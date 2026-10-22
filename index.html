@@ -1206,7 +1206,7 @@ async function pollJobs(){
     const r=await decryptFile('jobs.enc.json');const before=JSON.stringify(S.rjobs);S.rjobs=(r&&r.jobs)||{};
     let changed=JSON.stringify(S.rjobs)!==before,finished=[];
     Object.values(S.jobs).forEach(j=>{const st=jobView(j.id).st;if(st!==j.status){if(st==='done')finished.push(j.id);j.status=st;changed=true}});
-    if(changed){LS.set('jobs',S.jobs);refreshMarks();if(sheetCtx&&sheetCtx.job)refreshSheet();finished.forEach(celebrate)}
+    if(changed){LS.set('jobs',S.jobs);if(sheetCtx)refreshSheet();else if(D)rerenderView();refreshMarks();finished.forEach(celebrate)}
   }catch(e){}
   const act=Object.values(S.jobs).some(j=>!['done','rejected'].includes(j.status));
   clearTimeout(pollT);if(act)pollT=setTimeout(pollJobs,15000);
