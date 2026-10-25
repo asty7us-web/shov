@@ -630,7 +630,8 @@ function vSklad(p){
   cl.sort((a,b)=>urg(a)-urg(b)||(b.ads||0)-(a.ads||0));
   const bad=cl.filter(c=>urg(c)<=1);const need=cl.reduce((s,c)=>s+Math.max(0,Math.ceil((c.ads||0)*10-(c.stock||0)-(c.transit||0))),0);
   const R=54,Cn=2*Math.PI*R,frac=days==null?0:Math.min(1,days/30),rc=days==null?'var(--bar)':(days<=4||bad.length)?'var(--bad)':days<=10?'var(--warn)':'var(--good)';
-  const reg=(p.regions||{}).by||{},cities=Object.keys(reg),cs=p.comps||[];
+  const reg=(p.regions||{}).by||{},cs=p.comps||[];
+  const cities=cs.some(c=>Object.values(reg).some(v=>v[c.sku]))?Object.keys(reg):[];   // ни одного конкурента в выдаче городов — блок не показываем
   const rcol=v=>{const d=dlv(v);return d==null?'var(--fill)':d<=1?'var(--good)':d<=3?'var(--warn)':'var(--bad)'};
   return `<h1 class="lt reveal">Склады</h1><p class="sub reveal">Остатки FBO по кластерам. Вова: везти на 7–10 дней, Москву — в начале недели, подсвечивать за 3–4 дня до нуля.</p>
   <div class="card sh reveal"><div class="ring"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${R}" stroke="var(--fill)"/><circle cx="66" cy="66" r="${R}" stroke="${rc}" stroke-dasharray="${Cn}" stroke-dashoffset="${Cn}" class="rg" data-off="${Cn*(1-frac)}" style="transition:stroke-dashoffset 1.3s var(--out)"/></svg><div class="rv"><b>${days==null?'—':`<span data-count="${Math.round(days)}">${fi(days)}</span>`}</b><span>дней в среднем</span></div></div>
