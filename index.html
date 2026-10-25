@@ -99,6 +99,10 @@ img{display:block;max-width:100%}
 .trial>*{position:relative}
 .trial:active{transform:scale(.94)}
 .trial svg{width:16px;height:16px}
+.konkbtn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:12px;font-weight:700;font-size:14px;background:var(--solid);color:var(--ink);border:var(--bw) solid var(--line);flex:none;text-decoration:none;transition:transform .3s var(--spring)}
+.konkbtn:active{transform:scale(.94)}
+.konkbtn svg{width:17px;height:17px;color:var(--c-oz)}
+@media (max-width:560px){.konkbtn span{display:none}.konkbtn{padding:8px 10px}}
 .iconbtn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--solid);color:var(--ink2);border:var(--bw) solid var(--line);flex:none;transition:transform .3s var(--spring)}
 .iconbtn:active{transform:scale(.9)}
 .iconbtn svg{width:19px;height:19px}
@@ -556,6 +560,7 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
     <div class="hsp"></div>
     <div class="jimhud" id="jimhud" aria-hidden="true"></div>
     <button class="jobpill" id="jobpill"><i></i><span></span></button>
+    <a class="konkbtn" href="./konkurenty/" title="Конкуренты Озон: топ-5 по каждому товару, ключи, склады"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg><span>Конкуренты</span></a>
     <button class="trial" id="trialbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg><span>Триал</span></button>
     <button class="iconbtn" id="skinbtn" aria-label="Тема оформления"></button>
   </div>
