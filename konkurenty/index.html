@@ -216,7 +216,7 @@ const ROWS=[
  ['Соответствие запросу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.rel},v=>v==null?'—':n1.format(v),1],
  ['Наличие'],
  ['Остаток на конец недели',c=>c.stock,fi,1],
- ['Дней без остатка из 28',c=>c.access_days,fi,-1,'как в «Товарах на Ozon»'],
+ ['Дней без остатка из 28',c=>c.access_days!=null&&c.access_days<0?null:c.access_days,fi,-1,'как в «Товарах на Ozon»'],
  ['Упущенные продажи',c=>c.missed,fk,-1],
  ['Схема',c=>c.schema,v=>esc(v||'—'),0],
  ['Быстрая доставка, городов',(c,p)=>{const f=fastCities(p,c.sku);return f?f[0]:null},(v,c,p)=>{const f=fastCities(p,c.sku);return f?f[0]+' из '+f[1]:'—'},1,'доставка за 1–2 дня'],
