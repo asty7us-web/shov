@@ -1,0 +1,23 @@
+{
+  "id": "/shov/konkurenty/",
+  "name": "Конкуренты · Склейки",
+  "short_name": "Конкуренты",
+  "description": "Озон: топ конкурентов по каждому товару, ключи и позиции, склады; склейки WB, Ozon и Маркета.",
+  "lang": "ru",
+  "start_url": "/shov/konkurenty/?app=1",
+  "scope": "/shov/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2f2f7",
+  "icons": [
+    {"src": "/shov/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/shov/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/shov/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Конкуренты", "url": "/shov/konkurenty/", "icons": [{"src": "/shov/pwa/icon-192.png", "sizes": "192x192"}]},
+    {"name": "Склейки", "url": "/shov/", "icons": [{"src": "/shov/pwa/icon-192.png", "sizes": "192x192"}]}
+  ]
+}
