@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Конкуренты Озон</title>
+<meta name="theme-color" content="#f2f4f9">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='14' width='6' height='14' rx='2' fill='%231f63ff'/%3E%3Crect x='13' y='8' width='6' height='20' rx='2' fill='%230db2a4'/%3E%3Crect x='23' y='3' width='6' height='25' rx='2' fill='%23ff9500'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap">
+<script>try{var k=JSON.parse(localStorage.getItem('shov.skin')||'"auto"');if(k==='graphite'||k==='aurora')document.documentElement.dataset.theme='dark';else if(k&&k!=='auto')document.documentElement.dataset.theme='light'}catch(e){}</script>
+<style>
+/* Конкуренты Озон: шапка с разделами, выбор товара, три раздела. Методика — видео Вовы 21.10.2026. */
+:root{
+  --bg:#f2f4f9;--fg:#0d1430;--fg2:#4b5476;--fg3:#8c93ad;--card:#fff;--sunk:#eef1f7;--line:rgba(16,26,58,.10);
+  --hdr:rgba(246,248,252,.9);--accent:#1f63ff;--accent-soft:rgba(31,99,255,.10);--accent-ink:#fff;
+  --good:#0f9d68;--warn:#c97a08;--bad:#de3550;--good-soft:rgba(15,157,104,.12);--warn-soft:rgba(217,130,10,.14);--bad-soft:rgba(222,53,80,.11);
+  --shadow:0 1px 2px rgba(13,20,48,.05),0 10px 30px -10px rgba(13,20,48,.14);
+  --f-d:"Unbounded","Onest",system-ui,sans-serif;--f-b:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c0f15;--fg:#eef1f8;--fg2:#a9b1c6;--fg3:#6c748b;--card:#151a24;--sunk:#10141c;--line:rgba(255,255,255,.08);
+  --hdr:rgba(14,18,26,.88);--accent:#8fb2ff;--accent-soft:rgba(143,178,255,.14);--accent-ink:#0a1122;
+  --good:#39c98f;--warn:#f0a73a;--bad:#ff6b81;--good-soft:rgba(57,201,143,.14);--warn-soft:rgba(240,167,58,.15);--bad-soft:rgba(255,107,129,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c0f15;--fg:#eef1f8;--fg2:#a9b1c6;--fg3:#6c748b;--card:#151a24;--sunk:#10141c;--line:rgba(255,255,255,.08);
+  --hdr:rgba(14,18,26,.88);--accent:#8fb2ff;--accent-soft:rgba(143,178,255,.14);--accent-ink:#0a1122;
+  --good:#39c98f;--warn:#f0a73a;--bad:#ff6b81;--good-soft:rgba(57,201,143,.14);--warn-soft:rgba(240,167,58,.15);--bad-soft:rgba(255,107,129,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:14.5px/1.45 var(--f-b);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+/* шапка */
+.hdr{position:sticky;top:0;z-index:30;background:var(--hdr);backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);border-bottom:1px solid var(--line)}
+.hin{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--fg2);flex:none}
+.back svg{width:16px;height:16px}
+.brand{font-family:var(--f-d);font-weight:600;font-size:18px;letter-spacing:-.01em;white-space:nowrap}
+.brand small{font-family:var(--f-b);font-weight:500;font-size:12px;color:var(--fg3);margin-left:6px}
+.tabs{display:flex;gap:2px;padding:3px;border-radius:13px;background:var(--sunk);border:1px solid var(--line);margin-left:auto}
+.tabs button{border:0;background:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--fg2);white-space:nowrap}
+.tabs button.on{background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
+.stamp{font-size:12px;color:var(--fg3);white-space:nowrap}
+/* выбор товара */
+.picker{max-width:1280px;margin:0 auto;padding:12px 16px 4px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-align:left;max-width:250px}
+.chip img{width:34px;height:34px;border-radius:9px;object-fit:cover;background:var(--sunk);flex:none}
+.chip b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.chip span{display:block;font-size:11.5px;color:var(--fg3)}
+.chip.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-left:4px;vertical-align:middle}
+main{max-width:1280px;margin:0 auto;padding:10px 16px 60px}
+h2{font-family:var(--f-d);font-weight:600;font-size:clamp(20px,2.6vw,26px);letter-spacing:-.02em;margin:14px 0 4px;line-height:1.15}
+h3{font-size:15px;font-weight:700;margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+h3 em{font-style:normal;font-weight:500;font-size:12.5px;color:var(--fg3)}
+.sub{color:var(--fg2);font-size:13.5px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+/* сводка */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:12px 0 4px}
+@media (max-width:520px){.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:10px 12px}.kpi .v{font-size:17px}.kpi .s{font-size:11.5px}}
+.kpi{padding:12px 14px}
+.kpi .l{font-size:12px;color:var(--fg3);font-weight:600}
+.kpi .v{font-family:var(--f-d);font-weight:600;font-size:21px;letter-spacing:-.02em;margin-top:3px}
+.kpi .s{font-size:12.5px;color:var(--fg2);margin-top:2px}
+.up{color:var(--good)}.dn{color:var(--bad)}.mut{color:var(--fg3)}
+/* таблица сравнения */
+.tw{overflow-x:auto;border-radius:18px}
+table{border-collapse:separate;border-spacing:0;width:100%}
+.cmp th,.cmp td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-size:13.5px}
+.cmp td:first-child,.cmp th:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1;white-space:normal;min-width:170px;max-width:230px;color:var(--fg2)}
+.cmp thead th{vertical-align:bottom;background:var(--card);padding-top:12px}
+.cmp tr.grp td{background:var(--sunk);font-weight:700;color:var(--fg);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px}
+.cmp tr.grp td:first-child{background:var(--sunk)}
+.cmp td.us,.cmp th.us{background:var(--accent-soft)}
+.cmp td.good{color:var(--good);font-weight:600}.cmp td.bad{color:var(--bad);font-weight:600}
+.cmp td.best{box-shadow:inset 0 -2px 0 var(--good)}
+.ph{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:120px}
+.ph img{width:54px;height:54px;border-radius:10px;object-fit:cover;background:var(--sunk)}
+.ph b{font-size:12.5px;max-width:150px;white-space:normal;text-align:right;line-height:1.25}
+.ph i{font-style:normal;font-size:11.5px;color:var(--fg3);max-width:150px;white-space:normal;text-align:right}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sunk);color:var(--fg2)}
+.tag.new{background:var(--warn-soft);color:var(--warn)}.tag.us{background:var(--accent);color:var(--accent-ink)}
+.hint{font-size:11.5px;color:var(--fg3);font-weight:400}
+/* блоки */
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.pad{padding:14px 16px}
+.list{margin:0;padding:0;list-style:none}
+.list li{padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:10px}
+.list li:last-child{border-bottom:0}
+.list .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12px;display:grid;place-items:center}
+.list b{font-weight:600}
+.small th,.small td{padding:6px 10px;border-bottom:1px solid var(--line);font-size:13px;text-align:right;white-space:nowrap}
+.small th:first-child,.small td:first-child{text-align:left;white-space:normal}
+.small thead th{color:var(--fg3);font-weight:600;font-size:12px}
+/* позиции */
+.pos td.c{min-width:44px;text-align:center;font-weight:600;border-radius:0}
+.p1{background:var(--good-soft);color:var(--good)}.p2{background:var(--warn-soft);color:var(--warn)}.p3{background:var(--bad-soft);color:var(--bad)}
+.p0{color:var(--fg3)}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--fg2);font-weight:600;font-size:13px}
+.empty{padding:40px 16px;text-align:center;color:var(--fg3)}
+.lock{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:50}
+.lock[hidden]{display:none}
+.lock .card{padding:22px;width:min(360px,92vw)}
+.lock input{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--sunk);color:var(--fg);font:inherit;margin:10px 0}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:12px;font-weight:700}
+.note{font-size:12.5px;color:var(--fg3);margin-top:8px}
+.stale{background:var(--warn-soft);color:var(--warn);padding:8px 12px;border-radius:12px;font-size:13px;margin-top:10px}
+@media (max-width:720px){.hin{flex-wrap:wrap}.tabs{margin-left:0;order:3;width:100%}.tabs button{flex:1;padding:7px 6px}.stamp{display:none}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hin">
+    <a class="back" href="../" title="Вернуться в Склейки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>Склейки</a>
+    <div class="brand">Конкуренты<small>Озон</small></div>
+    <nav class="tabs" id="tabs"><button data-t="konk">Конкуренты</button><button data-t="keys">Ключи</button><button data-t="sklad">Склады</button></nav>
+    <div class="stamp" id="stamp"></div>
+  </div>
+</header>
+<div class="picker" id="picker"></div>
+<main id="view"><div class="empty">Открываю данные…</div></main>
+<div class="lock" id="lock" hidden><div class="card"><b>Пароль</b><div class="note">Тот же, что у Юнитки и Склеек.</div><input id="pw" type="password" autocomplete="current-password"><button class="btn" id="pwgo">Открыть</button><div class="note" id="pwerr"></div></div></div>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const LS={get(k,d){try{const v=localStorage.getItem('shov.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('shov.'+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem('shov.'+k)}catch(e){}}};
+const KS={get(k,d){try{const v=localStorage.getItem('konk.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('konk.'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const b64u8=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let KEY=null,SALT=null,D=null,P=null;
+const S={t:KS.get('tab','konk'),sku:KS.get('sku',null)};
+
+/* ---------- данные: тот же ключ, что у Склеек (пароль Юнитки) ---------- */
+async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
+async function load(pass){
+  const res=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});
+  if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
+  const enc=await res.json();
+  if(!KEY||SALT!==enc.salt){
+    const kc=LS.get('kc',null);
+    if(!pass&&kc&&kc.salt===enc.salt)KEY=await crypto.subtle.importKey('raw',b64u8(kc.k),'AES-GCM',false,['decrypt']);
+    else{let p=pass||LS.get('pass','');if(!p){try{p=JSON.parse(localStorage.getItem('unitka.pass')||'""')}catch(e){p=''}}if(!p)throw new Error('NEED_PASS');KEY=await deriveKey(p,enc.salt,enc.iter);pass=p}
+    SALT=enc.salt;
+  }
+  let plain;try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(enc.iv)},KEY,b64u8(enc.ct))}catch(e){KEY=null;LS.del('kc');throw new Error('BAD_PASS')}
+  if(pass){LS.set('pass',pass);try{const raw=new Uint8Array(await crypto.subtle.exportKey('raw',KEY));let bin='';raw.forEach(x=>bin+=String.fromCharCode(x));LS.set('kc',{salt:enc.salt,k:btoa(bin)})}catch(e){}}
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+/* ---------- формат ---------- */
+const nf=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
+const n1=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1});
+const fi=v=>v==null||isNaN(v)?'—':nf.format(v);
+const fr=v=>v==null||isNaN(v)?'—':nf.format(v)+' ₽';
+const fk=v=>v==null||isNaN(v)?'—':(Math.abs(v)>=1e6?n1.format(v/1e6)+' млн ₽':Math.abs(v)>=1e4?nf.format(v/1e3)+' тыс ₽':nf.format(v)+' ₽');
+const n2=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
+const fp=v=>v==null||isNaN(v)?'—':(Math.abs(v)<1&&v!==0?n2:n1).format(v)+'%';
+const fd=v=>v==null||isNaN(v)?'—':`<span class="${v>=0?'up':'dn'}">${v>0?'+':''}${nf.format(v)}%</span>`;
+const med=a=>{a=a.filter(x=>x!=null&&!isNaN(x)).sort((x,y)=>x-y);if(!a.length)return null;const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2};
+const ddmm=s=>s?s.slice(8,10)+'.'+s.slice(5,7):'';
+const dlv=s=>{const m=(s||'').match(/\d+/g);return m?+m[m.length-1]:null};
+const short=s=>(s||'').replace(/[«»"]/g,'').replace(/^ООО\s*/,'').slice(0,26);
+
+/* ---------- выбор товара ---------- */
+function prod(){return D.products.find(p=>p.sku===S.sku)||D.products[0]}
+function warn(p){return (p.clusters||[]).some(c=>(c.ads||0)>=0.3&&(c.idc==null||c.idc<=4))}
+function renderPicker(){
+  $('#picker').innerHTML=D.products.map(p=>`<button class="chip ${p.sku===P.sku?'on':''}" data-sku="${p.sku}"><img src="${esc(p.photo||'')}" alt="" loading="lazy"><div><b>${esc(p.offer_id)}${warn(p)?'<i class="dot" title="Кончается в кластере"></i>':''}</b><span>7 дн: ${fi(p.our&&p.our.cnt7)} шт · ${p.comps?p.comps.length:0} конкурентов</span></div></button>`).join('');
+}
+function renderTabs(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.t))}
+
+/* ---------- раздел «Конкуренты» ---------- */
+const MAIN=p=>(p.keys&&p.keys[0]&&p.keys[0].q)||'';
+function snapRow(p,sku,q){q=q||MAIN(p);const k=p.snap&&p.snap.keys&&p.snap.keys[q];return k&&k.rows?k.rows[sku]:null}
+/* быстрая доставка: в скольких городах 0–2 дня; если товар не нашли в выдаче ни одного города — данных нет (не «0») */
+function fastCities(p,sku){const by=(p.regions&&p.regions.by)||{};let n=0,t=0,seen=0;for(const c in by){t++;const v=by[c][sku];if(v)seen++;const d=dlv(v);if(d!=null&&d<=2)n++}return t&&seen?[n,t]:null}
+const ROWS=[
+ ['Продажи'],
+ ['Заказано за 7 дней',c=>c.sum7,fk,1],
+ ['Заказано штук за 7 дней',c=>c.cnt7,fi,1],
+ ['Динамика 7 дней',c=>c.dyn7,fd,1,'к прошлой неделе — «лестница» Вовы'],
+ ['Заказано штук за 28 дней',c=>c.cnt28,fi,1],
+ ['Динамика 28 дней',c=>c.dyn28,fd,1],
+ ['Продаж в день, шт',c=>c.avg_orders_day,v=>v==null?'—':n1.format(v),1,'когда товар был в наличии'],
+ ['Цена'],
+ ['Средняя цена продажи',c=>c.price,fr,0],
+ ['Самая низкая цена',c=>c.min_price,fr,0],
+ ['Скидка от медианной цены',c=>c.discount,fp,0],
+ ['Доля заказов по акциям',c=>c.promo_share,fp,0],
+ ['Дней в акциях из 7',c=>c.promo_days,fi,0],
+ ['Воронка'],
+ ['Показы всего',c=>c.views,fi,1],
+ ['Показы в поиске и каталоге',c=>c.views_search,fi,1],
+ ['Посещения карточки',c=>c.sessions,fi,1],
+ ['Конверсия показ → заказ',c=>c.cv_view_order,fp,1],
+ ['Конверсия поиск → корзина',c=>c.cv_search_cart,fp,1],
+ ['Карточка → корзина',c=>c.cv_card_cart,fp,1],
+ ['Доля выкупа',c=>c.redemption,fp,1],
+ ['Реклама и поиск'],
+ ['ДРР',c=>c.drr,fp,0,'доля рекламы от заказов товара'],
+ ['Дней с рекламой из 7',c=>c.ad_days,fi,0],
+ ['Расход на рекламу в день',c=>c.ad_day,fr,0,'оценка: заказы × ДРР ÷ 7'],
+ ['Ставка за клик, главный ключ',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.cpc},v=>v==null?'—':n1.format(v)+' ₽',0,'Москва, сейчас'],
+ ['Позиция, главный ключ',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},(v,c,p)=>{if(v!=null)return fi(v);const k=p.snap&&p.snap.keys&&p.snap.keys[MAIN(p)];return k&&k.total?'<span class="mut">ниже '+Math.min(k.total,144)+'</span>':'—'},-1,'Москва, сейчас'],
+ ['Рейтинг',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.rating},v=>v==null?'—':n1.format(v),1],
+ ['Отзывов',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.reviews},fi,1],
+ ['Соответствие запросу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.rel},v=>v==null?'—':n1.format(v),1],
+ ['Наличие'],
+ ['Остаток на конец недели',c=>c.stock,fi,1],
+ ['Дней без остатка из 28',c=>c.access_days,fi,-1,'как в «Товарах на Ozon»'],
+ ['Упущенные продажи',c=>c.missed,fk,-1],
+ ['Схема',c=>c.schema,v=>esc(v||'—'),0],
+ ['Быстрая доставка, городов',(c,p)=>{const f=fastCities(p,c.sku);return f?f[0]:null},(v,c,p)=>{const f=fastCities(p,c.sku);return f?f[0]+' из '+f[1]:'—'},1,'доставка за 1–2 дня'],
+ ['Карточка создана',c=>c.created,v=>v?v.split('-').reverse().join('.'):'—',0]
+];
+function cmpTable(p){
+  const cols=[Object.assign({us:true},p.our||{})].concat(p.comps||[]);
+  const head=`<thead><tr><th>${p.sel_date?`<span class="hint">подбор от ${ddmm(p.sel_date)}</span>`:''}</th>${cols.map((c,i)=>`<th class="${c.us?'us':''}"><div class="ph">${c.us?'<span class="tag us">Мы</span>':`<a href="${esc(c.link||'#')}" target="_blank" rel="noopener"><img src="${esc(c.photo||'')}" alt="" loading="lazy"></a>`}<b>${c.us?esc(p.offer_id):esc(short(c.seller))}</b><i>${c.us?'место '+(c.rank?c.rank:'ниже 200')+' в категории':esc((c.name||'').slice(0,60))}</i>${c.new?'<span class="tag new">новый</span>':''}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}</div></th>`).join('')}</tr></thead>`;
+  const body=ROWS.map(r=>{
+    if(r.length===1)return `<tr class="grp"><td colspan="${cols.length+1}">${r[0]}</td></tr>`;
+    const [lab,get,fmt,dir,hint]=r;
+    const vals=cols.map(c=>{try{return get(c,p)}catch(e){return null}});
+    const comp=vals.slice(1).filter(v=>typeof v==='number'&&!isNaN(v));
+    const m=med(comp);
+    let best=null;if(dir&&comp.length){const all=vals.filter(v=>typeof v==='number');best=dir>0?Math.max(...all):Math.min(...all)}
+    return `<tr><td>${lab}${hint?`<div class="hint">${hint}</div>`:''}</td>${vals.map((v,i)=>{
+      let cl=cols[i].us?'us':'';
+      if(cols[i].us&&dir&&typeof v==='number'&&m!=null&&m!==0){const k=v/m;const better=dir>0?k>1.1:k<0.9,worse=dir>0?k<0.9:k>1.1;if(better)cl+=' good';else if(worse)cl+=' bad'}
+      if(dir&&best!=null&&v===best&&comp.length>1)cl+=' best';
+      return `<td class="num ${cl}">${fmt(v,cols[i],p)}</td>`}).join('')}</tr>`}).join('');
+  return `<div class="card tw"><table class="cmp">${head}<tbody>${body}</tbody></table></div><div class="note">Голубой столбец — мы. Зелёным и красным подсвечено, где мы лучше или хуже медианы пяти конкурентов больше чем на 10%; подчёркнуто — лучшее значение в строке. Данные «Аналитика конкурентов → Товары на Ozon» за 7 и 28 дней.</div>`;
+}
+function kpis(p){
+  const o=p.our||{},cs=p.comps||[];
+  const mp=med(cs.map(c=>c.price)),md=med(cs.map(c=>c.drr)),mc=med(cs.map(c=>c.cnt7));
+  const top=cs.slice().sort((a,b)=>(b.sum7||0)-(a.sum7||0))[0]||{};
+  const f=fastCities(p,p.sku),fm=med(cs.map(c=>{const x=fastCities(p,c.sku);return x?x[0]:null}));
+  const k=(p.keys||[])[0],r=snapRow(p,p.sku);
+  return `<div class="kpis">
+  <div class="card kpi"><div class="l">Наши заказы за 7 дней</div><div class="v num">${fi(o.cnt7)} шт</div><div class="s">${fk(o.sum7)} · ${fd(o.dyn7)} · у топ-5 медиана ${fi(mc)} шт</div></div>
+  <div class="card kpi"><div class="l">Цена</div><div class="v num">${fr(o.price)}</div><div class="s">медиана топ-5 ${fr(mp)}${mp&&o.price?` · ${o.price>mp?'дороже':'дешевле'} на ${nf.format(Math.abs(o.price/mp-1)*100)}%`:''}</div></div>
+  <div class="card kpi"><div class="l">Реклама</div><div class="v num">${fp(o.drr)} ДРР</div><div class="s">≈ ${fr(o.ad_day)} в день · у ${esc(short(top.seller))} ≈ ${fr(top.ad_day)}</div></div>
+  <div class="card kpi"><div class="l">Главный ключ, Москва</div><div class="v num">${r&&r.pos?r.pos+'-е место':'—'}</div><div class="s">${esc(k?k.q:'')}</div></div>
+  <div class="card kpi"><div class="l">Быстрая доставка</div><div class="v num">${f?f[0]+' из '+f[1]:'—'} городов</div><div class="s">у топ-5 медиана ${fm==null?'—':nf.format(fm)}</div></div>
+  </div>`;
+}
+function advice(p){
+  const a=p.advice;
+  if(a&&a.items&&a.items.length)return `<div class="card pad"><ul class="list">${a.items.map((x,i)=>`<li><span class="n">${i+1}</span><div><b>${esc(x.title)}</b><div>${esc(x.why||'')}</div>${x.do?`<div class="mut">Что сделать: ${esc(x.do)}</div>`:''}</div></li>`).join('')}</ul>${a.summary?`<div class="note">${esc(a.summary)}</div>`:''}<div class="note">Разбор модели от ${esc(a.at||'')}</div></div>`;
+  return `<div class="card pad mut">Разбор «что доделать» появится после ближайшего подбора.</div>`;
+}
+function side(p){
+  const z=p.zakup||{},L=p.leader,dm=p.dumpers||[];
+  let h='<div class="card pad">';
+  h+=`<b>Закупка по методу Вовы</b><div class="sub" style="margin-top:4px">Ориентир — те, кто продаёт много по нашей цене. За 28 дней доноры продали: ${(z.donors28||[]).map(fi).join(', ')||'—'} шт; мы — ${fi(z.our28)} шт.${z.target?` Чтобы встать вровень — держать на складах ${fi(z.target[0])}–${fi(z.target[1])} шт на месяц (их продажи + 25–50%), сразу на все склады и рекламу без лимита.`:''}</div>`;
+  if(L)h+=`<b>Лидер категории</b><div class="sub" style="margin-top:4px"><a href="${esc(L.link)}" target="_blank" rel="noopener">${esc(short(L.seller))}</a> — ${fi(L.cnt7)} шт за 7 дней по ${fr(L.price)}, ДРР ${fp(L.drr)}.</div>`;
+  if(dm.length)h+=`<b>Демперы — следим</b><table class="small" style="width:100%;margin-top:6px"><thead><tr><th>Продавец</th><th>Цена</th><th>7 дн</th><th>ДРР</th></tr></thead><tbody>${dm.map(c=>`<tr><td><a href="${esc(c.link)}" target="_blank" rel="noopener">${esc(short(c.seller))}</a></td><td class="num">${fr(c.price)}</td><td class="num">${fi(c.cnt7)} шт</td><td class="num">${fp(c.drr)}</td></tr>`).join('')}</tbody></table><div class="note">Дешевле нас больше чем на 30% и продают не меньше. В минус не догоняем — смотрим, вдруг поднимут цену.</div>`;
+  return h+'</div>';
+}
+function rejected(p){
+  const r=p.rejected||[];if(!r.length)return '';
+  return `<details><summary>Почему не взяли других из топа (${r.length})</summary><table class="small" style="width:100%;margin-top:8px"><tbody>${r.map(x=>`<tr><td>${esc(short(x.seller))} — ${esc((x.name||'').slice(0,70))}</td><td class="num">${fk(x.sum7)}</td><td>${esc(x.why)}</td></tr>`).join('')}</tbody></table></details>`;
+}
+function vKonk(p){
+  if(!p.comps||!p.comps.length)return `<div class="empty">Конкуренты ещё не подобраны.</div>`;
+  const next=p.sel_date?new Date(new Date(p.sel_date).getTime()+14*864e5).toISOString().slice(0,10):'';
+  return `<h2>${esc(p.offer_id)}</h2><p class="sub">${esc(p.type_name||'')} · 5 конкурентов: тот же товар, цена от 70 до 150% нашей, больше всех заказов за 7 дней. Подбор от ${ddmm(p.sel_date)}, следующий ${ddmm(next)}.</p>
+  ${p.stale?'<div class="stale">Последний сбор по товару не прошёл — показаны прошлые данные.</div>':''}
+  ${kpis(p)}
+  <h3>Сравнение с топ-5 <em>${esc(D.full_at||'')}</em></h3>${cmpTable(p)}${rejected(p)}
+  <div class="two" style="margin-top:14px"><div><h3 style="margin-top:6px">Что доделать до топа</h3>${advice(p)}</div><div><h3 style="margin-top:6px">Закупка и кого держать в виду</h3>${side(p)}</div></div>`;
+}
+
+/* ---------- раздел «Ключи» ---------- */
+const pc=v=>v==null?'p0':v<=10?'p1':v<=30?'p2':'p3';
+function vKeys(p){
+  const keys=p.keys||[];if(!keys.length)return `<div class="empty">Ключей пока нет.</div>`;
+  const days=Object.keys((p.hist&&p.hist.day)||{}).sort().slice(-14);
+  const live=(p.hist&&p.hist.live)||{};
+  const today=(D.updated||'').slice(0,10);
+  const todayAvg=q=>{const a=(live[q]||[]).filter(x=>x[0].slice(0,10)===today&&x[1]!=null).map(x=>x[1]);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};
+  const rows=keys.map(k=>{
+    const cells=days.map(d=>{const v=(p.hist.day[d]||{})[k.q];const x=v&&v.pos?v.pos:null;return `<td class="c num ${pc(x)}" title="${d}${v&&v.orders?' · заказов '+v.orders:''}">${x==null?'·':nf.format(x)}</td>`}).join('');
+    const now=snapRow(p,p.sku,k.q),ta=todayAvg(k.q);
+    return `<tr><td><b>${esc(k.q)}</b>${k.pinned?' <span class="tag">закреплён</span>':''}<div class="hint">искали ${fi(k.searched)} · заказов ${fi(k.orders)} за 28 дн</div></td><td class="num">${k.pos28?fi(k.pos28):'—'}${k.pos28&&k.pos28_d?`<div class="hint">${k.pos28_d<0?'лучше на '+nf.format(-k.pos28_d):'хуже на '+nf.format(k.pos28_d)}</div>`:''}</td>${cells}<td class="c num ${pc(ta)}">${ta==null?'·':nf.format(ta)}</td><td class="c num ${pc(now&&now.pos)}">${now&&now.pos?nf.format(now.pos):'—'}</td></tr>`}).join('');
+  const avgRow=`<tr><td class="mut">Средняя позиция</td><td></td>${days.map(d=>{const a=keys.map(k=>{const v=(p.hist.day[d]||{})[k.q];return v&&v.pos}).filter(Boolean);const m=a.length?a.reduce((s,x)=>s+x,0)/a.length:null;return `<td class="c num ${pc(m)}">${m==null?'·':nf.format(m)}</td>`}).join('')}<td></td><td></td></tr>`;
+  const t1=`<div class="card tw"><table class="small pos"><thead><tr><th>Запрос</th><th>Позиция<br>за 28 дн</th>${days.map(d=>`<th>${ddmm(d)}</th>`).join('')}<th>Сегодня<br>в среднем</th><th>Сейчас</th></tr></thead><tbody>${rows}${avgRow}</tbody></table></div><div class="note">По дням — средняя позиция товара по запросу из аналитики Озона (точка — в этот день по запросу не показывали). «Сегодня в среднем» и «Сейчас» — наши замеры выдачи по Москве, ${(p.snap&&p.snap.at)||''}. Зелёный — топ-10, жёлтый — до 30, красный — ниже.</div>`;
+  const cs=p.comps||[];
+  const t2=`<div class="card tw"><table class="small"><thead><tr><th>Запрос · Москва</th><th>Мы</th>${cs.map(c=>`<th title="${esc(c.name)}">${esc(short(c.seller))}</th>`).join('')}<th>Топ-3 выдачи</th></tr></thead><tbody>${keys.map(k=>{const sk=(p.snap&&p.snap.keys&&p.snap.keys[k.q])||{};const cell=s=>{const r=(sk.rows||{})[s];return r?`<b>${r.pos?nf.format(r.pos):'—'}</b><div class="hint">${r.cpc?n1.format(r.cpc)+' ₽ клик':'без рекламы'}${r.price?' · '+fr(r.price):''}</div>`:'<span class="mut">ниже '+((sk.total&&sk.total<144)?sk.total:144)+'</span>'};return `<tr><td>${esc(k.q)}<div class="hint">в выдаче ${fi(sk.total)}</div></td><td class="num us">${cell(p.sku)}</td>${cs.map(c=>`<td class="num">${cell(c.sku)}</td>`).join('')}<td>${(sk.top3||[]).map(t=>`${t.pos}. ${esc(short(t.seller))}${t.mine?' (мы)':''} <span class="hint">${t.cpc?n1.format(t.cpc)+' ₽':''}</span>`).join('<br>')}</td></tr>`}).join('')}</tbody></table></div><div class="note">Позиция, ставка за клик и цена — «Видимость в поиске → Что влияет на место в поиске». Если ставку лидера не перебить — догонять ценой и складами (Вова).</div>`;
+  const junk=p.junk||[];
+  const t3=junk.length?`<h3>Показы есть, заказов нет <em>чужие (как «унитаз» у сиденья) — убрать из названия и описания; свои — поднимать позицию</em></h3><div class="card tw"><table class="small"><thead><tr><th>Запрос</th><th>Увидели</th><th>Позиция</th><th>В карточку</th></tr></thead><tbody>${junk.map(j=>`<tr><td>${esc(j.q)}</td><td class="num">${fi(j.seen)}</td><td class="num">${fi(j.pos28)}</td><td class="num">${fp(j.ctr)}</td></tr>`).join('')}</tbody></table></div>`:'';
+  return `<h2>${esc(p.offer_id)} — ключи</h2><p class="sub">${keys.length} главных запросов по заказам за 28 дней — как у Вовы в Sellium. Свои ключи можно закрепить в «К».</p><h3>Средняя позиция по дням</h3>${t1}<h3>Сейчас в выдаче: мы и конкуренты</h3>${t2}${t3}`;
+}
+
+/* ---------- раздел «Склады» ---------- */
+function vSklad(p){
+  const cl=(p.clusters||[]).filter(c=>c.stock||c.ads||c.transit);
+  const st=c=>{const s=c.idc;if((c.ads||0)>0&&!c.stock)return ['p3','пусто'];if(s==null)return ['p0','—'];if(s<=4)return ['p3',s+' дн'];if(s<=10)return ['p2',s+' дн'];return ['p1',s+' дн']};
+  const alarm=cl.filter(c=>(c.ads||0)>=0.1&&(c.idc==null||c.idc<=4)&&(c.stock||0)<((c.ads||0)*7));
+  const t1=cl.length?`<div class="card tw"><table class="small pos"><thead><tr><th>Кластер</th><th>Остаток</th><th>В пути</th><th>Продаж в день</th><th>Хватит</th><th>На 10 дней нужно</th></tr></thead><tbody>${cl.map(c=>{const [k,t]=st(c);const need=Math.max(0,Math.ceil((c.ads||0)*10-(c.stock||0)-(c.transit||0)));return `<tr><td>${esc(c.cluster)}</td><td class="num">${fi(c.stock)}</td><td class="num">${fi(c.transit)}</td><td class="num">${c.ads==null?'—':n1.format(c.ads)}</td><td class="c num ${k}">${t}</td><td class="num">${need?fi(need)+' шт':'—'}</td></tr>`}).join('')}</tbody></table></div><div class="note">Остатки FBO из API Озона. Вова: везти на 7–10 дней, Москву — в начале недели, подсвечивать за 3–4 дня до нуля.</div>`:`<div class="card pad mut">Остатков на складах Озона нет.</div>`;
+  const reg=p.regions&&p.regions.by||{},cities=Object.keys(reg),cs=[{sku:p.sku,seller:'Мы',us:true}].concat(p.comps||[]);
+  const dc=v=>{const d=dlv(v);return d==null?'p0':d<=1?'p1':d<=3?'p2':'p3'};
+  const t2=cities.length?`<div class="card tw"><table class="small pos"><thead><tr><th>Срок доставки</th>${cities.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${cs.map(c=>`<tr><td class="${c.us?'us':''}">${c.us?'<b>Мы</b>':esc(short(c.seller))}</td>${cities.map(ct=>{const v=(reg[ct]||{})[c.sku];return `<td class="c ${dc(v)}">${v?esc(v.replace(' дня','').replace(' день','').replace(' дней','')):'—'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div><div class="note">Срок доставки товара в город по запросу «${esc(p.regions.q)}», ${ddmm(p.regions.at)}. 0–1 день — товар лежит в этом кластере. Прочерк — товара нет в первых ~100 выдачи этого города.</div>`:'';
+  return `<h2>${esc(p.offer_id)} — склады</h2>${alarm.length?`<div class="stale">Кончается или пусто: ${alarm.map(c=>esc(c.cluster)).join(', ')}</div>`:''}<h3>Наши остатки по кластерам</h3>${t1}${t2?`<h3>Где лежат конкуренты</h3>${t2}`:''}`;
+}
+
+/* ---------- отрисовка ---------- */
+function render(){
+  P=prod();S.sku=P.sku;KS.set('sku',S.sku);KS.set('tab',S.t);
+  renderTabs();renderPicker();
+  $('#stamp').textContent='Обновлено '+(D.updated||'').slice(8,10)+'.'+(D.updated||'').slice(5,7)+' '+(D.updated||'').slice(11);
+  $('#view').innerHTML=S.t==='keys'?vKeys(P):S.t==='sklad'?vSklad(P):vKonk(P);
+}
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.t=b.dataset.t;render();window.scrollTo({top:0})});
+$('#picker').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;S.sku=b.dataset.sku;render()});
+function start(d){D=d;if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}render()}
+function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};$('#pw').focus()}
+(async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else $('#view').innerHTML='<div class="empty">Не удалось открыть данные: '+esc(e.message)+'</div>'}})();
+})();
+</script>
+</body>
+</html>
