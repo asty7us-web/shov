@@ -1012,6 +1012,7 @@ const GROUPS=[
   ['Показ → заказ',c=>c.cv_view_order,fp,1],['Поиск → корзина',c=>c.cv_search_cart,fp,1],['Карточка → корзина',c=>c.cv_card_cart,fp,1],['Доля выкупа',c=>c.redemption,fp,1]]],
  ['ads','Реклама и поиск',[
   ['ДРР',c=>c.drr,fp,-1,'меньше — лучше'],['Расход на рекламу в день',c=>c.ad_day,fr,0,'оценка: заказы × ДРР ÷ 7'],['Дней с оплатой за клик из 7',c=>c.ad_days,fi,0,'аналитика Озона за неделю'],
+  ['Показы всего',c=>c.views,fi,1,'',1],   // 26.10 Андрей: показы рядом с рекламой; 6-е поле — только на телефоне (на компе строка уже есть в «Воронке»)
   ['Ставка за клик, главный ключ',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.cpc},adCell,0,'Москва, сейчас; под ставкой — стратегия'],
   ['Позиция по главному ключу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},fi,-1,'меньше — лучше'],
   ['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Отзывов',c=>c.reviews,fi,1]]],
@@ -1094,7 +1095,7 @@ function cmpPhone(p,g){
 function cmpDesk(p){
   const C=cols(p);
   const head=`<thead><tr><th></th>${C.map(c=>`<th class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><div class="ph">${img(c.photo)}<b>${esc(c.us?'Мы — '+p.offer_id:short(c.seller))}</b><i>${c.us?(c.rank?c.rank+'-е место в категории':'ниже 200-го места'):esc((c.name||'').slice(0,60))}</i>${c.status==='pending'?'<span class="tag wait">ждёт ✅</span>':''}</div></th>`).join('')}</tr></thead>`;
-  const body=GROUPS.map(([,n,ms])=>`<tr class="g"><td colspan="${C.length+1}">${n}</td></tr>`+rowsOf(ms).map(m=>{const vals=mvals(p,m,C);if(!vals.some(ok))return '';const mk=mmark(vals,m[3]);
+  const body=GROUPS.map(([,n,ms])=>`<tr class="g"><td colspan="${C.length+1}">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(m=>{const vals=mvals(p,m,C);if(!vals.some(ok))return '';const mk=mmark(vals,m[3]);
     return `<tr data-f="m:${esc(m[0])}"><td>${PL(m[0])}${m[4]?`<span class="hint">${PL(m[4])}</span>`:''}</td>${vals.map((v,i)=>`<td class="${C[i].us?'us ':''}${mk[i]}">${m[2](v,C[i],p)}</td>`).join('')}</tr>`}).join('')).join('');
   return `<div class="card tw reveal"><table class="cmpd">${head}<tbody>${body}</tbody></table></div>`;
 }
@@ -1175,7 +1176,7 @@ const qBtns=(p,c)=>{const q=qOf(p,c.sku),on=d=>q&&q.d===d?' on':'',sent=q&&q.sen
 function compSheet(p,sku){
   const c=allC(p).find(x=>x.sku===sku)||(p.rejected||[]).find(x=>x.sku===sku);if(!c)return;
   const o=per(Object.assign({},p.our||{},{rating:(p.our_card||{}).rating,reviews:(p.our_card||{}).reviews})),cp=per(c);const j=c.j||(c.v?{v:c.v,why:c.why}:{});
-  const rows=GROUPS.map(([g,n,ms])=>`<tr class="g"><td colspan="3">${n}</td></tr>`+rowsOf(ms).map(([lab,get,fmt,dir])=>{let a=null,b=null;try{a=get(Object.assign({us:true,sku:p.sku},o),p)}catch(e){}try{b=get(cp,p)}catch(e){}
+  const rows=GROUPS.map(([g,n,ms])=>`<tr class="g"><td colspan="3">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(([lab,get,fmt,dir])=>{let a=null,b=null;try{a=get(Object.assign({us:true,sku:p.sku},o),p)}catch(e){}try{b=get(cp,p)}catch(e){}
     if(!ok(a)&&!ok(b))return '';let cl='';if(dir&&ok(a)&&ok(b)&&a!==b)cl=(dir>0?a>b:a<b)?'up':'dn';return `<tr><td>${PL(lab)}</td><td class="num ${cl}">${fmt(a,o,p)}</td><td class="num">${fmt(b,cp,p)}</td></tr>`}).join('')).join('');
   const oc=(p.our_card||{}).chars||{},cc=c.chars||{},ks=[...new Set([...Object.keys(oc),...Object.keys(cc)])].slice(0,12);
   const isComp=allC(p).some(x=>x.sku===sku);
