@@ -1096,7 +1096,7 @@ function qbar(){
   const n=Q.filter(x=>!x.sent).length,s=Q.filter(x=>x.sent).length,b=$('#qbar');
   b.hidden=!n&&!s;
   b.innerHTML=n?`<span style="white-space:nowrap"><b>${n} ${plur(n,'решение','решения','решений')}</b></span><button class="btn press" id="qsend">Отправить</button><button class="ico press" id="qclr" aria-label="Сбросить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`
-   :`<span>${IC.clock} Отправлено в «К»: ${s}. Нажмите там «✅ Применить»</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+   :`<span>${IC.clock} Отправлено: ${s}. Применится само за 5 минут</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
   document.body.classList.toggle('hasq',!b.hidden);
 }
 async function qSend(){
@@ -1113,8 +1113,11 @@ async function qSend(){
       const r=await fetch('https://api.telegram.org/bot'+T.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({chat_id:T.chat,text,parse_mode:'HTML',disable_web_page_preview:true,reply_markup:{inline_keyboard:[[{text:'✅ Применить',callback_data:'ko:b::'},{text:'✖ Отмена',callback_data:'ko:c::'}]]}})});
       const j=await r.json();if(!j.ok)throw new Error(j.description||'ошибка');
+      // 26.10: номер сообщения бота — в кнопку, чтобы сторож применил решения сам и удалил сообщение (soglas.py watch)
+      const mid=j.result.message_id;await fetch('https://api.telegram.org/bot'+T.token+'/editMessageReplyMarkup',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:T.chat,message_id:mid,reply_markup:{inline_keyboard:[[{text:'✅ Применить',callback_data:'ko:b:'+mid+':'},{text:'✖ Отмена',callback_data:'ko:c:'+mid+':'}]]}})}).catch(()=>{});
     }
-    const now=Date.now();items.forEach(x=>x.sent=now);KS.set('q',Q);qbar();toast('Отправил в «К» — нажмите там «Применить»');
+    const now=Date.now();items.forEach(x=>x.sent=now);KS.set('q',Q);qbar();toast('Отправлено — применится само за 5 минут');
   }catch(e){toast('Не отправилось: '+e.message)}
 }
 const qBtns=(p,c)=>{const q=qOf(p,c.sku),on=d=>q&&q.d===d?' on':'',sent=q&&q.sent?' · отправлено':'';
