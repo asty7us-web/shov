@@ -50,6 +50,12 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;paddin
 .num{font-variant-numeric:tabular-nums}
 .press{transition:transform .35s var(--spring),box-shadow .3s var(--ease),background-color .25s var(--ease)}
 .press:active{transform:scale(.97);transition-duration:.12s}
+/* 26.10 Андрей: «квадратик кликабельный — чтобы при нажатии и касании было видно» — карточки-кнопки темнеют и сжимаются при касании, на компе приподнимаются под мышью */
+.card.press:active{transform:scale(.96);filter:brightness(.94)}
+@media (hover:hover){.card.press:hover{box-shadow:0 6px 18px rgba(0,0,0,.12)}}
+.cm.more{grid-template-columns:50px minmax(0,1fr)}
+.cm.more .ph{display:grid;place-items:center;border-radius:12px;background:var(--acc-soft);color:var(--acc);font:700 16px/1 var(--fd)}
+.cm.more b{color:var(--acc)}
 @media (hover:hover){.lift:hover{transform:translateY(-2px);box-shadow:var(--sh2)}}
 :focus-visible{outline:2.5px solid var(--acc);outline-offset:2px;border-radius:12px}
 
@@ -350,7 +356,7 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .cm .p{font-size:13px;font-weight:700;margin-top:1px;white-space:nowrap}
 .cm .p span{font-size:11.5px;font-weight:600;margin-left:4px}
 .cm .s{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (min-width:960px){.rail2{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;margin:0;padding:2px 0 8px}.cm{width:auto}}
+@media (min-width:960px){.rail2{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));overflow:visible;margin:0;padding:2px 0 8px}.cm{width:auto}}
 /* 26.10 раскладка (Андрей: «распредели грамотнее»): на компе советы слева, реклама и закупка справа — без пустот */
 .duo{display:grid;gap:0 18px;grid-template-columns:minmax(0,1fr)}
 .duo>.side .mc{margin-bottom:10px}
@@ -1221,13 +1227,14 @@ function others(p){
   return h;
 }
 function vKonk(p){
-  const cs=p.comps||[],pn=pendN(p),pk=p.pick||{};
+  const cs=p.comps||[],pn=pendN(p),pk=p.pick||{},rj=(p.rejected||[]).length;
   const adv=(p.advice||{}).items||[];
   return `${pn?`<button class="banner press reveal" id="pendgo">${IC.clock}<div style="flex:1;text-align:left"><b>${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения: такой же товар или нет.</b> Решить можно прямо здесь.</div><span class="tag acc">Решить</span></button>`:''}
   ${hero(p)}
   <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><span>${pk.checked?`проверено по фото: ${pk.matched} из ${pk.checked}`:''}</span></div>
-  ${cs.length?`<div class="rail2">${cs.map((c,i)=>cmini(c,i,p)).join('')}</div>`:'<div class="card pad mut reveal">Подходящих конкурентов пока нет — подбор продолжается.</div>'}
-  ${(p.rejected||[]).length||(p.reserve||[]).length?`<div class="note" style="margin:2px 2px 0">${(p.rejected||[]).length?`<button class="lnk" id="rej">Другие из топа · ${p.rejected.length} — взять или убрать</button>`:''}${(p.reserve||[]).length?`${(p.rejected||[]).length?' · ':''}в запасе ${p.reserve.length} ${plur(p.reserve.length,'согласованный','согласованных','согласованных')} (${[...new Set(p.reserve.map(r=>short(r.seller)).filter(s=>s&&s!=='—'))].map(esc).join(', ')}) — встанут, если кто-то из пятёрки упадёт по продажам`:''}</div>`:''}
+  ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
+  ${cs.length?'':'<div class="card pad mut reveal">Подходящих конкурентов пока нет — подбор продолжается.</div>'}
+  ${(p.reserve||[]).length?`<div class="note" style="margin:2px 2px 0">в запасе ${p.reserve.length} ${plur(p.reserve.length,'согласованный','согласованных','согласованных')} (${[...new Set(p.reserve.map(r=>short(r.seller)).filter(s=>s&&s!=='—'))].map(esc).join(', ')}) — встанут, если кто-то из пятёрки упадёт по продажам</div>`:''}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
   <div class="duo"><div class="main">
@@ -1508,7 +1515,14 @@ function start(d){D=d;if(!D.products||!D.products.length){$('#view').innerHTML='
   if(hs.startsWith('sku=')){const [s,...f]=hs.slice(4).split('&');S.sku=s;S.t='konk';pick=f.includes('pick')}else if(hs==='pend'){const p=D.products.find(x=>pendN(x));if(p){S.sku=p.sku;S.t='konk';pend=true}}
   if(hs==='pend'||hs.startsWith('sku='))history.replaceState(null,'',location.pathname+location.search);
   render(false);if(pend)setTimeout(()=>pendSheet(P),500);
-  if(pick&&P.sku===S.sku)setTimeout(()=>pendN(P)?pendSheet(P):otherSheet(P),500)}
+  if(pick&&P.sku===S.sku)setTimeout(()=>pendN(P)?pendSheet(P):otherSheet(P),500);
+  // 26.10 Андрей: «обновление возвращает на главную» — страница строится после расшифровки данных, браузер не успевал вернуть прокрутку: возвращаем сами
+  if(!hs){let y=null;try{y=JSON.parse(sessionStorage.getItem('konk.y')||'null')}catch(e){}
+    if(y&&y.t===S.t&&y.s===S.sku&&y.y>0)requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(0,y.y)))}}
+try{history.scrollRestoration='manual'}catch(e){}
+document.addEventListener('touchstart',()=>{},{passive:true});   // без этого Safari на iPhone не показывает нажатие (:active)
+const saveY=()=>{try{sessionStorage.setItem('konk.y',JSON.stringify({y:Math.round(scrollY),t:S.t,s:S.sku}))}catch(e){}};
+addEventListener('pagehide',saveY);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveY()});
 function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('#pw').focus(),50)}
 (async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else $('#view').innerHTML='<div class="empty">Не удалось открыть данные: '+esc(e.message)+'</div>'}})();
 })();
