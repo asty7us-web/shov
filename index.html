@@ -113,6 +113,8 @@ img{display:block;max-width:100%}
 .appsw svg{width:15px;height:15px}
 @media (max-width:560px){.appsw .lbl{display:none}.appsw>a,.appsw>span{padding:6px 9px}}
 @media (max-width:440px){.trial span{display:none}.trial{padding:8px 10px}}
+/* 26.10: с кнопкой «Юнитка» шапка телефона не влезала — кнопка темы уезжала за край. Слово «Склейки» и так есть в переключателе сервисов */
+@media (max-width:440px){.brand b{display:none}.hdr-in{gap:8px}}
 .iconbtn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--solid);color:var(--ink2);border:var(--bw) solid var(--line);flex:none;transition:transform .3s var(--spring)}
 .iconbtn:active{transform:scale(.9)}
 .iconbtn svg{width:19px;height:19px}
