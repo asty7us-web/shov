@@ -1208,7 +1208,7 @@ const qBtns=(p,c)=>{const q=qOf(p,c.sku),on=d=>q&&q.d===d?' on':'',sent=q&&q.sen
   return c.status==='yes'?`<div class="qa"><button class="qb n press${on('n')}" data-q="n" data-qc="${c.sku}">✖ Убрать из конкурентов${q&&q.d==='n'?sent||' · в очереди':''}</button></div>`
    :`<div class="qa"><button class="qb y press${on('y')}" data-q="y" data-qc="${c.sku}">✅ Взять${q&&q.d==='y'?sent||' · в очереди':''}</button><button class="qb n press${on('n')}" data-q="n" data-qc="${c.sku}">✖ ${c.status==='pending'?'Не брать':'Убрать'}${q&&q.d==='n'?sent||' · в очереди':''}</button></div>`};
 function compSheet(p,sku){
-  const c=allC(p).find(x=>x.sku===sku)||(p.rejected||[]).find(x=>x.sku===sku);if(!c)return;
+  const c=allC(p).find(x=>x.sku===sku)||(p.rejected||[]).find(x=>x.sku===sku)||(p.leader&&p.leader.sku===sku?p.leader:null);if(!c)return;
   const o=per(Object.assign({},p.our||{},{rating:(p.our_card||{}).rating,reviews:(p.our_card||{}).reviews})),cp=per(c);const j=c.j||(c.v?{v:c.v,why:c.why}:{});
   const rows=GROUPS.map(([g,n,ms])=>`<tr class="g"><td colspan="3">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(([lab,get,fmt,dir])=>{let a=null,b=null;try{a=get(Object.assign({us:true,sku:p.sku},o),p)}catch(e){}try{b=get(cp,p)}catch(e){}
     if(!ok(a)&&!ok(b))return '';let cl='';if(dir&&ok(a)&&ok(b)&&a!==b)cl=(dir>0?a>b:a<b)?'up':'dn';return `<tr><td>${PL(lab)}</td><td class="num ${cl}">${fmt(a,o,p)}</td><td class="num">${fmt(b,cp,p)}</td></tr>`}).join('')).join('');
@@ -1255,9 +1255,31 @@ function zakup(p){
    ${z.donors28.map((v,i)=>bar('Донор '+(i+1),v)).join('')}${bar('Мы',z.our28||0,'us')}
    ${z.target?`<div class="ad" style="padding:10px 0 4px"><div class="do" style="margin:0">Чтобы встать вровень — держать на складах <b>${fi(z.target[0])}–${fi(z.target[1])} шт</b> на месяц (их продажи + 25–50%), сразу на все склады и рекламу без лимита.</div></div>`:''}</div>`;
 }
+/* запас: согласованные сверх пятёрки и (Андрей 28.10) согласованные без продаж за 28 дней */
+function resNote(p){
+  const r=p.reserve||[],ns=r.filter(x=>x.nosale),ex=r.filter(x=>!x.nosale);
+  const who=a=>[...new Set(a.map(x=>short(x.seller)).filter(s=>s&&s!=='—'))].map(esc).join(', ');
+  let h='';
+  if(ex.length)h+=`<div class="note" style="margin:2px 2px 0">в запасе ${ex.length} ${plur(ex.length,'согласованный','согласованных','согласованных')}${who(ex)?` (${who(ex)})`:''} — встанут, если кто-то из пятёрки упадёт по продажам</div>`;
+  if(ns.length)h+=`<div class="note" style="margin:2px 2px 0">в запасе ${ns.length} ${plur(ns.length,'согласованный','согласованных','согласованных')} — <b>продаж нет</b> за 28 дней${who(ns)?` (${who(ns)})`:''}: в пятёрку не ставим, вернутся, когда начнут продавать</div>`;
+  return h;
+}
+/* место магазина в категории — раздел «Конкуренты» в кабинете Озона: продавцы по выручке во всей категории, не товары */
+function shop(p){
+  const s=p.shop;if(!s||!ok(s.pos))return '';
+  const w=s.weeks||[],w0=w.length>1?w[0]:null,d=w0&&ok(w0[1])?w0[1]-s.pos:null;
+  const dd=x=>x.slice(8,10)+'.'+x.slice(5,7);
+  const xb=ok(s.best)&&ok(s.my)&&s.my>0?s.best/s.my:null,xn=ok(s.near_rev)&&ok(s.my)&&s.my>0?s.near_rev/s.my:null;
+  const vr=x=>{const r=x>=10?Math.round(x):Math.round(x*10)/10;return 'в '+NF.format(r)+' '+(r%1?'раза':plur(r,'раз','раза','раз'))+' больше нас'};
+  return `<div class="card mc reveal"><h3>Место магазина в категории<em>${esc(p.type_name||'')} · ${dd(s.from)}–${dd(s.to)}</em></h3>
+   <div class="verdict"><b class="num">${fi(s.pos)}-е</b> из ${fi(s.all)} продавцов по выручке${ok(s.top)?` — топ ${s.top}%`:''}${d?` · <span class="${d>0?'up':'dn'}">${d>0?'поднялись':'опустились'} на ${fi(Math.abs(d))} ${plur(Math.abs(d),'место','места','мест')}</span> с недели ${dd(w0[0])}`:''}</div>
+   ${xb?`<div class="br" style="grid-template-columns:1fr auto"><span class="nm">Магазин-лидер продаёт</span><span class="vl num">${vr(xb)}</span></div>`:''}
+   ${s.near&&xn?`<div class="br" style="grid-template-columns:1fr auto"><span class="nm">Ближайший магазин — ${esc(s.near)}</span><span class="vl num">${xn>=1?vr(xn):'на '+NF.format(Math.round((1-xn)*100))+'% меньше нас'}</span></div>`:''}
+   <div class="note" style="margin:6px 0 0">Это магазины целиком по всей категории, не наш товар: считаются все наши товары этой категории.</div></div>`;
+}
 function others(p){
-  const dm=p.dumpers||[],L=p.leader;let h='';
-  if(L)h+=`<div class="card mc reveal"><h3>Лидер категории<em>тот же товар</em></h3><div class="br" style="grid-template-columns:44px 1fr auto">${img(L.photo).replace('<img','<img style="width:44px;height:44px;border-radius:12px"')}<span class="nm" style="white-space:normal"><b style="color:var(--ink)">${esc(short(L.seller))}</b><br>${fi(L.cnt7)} шт за 7 дней · ДРР ${fp(L.drr)}</span><span class="vl num">${fr(L.price)}</span></div></div>`;
+  const dm=p.dumpers||[],L=p.leader;let h=shop(p);
+  if(L)h+=`<div class="card mc reveal"><h3>Лидер категории<em>${L.v==='other'?'похожий, но не такой же':L.v?'тот же товар':'больше всех продаж из похожих'}</em></h3><button class="br press" data-comp="${L.sku}" style="grid-template-columns:44px 1fr auto;width:100%;text-align:left">${img(L.photo).replace('<img','<img style="width:44px;height:44px;border-radius:12px"')}<span class="nm" style="white-space:normal"><b style="color:var(--ink)">${esc(short(L.seller))}</b><br>${fi(L.cnt7)} шт за 7 дней${ok(L.drr)?' · ДРР '+fp(L.drr):''}</span><span class="vl num">${fr(L.price)}</span></button>${L.diff?`<div class="note" style="margin:6px 0 0">Отличие: ${esc(L.diff.slice(0,160))}</div>`:''}</div>`;
   if(dm.length)h+=`<div class="card mc reveal"><h3>Демперы — следим<em>дешевле нас на 30%+</em></h3><div class="verdict mut">В минус не догоняем — смотрим, вдруг поднимут цену</div>${dm.map(c=>`<div class="br" style="grid-template-columns:30px 1fr auto">${img(c.photo).replace('<img','<img style="width:30px;height:30px;border-radius:9px"')}<span class="nm">${esc(short(c.seller))} · ${fi(c.cnt7)} шт/нед</span><span class="vl num">${fr(c.price)}</span></div>`).join('')}</div>`;
   return h;
 }
@@ -1269,7 +1291,7 @@ function vKonk(p){
   <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><span>${pk.checked?`проверено по фото: ${pk.matched} из ${pk.checked}`:''}</span></div>
   ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
   ${cs.length?'':'<div class="card pad mut reveal">Подходящих конкурентов пока нет — подбор продолжается.</div>'}
-  ${(p.reserve||[]).length?`<div class="note" style="margin:2px 2px 0">в запасе ${p.reserve.length} ${plur(p.reserve.length,'согласованный','согласованных','согласованных')} (${[...new Set(p.reserve.map(r=>short(r.seller)).filter(s=>s&&s!=='—'))].map(esc).join(', ')}) — встанут, если кто-то из пятёрки упадёт по продажам</div>`:''}
+  ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
   <div class="duo"><div class="main">
