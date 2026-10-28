@@ -112,6 +112,8 @@ img{display:block;max-width:100%}
 .appsw>a:active{transform:scale(.94)}
 .appsw svg{width:15px;height:15px}
 @media (max-width:560px){.appsw .lbl{display:none}.appsw>a,.appsw>span{padding:6px 9px}}
+/* 28.10: на ПК 980–1599 px шапка не влезала — кнопка тем уходила за правый край (на 1280 её не было видно); переключатель сервисов — одни значки, подписи во всплывашке */
+@media (min-width:980px) and (max-width:1599px){.appsw .lbl{display:none}.appsw>a,.appsw>span{padding:6px 9px}}
 @media (max-width:440px){.trial span{display:none}.trial{padding:8px 10px}}
 /* 26.10: с кнопкой «Юнитка» шапка телефона не влезала — кнопка темы уезжала за край. Слово «Склейки» и так есть в переключателе сервисов */
 @media (max-width:440px){.brand b{display:none}.hdr-in{gap:8px}}
@@ -558,7 +560,96 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
 }
 @media (max-width:520px){.legend4{grid-template-columns:1fr}}
 @media (max-width:370px){.mini{display:none}}
-@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* «Космос» (28.10, Андрей: «добавь в конкуренты и склейки космос») — как в Отклике / Юнитке: фон — глубокий космос (space-bg*.webp),
+   мерцают звёзды и пролетают метеоры (#spDeco); панели — тёмное стекло; над разделами окошко #spCard — слайд-шоу аффирмаций (SP_AFF):
+   стрелки / свайп / тап по краю / ← →, сами каждые 7 с, пауза, во весь экран; музыка space-music.mp3 с первого нажатия, звук — кнопка в шапке.
+   Картинки и музыка — из Юнитки (Код\unitka\site\space-*), deploy.py кладёт их рядом со страницей. */
+:root[data-skin="space"]{
+  --bg:#060818; --fg:#eef0ff; --fg2:#b6bbe0; --fg3:#8a90ba; --solid:rgba(14,18,42,.74); --ink:#eef0ff; --ink2:#b6bbe0; --ink3:#8a90ba; --sunk:rgba(255,255,255,.06); --line:rgba(200,190,255,.13); --sheet:#0b0e26;
+  --hdr:rgba(7,9,26,.9); --hdr-fg:#eef0ff; --accent:#a493ff; --accent-ink:#0b0a26; --accent-soft:rgba(164,147,255,.2);
+  --good:#7fe0a6; --warn:#ffd27a; --bad:#ff8f9e; --good-soft:rgba(127,224,166,.13); --warn-soft:rgba(255,210,122,.13); --bad-soft:rgba(255,143,158,.14);
+  --r1:#a493ff; --r2:#8fb4ff; --r3:#ffd27a; --r4:#ff8f9e; --vl:.76; --vc:.14; --glow1:transparent; --glow2:transparent;
+  --shadow:0 0 0 1px rgba(200,190,255,.06) inset,0 18px 40px -12px rgba(0,0,10,.7); --shadow-lg:0 30px 90px -10px rgba(0,0,0,.85);
+  --f-display:"Unbounded","Manrope",system-ui,sans-serif; --f-body:"Manrope","Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --spbg:url("space-bg.webp"); --sph:url("space-hero.webp"); --sbh:clamp(270px,31vw,400px); color-scheme:dark}
+:root[data-skin="space"] body{background:#060818}
+:root[data-skin="space"] body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,rgba(6,8,24,.2),rgba(6,8,24,.5)),var(--spbg) center/cover}
+:root[data-skin="space"] :is(.panel,.acc,.stp){backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+:root[data-skin="space"] .pop{background:#11152f}
+:root[data-skin="space"] :is(.tipbox,.selbar,.toast){color:#0b0e26}
+:root[data-skin="space"] .btn{background:linear-gradient(135deg,#c2b6ff,#806cff);color:#0b0a26}
+:root[data-skin="space"] .brand b{font-weight:700;letter-spacing:.04em}
+.skins .sgrp{grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:6px 4px 0}
+#sndbtn .off,#sndbtn[aria-pressed="true"] .on{display:none}
+#sndbtn[aria-pressed="true"] .off{display:block}
+#spDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#spDeco .tw{position:absolute;width:var(--z);height:var(--z);border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(200,215,255,.85);opacity:.15;animation:sp-tw var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes sp-tw{0%,100%{opacity:.12;transform:scale(.55)}50%{opacity:1;transform:scale(1)}}
+#spDeco .met{position:absolute;left:0;top:0;width:190px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(214,206,255,.7) 70%,#fff);box-shadow:0 0 8px rgba(190,180,255,.7);opacity:0}
+#spWrap{max-width:1440px;margin:0 auto;padding:calc(var(--hh) + 14px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+#spWrap:empty{display:none}
+#spWrap:not(:empty)+.main{padding-top:10px}
+#spCard{position:relative;height:var(--sbh);margin:0 0 14px;border-radius:22px;overflow:hidden;isolation:isolate;background:#050716;outline:none;
+  box-shadow:0 0 0 1px rgba(190,180,255,.3),0 0 42px rgba(120,100,255,.24),0 18px 50px rgba(0,0,0,.55);-webkit-user-select:none;user-select:none}
+#spCard:focus-visible{box-shadow:0 0 0 2px #cfc6ff,0 0 42px rgba(120,100,255,.4)}
+#spCard .spimg{position:absolute;inset:-7%;background:var(--sph) 50% 50%/cover;transition:transform 2.6s cubic-bezier(.2,.7,.2,1);will-change:transform}
+#spCard .spsh{position:absolute;inset:0;background:radial-gradient(ellipse 62% 60% at 50% 48%,rgba(4,6,20,.58),rgba(4,6,20,.18) 72%,transparent),linear-gradient(180deg,rgba(4,6,20,.6),transparent 26%,transparent 72%,rgba(4,6,20,.6))}
+#spCard canvas.spst{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#spCard .spfl{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:linear-gradient(105deg,transparent 30%,rgba(220,214,255,.16) 45%,rgba(255,255,255,.28) 50%,rgba(220,214,255,.16) 55%,transparent 70%)}
+#spCard .sphud{position:absolute;z-index:2;inset:10px;pointer-events:none;border-radius:16px;border:1px solid rgba(200,190,255,.16)}
+#spCard .sphud i{position:absolute;width:24px;height:24px;border:2px solid #d3cbff;filter:drop-shadow(0 0 5px rgba(164,147,255,.95))}
+#spCard .sphud i:nth-child(1){left:-1px;top:-1px;border-right:0;border-bottom:0;border-top-left-radius:16px}
+#spCard .sphud i:nth-child(2){right:-1px;top:-1px;border-left:0;border-bottom:0;border-top-right-radius:16px}
+#spCard .sphud i:nth-child(3){left:-1px;bottom:-1px;border-right:0;border-top:0;border-bottom-left-radius:16px}
+#spCard .sphud i:nth-child(4){right:-1px;bottom:-1px;border-left:0;border-top:0;border-bottom-right-radius:16px}
+#spCard .sptop{position:absolute;z-index:3;left:26px;right:26px;top:22px;display:flex;align-items:center;gap:10px;pointer-events:none;font:700 11px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:rgba(232,229,255,.85)}
+#spCard .splogo{font:700 13px/1 var(--f-display);letter-spacing:.26em;color:#fff;text-shadow:0 0 12px rgba(164,147,255,.95)}
+#spCard .spch{padding:5px 10px;border-radius:999px;background:rgba(164,147,255,.16);border:1px solid rgba(200,190,255,.32)}
+#spCard .spnum{margin-left:auto;font-variant-numeric:tabular-nums}
+#spCard .spstage{position:absolute;z-index:2;inset:58px 78px 56px;display:grid;place-items:center;text-align:center;cursor:grab;touch-action:pan-y}
+#spCard .spstage:active{cursor:grabbing}
+#spCard .spq{grid-area:1/1;margin:0;max-width:21ch;font:800 clamp(25px,3.5vw,50px)/1.16 "Manrope",var(--f-body);letter-spacing:-.022em;color:#fff;text-wrap:balance;text-shadow:0 2px 22px rgba(5,6,25,.85),0 0 40px rgba(130,110,255,.35)}
+#spCard .spq span{display:inline-block}
+#spCard .spq.drag{transition:none}
+#spCard .spq.back{transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s}
+#spCard .spnav{position:absolute;z-index:3;top:50%;width:46px;height:46px;margin-top:-23px;padding:0;border-radius:50%;border:1px solid rgba(220,215,255,.36);background:rgba(10,12,36,.42);color:#fff;display:grid;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .2s,background .2s}
+#spCard .spnav:hover{background:rgba(164,147,255,.38);transform:scale(1.08)}
+#spCard .spnav:active{transform:scale(.94)}
+#spCard .spnav.prev{left:20px} #spCard .spnav.next{right:20px}
+#spCard .spnav svg{width:20px;height:20px;display:block}
+#spCard .spbar{position:absolute;z-index:3;left:26px;right:146px;bottom:20px;display:flex;gap:6px}
+#spCard .spbar button{flex:1;min-width:0;height:16px;padding:6px 0;border:0;background:none;cursor:pointer}
+#spCard .spbar button i{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden}
+#spCard .spbar button i b{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}
+#spCard .spbar button.done i b{transform:scaleX(1);background:rgba(255,255,255,.75)}
+#spCard .spbar button.cur i b{animation:sp-fill 7s linear forwards;box-shadow:0 0 8px #b3a5ff}
+#spCard:is(.hold,.stop) .spbar button.cur i b{animation-play-state:paused}
+@keyframes sp-fill{to{transform:scaleX(1)}}
+#spCard .spbtns{position:absolute;z-index:3;right:22px;bottom:10px;display:flex;gap:6px}
+#spCard .spbtns button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(220,215,255,.36);background:rgba(10,12,36,.42);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+#spCard .spbtns button:hover{background:rgba(164,147,255,.38)}
+#spCard .spbtns svg{width:16px;height:16px;display:block}
+#spCard [data-sp="play"] .pl,#spCard.stop [data-sp="play"] .pa,#spCard [data-sp="mute"] .off,#spCard [data-sp="mute"][aria-pressed="true"] .on{display:none}
+#spCard [data-sp="mute"][aria-pressed="true"] .off{display:block}
+#spCard.stop [data-sp="play"] .pl{display:block}
+#spCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;border-radius:0}
+#spCard.big .spq{font-size:clamp(30px,5.2vw,80px)}
+#spCard.big .spstage{inset:84px 96px 84px}
+@media (max-width:899px){
+  :root[data-skin="space"]{--spbg:url("space-bg-m.webp");--sph:url("space-hero-m.webp");--sbh:max(300px,82vw)}
+  #spCard{border-radius:18px}
+  #spCard .sptop{left:20px;right:20px;top:20px;font-size:10px;letter-spacing:.12em}
+  #spCard .splogo{font-size:11.5px}
+  #spCard .spstage{inset:52px 20px 56px}
+  #spCard .spq{max-width:none;font-size:clamp(21px,6.3vw,30px)}
+  #spCard .spnav{display:none}
+  #spCard .spbar{left:20px;right:150px;bottom:18px;gap:4px}
+  #spCard .spbtns{right:16px;bottom:9px}
+  #spCard.big .spq{font-size:clamp(26px,8vw,44px)}
+  #spCard.big .spstage{inset:70px 22px 70px}
+}
+@media (orientation:portrait) and (max-width:899px){#spCard.big .spimg{background-image:url("space-hero-tall.webp")}}
+@media (prefers-reduced-motion: reduce){:root:not([data-skin="space"]) *,:root:not([data-skin="space"]) *::before,:root:not([data-skin="space"]) *::after{animation:none!important;transition:none!important}}   /* «Космос» двигается всегда, как в Отклике */
 </style>
 </head>
 <body>
@@ -574,10 +665,12 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
     <button class="jobpill" id="jobpill"><i></i><span></span></button>
     <nav class="appsw" aria-label="Сервисы"><span class="on" title="Склейки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg><span class="lbl">Склейки</span></span><a href="./konkurenty/" title="Конкуренты Озон: топ-5 по каждому товару, ключи, склады"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg><span class="lbl">Конкуренты</span></a><a href="../unitka/" title="Юнитка: маржа, СПП по дням, расчёт цены"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg><span class="lbl">Юнитка</span></a></nav>
     <button class="trial" id="trialbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg><span>Триал</span></button>
+    <button class="iconbtn" id="sndbtn" aria-label="Звук" aria-pressed="false" hidden><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg></button>
     <button class="iconbtn" id="skinbtn" aria-label="Тема оформления"></button>
   </div>
   <div class="hdr-in hdr-2"><div class="seg" id="seg" role="tablist" aria-label="Магазин"></div><div class="stamp" id="stamp"></div></div>
 </header>
+<div id="spWrap"></div>
 <main class="main" id="view"></main>
 <nav class="tabbar" id="tabbar" aria-label="Разделы"></nav>
 <div class="selbar" id="selbar"></div>
@@ -1102,9 +1195,9 @@ function celebrate(id){const fixes=(S.jobs[id]||{}).fixes||[];toast(`ТЗ №${i
 function burst(n){if(RM)return;const cv=$('#confetti'),c=cv.getContext('2d');cv.hidden=false;cv.width=innerWidth;cv.height=innerHeight;const cs=getComputedStyle(document.documentElement),cols=['--r1','--r2','--r3','--r4','--accent'].map(v=>cs.getPropertyValue(v).trim()||'#f0a');const ps=Array.from({length:n},()=>({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*.62,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,s:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.floor(Math.random()*cols.length)]}));let t0=performance.now();const step=t=>{const dt=Math.min(32,t-t0)/16;t0=t;c.clearRect(0,0,cv.width,cv.height);let alive=0;ps.forEach(p=>{p.vy+=.45*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;if(p.y<cv.height+20){alive++;c.save();c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;c.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66);c.restore()}});if(alive)requestAnimationFrame(step);else cv.hidden=true};requestAnimationFrame(step)}
 
 /* темы */
-const SKINS=[['auto','Авто','как в системе','linear-gradient(135deg,#f2f4f9 50%,#0c0f15 50%)','#2445dc','Aa','Unbounded','#111'],['porcelain','Фарфор','кобальт на белом','#f2f4f9','#2445dc','Aa','Unbounded','#111'],['graphite','Графит','лёд на тёмном','#0c0f15','#8fb2ff','Aa','Unbounded','#fff'],['sage','Шалфей','слива и зелень','#edf1ea','#7a3a70','Аа','Prata','#16302a'],['aurora','Аврора','северное сияние','radial-gradient(circle at 20% 20%,#ff62d4,transparent 55%),radial-gradient(circle at 85% 85%,#38e4ff,transparent 55%),#070923','#ffd36b','Аа','Unbounded','#fff'],['jim','Червяк Джим','свалка, корова и бластер','url(jim_bg_m.webp) center/cover,#3b0f5c','#7fd400','Аа','Rubik Moonrocks','#7fd400']];
-function applySkin(k,anim){const r=document.documentElement;if(anim&&!RM){r.classList.add('morph');setTimeout(()=>r.classList.remove('morph'),650)}if(k==='auto')delete r.dataset.skin;else r.dataset.skin=k;S.skin=k;LS.set('skin',k);const mc=$('meta[name="theme-color"]');if(mc)mc.content=getComputedStyle(r).getPropertyValue('--bg').trim()||'#f2f4f9';if(k==='jim')mountJim();requestAnimationFrame(()=>{hh();moveThumb(false)})}
-function renderPop(){$('#pop').innerHTML=`<h4>Оформление</h4><div class="skins">${SKINS.map(([k,n,d,bg,ac,aa,ff,fc])=>`<button class="skin ${S.skin===k?'on':''}" data-skin="${k}"><div class="pv" style="background:${bg};color:${fc};font-family:'${ff}',serif"><span>${aa}</span><i style="background:${ac}"></i></div><div class="nm">${n}</div><div class="ds">${d}</div></button>`).join('')}</div>`}
+const SKINS=[['auto','Авто','как в системе','linear-gradient(135deg,#f2f4f9 50%,#0c0f15 50%)','#2445dc','Aa','Unbounded','#111'],['porcelain','Фарфор','кобальт на белом','#f2f4f9','#2445dc','Aa','Unbounded','#111'],['graphite','Графит','лёд на тёмном','#0c0f15','#8fb2ff','Aa','Unbounded','#fff'],['sage','Шалфей','слива и зелень','#edf1ea','#7a3a70','Аа','Prata','#16302a'],['aurora','Аврора','северное сияние','radial-gradient(circle at 20% 20%,#ff62d4,transparent 55%),radial-gradient(circle at 85% 85%,#38e4ff,transparent 55%),#070923','#ffd36b','Аа','Unbounded','#fff'],['jim','Червяк Джим','свалка, корова и бластер','url(jim_bg_m.webp) center/cover,#3b0f5c','#7fd400','Аа','Rubik Moonrocks','#7fd400'],['space','Космос','аффирмации, звёзды и музыка','url(space-bg-m.webp) center/cover,#060818','#a493ff','Аа','Unbounded','#fff']];
+function applySkin(k,anim){const r=document.documentElement;if(anim&&!RM){r.classList.add('morph');setTimeout(()=>r.classList.remove('morph'),650)}if(k==='auto')delete r.dataset.skin;else r.dataset.skin=k;S.skin=k;LS.set('skin',k);const mc=$('meta[name="theme-color"]');if(mc)mc.content=getComputedStyle(r).getPropertyValue('--bg').trim()||'#f2f4f9';if(k==='jim')mountJim();spaceDeco(k==='space');if(SNDT[k])SNDT[k](soundOff());syncSound();requestAnimationFrame(()=>{hh();moveThumb(false)})}
+function renderPop(){$('#pop').innerHTML=`<h4>Оформление</h4><div class="skins">${SKINS.map(([k,n,d,bg,ac,aa,ff,fc])=>(k==='space'?'<div class="sgrp">Спокойные</div>':'')+`<button class="skin ${S.skin===k?'on':''}" data-skin="${k}"><div class="pv" style="background:${bg};color:${fc};font-family:'${ff}',serif"><span>${aa}</span><i style="background:${ac}"></i></div><div class="nm">${n}</div><div class="ds">${d}</div></button>`).join('')}</div>`}
 function togglePop(force){const p=$('#pop'),o=force??!p.classList.contains('open');if(o)renderPop();p.classList.toggle('open',o)}
 
 /* Червяк Джим: сцена свалки (свой рисунок), летающая корова, вороны, капли слизи и игровой индикатор */
@@ -1120,6 +1213,120 @@ function mountJim(){
 }
 const JIMPOSE=`<img class="jimpose" src="jim_hero.webp" alt="" aria-hidden="true">`;  // герой темы (NeuralBox, nano-banana-pro)
 function renderHud(){if(S.skin!=='jim'||!D)return;const hp=$('#jimhp'),am=$('#jimammo');if(!hp)return;const gs=fg(),sc=gs.map(g=>g.score).filter(x=>x!=null),avg=sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:0;hp.style.width=avg+'%';am.textContent='ЗАРЯДЫ '+S.sel.size}
+/* «Космос» (28.10, как в Отклике / Юнитке): аффирмации Андрея с его магнитов, звёзды, метеоры, музыка */
+const SP_AFF=[
+ 'Всё складывается наилучшим образом для моего высшего блага.','Из этой ситуации выйдет только хорошее для меня.','Я в безопасности.','Вселенная любит меня.',
+ 'Жизнь моя полна чудес.','Деньги сыплются с небес.','Я притягиваю изобилие легко и с радостью.','Всё, что мне нужно, приходит ко мне вовремя.',
+ 'Каждый новый день приносит мне подарки.','Удача улыбается мне каждый день.','Мир полон возможностей, и они сами находят меня.','Я выбираю радость и спокойствие.'
+].flatMap((s,i)=>i%3===2?[s,'Благодарю.']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
+const SP_ICO={prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+ play:'<svg class="pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="pl" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 4.8v14.4a1 1 0 0 0 1.5.9l11.2-7.2a1 1 0 0 0 0-1.7L9 4a1 1 0 0 0-1.5.8Z"/></svg>',
+ mute:'<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+ big:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'};
+const SP_CAM=[[0,0,1.04],[-2.6,1,1.1],[2.2,-1.4,1.08],[-1.6,-1.2,1.12],[2.6,1.3,1.09],[0,2,1.11]];
+function spShow(el,i,dir){
+  const n=SP_AFF.length;i=((i%n)+n)%n;dir=dir||1;
+  const st=el.querySelector('.spstage'),old=st.querySelector('.spq:not(.out)'),q=document.createElement('p');
+  q.className='spq';q.innerHTML=SP_AFF[i].split(' ').map(w=>`<span>${w}</span>`).join(' ');st.appendChild(q);
+  // как у Apple: старая фраза тает в размытие, новая проявляется по слову
+  if(old){old.classList.add('out');const ws=[...old.children];
+    if(old.animate)ws.forEach((w,k)=>w.animate([{opacity:1,filter:'blur(0px)',transform:'none'},{opacity:0,filter:'blur(12px)',transform:`translate(${-dir*26}px,-12px) scale(.94)`}],{duration:460,delay:k*24,easing:'cubic-bezier(.4,0,.7,.2)',fill:'forwards'}));
+    setTimeout(()=>old.remove(),520+ws.length*24)}
+  if(q.animate)[...q.children].forEach((w,k)=>w.animate([{opacity:0,filter:'blur(16px)',transform:`translate(${dir*36}px,26px) scale(1.06)`},{opacity:1,filter:'blur(0px)',transform:'none'}],{duration:1100,delay:(old?280:120)+k*75,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));
+  const c=SP_CAM[i%SP_CAM.length];el.querySelector('.spimg').style.transform=`translate(${c[0]}%,${c[1]}%) scale(${c[2]})`;
+  if(old&&el.querySelector('.spfl').animate)el.querySelector('.spfl').animate([{opacity:0,transform:`translateX(${-dir*60}%)`},{opacity:1,offset:.45},{opacity:0,transform:`translateX(${dir*60}%)`}],{duration:1300,easing:'cubic-bezier(.3,.6,.3,1)'});
+  el._i=i;LS.set('spIdx',i);
+  el.querySelector('.spnum').textContent=String(i+1).padStart(2,'0')+' / '+String(n).padStart(2,'0');
+  const segs=el.querySelectorAll('.spbar button');segs.forEach((b,k)=>{b.classList.toggle('done',k<i);b.classList.remove('cur');b.setAttribute('aria-current',k===i)});void el.offsetWidth;segs[i].classList.add('cur');
+}
+function spBig(el,on){   // во весь экран — как в Отклике
+  el.classList.toggle('big',on);document.documentElement.classList.toggle('sp-big',on);
+  if(on&&el.requestFullscreen&&!document.fullscreenElement)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+  if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+/* живые звёзды поверх картинки окошка: мерцают, плывут за мышью / наклоном, изредка падает звезда; ~30 кадров/с, только пока окошко видно (как в Отклике) */
+function spStars(el){
+  const c=el.querySelector('.spst'),g=c.getContext('2d');
+  let W=0,H=0,ST=[],raf=0,last=0,mx=0,my=0,tx=0,ty=0,met=null;
+  const size=()=>{const dpr=Math.min(2,devicePixelRatio||1);W=c.clientWidth;H=c.clientHeight;if(!W||!H)return;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);
+    ST=Array.from({length:Math.round(W*H/2400)},()=>({x:Math.random()*W,y:Math.random()*H*.78,r:.35+Math.random()*Math.random()*1.5,p:Math.random()*6.3,s:.5+Math.random()*2,z:Math.random(),h:Math.random()<.2?'#cfd8ff':Math.random()<.1?'#ffe2b8':'#fff'}))};
+  const frame=t=>{raf=0;if(!el.isConnected)return;
+    if(t-last>32){last=t;mx+=(tx-mx)*.06;my+=(ty-my)*.06;g.clearRect(0,0,W,H);
+      for(const s of ST){g.globalAlpha=.25+.75*Math.abs(Math.sin(s.p+t/1000*s.s));g.fillStyle=s.h;g.beginPath();g.arc(s.x+mx*s.z*14,s.y+my*s.z*8,s.r,0,7);g.fill()}
+      if(!met&&Math.random()<.006)met={x:W*(.15+Math.random()*.7),y:H*Math.random()*.3,a:.35+Math.random()*.35,v:9+Math.random()*6,l:0};
+      if(met){met.l++;const x=met.x+Math.cos(met.a)*met.v*met.l,y=met.y+Math.sin(met.a)*met.v*met.l,k=Math.min(1,met.l/6)*Math.max(0,1-met.l/30),tl=90;
+        const gr=g.createLinearGradient(x-Math.cos(met.a)*tl,y-Math.sin(met.a)*tl,x,y);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(255,255,255,'+k+')');
+        g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.6;g.beginPath();g.moveTo(x-Math.cos(met.a)*tl,y-Math.sin(met.a)*tl);g.lineTo(x,y);g.stroke();if(met.l>30)met=null}
+      g.globalAlpha=1}
+    if(el._vis!==false&&!document.hidden)raf=requestAnimationFrame(frame)};
+  const kick=()=>{if(!raf)raf=requestAnimationFrame(frame)};
+  el.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const r=el.getBoundingClientRect();tx=((e.clientX-r.left)/r.width-.5)*2;ty=((e.clientY-r.top)/r.height-.5)*2});
+  const ori=e=>{if(e.gamma==null||!el.isConnected)return;tx=Math.max(-1,Math.min(1,e.gamma/25));ty=Math.max(-1,Math.min(1,(e.beta-40)/25))};
+  addEventListener('deviceorientation',ori);el._unStars=()=>removeEventListener('deviceorientation',ori);
+  new ResizeObserver(()=>{size();kick()}).observe(c);
+  new IntersectionObserver(es=>{el._vis=es[0].isIntersecting;el.classList.toggle('hold',!el._vis||document.hidden);kick()}).observe(el);
+  document.addEventListener('visibilitychange',()=>{if(el.isConnected){el.classList.toggle('hold',el._vis===false||document.hidden);kick()}});
+  size();kick();
+}
+function spMeteor(d){   // метеор по фону страницы — раз в несколько секунд, наискосок
+  if(!d.isConnected||document.hidden||!d.animate)return;
+  const m=document.createElement('i'),W=innerWidth,H=innerHeight,x=W*(.2+Math.random()*.8),y=H*Math.random()*.45,a=140+Math.random()*25,len=260+Math.random()*260;
+  m.className='met';d.appendChild(m);const dx=Math.cos(a*Math.PI/180)*len,dy=Math.sin(a*Math.PI/180)*len;
+  m.animate([{opacity:0,transform:`translate(${x}px,${y}px) rotate(${a}deg) scaleX(.3)`},{opacity:1,offset:.25},{opacity:0,transform:`translate(${x+dx}px,${y+dy}px) rotate(${a}deg) scaleX(1)`}],{duration:1300+Math.random()*600,easing:'cubic-bezier(.3,.1,.6,1)'}).onfinish=()=>m.remove();
+}
+/* звук — как в Отклике (28.10): кнопка в шапке у тем со звуком и 🔊 в окошке — одна настройка shov.mute, по умолчанию звук включён.
+   Музыка «Космоса» space-music.mp3 (Suno, из Юнитки) играет с первого нажатия — без нажатия браузер звук не даёт. */
+const curT=()=>S.skin||'auto';
+const SNDT={space:off=>spMusic(!off)};
+function soundOff(){return LS.get('mute',0)==1}
+function syncSound(){const t=curT(),b=$('#sndbtn'),off=soundOff();b.hidden=!SNDT[t];b.setAttribute('aria-pressed',off);b.title=off?'Звук выключен — включить':'Звук включён — выключить';
+  $$('[data-sp="mute"]').forEach(x=>x.setAttribute('aria-pressed',off))}
+function setSound(off){LS.set('mute',off?1:0);const t=curT();if(SNDT[t])SNDT[t](off);syncSound()}
+$('#sndbtn').addEventListener('click',()=>setSound(!soundOff()));
+let spAud=null;
+function spMusic(on){
+  if(!on||curT()!=='space'){if(spAud)spAud.pause();return}
+  if(!spAud){spAud=new Audio('space-music.mp3');spAud.loop=true;spAud.volume=.4}
+  spAud.play().catch(()=>{});
+}
+const spKick=()=>{if(curT()==='space'&&!soundOff()&&(!spAud||spAud.paused))spMusic(true)};
+document.addEventListener('pointerdown',spKick,true);document.addEventListener('click',spKick);document.addEventListener('keydown',spKick,true);
+document.addEventListener('fullscreenchange',()=>{const el=$('#spCard');if(!document.fullscreenElement&&el&&el.classList.contains('big')){el.classList.remove('big');document.documentElement.classList.remove('sp-big')}});
+function spaceDeco(on){
+  const d=$('#spDeco'),w=$('#spWrap'),c=$('#spCard');
+  if(!on){if(d){clearInterval(d._iv);d.remove()}if(c){if(c._unStars)c._unStars();spBig(c,false)}w.innerHTML='';document.documentElement.classList.remove('sp-big');spMusic(false);$('#fntSp')&&$('#fntSp').remove();return}
+  if(!$('#fntSp')){const l=document.createElement('link');l.id='fntSp';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap';document.head.appendChild(l)}
+  if(!d){const el=document.createElement('div');el.id='spDeco';el.setAttribute('aria-hidden','true');let h='';
+    for(let k=0;k<42;k++)h+=`<i class="tw" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;--z:${(1.5+Math.random()*2.6).toFixed(1)}px;--d:${(2.5+Math.random()*4).toFixed(1)}s;--dl:${(-Math.random()*6).toFixed(1)}s"></i>`;
+    el.innerHTML=h;document.body.appendChild(el);setTimeout(()=>spMeteor(el),2500);el._iv=setInterval(()=>spMeteor(el),7000)}
+  if(w.firstChild)return;
+  const el=document.createElement('section');el.id='spCard';el.tabIndex=0;el.setAttribute('aria-roledescription','слайд-шоу');el.setAttribute('aria-label','Аффирмации: листать стрелками ← →');
+  el.innerHTML='<i class="spimg" aria-hidden="true"></i><i class="spsh" aria-hidden="true"></i><canvas class="spst" aria-hidden="true"></canvas><i class="spfl" aria-hidden="true"></i><div class="sphud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
+   '<div class="sptop"><span class="splogo">СКЛЕЙКИ</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
+   `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
+   '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
+   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button><button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
+  w.appendChild(el);
+  const go=dd=>spShow(el,el._i+dd,dd);
+  el.querySelector('.prev').onclick=()=>go(-1);el.querySelector('.next').onclick=()=>go(1);
+  el.querySelector('.spbar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=[...b.parentNode.children].indexOf(b);if(k!==el._i)spShow(el,k,k>el._i?1:-1)});
+  el.querySelector('.spbar').addEventListener('animationend',e=>{if(e.target.closest('.cur'))go(1)});
+  el.querySelector('.spbtns').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b)return;
+    if(b.dataset.sp==='play')el.classList.toggle('stop');
+    else if(b.dataset.sp==='mute')setSound(b.getAttribute('aria-pressed')!=='true');
+    else spBig(el,!el.classList.contains('big'))});
+  el.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){go(1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}else if(e.key==='Escape'&&el.classList.contains('big'))spBig(el,false)});
+  // свайп: фраза едет за пальцем; дальше 50 px — следующая; короткий тап по краю на телефоне — тоже листает
+  const stg=el.querySelector('.spstage');let sx=null,sy=0,mv=false;const cur=()=>stg.querySelector('.spq:not(.out)');
+  stg.addEventListener('pointerdown',e=>{if(e.button>0)return;sx=e.clientX;sy=e.clientY;mv=false;el.classList.add('hold');try{stg.setPointerCapture(e.pointerId)}catch(x){}});
+  stg.addEventListener('pointermove',e=>{if(sx===null)return;const dx=e.clientX-sx,q=cur();if(Math.abs(dx)>8)mv=true;if(!q||!mv)return;q.classList.remove('back');q.classList.add('drag');q.style.transform=`translateX(${dx*.4}px)`;q.style.opacity=1-Math.min(.6,Math.abs(dx)/500)});
+  const up=e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy,q=cur();sx=null;el.classList.toggle('hold',el._vis===false||document.hidden);
+    if(q){q.classList.remove('drag');q.classList.add('back');q.style.transform='';q.style.opacity=''}if(e.type==='pointercancel')return;
+    if(mv&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1);else if(!mv&&e.pointerType!=='mouse'){const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.3)go(-1);else if(x>.7)go(1)}};
+  stg.addEventListener('pointerup',up);stg.addEventListener('pointercancel',up);
+  const i0=+LS.get('spIdx',-1);spShow(el,Number.isFinite(i0)?i0+1:0,1);spStars(el);   // каждый заход — со следующей аффирмации
+}
 addEventListener('scroll',()=>{if(S.skin==='jim')document.documentElement.style.setProperty('--sy',-scrollY+'px')},{passive:true});
 
 /* подсказки: при наведении и по нажатию */
@@ -1148,7 +1355,7 @@ const TOUR=[
  {v:'sdelat',sel:'#selbar',demo:true,t:'Корзина',d:'Как только что-то отмечено, внизу появляется корзина. В ней видно всё выбранное по товарам, и рядом снова написано, почему, — чтобы перечитать. Лишнее убирается крестиком.'},
  {v:'sdelat',sel:'#selbar',demo:true,t:'Решить',d:'В корзине ставите галочку <b>«Я изучил каждый пункт»</b> и жмёте «Решить». ТЗ приходит вам в «К» с кнопками «Согласовать» и «Отменить». После «Согласовать» вношу правки с копией карточки, проверяю, отдаю задачи «К» — а галочки здесь встают сами, с анимацией.'},
  {v:'skleit',sel:'.hint',t:'Пересклейки',d:'Что склеить, расклеить или перенести — с обоснованием и риском. Тут же видно, где на площадках склеено по-разному и какие одиночки похожи на варианты одного товара.'},
- {v:'skleit',sel:'#skinbtn',t:'Темы',d:'Фарфор, Графит, Шалфей, Аврора и <b>Червяк Джим</b> — свалка на закате, летающая корова, капли слизи и индикатор здоровья склеек, как в игре.'},
+ {v:'skleit',sel:'#skinbtn',t:'Темы',d:'Фарфор, Графит, Шалфей, Аврора, <b>Червяк Джим</b> — свалка на закате, летающая корова, капли слизи и индикатор здоровья склеек, как в игре, — и спокойный <b>Космос</b>: аффирмации, звёзды и музыка.'},
  {v:'obzor',t:'Готово!',d:'Начните с «Главное сейчас» на обзоре — там самое дорогое. Триал всегда можно пройти снова кнопкой «Триал»: её цвет уходит по мере прохождения.'}
 ];
 let TR=null,tourDemo=false;
@@ -1188,7 +1395,7 @@ document.addEventListener('change',e=>{if(e.target.id==='iread'){const b=$('[dat
 document.addEventListener('click',e=>{
   if(TR&&!e.target.closest('.tour-tip'))return;
   if(e.target.closest('.st3')&&!e.target.closest('[data-tip]'))return;  // 3D-сцену крутят, а не открывают
-  const t=e.target.closest('[data-tip],[data-go],[data-open],[data-item],[data-seg],[data-sort],[data-gf],[data-pf],[data-sel],[data-unsel],[data-selall],[data-acc],[data-tyt],[data-more],[data-skin],[data-mp],[data-ins],[data-ring],[data-resolve],[data-clr],[data-send],[data-close],[data-car],[data-trial],[data-introhide],#jobpill,.lk,.nd');
+  const t=e.target.closest('[data-tip],[data-go],[data-open],[data-item],[data-seg],[data-sort],[data-gf],[data-pf],[data-sel],[data-unsel],[data-selall],[data-acc],[data-tyt],[data-more],.skin[data-skin],[data-mp],[data-ins],[data-ring],[data-resolve],[data-clr],[data-send],[data-close],[data-car],[data-trial],[data-introhide],#jobpill,.lk,.nd');
   if(!t)return;
   if(t.dataset.tip!=null){e.stopPropagation();e.preventDefault();tipOwner===t?hideTip():showTip(t);return}
   if(t.dataset.sel!=null){e.stopPropagation();if(t.dataset.locked){toast('Этот пункт уже в работе или сделан');return}toggleSel(t.dataset.sel);t.classList.toggle('on',S.sel.has(t.dataset.sel));t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),700);buzz();renderSelbar();renderChrome();return}
