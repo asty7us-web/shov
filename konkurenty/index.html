@@ -794,10 +794,10 @@ const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Кл
 /* ---------- тема ---------- */
 /* ---------- «Космос»: аффирмации Андрея (с магнитов, как в Юнитке), звёзды, метеоры, музыка ---------- */
 const SP_AFF=[
- 'Всё складывается наилучшим образом для моего высшего блага.','Из этой ситуации выйдет только хорошее для меня.','Я в безопасности.','Вселенная любит меня.',
- 'Жизнь моя полна чудес.','Деньги сыплются с небес.','Я притягиваю изобилие легко и с радостью.','Всё, что мне нужно, приходит ко мне вовремя.',
- 'Каждый новый день приносит мне подарки.','Удача улыбается мне каждый день.','Мир полон возможностей, и они сами находят меня.','Я выбираю радость и спокойствие.'
-].flatMap((s,i)=>i%3===2?[s,'Благодарю.']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
+ 'Всё складывается наилучшим образом для моего высшего блага','Из этой ситуации выйдет только хорошее для меня','Я в безопасности','Вселенная любит меня',
+ 'Жизнь моя полна чудес','Деньги сыплются с небес','Я притягиваю изобилие легко и с радостью','Всё, что мне нужно, приходит ко мне вовремя',
+ 'Каждый новый день приносит мне подарки','Удача улыбается мне каждый день','Мир полон возможностей, и они сами находят меня','Я выбираю радость и спокойствие'
+].flatMap((s,i)=>i%3===2?[s,'Благодарю']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
 const SP_ICO={prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
  play:'<svg class="pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="pl" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 4.8v14.4a1 1 0 0 0 1.5.9l11.2-7.2a1 1 0 0 0 0-1.7L9 4a1 1 0 0 0-1.5.8Z"/></svg>',
@@ -829,7 +829,7 @@ function spStars(el){
   const c=el.querySelector('.spst'),g=c.getContext('2d');
   let W=0,H=0,ST=[],raf=0,last=0,mx=0,my=0,tx=0,ty=0,met=null;
   const size=()=>{const dpr=Math.min(2,devicePixelRatio||1);W=c.clientWidth;H=c.clientHeight;if(!W||!H)return;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);
-    ST=Array.from({length: 0},()=>({x:Math.random()*W,y:Math.random()*H*.78,r:.35+Math.random()*Math.random()*1.5,p:Math.random()*6.3,s:.5+Math.random()*2,z:Math.random(),h:Math.random()<.2?'#cfd8ff':Math.random()<.1?'#ffe2b8':'#fff'}))};
+    ST=Array.from({length:Math.round(W*H/2400)},()=>({x:Math.random()*W,y:Math.random()*H*.78,r:.35+Math.random()*Math.random()*1.5,p:Math.random()*6.3,s:.5+Math.random()*2,z:Math.random(),h:Math.random()<.2?'#cfd8ff':Math.random()<.1?'#ffe2b8':'#fff'}))};
   const frame=t=>{raf=0;if(!el.isConnected)return;
     if(t-last>32){last=t;mx+=(tx-mx)*.06;my+=(ty-my)*.06;g.clearRect(0,0,W,H);
       for(const s of ST){g.globalAlpha=.25+.75*Math.abs(Math.sin(s.p+t/1000*s.s));g.fillStyle=s.h;g.beginPath();g.arc(s.x+mx*s.z*14,s.y+my*s.z*8,s.r,0,7);g.fill()}
@@ -900,7 +900,7 @@ function spaceDeco(on){
   if(!on){if(d){clearInterval(d._iv);d.remove()}if(c){if(c._unStars)c._unStars();spBig(c,false)}w.innerHTML='';document.documentElement.classList.remove('sp-big');spMusic(false);$('#fntSp')&&$('#fntSp').remove();return}
   if(!$('#fntSp')){const l=document.createElement('link');l.id='fntSp';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap';document.head.appendChild(l)}
   if(!d){const el=document.createElement('div');el.id='spDeco';el.setAttribute('aria-hidden','true');let h='';
-    for(let k=0;k<0;k++)h+=`<i class="tw" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;--z:${(1.5+Math.random()*2.6).toFixed(1)}px;--d:${(2.5+Math.random()*4).toFixed(1)}s;--dl:${(-Math.random()*6).toFixed(1)}s"></i>`;
+    for(let k=0;k<42;k++)h+=`<i class="tw" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;--z:${(1.5+Math.random()*2.6).toFixed(1)}px;--d:${(2.5+Math.random()*4).toFixed(1)}s;--dl:${(-Math.random()*6).toFixed(1)}s"></i>`;
     el.innerHTML=h;document.body.appendChild(el);setTimeout(()=>spMeteor(el),2500);el._iv=setInterval(()=>spMeteor(el),7000)}
   if(w.firstChild)return;
   const el=document.createElement('section');el.id='spCard';el.tabIndex=0;el.setAttribute('aria-roledescription','слайд-шоу');el.setAttribute('aria-label','Аффирмации: листать стрелками ← →');
