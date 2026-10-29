@@ -90,8 +90,6 @@ img{display:block;max-width:100%}
 .hdr{position:fixed;z-index:40;top:0;left:0;right:0;padding-top:env(safe-area-inset-top,0px);background:var(--hdr);color:var(--hdr-fg);backdrop-filter:saturate(1.7) blur(20px);-webkit-backdrop-filter:saturate(1.7) blur(20px);border-bottom:1px solid var(--line)}
 .hdr-in{display:flex;align-items:center;gap:12px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));max-width:1440px;margin:0 auto}
 .hdr-2{padding-top:0;padding-bottom:10px}
-.brand{display:flex;align-items:center;gap:9px;flex:none}
-.brand b{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:-.01em}
 .tnav{display:none;gap:4px;margin-left:10px}
 .tnav button{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:12px;font-weight:600;font-size:14px;opacity:.75;transition:background .25s,opacity .25s,transform .3s var(--spring)}
 .tnav button svg{width:18px;height:18px}
@@ -105,18 +103,69 @@ img{display:block;max-width:100%}
 .trial>*{position:relative}
 .trial:active{transform:scale(.94)}
 .trial svg{width:16px;height:16px}
-/* переключатель сервисов «Склейки | Конкуренты» — такой же стоит в шапке Конкурентов */
-.appsw{display:flex;padding:2px;border-radius:12px;background:var(--sunk);border:var(--bw) solid var(--line);flex:none}
-.appsw>a,.appsw>span{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--ink2);text-decoration:none;white-space:nowrap;transition:transform .3s var(--spring),background-color .25s}
-.appsw>.on{background:var(--solid);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.appsw>a:active{transform:scale(.94)}
-.appsw svg{width:15px;height:15px}
-@media (max-width:560px){.appsw .lbl{display:none}.appsw>a,.appsw>span{padding:6px 9px}}
-/* 28.10: на ПК 980–1599 px шапка не влезала — кнопка тем уходила за правый край (на 1280 её не было видно); переключатель сервисов — одни значки, подписи во всплывашке */
-@media (min-width:980px) and (max-width:1599px){.appsw .lbl{display:none}.appsw>a,.appsw>span{padding:6px 9px}}
-@media (max-width:440px){.trial span{display:none}.trial{padding:8px 10px}}
-/* 26.10: с кнопкой «Юнитка» шапка телефона не влезала — кнопка темы уезжала за край. Слово «Склейки» и так есть в переключателе сервисов */
-@media (max-width:440px){.brand b{display:none}.hdr-in{gap:8px}}
+/* выбор сервиса — общий с Юниткой и Конкурентами (servisy\svc.py): название «Склейки» = кнопка, под ней список сервисов. Раздел на телефоне виден в нижней панели */
+:root{--svc-card:var(--solid);--svc-ink:var(--ink);--svc-ink2:var(--ink2);--svc-ink3:var(--ink3);--svc-line:var(--line);--svc-hover:var(--sunk);--svc-acc:var(--accent);--svc-acc-soft:var(--accent-soft)}
+:root[data-skin="aurora"],:root[data-skin="space"]{--svc-card:var(--sheet)}
+/*SVC:CSS*/
+/* выбор сервиса (servisy\svc.py — править там): кнопка «значок + название ⌄», под ней список трёх сервисов */
+.svc{position:relative;flex:none;min-width:0}
+/* шрифт задаю обёртке, кнопка его наследует (button{font:inherit} страниц) — так темы Юнитки (.brand) и Склеек (.brand b) по-прежнему перекрашивают название */
+:where(.svc){font:700 18px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.01em}
+.svc-btn{display:inline-flex;align-items:center;gap:9px;height:40px;margin:0 0 0 -6px;padding:0 9px 0 5px;border:0;border-radius:13px;background:transparent;color:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;transition:background-color .2s ease,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.svc-btn .svc-nm{font:inherit;letter-spacing:inherit}
+@media (hover:hover){.svc-btn:hover{background:var(--svc-hover)}}
+.svc-btn:active{transform:scale(.95);transition-duration:.12s}
+.svc-btn[aria-expanded="true"]{background:var(--svc-hover)}
+.svc-btn .svc-ic{width:30px;height:30px;border-radius:9px;font-size:15px}
+.svc-chev{width:16px;height:16px;flex:none;opacity:.55;margin-left:-3px;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+.svc-btn[aria-expanded="true"] .svc-chev{transform:rotate(180deg)}
+.svc-ic{display:grid;place-items:center;flex:none;color:#fff;font-style:normal;font-weight:800;line-height:1;
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.28),inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.16)}
+.svc-ic svg{width:62%;height:62%}
+.svc-ic.u{background:linear-gradient(145deg,#5aa2ff,#1f62e8)}
+.svc-ic.s{background:linear-gradient(145deg,#4d63ff,#13b3a5)}
+.svc-ic.k{background:linear-gradient(145deg,#2f7dff,#7b45f5)}
+.svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
+  background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
+  transform-origin:24px -6px;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.92);pointer-events:none;
+  transition:opacity .16s ease,transform .26s cubic-bezier(.4,0,.6,1),visibility 0s linear .26s}
+.svc-menu.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .2s ease,transform .5s cubic-bezier(.22,1.3,.36,1),visibility 0s}
+.svc-menu.gone{transition:none!important;opacity:0!important;visibility:hidden!important}
+.svc-cap{padding:9px 12px 6px;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--svc-ink3)}
+.svc-it{position:relative;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:14px;color:inherit;text-decoration:none;
+  -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.svc-it .svc-ic{width:42px;height:42px;border-radius:12px;font-size:19px}
+.svc-tx{min-width:0;flex:1;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.svc-tx b{display:block;font-size:15.5px;font-weight:650;line-height:1.2;letter-spacing:-.005em}
+.svc-tx small{display:block;margin-top:2px;font-size:12.5px;line-height:1.3;color:var(--svc-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (hover:hover){.svc-it:hover{background:var(--svc-hover)}}
+.svc-it:active{transform:scale(.97);background:var(--svc-hover);transition-duration:.1s}
+.svc-it[aria-current]{background:var(--svc-acc-soft)}
+.svc-it[aria-current] b{color:var(--svc-acc)}
+.svc-ok{width:20px;height:20px;flex:none;color:var(--svc-acc)}
+.svc-sp{width:18px;height:18px;flex:none;border-radius:50%;border:2.2px solid var(--svc-line);border-top-color:var(--svc-acc);opacity:0;transition:opacity .2s}
+.svc-it.go .svc-sp{opacity:1;animation:svc-spin .7s linear infinite}
+@keyframes svc-spin{to{transform:rotate(360deg)}}
+.svc-menu.on .svc-it{animation:svc-row .5s cubic-bezier(.22,1.2,.36,1) both}
+.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}
+@keyframes svc-row{from{opacity:0;transform:translateY(-6px)}}
+/* переход между сервисами: шапка и кнопка сервиса остаются на месте, остальное мягко проявляется */
+@view-transition{navigation:auto}
+.svc-hdr{view-transition-name:svc-hdr}
+#svcBtn{view-transition-name:svc-btn}
+::view-transition-group(svc-hdr),::view-transition-group(svc-btn){animation-duration:.42s;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+::view-transition-group(svc-hdr){overflow:clip}
+::view-transition-old(svc-hdr),::view-transition-new(svc-hdr){animation-duration:.3s}
+::view-transition-old(svc-btn),::view-transition-new(svc-btn){animation-duration:.32s;width:auto;height:auto}   /* название не растягивается, просто сменяется */
+::view-transition-old(root){animation:svc-out .2s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:svc-in .42s cubic-bezier(.16,1,.3,1) both}
+@keyframes svc-out{to{opacity:0}}
+@keyframes svc-in{from{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){@keyframes svc-in{from{opacity:0}}}
+/*/SVC:CSS*/
+@media (max-width:440px){.trial span{display:none}.trial{padding:8px 10px}.hdr-in{gap:8px}}
+@media (max-width:519px){.mini{display:none}}
 .iconbtn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--solid);color:var(--ink2);border:var(--bw) solid var(--line);flex:none;transition:transform .3s var(--spring)}
 .iconbtn:active{transform:scale(.9)}
 .iconbtn svg{width:19px;height:19px}
@@ -230,7 +279,10 @@ img{display:block;max-width:100%}
 
 /* ---------- плитки склеек ---------- */
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px}
-.gt{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:16px;text-align:left;border-radius:var(--rad);background:var(--solid);color:var(--ink);border:var(--bw) solid var(--line);box-shadow:var(--shadow);transition:transform .5s var(--spring),box-shadow .3s;transform-style:preserve-3d;animation:rise .6s var(--ease) both}
+.gt{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:16px;text-align:left;border-radius:var(--rad);background:var(--solid);color:var(--ink);border:var(--bw) solid var(--line);box-shadow:var(--shadow);transition:transform .5s var(--spring),box-shadow .3s;animation:rise .6s var(--ease) both;
+  content-visibility:auto;contain-intrinsic-size:auto 230px}
+/* 28.10: въезжают только первые плитки — 60 плиток и ~340 полосок разом грузили телефон на секунды после входа в раздел */
+.ggrid .gt:nth-child(n+11) .fp i{animation:none}
 .gt .glare{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.35),transparent 55%);opacity:0;transition:opacity .3s}
 .gt:hover .glare{opacity:1}
 @keyframes rise{from{opacity:0;transform:translateY(22px) rotateX(-12deg)}}
@@ -272,8 +324,9 @@ img{display:block;max-width:100%}
 .st3-card .ph3 img{width:100%;height:100%;object-fit:cover}
 .st3-card .lb{margin-top:4px;padding:3px 6px;border-radius:8px;background:var(--solid);color:var(--ink);font-size:11px;font-weight:700;line-height:1.2;text-align:center;box-shadow:0 4px 10px -6px rgba(0,0,0,.4)}
 .st3-card .lb b{display:block;font-size:14px}
-.st3-p{position:absolute;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;box-shadow:0 0 10px 2px currentColor;background:currentColor;will-change:transform;transition:opacity .3s}
-.st3.hl .st3-p{opacity:.12}.st3.hl .st3-p.on{opacity:1}
+.st3-cv{position:absolute;z-index:1;inset:0;width:100%;height:100%;pointer-events:none}
+.st3-spin{position:absolute;inset:0;transform-style:preserve-3d}   /* медленно качается сама (анимация браузера, не код) */
+.st3-cw,.st3-cb{transform-origin:50% 100%;transform-style:preserve-3d}
 .st3.hl .st3-card{opacity:.4}.st3.hl .st3-card.on{opacity:1}
 .st3-hint{position:absolute;right:12px;bottom:10px;font-size:11.5px;color:var(--ink3);pointer-events:none}
 .say{font-size:15px;line-height:1.55}
@@ -476,8 +529,18 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
 .lock .panel{width:min(420px,100%);padding:28px;display:grid;gap:14px;text-align:center}
 .lock input{height:48px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--sunk);color:var(--ink);font:inherit;font-size:16px;padding:0 14px;text-align:center;outline:none}
 .lock .err{color:var(--bad);font-size:14px;min-height:20px}
-.boot{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:var(--bg);color:var(--fg2);transition:opacity .5s}
-.boot .sp2{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite;margin:0 auto 14px}
+/* загрузка — заготовки блоков под шапкой, а не отдельный экран со спиннером: при переходе из Юнитки и Конкурентов шапка уже на месте (28.10) */
+.boot{position:fixed;inset:0;z-index:39;overflow:hidden;background:var(--bg);color:var(--fg2);transition:opacity .4s;
+  padding:calc(var(--hh) + 14px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.boot .bk{max-width:1440px;margin:0 auto;display:grid;gap:14px}
+.boot .sk{position:relative;overflow:hidden;border-radius:var(--rad);background:var(--solid);border:var(--bw) solid var(--line)}
+.boot .sk::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,var(--sunk) 50%,transparent 70%);transform:translateX(-100%);animation:bootsh 1.3s ease-in-out infinite}
+@keyframes bootsh{to{transform:translateX(100%)}}
+.boot .t1{height:42px;width:min(420px,72%);border-radius:14px}
+.boot .t2{height:16px;width:min(320px,55%);border-radius:8px;margin-bottom:6px}
+.boot .hb{height:230px}
+.boot .rw{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.boot .rw .sk{height:92px}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* триал — как «Показать фишки» в Юнитке: затемнение ловит нажатия, страница под ним не нажимается */
 .tour-dim{position:fixed;inset:0;z-index:108;background:transparent}
@@ -655,21 +718,46 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
 <body>
 <div class="bgfx" aria-hidden="true"></div>
 <div class="jimbg" id="jimbg" aria-hidden="true"></div>
-<header class="hdr" id="hdr">
+<header class="hdr svc-hdr" id="hdr">
   <div class="hdr-in">
-    <button class="brand" data-go="obzor" aria-label="Склейки, на главную"><span id="logo"></span><b>Склейки</b></button>
+    <!--SVC:HTML--><div class="svc"><button class="brand svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты"><span class="svc-ic s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)" fill="currentColor" fill-opacity=".28"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg></span><b class="svc-nm">Склейки</b><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><span class="svc-ic u">Ю</span><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" aria-current="page" role="menuitem"><span class="svc-ic s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)" fill="currentColor" fill-opacity=".28"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg></span><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><span class="svc-ic k"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3.5" y="12" width="4.4" height="8.5" rx="1.5"/><rect x="9.8" y="7.5" width="4.4" height="13" rx="1.5"/><rect x="16.1" y="3.5" width="4.4" height="17" rx="1.5"/></svg></span><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a></div></div><!--/SVC:HTML-->
     <nav class="tnav" id="tnav" aria-label="Разделы"></nav>
     <div class="mini" id="mini"></div>
     <div class="hsp"></div>
     <div class="jimhud" id="jimhud" aria-hidden="true"></div>
     <button class="jobpill" id="jobpill"><i></i><span></span></button>
-    <nav class="appsw" aria-label="Сервисы"><span class="on" title="Склейки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg><span class="lbl">Склейки</span></span><a href="./konkurenty/" title="Конкуренты Озон: топ-5 по каждому товару, ключи, склады"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg><span class="lbl">Конкуренты</span></a><a href="../unitka/" title="Юнитка: маржа, СПП по дням, расчёт цены"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg><span class="lbl">Юнитка</span></a></nav>
     <button class="trial" id="trialbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg><span>Триал</span></button>
     <button class="iconbtn" id="sndbtn" aria-label="Звук" aria-pressed="false" hidden><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg></button>
     <button class="iconbtn" id="skinbtn" aria-label="Тема оформления"></button>
   </div>
   <div class="hdr-in hdr-2"><div class="seg" id="seg" role="tablist" aria-label="Магазин"></div><div class="stamp" id="stamp"></div></div>
 </header>
+<script>/*SVC:JS*/
+(()=>{   // выбор сервиса (servisy\svc.py — править там)
+const b=document.getElementById('svcBtn'),m=document.getElementById('svcMenu');if(!b||!m)return;
+let pre=false;
+const prerender=()=>{   // пока выбирают — соседние сервисы уже открываются в фоне (Chrome), переход мгновенный
+  if(pre)return;pre=true;
+  try{if(!(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')))return;
+    const s=document.createElement('script');s.type='speculationrules';
+    s.textContent=JSON.stringify({prerender:[{source:'list',urls:[...m.querySelectorAll('a.svc-it:not([aria-current])')].map(a=>a.href),eagerness:'immediate'}]});
+    document.head.appendChild(s)}catch(e){}};
+const open=on=>{m.classList.toggle('on',on);m.classList.remove('gone');b.setAttribute('aria-expanded',on?'true':'false');if(on)prerender()};
+b.addEventListener('pointerdown',prerender,{passive:true});
+b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(!m.classList.contains('on'))});
+document.addEventListener('pointerdown',e=>{if(m.classList.contains('on')&&!e.target.closest('.svc'))open(false)},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&m.classList.contains('on')){open(false);b.focus()}});
+m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return;e.stopPropagation();
+  if(a.hasAttribute('aria-current')){e.preventDefault();open(false);return}
+  a.classList.add('go');if(!('onpageswap' in window))setTimeout(()=>m.classList.add('gone'),60)});
+addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
+addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
+/* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
+const TH=[['auto','auto','auto'],['light','porcelain','light'],['dark','graphite','dark'],['space','space','space'],['jim','jim',null]],
+  KEYS=['unitka.theme','shov.skin','konk.theme'];
+window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
+})();
+/*/SVC:JS*/</script>
 <div id="spWrap"></div>
 <main class="main" id="view"></main>
 <nav class="tabbar" id="tabbar" aria-label="Разделы"></nav>
@@ -682,7 +770,7 @@ html.sheet-open .sheet{transform:translateY(0);visibility:visible;transition:tra
 <div class="pop" id="pop"></div>
 <div class="tipbox" id="tipbox"></div>
 <div class="toast" id="toast"></div>
-<div class="boot" id="boot"><div><div class="sp2"></div>Открываю данные…</div></div>
+<div class="boot" id="boot" role="status" aria-label="Открываю данные…"><div class="bk"><div class="sk t1"></div><div class="sk t2"></div><div class="sk hb"></div><div class="rw"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div></div>
 <div class="lock" id="lock" hidden></div>
 <canvas class="confetti" id="confetti" hidden></canvas>
 
@@ -769,11 +857,12 @@ const ICON={
 };
 
 /* данные: расшифровка паролем Юнитки */
-const b64u8=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+// base64 → байты: встроенным fromBase64, где он есть, иначе простым циклом (28.10: Uint8Array.from с функцией на каждый из 3,5 млн знаков — ~1,4 с на телефоне при открытии)
+const b64u8=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
 let KEY=null,SALT=null;
 async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
 async function decryptFile(name,pass){
-  const res=await fetch(name+'?t='+Date.now(),{cache:'no-store'});
+  const res=await fetch(name,{cache:'no-cache'});   // сверка с сервером по ETag: не изменились — 3,5 МБ не качаются заново (было ?t= + no-store)
   if(res.status===404)return null;
   if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
   const enc=await res.json();
@@ -800,7 +889,8 @@ function prepare(d){
     (a.regroup||[]).forEach(r=>{if(r.id)TASKS.set(r.id,{id:r.id,key,ch,kind:'regroup',t:r})});}
   for(const f of [...S.sel])if(!FIX.has(f)&&!TASKS.has(f))S.sel.delete(f);
 }
-const itByArt=(art,ch)=>D.items.find(i=>i.art===art&&(!ch||i.ch===ch));
+let ARTS=null;   // артикул → карточка: раньше перебор всех 344 карточек на каждый артикул в каждом предложении
+const itByArt=(art,ch)=>{if(!ARTS||ARTS.d!==D){ARTS=new Map();ARTS.d=D;D.items.forEach(i=>{if(!ARTS.has(i.art))ARTS.set(i.art,i);if(!ARTS.has(i.art+'\u0001'+i.ch))ARTS.set(i.art+'\u0001'+i.ch,i)})}return ARTS.get(ch?art+'\u0001'+ch:art)};
 
 /* кольца и счётчики */
 function ring(score,size=46,sw=5,fs=13){const r=(size-sw)/2,c=2*Math.PI*r,k=cls(score),v=score==null?0:Math.max(0,Math.min(100,score));return `<span class="ring" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}"><circle class="tr" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"/><circle class="${k}-s" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-to="${c*(1-v/100)}"/></svg><span class="v ${k}-c" style="font-size:${fs}px">${score==null?'—':Math.round(score)}</span></span>`}
@@ -827,40 +917,72 @@ function storyCard(s,opt={}){
   const g=s.g,a=ADV[g.key],sid='st'+Math.random().toString(36).slice(2,8);STAGEMAP.set(sid,s);
   return `<article class="panel story ${opt.click?'clk':''}" ${opt.click?`data-open="${esc(g.key)}"`:''}>
     <div class="hd"><div><div>${chl(g.ch)}</div><div class="tt">${esc(g.title||g.subj)}${s.cl.label&&g.mixed?` <span class="chip">${esc(s.cl.label)}</span>`:''}</div></div><span class="chip acc" data-tip="${esc(ppTip(s))}">перелив ${Math.round(s.tv*100)} п.п. <span class="qm">?</span></span></div>
-    <div class="st3" data-st="${sid}"><div class="st3-cam"><div class="st3-world"><div class="st3-floor"><span class="fl l">смотрят</span><span class="fl r">покупают</span></div></div></div><div class="st3-hint">${TOUCH?'проведите пальцем':'потяните мышью'}, чтобы повернуть</div></div>
+    <div class="st3" data-st="${sid}"><div class="st3-cam"><div class="st3-world"><div class="st3-spin"><div class="st3-floor"><span class="fl l">смотрят</span><span class="fl r">покупают</span></div></div></div></div><div class="st3-hint">${TOUCH?'проведите пальцем':'потяните мышью'}, чтобы повернуть</div></div>
     <div class="say">${storySay(s)}</div>
     ${a&&a.flow&&!opt.short?`<div class="adv"><div><b>Разбор аналитика</b><span class="ai">Opus 5.5 · максимум</span></div><div>${esc(a.flow)}</div></div>`:''}
     ${opt.click?'<div><span class="tap">Открыть склейку '+ICON.arrow+'</span></div>':''}
   </article>`;
 }
 
-/* 3D-сцена: карточки стоят на полу, покупатели-точки летят по дугам от «смотрят» к «покупают» */
-const LIVE=new Set();let loopOn=false;
-const io3=new IntersectionObserver(es=>es.forEach(e=>{const st=e.target._st;if(!st)return;e.isIntersecting?LIVE.add(st):LIVE.delete(st);if(LIVE.size&&!loopOn){loopOn=true;requestAnimationFrame(loop)}}),{threshold:.05});
+/* 3D-сцена: карточки стоят на полу, покупатели-точки летят по дугам от «смотрят» к «покупают».
+   Точки — на одном холсте поверх сцены, их место считаю той же 3D-матрицей, что у пола (28.10: раньше каждая точка была отдельным
+   3D-элементом — до 70 на сцену, браузер пересобирал сотни слоёв каждый кадр, «Переливы» и «Обзор» шли рывками) */
+const LIVE=new Set();let loopOn=false,SKINV=0;
+const io3=new IntersectionObserver(es=>es.forEach(e=>{const st=e.target._st;if(!st)return;
+  if(e.isIntersecting){LIVE.add(st);st.anims.forEach(a=>a.play())}else{LIVE.delete(st);st.anims.forEach(a=>a.pause())}   // за экраном сцена стоит
+  if(LIVE.size&&!loopOn){loopOn=true;lastT=performance.now();requestAnimationFrame(loop)}}),{threshold:.05});
+function oklchRgb(L,C,h){const a=C*Math.cos(h*Math.PI/180),b=C*Math.sin(h*Math.PI/180);
+  const l=(L+.3963377774*a+.2158037573*b)**3,m=(L-.1055613458*a-.0638541728*b)**3,s=(L-.0894841775*a-1.291485548*b)**3;
+  const g=v=>{v=Math.max(0,Math.min(1,v));return Math.round(255*(v<=.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-.055))};
+  return [g(4.0767416621*l-3.3077115913*m+.2309699292*s),g(-1.2684380046*l+2.6097574011*m-.3413193965*s),g(-.0041960863*l-.7034186147*m+1.707614701*s)]}
+const DOTS=new Map();
+function dotSprite(ci){   // светящаяся точка цвета варианта (как vcol), рисуется один раз на тему
+  const k=ci%HUES.length+'|'+SKINV;if(DOTS.has(k))return DOTS.get(k);
+  const cs=getComputedStyle(document.documentElement),[r,g,b]=oklchRgb(parseFloat(cs.getPropertyValue('--vl'))||.64,parseFloat(cs.getPropertyValue('--vc'))||.16,HUES[ci%HUES.length]);
+  const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d'),gr=x.createRadialGradient(24,24,0,24,24,24),col=`${r},${g},${b}`;
+  gr.addColorStop(0,`rgba(${col},1)`);gr.addColorStop(.46,`rgba(${col},1)`);gr.addColorStop(.58,`rgba(${col},.45)`);gr.addColorStop(1,`rgba(${col},0)`);
+  x.fillStyle=gr;x.fillRect(0,0,48,48);DOTS.set(k,c);return c}
+function stMat(st,sp){   // та же цепочка, что в CSS: перспектива камеры (1000px, начало 50% 20%) × мир (scale, rotateX, rotateZ вокруг центра 600×340 на 50% 64%) × покачивание
+  const W=st.W,H=st.H;
+  return new DOMMatrix().translate(W*.5,H*.2).multiply(new DOMMatrix([1,0,0,0,0,1,0,0,0,0,1,-1/1000,0,0,0,1])).translate(-W*.5,-H*.2)
+    .translate(W*.5,H*.64).scale(st.sc).rotateAxisAngle(1,0,0,st.rx).rotateAxisAngle(0,0,1,st.rz+sp).translate(-300,-170)}
 function mountStages(root){
   $$('.st3[data-st]',root).forEach(el=>{
     if(el._st)return;const s=STAGEMAP.get(el.dataset.st);if(!s)return;
-    const world=$('.st3-world',el),W=el.clientWidth,sc=Math.min(1,(W-10)/620);
-    el.style.setProperty('--sc',sc);
+    const world=$('.st3-world',el);
     const place=(rows,side)=>rows.map((r,i)=>{const n=rows.length,gap=n<2?0:Math.min(150,250/(n-1));return {r,x:300+side*(200-i*28),y:170+(i-(n-1)/2)*gap}});
     const L=place(s.don,-1),R=place(s.rec,1);let html='';
-    const card=(p,key,lbl)=>`<div class="st3-card" data-u="${esc(p.r.it.uid)}" style="left:${p.x-36}px;top:${p.y-136}px"><div class="ph3">${img(p.r.it)}</div><div class="lb"><b>${pct(p.r[key])}</b>${esc(trunc(p.r.it.art,14))}<br>${lbl}</div></div>`;
+    const card=(p,key,lbl)=>`<div class="st3-card" data-u="${esc(p.r.it.uid)}" style="left:${p.x-36}px;top:${p.y-136}px"><div class="st3-cw"><div class="st3-cb"><div class="ph3">${img(p.r.it)}</div><div class="lb"><b>${pct(p.r[key])}</b>${esc(trunc(p.r.it.art,14))}<br>${lbl}</div></div></div></div>`;
     L.forEach(p=>html+=card(p,'sv','просмотров'));R.forEach(p=>html+=card(p,'so','заказов'));
     const parts=[],N=RM?0:Math.max(24,Math.min(70,Math.round(sum(s.flows,f=>f.f)*160)));
     const tot=sum(s.flows,f=>f.f)||1;
-    s.flows.forEach(f=>{const a=L.find(p=>p.r===f.d),b=R.find(p=>p.r===f.r);if(!a||!b)return;const k=Math.max(3,Math.round(N*f.f/tot));for(let q=0;q<k;q++)parts.push({a,b,t:Math.random(),v:.22+Math.random()*.18,h:30+Math.random()*45,col:vcol(f.r.it.ci),ua:f.d.it.uid,ub:f.r.it.uid})});
-    parts.forEach((p,i)=>html+=`<i class="st3-p" data-i="${i}" style="color:${p.col}"></i>`);
-    world.insertAdjacentHTML('beforeend',html);
-    const pe=$$('.st3-p',world);parts.forEach((p,i)=>p.el=pe[i]);
-    const cards=$$('.st3-card',world);
-    const st={el,world,parts,cards,rx:52,rz:0,drag:null,t0:performance.now()};el._st=st;
-    const face=()=>{world.style.setProperty('--rx',st.rx+'deg');world.style.setProperty('--rz',st.rz+'deg');cards.forEach(c=>c.style.transform=`rotateZ(${-st.rz}deg) rotateX(${-st.rx}deg)`)};
-    st.face=face;face();
+    s.flows.forEach(f=>{const a=L.find(p=>p.r===f.d),b=R.find(p=>p.r===f.r);if(!a||!b)return;const k=Math.max(3,Math.round(N*f.f/tot));for(let q=0;q<k;q++)parts.push({a,b,t:Math.random(),v:.22+Math.random()*.18,h:30+Math.random()*45,ci:f.r.it.ci,ua:f.d.it.uid,ub:f.r.it.uid})});
+    const spin=$('.st3-spin',el);spin.insertAdjacentHTML('beforeend',html);
+    const cv=document.createElement('canvas');cv.className='st3-cv';$('.st3-cam',el).appendChild(cv);
+    const cards=$$('.st3-card',world),cbs=$$('.st3-cb',world);
+    // покачивание ±12° за 20 с — анимацией браузера (идёт без кода, на видеокарте), карточки качаются навстречу и смотрят прямо;
+    // угол для точек беру из её времени: 12·sin(2πt/20 с)
+    const kf=k=>Array.from({length:25},(_,i)=>({transform:`rotateZ(${(k*12*Math.sin(i/24*2*Math.PI)).toFixed(3)}deg)`})),opt={duration:20000,iterations:Infinity};
+    const anims=RM?[]:[spin.animate(kf(1),opt),...$$('.st3-cw',world).map(w=>w.animate(kf(-1),opt))];anims.forEach(a=>a.pause());
+    const st={el,world,parts,cards,anims,wob:anims[0],ctx:cv.getContext('2d'),rx:52,rz:0,sc:1,W:0,H:0,M:null,hl:null,ver:-1,drag:null};el._st=st;
+    const size=()=>{const w=el.clientWidth,h=el.clientHeight;if(!w||w===st.W&&h===st.H)return;const dpr=Math.min(1.5,devicePixelRatio||1);   // точки мягкие — 1,5× хватает, холст вдвое легче, чем на 2×
+      st.W=w;st.H=h;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);st.ctx.setTransform(dpr,0,0,dpr,0,0);st.sc=Math.min(1,(w-10)/620);el.style.setProperty('--sc',st.sc);st.M=null;st.draw(0)};
+    const face=()=>{world.style.setProperty('--rx',st.rx+'deg');world.style.setProperty('--rz',st.rz+'deg');cards.forEach(c=>c.style.transform=`rotateZ(${-st.rz}deg)`);cbs.forEach(c=>c.style.transform=`rotateX(${-st.rx}deg)`);st.M=null};
+    st.draw=dt=>{if(!st.W)return;if(st.ver!==SKINV){st.ver=SKINV;parts.forEach(p=>p.sp=dotSprite(p.ci))}
+      const sp=st.wob?12*Math.sin((st.wob.currentTime||0)/20000*2*Math.PI):0;if(!st.M||st.M.sp!==sp){st.M=stMat(st,sp);st.M.sp=sp}
+      const m=st.M,c=st.ctx,hl=st.hl;c.clearRect(0,0,st.W,st.H);
+      for(const p of parts){p.t+=p.v*dt;if(p.t>1)p.t-=1;
+        const x=p.a.x+(p.b.x-p.a.x)*p.t,y=p.a.y+(p.b.y-p.a.y)*p.t,z=18+Math.sin(Math.PI*p.t)*p.h,w=m.m14*x+m.m24*y+m.m34*z+m.m44;if(w<=.05)continue;
+        const sx=(m.m11*x+m.m21*y+m.m31*z+m.m41)/w,sy=(m.m12*x+m.m22*y+m.m32*z+m.m42)/w,r=9.5*st.sc/w;   // как прежняя точка 10 px со свечением
+        c.globalAlpha=(hl&&p.ua!==hl&&p.ub!==hl?.12:1)*Math.min(1,p.t*8,(1-p.t)*8);   // у карточек точка проявляется и гаснет
+        c.drawImage(p.sp,sx-r,sy-r,r*2,r*2)}
+      c.globalAlpha=1};
+    st.face=face;face();size();new ResizeObserver(size).observe(el);
     el.addEventListener('pointerdown',e=>{st.drag={x:e.clientX,y:e.clientY,rx:st.rx,rz:st.rz}});
-    el.addEventListener('pointermove',e=>{if(!st.drag)return;st.rz=Math.max(-45,Math.min(45,st.drag.rz+(e.clientX-st.drag.x)*.3));st.rx=Math.max(35,Math.min(72,st.drag.rx-(e.clientY-st.drag.y)*.25));face()});
+    el.addEventListener('pointermove',e=>{if(!st.drag)return;st.rz=Math.max(-45,Math.min(45,st.drag.rz+(e.clientX-st.drag.x)*.3));st.rx=Math.max(35,Math.min(72,st.drag.rx-(e.clientY-st.drag.y)*.25));face();if(RM)st.draw(0)});
     const end=()=>{st.drag=null};el.addEventListener('pointerup',end);el.addEventListener('pointerleave',end);
-    cards.forEach(c=>{c.addEventListener('pointerenter',()=>{el.classList.add('hl');const u=c.dataset.u;c.classList.add('on');parts.forEach(p=>p.el.classList.toggle('on',p.ua===u||p.ub===u));cards.forEach(o=>{if(parts.some(p=>(p.ua===u&&p.ub===o.dataset.u)||(p.ub===u&&p.ua===o.dataset.u)))o.classList.add('on')})});
-      c.addEventListener('pointerleave',()=>{el.classList.remove('hl');cards.forEach(o=>o.classList.remove('on'));parts.forEach(p=>p.el.classList.remove('on'))})});
+    cards.forEach(c=>{c.addEventListener('pointerenter',()=>{el.classList.add('hl');const u=c.dataset.u;st.hl=u;c.classList.add('on');cards.forEach(o=>{if(parts.some(p=>(p.ua===u&&p.ub===o.dataset.u)||(p.ub===u&&p.ua===o.dataset.u)))o.classList.add('on')})});
+      c.addEventListener('pointerleave',()=>{el.classList.remove('hl');cards.forEach(o=>o.classList.remove('on'));st.hl=null})});
     io3.observe(el);
   });
 }
@@ -868,9 +990,8 @@ let lastT=performance.now();
 function loop(t){
   const dt=Math.min(.05,(t-lastT)/1000);lastT=t;
   LIVE.forEach(st=>{
-    if(!document.body.contains(st.el)){LIVE.delete(st);return}
-    if(!st.drag&&!RM){st.rz=Math.sin((t-st.t0)/3200)*12;st.face()}
-    st.parts.forEach(p=>{p.t+=p.v*dt;if(p.t>1)p.t-=1;const x=p.a.x+(p.b.x-p.a.x)*p.t,y=p.a.y+(p.b.y-p.a.y)*p.t,z=18+Math.sin(Math.PI*p.t)*p.h;p.el.style.transform=`translate3d(${x}px,${y}px,${z}px)`});
+    if(!document.body.contains(st.el)){LIVE.delete(st);st.anims.forEach(a=>a.cancel());return}
+    st.draw(dt);
   });
   if(LIVE.size)requestAnimationFrame(loop);else loopOn=false;
 }
@@ -907,7 +1028,7 @@ function fingerprint(g){const O=sum(g.its,i=>i.orders);if(!O)return `<div class=
 function gtile(g,i=0){
   const oos=g.its.filter(x=>x.stock!=null&&x.stock<=0).length,split=Object.values(g.cross||{}).some(c=>c.groups>1),lead=g.its[0],O=g.orders,a=ADV[g.key];
   const nt=a?(a.tasks||[]).length:0;
-  return `<button class="gt clk" data-open="${esc(g.key)}" data-tilt style="animation-delay:${Math.min(i,14)*40}ms"><span class="glare"></span>${fan(g)}<div class="body"><div class="hdr2">${chl(g.ch)}${ring(g.score,42,4.5,12)}</div><div class="ttl">${esc(g.title||g.subj)}</div>
+  return `<button class="gt clk" data-open="${esc(g.key)}" data-tilt style="${i<10?`animation-delay:${i*40}ms`:'animation:none'}"><span class="glare"></span>${fan(g)}<div class="body"><div class="hdr2">${chl(g.ch)}${ring(g.score,42,4.5,12)}</div><div class="ttl">${esc(g.title||g.subj)}</div>
     <div class="lead">Тащит: <b>${esc(lead.art)}</b>${O?` · ${pct((lead.orders||0)/O)} заказов`:''} ${stk(lead)}</div>
     <div class="meta">${g.n} ${plural(g.n,'вариант','варианта','вариантов')} · в наличии ${g.inStock} · ${g.issues} ${plural(g.issues,'замечание','замечания','замечаний')}</div>
     ${(g.mixed||oos||split||nt)?`<div class="warns">${g.mixed?'<span class="chip bad">разные товары</span>':''}${oos?`<span class="chip warn">${oos} без остатка</span>`:''}${split?'<span class="chip warn">склеено по-разному</span>':''}${nt?`<span class="ai">${nt} ${plural(nt,'предложение','предложения','предложений')} аналитика</span>`:''}</div>`:''}
@@ -1007,12 +1128,14 @@ function vSdelat(){
   </div>
   ${chans.map(ch=>chSection(ch,rows.filter(r=>r.it.ch===ch),showT?tasksFor(ch):[])).join('')||'<div class="empty">Замечаний нет</div>'}`;
 }
+/* длинные списки — по 10 и «Показать ещё» (28.10: 411 предложений аналитика рисовались разом, раздел открывался ~2 с) */
+function moreBtn(key,n){const lim=S.lim[key]||10;return n>lim?`<div class="more-rows"><button data-more="${esc(key)}">Показать ещё ${Math.min(30,n-lim)} из ${n-lim}</button></div>`:''}
 function chSection(ch,rows,tasks){
   if(!rows.length&&!tasks.length)return '';
   const by=new Map();rows.forEach(r=>{const k=r.x.code;if(!by.has(k))by.set(k,[]);by.get(k).push(r)});
   const types=[...by.entries()].sort((a,b)=>(b[1][0].x.auto-a[1][0].x.auto)||(b[1].length-a[1].length));
   return `<section class="chs" id="ch-${ch}"><h3>${mpi(ch,true)} ${CHN[ch]} <small>${tasks.length?tasks.length+' '+plural(tasks.length,'предложение','предложения','предложений')+' · ':''}${fmt(rows.length)} ${plural(rows.length,'замечание','замечания','замечаний')}</small></h3>
-    ${tasks.length?`<div class="panel ty open" style="content-visibility:visible"><div class="th" data-tyt="${ch}:tasks"><div><div class="nm">🧠 Предложения аналитика <span class="ai">Opus 5.5 · максимум</span></div><div class="ds">Задачи, которые не сводятся к одному полю: довезти, сделать слайды по отзывам, переписать текст, поправить карточку.</div></div><div class="rt"><span class="cnt">${tasks.length}</span>${ICON.chev}</div></div><div class="in"><div>${tasks.map(taskRow).join('')}</div></div></div>`:''}
+    ${tasks.length?`<div class="panel ty open" style="content-visibility:visible"><div class="th" data-tyt="${ch}:tasks"><div><div class="nm">🧠 Предложения аналитика <span class="ai">Opus 5.5 · максимум</span></div><div class="ds">Задачи, которые не сводятся к одному полю: довезти, сделать слайды по отзывам, переписать текст, поправить карточку.</div></div><div class="rt"><span class="cnt">${tasks.length}</span>${ICON.chev}</div></div><div class="in"><div>${tasks.slice(0,S.lim[ch+':tasks']||10).map(taskRow).join('')}${moreBtn(ch+':tasks',tasks.length)}</div></div></div>`:''}
     ${types.map(([code,rs])=>tyBlock(ch,code,rs)).join('')}</section>`;
 }
 function taskArts(arts,ch){return `<div class="arts">${(arts||[]).slice(0,8).map(a=>{const it=itByArt(a,ch);return `<span>${it?img(it):''}${esc(a)}${it?' · '+(it.stock==null?'':it.stock<=0?'нет в наличии':'ост. '+fmt(it.stock)):''}</span>`}).join('')}</div>`}
@@ -1026,7 +1149,7 @@ function tyBlock(ch,code,rs){
     <div class="in"><div>
       <div style="padding:0 16px 10px;display:flex;justify-content:flex-end"><button class="selall" data-selall="${esc(key)}">Выбрать все ${free.length}</button></div>
       ${rs.slice(0,lim).map(prow).join('')}
-      ${rs.length>lim?`<div class="more-rows"><button data-more="${esc(key)}">Показать ещё ${Math.min(30,rs.length-lim)} из ${rs.length-lim}</button></div>`:''}
+      ${moreBtn(key,rs.length)}
     </div></div></div>`;
 }
 function prow(r){const {it,x}=r,st=fixState(x.id),g=it.g,a=ADVFIX.get(x.id);
@@ -1196,7 +1319,7 @@ function burst(n){if(RM)return;const cv=$('#confetti'),c=cv.getContext('2d');cv.
 
 /* темы */
 const SKINS=[['auto','Авто','как в системе','linear-gradient(135deg,#f2f4f9 50%,#0c0f15 50%)','#2445dc','Aa','Unbounded','#111'],['porcelain','Фарфор','кобальт на белом','#f2f4f9','#2445dc','Aa','Unbounded','#111'],['graphite','Графит','лёд на тёмном','#0c0f15','#8fb2ff','Aa','Unbounded','#fff'],['sage','Шалфей','слива и зелень','#edf1ea','#7a3a70','Аа','Prata','#16302a'],['aurora','Аврора','северное сияние','radial-gradient(circle at 20% 20%,#ff62d4,transparent 55%),radial-gradient(circle at 85% 85%,#38e4ff,transparent 55%),#070923','#ffd36b','Аа','Unbounded','#fff'],['jim','Червяк Джим','свалка, корова и бластер','url(jim_bg_m.webp) center/cover,#3b0f5c','#7fd400','Аа','Rubik Moonrocks','#7fd400'],['space','Космос','аффирмации, звёзды и музыка','url(space-bg-m.webp) center/cover,#060818','#a493ff','Аа','Unbounded','#fff']];
-function applySkin(k,anim){const r=document.documentElement;if(anim&&!RM){r.classList.add('morph');setTimeout(()=>r.classList.remove('morph'),650)}if(k==='auto')delete r.dataset.skin;else r.dataset.skin=k;S.skin=k;LS.set('skin',k);const mc=$('meta[name="theme-color"]');if(mc)mc.content=getComputedStyle(r).getPropertyValue('--bg').trim()||'#f2f4f9';if(k==='jim')mountJim();spaceDeco(k==='space');if(SNDT[k])SNDT[k](soundOff());syncSound();requestAnimationFrame(()=>{hh();moveThumb(false)})}
+function applySkin(k,anim){const r=document.documentElement;if(anim&&!RM){r.classList.add('morph');setTimeout(()=>r.classList.remove('morph'),650)}if(k==='auto')delete r.dataset.skin;else r.dataset.skin=k;SKINV++;S.skin=k;LS.set('skin',k);const mc=$('meta[name="theme-color"]');if(mc)mc.content=getComputedStyle(r).getPropertyValue('--bg').trim()||'#f2f4f9';if(k==='jim')mountJim();spaceDeco(k==='space');if(SNDT[k])SNDT[k](soundOff());syncSound();requestAnimationFrame(()=>{hh();moveThumb(false)})}
 function renderPop(){$('#pop').innerHTML=`<h4>Оформление</h4><div class="skins">${SKINS.map(([k,n,d,bg,ac,aa,ff,fc])=>(k==='space'?'<div class="sgrp">Спокойные</div>':'')+`<button class="skin ${S.skin===k?'on':''}" data-skin="${k}"><div class="pv" style="background:${bg};color:${fc};font-family:'${ff}',serif"><span>${aa}</span><i style="background:${ac}"></i></div><div class="nm">${n}</div><div class="ds">${d}</div></button>`).join('')}</div>`}
 function togglePop(force){const p=$('#pop'),o=force??!p.classList.contains('open');if(o)renderPop();p.classList.toggle('open',o)}
 
@@ -1436,7 +1559,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.acc!=null){t.parentElement.classList.toggle('open');buzz();return}
   if(t.dataset.tyt){const k=t.dataset.tyt;S.openTy.has(k)?S.openTy.delete(k):S.openTy.add(k);t.closest('.ty').classList.toggle('open');buzz();return}
   if(t.dataset.more){S.lim[t.dataset.more]=(S.lim[t.dataset.more]||10)+30;S.openTy.add(t.dataset.more);rerenderView();return}
-  if(t.dataset.skin){applySkin(t.dataset.skin,true);renderPop();buzz();if(S.view==='obzor')rerenderView();return}
+  if(t.dataset.skin){applySkin(t.dataset.skin,true);renderPop();buzz();if(window.svcTheme)svcTheme(1,t.dataset.skin);if(S.view==='obzor')rerenderView();return}
   if(t.dataset.ring){t.dataset.tip=RINGX[t.dataset.ring];showTip(t);return}
   if(t.dataset.resolve!=null){openResolve();return}
   if(t.dataset.clr!=null){S.sel.clear();saveSel();refreshMarks();if(S.view==='sdelat')rerenderView();return}
@@ -1455,7 +1578,7 @@ function selAll(scope){
   const free=ids.filter(id=>['none','sel'].includes(fixState(id).s)),on=!free.every(id=>S.sel.has(id));free.forEach(id=>toggleSel(id,on));buzz();rerenderView();refreshMarks();toast(on?`В корзине +${free.length}`:'Выбор снят');
 }
 function rerenderView(){const y=scrollY;render();window.scrollTo({top:y})}
-$('#logo').innerHTML=ICON.logo;$('#skinbtn').innerHTML=ICON.skin;$('#sheetx').innerHTML=ICON.x;
+$('#skinbtn').innerHTML=ICON.skin;$('#sheetx').innerHTML=ICON.x;
 $('#skinbtn').addEventListener('click',e=>{e.stopPropagation();togglePop()});
 $('#trialbtn').addEventListener('click',()=>tourStart());
 $('#sheetx').addEventListener('click',closeSheet);$('#scrim').addEventListener('click',closeSheet);
@@ -1474,7 +1597,7 @@ function start(d){prepare(d);applySkin(S.skin,false);const h=(location.hash||'')
   const b=$('#boot');b.style.opacity=0;setTimeout(()=>b.hidden=true,500);pollJobs();
   if(LS.get('tourMax',0)<1&&!LS.get('introHide',false))setTimeout(()=>toast('Впервые здесь? Нажмите «Триал» — покажу всё за 2 минуты'),1400);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{moveThumb(false);hh()})}
-(async()=>{applySkin(S.skin,false);hh();tourPaint();try{const d=await decryptFile('data.enc.json');if(!d)throw new Error('Данные ещё не выложены');start(d)}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')showLock(e.message);else $('#boot').innerHTML='<div style="text-align:center;max-width:360px;padding:20px">Не удалось открыть данные: '+esc(e.message)+'<br><br><button class="btn" onclick="location.reload()">Обновить</button></div>'}})();
+(async()=>{applySkin(S.skin,false);hh();tourPaint();try{const d=await decryptFile('data.enc.json');if(!d)throw new Error('Данные ещё не выложены');start(d)}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')showLock(e.message);else $('#boot').innerHTML='<div style="text-align:center;max-width:360px;padding:20px;margin:40px auto">Не удалось открыть данные: '+esc(e.message)+'<br><br><button class="btn" onclick="location.reload()">Обновить</button></div>'}})();
 })();
 </script>
 </body>
