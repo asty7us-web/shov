@@ -12,7 +12,8 @@
 <link rel="manifest" href="/shov/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/shov/pwa/apple-180.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23005bff'/%3E%3Crect x='7' y='16' width='4' height='9' rx='2' fill='white'/%3E%3Crect x='14' y='11' width='4' height='14' rx='2' fill='white'/%3E%3Crect x='21' y='7' width='4' height='18' rx='2' fill='white'/%3E%3C/svg%3E">
-<script>(function(){try{var t=JSON.parse(localStorage.getItem('konk.theme')||'"auto"');if(['light','dark','paper','paperdim','space'].includes(t))document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<script>(function(){try{var t=JSON.parse(localStorage.getItem('konk.theme')||'"auto"');if(['light','dark','paper','paperdim','space','farcry','sonic','solitaire','birds'].includes(t))document.documentElement.dataset.theme=t;
+  if(['farcry','sonic','solitaire','birds'].includes(t)){document.documentElement.dataset.igra=t;document.write('<link rel="stylesheet" id="igcss" href="/unitka/igry.css?v=1">')}}catch(e){}})()</script>
 <style>
 /* «Конкуренты Озон». Телефон в первую очередь: закреплённая шапка с переключателем «Склейки | Конкуренты» и выбором товара,
    нижняя панель разделов, листы снизу. Темы: светлая, тёмно-серая, авто. Методика — видео Вовы 21.10.2026. */
@@ -75,18 +76,27 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;paddin
 .svc-btn{display:inline-flex;align-items:center;gap:9px;height:40px;margin:0 0 0 -6px;padding:0 9px 0 5px;border:0;border-radius:13px;background:transparent;color:inherit;cursor:pointer;
   -webkit-tap-highlight-color:transparent;white-space:nowrap;transition:background-color .2s ease,transform .4s cubic-bezier(.34,1.56,.64,1)}
 .svc-btn .svc-nm{font:inherit;letter-spacing:inherit}
-@media (hover:hover){.svc-btn:hover{background:var(--svc-hover)}}
+/* подложка — в цвет текста шапки (в игровых темах шапка цветная, а название белое) */
+@media (hover:hover){.svc-btn:hover{background:var(--svc-hover);background:color-mix(in srgb,currentColor 13%,transparent)}}
 .svc-btn:active{transform:scale(.95);transition-duration:.12s}
-.svc-btn[aria-expanded="true"]{background:var(--svc-hover)}
-.svc-btn .svc-ic{width:30px;height:30px;border-radius:9px;font-size:15px}
+.svc-btn[aria-expanded="true"]{background:var(--svc-hover);background:color-mix(in srgb,currentColor 13%,transparent)}
+.svc-btn .svc-ic{width:30px;height:30px;border-radius:9px}
 .svc-chev{width:16px;height:16px;flex:none;opacity:.55;margin-left:-3px;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
 .svc-btn[aria-expanded="true"] .svc-chev{transform:rotate(180deg)}
-.svc-ic{display:grid;place-items:center;flex:none;color:#fff;font-style:normal;font-weight:800;line-height:1;
-  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.28),inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.16)}
-.svc-ic svg{width:62%;height:62%}
-.svc-ic.u{background:linear-gradient(145deg,#5aa2ff,#1f62e8)}
-.svc-ic.s{background:linear-gradient(145deg,#4d63ff,#13b3a5)}
-.svc-ic.k{background:linear-gradient(145deg,#2f7dff,#7b45f5)}
+/* значок: свой цвет у сервиса, блик сверху, цветное свечение; при наведении и открытии — лёгкий наклон */
+.svc-ic{display:grid;place-items:center;flex:none;position:relative;overflow:hidden;color:#fff;font-style:normal;line-height:1;
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.14),0 3px 9px -2px var(--svc-glow,rgba(0,0,0,.3));
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+.svc-ic::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 75% at 28% 6%,rgba(255,255,255,.55),rgba(255,255,255,0) 58%)}
+.svc-ic svg{position:relative;width:66%;height:66%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+.svc-ic.u{--svc-glow:rgba(16,185,129,.55);background:linear-gradient(145deg,#4ff0b4 0%,#10b981 48%,#0a7d70 100%)}
+.svc-ic.s{--svc-glow:rgba(168,85,247,.55);background:linear-gradient(145deg,#d8a4ff 0%,#a855f7 46%,#e0338f 100%)}
+.svc-ic.k{--svc-glow:rgba(255,112,48,.55);background:linear-gradient(145deg,#ffd166 0%,#ff8a2b 46%,#ee3a52 100%)}
+@media (hover:hover){.svc-btn:hover .svc-ic,.svc-it:hover .svc-ic{transform:rotate(-8deg) scale(1.06)}}
+.svc-btn[aria-expanded="true"] .svc-ic{transform:rotate(-8deg) scale(1.06)}
+.svc-menu.on .svc-it .svc-ic{animation:svc-ico .6s cubic-bezier(.34,1.56,.64,1) both}
+.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}
+@keyframes svc-ico{from{transform:scale(.6) rotate(-20deg);opacity:0}}
 .svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
   background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
   transform-origin:24px -6px;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.92);pointer-events:none;
@@ -96,7 +106,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;paddin
 .svc-cap{padding:9px 12px 6px;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--svc-ink3)}
 .svc-it{position:relative;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:14px;color:inherit;text-decoration:none;
   -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}
-.svc-it .svc-ic{width:42px;height:42px;border-radius:12px;font-size:19px}
+.svc-it .svc-ic{width:42px;height:42px;border-radius:12px}
 .svc-tx{min-width:0;flex:1;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .svc-tx b{display:block;font-size:15.5px;font-weight:650;line-height:1.2;letter-spacing:-.005em}
 .svc-tx small{display:block;margin-top:2px;font-size:12.5px;line-height:1.3;color:var(--svc-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -111,6 +121,25 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;paddin
 .svc-menu.on .svc-it{animation:svc-row .5s cubic-bezier(.22,1.2,.36,1) both}
 .svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}
 @keyframes svc-row{from{opacity:0;transform:translateY(-6px)}}
+/* выбор темы — как в Юнитке (Андрей 29.10: «как в юнитке выбор везде тем формат»): кнопка «значок + название темы», под ней список
+   с кружками и группами «Весёлые» / «Спокойные». Юнитка рисует свой (он образец), Склейки и Конкуренты — svcPicker() отсюда */
+.svt{position:relative;flex:none}
+.svt-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;min-width:36px;padding:0 10px;border:1px solid var(--svc-line);border-radius:10px;
+  background:var(--svc-card);color:var(--svc-ink2);font:600 13.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;white-space:nowrap;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.svt-btn:active{transform:scale(.94)}
+.svt-btn svg{width:18px;height:18px;flex:none;display:block}
+@media (max-width:860px){.svt-btn span{display:none}}
+.svt-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:300;min-width:220px;max-height:calc(100vh - 100px);overflow:auto;padding:6px;border-radius:12px;
+  background:var(--svc-card);color:var(--svc-ink);border:1px solid var(--svc-line);box-shadow:0 8px 28px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:2px;
+  font:600 15px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transform-origin:top right;animation:svt-in .24s cubic-bezier(.22,1,.36,1)}
+.svt-menu[hidden]{display:none}
+@keyframes svt-in{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+.svt-menu button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font:inherit;display:flex;align-items:center;gap:10px;color:inherit;cursor:pointer;white-space:nowrap}
+@media (hover:hover){.svt-menu button:hover{background:var(--svc-hover)}}
+.svt-menu button[aria-checked="true"]{background:var(--svc-acc-soft);color:var(--svc-acc)}
+.svt-menu .sw{width:20px;height:20px;flex:none;display:block}
+.svt-menu .tgrp{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--svc-ink3);padding:8px 10px 2px;border-top:1px solid var(--svc-line);margin-top:4px}
 /* переход между сервисами: шапка и кнопка сервиса остаются на месте, остальное мягко проявляется */
 @view-transition{navigation:auto}
 .svc-hdr{view-transition-name:svc-hdr}
@@ -753,20 +782,119 @@ table.rg2{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
 @media (hover:hover){.tmenu button:hover{background:var(--fill2)}}
 .tmenu .sw{width:22px;height:22px;flex:none;display:block}
 
-@media (prefers-reduced-motion:reduce){:root:not([data-theme="space"]) *,:root:not([data-theme="space"]) *::before,:root:not([data-theme="space"]) *::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}   /* «Космос» двигается всегда, как в Отклике */
+/* ═════ игровые темы Юнитки (29.10, Андрей: «соник, пасьянс, энгри и фаркрай на всех 3 должны быть такими же»): баннер с игрой, фоны и игры —
+   общие с Юниткой (/unitka/igry.css + igry.js, IGRY.apply в applyTheme); здесь — вид страницы Конкурентов в тех же цветах, шрифтах и рамках ═════ */
+:root[data-theme="sonic"]{
+  --bg:#1d5fe6;--card:#fff;--card2:#fff;--fill:#edf3ff;--fill2:#f4f8ff;--ink:#0a1a4a;--ink2:#34508e;--ink3:#6a7fae;--line:#d7e3fb;--line2:#e6eeff;
+  --hdr:linear-gradient(180deg,#0b2c8f,#1748c9);--acc:#1d5fe6;--acc2:#3d7bff;--acc-soft:#dde8ff;--on-acc:#fff;
+  --good:#12843a;--warn:#a86200;--bad:#d6262b;--good-soft:#dcf4e2;--warn-soft:#fff1bd;--bad-soft:#ffdfe0;
+  --bar:#b9cdff;--sh1:0 0 0 3px #0a1a4a,0 5px 0 3px #0a1a4a;--sh2:0 8px 0 #0a1a4a,0 24px 60px rgba(0,0,40,.35);--r:18px;color-scheme:light;
+  --f:"Exo 2",system-ui,sans-serif;--fd:"Russo One","Exo 2",system-ui,sans-serif}
+:root[data-theme="solitaire"]{
+  --bg:#06140d;--card:#0f2a1d;--card2:#0f2a1d;--fill:rgba(0,0,0,.32);--fill2:rgba(232,194,96,.06);--ink:#f3ead2;--ink2:#cdbf98;--ink3:#9a8f72;--line:rgba(232,194,96,.22);--line2:rgba(232,194,96,.12);
+  --hdr:linear-gradient(180deg,#070b09,#0c1711);--acc:#e8c260;--acc2:#f0cf73;--acc-soft:rgba(232,194,96,.13);--on-acc:#1b1306;
+  --good:#6fd08c;--warn:#f0c96a;--bad:#ff7474;--good-soft:rgba(111,208,140,.13);--warn-soft:rgba(232,194,96,.13);--bad-soft:rgba(255,116,116,.13);
+  --bar:#5d5232;--bar-us:#e8c260;--sh1:0 0 0 1px rgba(232,194,96,.38),0 12px 32px rgba(0,0,0,.5);--sh2:0 30px 80px rgba(0,0,0,.7);--r:14px;color-scheme:dark;
+  --f:"Montserrat",system-ui,sans-serif;--fd:"Forum",Georgia,serif}
+:root[data-theme="birds"]{
+  --bg:#52c1ec;--card:#fffaf0;--card2:#fffaf0;--fill:#f3e6c8;--fill2:#f6ecd6;--ink:#2b1a0c;--ink2:#5c4329;--ink3:#8c7556;--line:#ecdcbc;--line2:#f3e8d0;
+  --hdr:linear-gradient(180deg,rgba(255,240,200,.18),rgba(60,25,0,.18)),var(--wood);--acc:#e0241c;--acc2:#ff5a3a;--acc-soft:#ffe4d8;--on-acc:#fff;
+  --good:#2f8a10;--warn:#a26200;--bad:#d2261c;--good-soft:#e2f5d3;--warn-soft:#fff1c2;--bad-soft:#ffe0d9;
+  --bar:#d9c49a;--sh1:0 0 0 3px #3b220e,0 5px 0 3px #3b220e,0 12px 26px rgba(16,45,80,.28);--sh2:0 8px 0 #3b220e,0 24px 60px rgba(16,45,80,.35);--r:18px;color-scheme:light;
+  --f:"Rubik",system-ui,sans-serif;--fd:"Rubik",system-ui,sans-serif}
+:root[data-theme="farcry"]{
+  --bg:#1d140c;--card:#efe2c0;--card2:#efe2c0;--fill:rgba(110,70,20,.12);--fill2:rgba(110,70,20,.07);--ink:#21170c;--ink2:#5b4529;--ink3:#8a7350;--line:#d3bd8e;--line2:#e3d1a6;
+  --hdr:linear-gradient(180deg,#0e0905,#1c120a);--acc:#c8241d;--acc2:#e0453a;--acc-soft:#f1cdbf;--on-acc:#fff;
+  --good:#2c6a26;--warn:#8f5d00;--bad:#b0221a;--good-soft:#dcead0;--warn-soft:#f1e1b8;--bad-soft:#f4d5cb;
+  --bar:#b59a66;--sh1:var(--burn),0 12px 28px rgba(0,0,0,.55),0 2px 0 rgba(0,0,0,.35);--sh2:0 30px 80px rgba(0,0,0,.75);--r:3px;color-scheme:light;
+  --f:"Roboto Condensed",system-ui,sans-serif;--fd:"Rubik Dirt","Roboto Condensed",system-ui,sans-serif}
+:root[data-igra] .top{backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:0;color:#fff}
+:root[data-igra] .top::after{content:"";position:absolute;left:0;right:0;top:100%;pointer-events:none}
+:root[data-igra] .tabbar{backdrop-filter:none;-webkit-backdrop-filter:none;border-top:0}
+:root[data-igra] .tabbar::before{content:"";position:absolute;left:0;right:0;bottom:100%;pointer-events:none}
+:root[data-igra] .top :is(.ico,.tourb,.svt-btn){color:var(--ink2)}
+:root[data-igra] .top .chip{color:var(--ink)}   /* товары в ленте шапки — на своих плашках, текст тёмный */
+:root[data-igra] #spWrap{padding-top:18px}
+/* «Соник» */
+:root[data-theme="sonic"] .top::after{height:14px;background:linear-gradient(#3fbf1c 0 4px,#155c08 4px 6px,transparent 6px),var(--chk)}
+:root[data-theme="sonic"] .tabbar{background:#0b2c8f} :root[data-theme="sonic"] .tabbar::before{height:12px;background:linear-gradient(#3fbf1c 0 4px,#155c08 4px 6px,transparent 6px),var(--chk);transform:scaleY(-1)}
+:root[data-theme="sonic"] .tb{color:#e6eeff} :root[data-theme="sonic"] .tb.on{color:#ffd21f}
+:root[data-theme="sonic"] .svc-nm{font-family:"Russo One",sans-serif;font-weight:400;text-shadow:0 2px 0 #0a1a4a}
+:root[data-theme="sonic"] .dtabs{background:rgba(255,255,255,.12)} :root[data-theme="sonic"] .dtabs button{color:#e6eeff}
+:root[data-theme="sonic"] .dtabs button.on{color:#0a1a4a;background:linear-gradient(#ffe066,#ffc81e);box-shadow:0 0 0 2px #0a1a4a,0 3px 0 2px #0a1a4a}
+:root[data-theme="sonic"] :is(.lt,.sec h2){color:#fff;text-shadow:0 3px 0 #0a1a4a} :root[data-theme="sonic"] :is(.sub,.sec span){color:#e6eeff;text-shadow:0 1px 0 #0a1a4a}
+:root[data-theme="sonic"] .sheet :is(.lt,.sec h2){color:var(--ink);text-shadow:none} :root[data-theme="sonic"] .sheet :is(.sub,.sec span){color:var(--ink2);text-shadow:none}
+:root[data-theme="sonic"] .sec h2{padding-left:26px;background:var(--ringi) 0 50%/20px 20px no-repeat}
+:root[data-theme="sonic"] .btn{background:linear-gradient(#ffe066,#ffc81e 55%,#ffab08);color:#0a1a4a;font-weight:800;box-shadow:0 0 0 2px #0a1a4a,0 3px 0 2px #0a1a4a}
+:root[data-theme="sonic"] :is(.ico,.svt-btn,.tourb){background:#fff;border:2px solid #0a1a4a;box-shadow:0 3px 0 #0a1a4a}
+:root[data-theme="sonic"] .seg{background:#fff;box-shadow:0 0 0 2px #0a1a4a} :root[data-theme="sonic"] .seg button.on{background:#1d5fe6;color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+:root[data-theme="sonic"] .chip.on{box-shadow:0 0 0 3px #ffc81e,0 0 0 5px #0a1a4a}
+/* «Пасьянс» */
+:root[data-theme="solitaire"] .top{box-shadow:0 1px 0 rgba(232,194,96,.85),0 10px 24px rgba(0,0,0,.5)}
+:root[data-theme="solitaire"] .tabbar{background:linear-gradient(180deg,#0c1711,#070b09);border-top:1px solid rgba(232,194,96,.8)}
+:root[data-theme="solitaire"] .tb{color:#d6c9a3} :root[data-theme="solitaire"] .tb.on{color:#f0c96a}
+:root[data-theme="solitaire"] .svc-nm{color:#f0dca0;font:400 23px/1 "Forum",Georgia,serif;letter-spacing:.06em}
+:root[data-theme="solitaire"] .dtabs button{color:#d6c9a3} :root[data-theme="solitaire"] .dtabs button.on{color:#f0c96a;background:rgba(232,194,96,.1);box-shadow:inset 0 -2px 0 #e8c260}
+:root[data-theme="solitaire"] .card{background:var(--sp-g) right 11px top 10px/10px 10px no-repeat,linear-gradient(170deg,#13372a,#0b2219)}
+:root[data-theme="solitaire"] :is(.lt,.sec h2){font-weight:400;letter-spacing:.03em;color:#f0c96a}
+:root[data-theme="solitaire"] .sec h2{padding-left:21px;background:var(--cl-g) 0 50%/13px 13px no-repeat}
+:root[data-theme="solitaire"] .btn{background:var(--goldbtn);color:#1b1306;border:1px solid #f7df95;box-shadow:0 2px 0 #6b4a12,0 0 16px rgba(232,194,96,.25);font-weight:700}
+:root[data-theme="solitaire"] :is(.ico,.svt-btn,.tourb){background:rgba(255,255,255,.04);border:1px solid rgba(232,194,96,.55);color:#f0dca0}
+:root[data-theme="solitaire"] .seg button.on{background:var(--goldbtn);color:#1b1306}
+:root[data-theme="solitaire"] :is(.sheet,.qbar){background:#0b2219;box-shadow:0 0 0 1px rgba(232,194,96,.45),var(--sh2)}
+:root[data-theme="solitaire"] .svt-menu{background:#0f2a1d;border:1px solid rgba(232,194,96,.45)}
+:root[data-theme="solitaire"] .svt-menu .tgrp{font:400 14px/1.3 "Forum",Georgia,serif;text-transform:none;letter-spacing:.03em;color:#e8c260}
+/* «Angry Birds» */
+:root[data-theme="birds"] .top{box-shadow:0 3px 0 #3b220e}
+:root[data-theme="birds"] .top::after{top:calc(100% + 3px);height:16px;background:var(--grass) 0 0/64px 16px repeat-x;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
+:root[data-theme="birds"] .tabbar{background:linear-gradient(180deg,rgba(255,240,200,.12),rgba(40,15,0,.3)),var(--wood);box-shadow:0 -3px 0 #3b220e}
+:root[data-theme="birds"] .tabbar::before{bottom:calc(100% + 2px);height:16px;background:var(--grass) 0 0/64px 16px repeat-x;transform:scaleY(-1)}
+:root[data-theme="birds"] :is(.tb,.dtabs button){color:#fff;font-weight:800;text-shadow:var(--ol)}
+:root[data-theme="birds"] .tb svg{filter:drop-shadow(1px 0 0 #2b1405) drop-shadow(-1px 0 0 #2b1405) drop-shadow(0 1px 0 #2b1405) drop-shadow(0 -1px 0 #2b1405)}
+:root[data-theme="birds"] .tb.on{color:#ffd21f}
+:root[data-theme="birds"] .dtabs{background:rgba(43,20,5,.25)}
+:root[data-theme="birds"] .dtabs button.on{color:#fff;background:linear-gradient(#ff7a5c,#e0241c 55%,#a8140d);box-shadow:0 0 0 2.5px #3b0d06,0 3px 0 2.5px #3b0d06,inset 0 2px 0 rgba(255,255,255,.45)}
+:root[data-theme="birds"] .svc-nm{color:#fff;font-weight:900;text-shadow:var(--ol),0 4px 0 #2b1405}
+:root[data-theme="birds"] .card{background:linear-gradient(180deg,#fffdf7,#fff4dc)}
+:root[data-theme="birds"] :is(.lt,.sec h2){color:#fff;font-weight:900;text-shadow:var(--ol),0 4px 0 #2b1405}
+:root[data-theme="birds"] :is(.sub,.sec span){color:#fff;text-shadow:0 1px 0 #2b1405,0 0 6px rgba(43,20,5,.5)}
+:root[data-theme="birds"] .sheet :is(.lt,.sec h2,.sub,.sec span){color:var(--ink);text-shadow:none}
+:root[data-theme="birds"] .sec h2{padding-left:30px;background:var(--pig) 0 50%/24px 24px no-repeat}
+:root[data-theme="birds"] .btn{background:linear-gradient(#ff7a5c,#e0241c 55%,#ad150e);color:#fff;text-shadow:0 1px 0 #6e0d06;box-shadow:0 0 0 2px #3b0d06,0 3px 0 2px #3b0d06,inset 0 2px 0 rgba(255,255,255,.45)}
+:root[data-theme="birds"] :is(.ico,.svt-btn,.tourb){background:linear-gradient(#fffdf6,#f1e2c2);border:2.5px solid #3b220e;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 #fff;color:#2b1a0c}
+:root[data-theme="birds"] .seg button.on{background:linear-gradient(#8fdcff,#2f8fd6 60%,#1d63a8);color:#fff;text-shadow:0 1px 0 #0c3a66}
+:root[data-theme="birds"] .chip.on{box-shadow:0 0 0 3px #e0241c,0 0 0 5px #3b220e}
+:root[data-theme="birds"] .svt-menu{background:#fffaf0;border:2px solid #3b220e;box-shadow:0 5px 0 #3b220e,0 14px 30px rgba(0,0,0,.25)}
+/* «Far Cry 3» */
+:root[data-theme="farcry"] .top{box-shadow:0 6px 18px rgba(0,0,0,.5)}
+:root[data-theme="farcry"] .top::after{height:20px;background:var(--tatau) 0 0/auto 20px repeat-x;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7))}
+:root[data-theme="farcry"] .tabbar{background:linear-gradient(180deg,#1c120a,#0e0905)} :root[data-theme="farcry"] .tabbar::before{height:14px;background:var(--tatau) 0 100%/auto 14px repeat-x}
+:root[data-theme="farcry"] .tb{color:#e9dcbc} :root[data-theme="farcry"] .tb.on{color:#ff6a5a}
+:root[data-theme="farcry"] .svc-nm{color:#f4efe4;text-transform:uppercase;font-size:18px;text-shadow:0 2px 0 rgba(0,0,0,.6)}
+@media (max-width:959px){:root[data-igra] .svc-btn .svc-nm{max-width:170px}}
+:root[data-theme="farcry"] .dtabs{background:rgba(239,226,192,.1)} :root[data-theme="farcry"] .dtabs button{color:rgba(244,239,228,.88)}
+:root[data-theme="farcry"] .dtabs button.on{color:#fff;background:rgba(200,36,29,.22);box-shadow:inset 0 -3px 0 var(--acc);border-radius:4px 4px 0 0}
+:root[data-theme="farcry"] :is(.card,.chip,.sheet,.qbar,.svt-menu,.svt-btn,.ico,.tourb){background-color:var(--card);background-image:var(--paper)}
+:root[data-theme="farcry"] :is(.lt,.sec h2){text-transform:uppercase;letter-spacing:.04em;font-weight:400;color:#efe2c0;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px rgba(0,0,0,.7)}
+:root[data-theme="farcry"] :is(.sub,.sec span){color:#efe2c0;text-shadow:0 1px 2px #000,0 0 8px rgba(0,0,0,.8)}
+:root[data-theme="farcry"] .sheet :is(.lt,.sec h2,.sub,.sec span){color:var(--ink);text-shadow:none}
+:root[data-theme="farcry"] .sec h2{padding-left:26px;background:var(--skull) 0 50%/auto 18px no-repeat}
+:root[data-theme="farcry"] .btn,:root[data-theme="farcry"] .seg button.on{background:var(--acc);color:#fff;clip-path:var(--rough);box-shadow:none;font-weight:700}
+:root[data-theme="farcry"] .svt-menu .tgrp{text-transform:uppercase;letter-spacing:.06em}
+@media (prefers-reduced-motion:reduce){:root:not([data-theme="space"]):not([data-igra]) *,:root:not([data-theme="space"]):not([data-igra]) *::before,:root:not([data-theme="space"]):not([data-igra]) *::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}   /* «Космос» и игровые темы двигаются всегда, как в Юнитке и Отклике */
 </style>
 </head>
 <body>
 <header class="top svc-hdr" id="top">
   <div class="bar">
-    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты"><span class="svc-ic k"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3.5" y="12" width="4.4" height="8.5" rx="1.5"/><rect x="9.8" y="7.5" width="4.4" height="13" rx="1.5"/><rect x="16.1" y="3.5" width="4.4" height="17" rx="1.5"/></svg></span><span class="svc-nm">Конкуренты</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><span class="svc-ic u">Ю</span><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><span class="svc-ic s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)" fill="currentColor" fill-opacity=".28"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg></span><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" aria-current="page" role="menuitem"><span class="svc-ic k"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3.5" y="12" width="4.4" height="8.5" rx="1.5"/><rect x="9.8" y="7.5" width="4.4" height="13" rx="1.5"/><rect x="16.1" y="3.5" width="4.4" height="17" rx="1.5"/></svg></span><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
+    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="13" width="5.4" height="8.2" rx="1.4" fill="currentColor" fill-opacity=".72"/><rect x="9.3" y="9" width="5.4" height="12.2" rx="1.4" fill="currentColor"/><rect x="15.8" y="15.6" width="5.4" height="5.6" rx="1.4" fill="currentColor" fill-opacity=".55"/><path d="M12 2.6l1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 8.2l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3Z" fill="#fff59d"/></svg></em><span class="svc-nm">Конкуренты</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M4.2 5.2h2.6v5.5h2.4C9.7 7.2 11.6 5 14.7 5c3.6 0 5.6 2.9 5.6 7s-2 7-5.6 7c-3.1 0-5-2.2-5.5-5.6H6.8v5.4H4.2Zm10.5 2.2c-1.9 0-3 1.8-3 4.6s1.1 4.6 3 4.6 3-1.8 3-4.6-1.1-4.6-3-4.6Z"/><circle cx="20.2" cy="4.2" r="1.6" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="6.2" width="9.6" height="13.4" rx="2.6" transform="rotate(-10 7.6 12.9)" fill="currentColor" fill-opacity=".42"/><rect x="10.6" y="4" width="9.6" height="13.4" rx="2.6" transform="rotate(8 15.4 10.7)" fill="currentColor"/><path d="M12 14.6c.9.9 2.4 1 3.4.2" fill="none" stroke="#a21caf" stroke-width="1.6" stroke-linecap="round" transform="rotate(8 15.4 10.7)"/><circle cx="13.6" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/><circle cx="17.2" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" aria-current="page" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="13" width="5.4" height="8.2" rx="1.4" fill="currentColor" fill-opacity=".72"/><rect x="9.3" y="9" width="5.4" height="12.2" rx="1.4" fill="currentColor"/><rect x="15.8" y="15.6" width="5.4" height="5.6" rx="1.4" fill="currentColor" fill-opacity=".55"/><path d="M12 2.6l1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 8.2l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3Z" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
     <button class="ctx press" id="ctx" aria-label="Сменить товар"></button>
     <div class="sp"></div>
     <nav class="dtabs" id="dtabs"></nav>
     <button class="inst press" id="instBtn" hidden aria-label="Установить приложение"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg><span>Установить</span></button>
     <button class="tourb press" id="tourBtn" aria-label="Фишки — пошаговые подсказки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M11 5l1.7 5.3L18 12l-5.3 1.7L11 19l-1.7-5.3L4 12l5.3-1.7Z"/><path d="M18.5 3.5l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/></svg><span>Фишки</span></button>
     <button class="ico press" id="sndBtn" aria-label="Звук" aria-pressed="false" hidden><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg></button>
-    <button class="ico press" id="themeBtn" aria-label="Тема оформления"></button>
+    <button id="themeBtn" type="button" aria-label="Тема оформления"></button>
   </div>
   <div class="picker" id="picker"></div>
 </header>
@@ -791,16 +919,56 @@ m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return
 addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
-const TH=[['auto','auto','auto'],['light','porcelain','light'],['dark','graphite','dark'],['space','space','space'],['jim','jim',null]],
+const TH=[['auto','auto','auto'],['light',null,'light'],['dark','graphite','dark'],['space','space','space'],['jim','jim',null],
+  ['farcry','farcry','farcry'],['sonic','sonic','sonic'],['solitaire','solitaire','solitaire'],['birds','birds','birds']],
   KEYS=['unitka.theme','shov.skin','konk.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
+/* выбор темы в формате Юнитки: svcPicker({btn:'#id кнопки', list:[[ключ, название, группа, чей значок/кружок]], cur, onPick, sw:{свои кружки}}).
+   Значки и кружки общих тем — те же, что в Юнитке (TH и SWATCH там) */
+const IC={auto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.2"/><path d="M12 5.2a6.8 6.8 0 0 1 0 13.6Z" fill="currentColor" stroke="none"/></svg>',
+  light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>',
+  dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>',
+  farcry:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 2.4 1.2 4.3 3 5.4V18a1 1 0 0 0 1 1h1v2h4v-2h1a1 1 0 0 0 1-1v-2.6c1.8-1.1 3-3 3-5.4a7 7 0 0 0-7-7Z"/><circle cx="9.3" cy="10.6" r="1.5" fill="currentColor"/><circle cx="14.7" cy="10.6" r="1.5" fill="currentColor"/></svg>',
+  jim:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21.5c-2.6 0-3.8-1.9-2.8-3.8 1.1-2 4-2.1 5.2-4 1.2-1.8-.6-3.8 1-5.6 1.4-1.6 3.6-1.5 5.1-.6"/><circle cx="15.6" cy="5.2" r="2.3"/><circle cx="19.6" cy="5.9" r="2.3"/></svg>',
+  sonic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="15" cy="12" rx="5.6" ry="7"/><ellipse cx="15" cy="12" rx="2.4" ry="3.6"/><path d="M2.5 8.5h5M1.5 12h5M2.5 15.5h5"/></svg>',
+  solitaire:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M12 7.2c1.2 1.4 3.7 2.9 3.7 4.8 0 1.6-1.9 2.4-3.1 1.2l.6 2.4h-2.4l.6-2.4c-1.2 1.2-3.1.4-3.1-1.2 0-1.9 2.5-3.4 3.7-4.8Z" fill="currentColor" stroke="none"/></svg>',
+  birds:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13.5a7.5 7.5 0 0 1 15 0c0 3.6-3.4 6-7.5 6s-7.5-2.4-7.5-6Z"/><path d="M8 10.2l3 1.3M16 10.2l-3 1.3M11 14l2.6 1.1-2.6 1M9.5 6.5c.4-1.6 1.6-2.6 3-3"/></svg>',
+  paper:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5.5C6.5 4.3 9.2 4.4 12 6c2.8-1.6 5.5-1.7 8-.5V19c-2.5-1.2-5.2-1.1-8 .5-2.8-1.6-5.5-1.7-8-.5Z"/><path d="M12 6v13.5"/></svg>',
+  aurora:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 15c3-6 6-8 9-4s6 2 9-4"/><path d="M3 19c3-4 6-5 9-2s6 1 9-3" opacity=".6"/><path d="M17 3.5v2.4M15.8 4.7h2.4"/></svg>',
+  space:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5.2"/><path d="M6.6 14.4C3.4 16.6 2 18.6 2.7 19.6c1.1 1.6 6.4-.6 11.7-4.9s8.6-9.1 7.5-10.6c-.7-1-3.1-.4-6.1 1.4"/><path d="M19 2.5v2.6M17.7 3.8h2.6" stroke-width="1.5"/></svg>'};
+const SW={auto:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fcfcfb"/><path d="M10 1.4a8.6 8.6 0 0 1 0 17.2Z" fill="#1a1a19"/><circle cx="10" cy="10" r="8.6" fill="none" stroke="#8a8a85" stroke-width="1.2"/></svg>',
+  light:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fcfcfb" stroke="#8a8a85" stroke-width="1.2"/></svg>',
+  dark:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#1a1a19" stroke="#8a8a85" stroke-width="1.2"/></svg>',
+  farcry:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#2a1d12" stroke="#c8241d" stroke-width="1.6"/><path d="M10 4.6a4.2 4.2 0 0 0-4.2 4.2c0 1.4.7 2.6 1.8 3.2v1.6h1v1.2h2.8V14h1v-1.6c1.1-.6 1.8-1.8 1.8-3.2A4.2 4.2 0 0 0 10 4.6Z" fill="#efe2c0"/><circle cx="8.4" cy="9.2" r=".9" fill="#2a1d12"/><circle cx="11.6" cy="9.2" r=".9" fill="#2a1d12"/></svg>',
+  jim:'<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swJim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1263"/><stop offset=".62" stop-color="#d9532c"/><stop offset=".62" stop-color="#7ad321"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swJim)" stroke="#1a1022" stroke-width="1.6"/><circle cx="8.3" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="11.9" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="8.7" cy="7.8" r=".7" fill="#1a1022"/><circle cx="12.3" cy="7.8" r=".7" fill="#1a1022"/></svg>',
+  sonic:'<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swSon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f6efa"/><stop offset=".66" stop-color="#5fb0ff"/><stop offset=".66" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#cf6b16"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swSon)" stroke="#0a1a4a" stroke-width="1.6"/><circle cx="10" cy="8" r="3.4" fill="none" stroke="#ffc81e" stroke-width="1.9"/></svg>',
+  solitaire:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#0b2e1e" stroke="#e8c260" stroke-width="1.4"/><rect x="6.2" y="4.6" width="7.6" height="10.8" rx="1.4" fill="#fffdf6" transform="rotate(-8 10 10)"/><path d="M10 13.2c-.6-.6-2.3-1.6-2.3-2.8 0-.9 1.1-1.4 2.3-.4 1.2-1 2.3-.5 2.3.4 0 1.2-1.7 2.2-2.3 2.8Z" fill="#c41230"/></svg>',
+  birds:'<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#e0241c" stroke="#3b220e" stroke-width="1.6"/><path d="M3.2 12.6c2 2.6 4.3 3.7 6.8 3.7s4.8-1.1 6.8-3.7c-2.2.9-4.4 1.3-6.8 1.3s-4.6-.4-6.8-1.3Z" fill="#f3dcb4"/><circle cx="7.6" cy="9.4" r="1.7" fill="#fff"/><circle cx="12.4" cy="9.4" r="1.7" fill="#fff"/><circle cx="8" cy="9.6" r=".7"/><circle cx="12" cy="9.6" r=".7"/><path d="M5.4 7.2l4 1.6M14.6 7.2l-4 1.6" stroke="#1d1007" stroke-width="1.5" stroke-linecap="round"/><path d="M8.6 11l2.8-.2 2 1.3-2.4.9Z" fill="#ffb31f" stroke="#7a3d06" stroke-width=".5"/></svg>',
+  space:'<svg class="sw" viewBox="0 0 20 20"><defs><radialGradient id="swSp" cx=".3" cy=".3" r=".9"><stop offset="0" stop-color="#7a4fd6"/><stop offset=".55" stop-color="#1c1a5e"/><stop offset="1" stop-color="#060818"/></radialGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swSp)" stroke="#a493ff" stroke-width="1.2"/><path d="M3.4 14.6a8.6 8.6 0 0 0 13.2 0c-1.6-1.6-4-2.4-6.6-2.4s-5 .8-6.6 2.4Z" fill="#3fa0e8"/><path d="M3.4 14.6c1.6-1.6 4-2.4 6.6-2.4s5 .8 6.6 2.4" fill="none" stroke="#8ff0ff" stroke-width=".8"/><circle cx="13.6" cy="12.6" r="1.3" fill="#ffd27a"/><circle cx="6" cy="6.4" r=".7" fill="#fff"/><circle cx="12.4" cy="5" r=".5" fill="#fff"/></svg>'};
+window.svcPicker=o=>{
+  const b=document.querySelector(o.btn);if(!b)return null;
+  const w=document.createElement('div');w.className='svt';b.replaceWith(w);w.appendChild(b);b.classList.add('svt-btn');
+  b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');
+  const m=document.createElement('div');m.className='svt-menu';m.setAttribute('role','menu');m.hidden=true;w.appendChild(m);
+  let cur=o.cur;
+  const draw=()=>{const it=o.list.find(x=>x[0]===cur)||o.list[0],ic=it[3]||it[0];
+    b.innerHTML=(IC[ic]||IC.auto)+'<span>'+it[1]+'</span>';b.title='Тема: '+it[1].toLowerCase();
+    let g='';m.innerHTML=o.list.map(([k,n,grp,base])=>((grp||'')!==g?(g=grp||'','<div class="tgrp">'+g+'</div>'):'')+
+      '<button type="button" role="menuitemradio" aria-checked="'+(k===cur)+'" data-svt="'+k+'">'+((o.sw&&o.sw[k])||SW[base||k]||SW.auto)+n+'</button>').join('')};
+  const show=on=>{m.hidden=!on;b.setAttribute('aria-expanded',on?'true':'false')};
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();show(m.hidden)});
+  m.addEventListener('click',e=>{const x=e.target.closest('[data-svt]');if(!x)return;e.stopPropagation();cur=x.dataset.svt;show(false);draw();o.onPick(cur)});
+  document.addEventListener('pointerdown',e=>{if(!m.hidden&&!e.target.closest('.svt'))show(false)},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){show(false);b.focus()}});
+  draw();
+  return {set(k){cur=k;draw()},close(){show(false)}};
+};
 })();
 /*/SVC:JS*/</script>
 <div class="topsp" id="topsp"></div>
 <div id="spWrap"></div>
 <main id="view"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
 <div class="qbar" id="qbar" hidden></div>
-<div class="tmenu" id="tmenu" role="menu" hidden></div>
 <nav class="tabbar" id="tabbar"></nav>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="sbody" id="sbody"></div></section></div>
 <div class="tip" id="tip"></div>
@@ -934,11 +1102,12 @@ function spMeteor(d){   // метеор по фону страницы — ра�
 /* звук — как в Отклике (28.10): кнопка в шапке у тем со звуком и 🔊 в окошке — одна настройка konk.mute, по умолчанию звук включён.
    Музыка «Космоса» space-music.mp3 (Suno, из Юнитки) играет с первого нажатия — без нажатия браузер звук не даёт. */
 const curT=()=>document.documentElement.dataset.theme||'auto';
-const SNDT={space:off=>spMusic(!off)};
-function soundOff(){return KS.get('mute',0)==1}
+const igSnd=off=>{if(window.IGRY)IGRY.setSound(off)};   // в играх звук — общий с Юниткой (unitka.sxMute и др.), его хранит IGRY
+const SNDT={space:off=>spMusic(!off),sonic:igSnd,solitaire:igSnd,birds:igSnd};
+function soundOff(){if(window.IGRY&&IGRY.hasSound(curT()))return IGRY.soundOff();return KS.get('mute',0)==1}
 function syncSound(){const t=curT(),b=$('#sndBtn'),off=soundOff();b.hidden=!SNDT[t];b.setAttribute('aria-pressed',off);b.title=off?'Звук выключен — включить':'Звук включён — выключить';
   $$('[data-sp="mute"]').forEach(x=>x.setAttribute('aria-pressed',off))}
-function setSound(off){KS.set('mute',off?1:0);const t=curT();if(SNDT[t])SNDT[t](off);syncSound()}
+function setSound(off){const t=curT();if(!IGRY_T.includes(t))KS.set('mute',off?1:0);if(SNDT[t])SNDT[t](off);syncSound()}
 $('#sndBtn').addEventListener('click',()=>setSound(!soundOff()));
 /* Андрей 28.10: музыка без шва и сама возвращается после сна вкладки (как в Отклике). Два плеера по очереди: за SP_XF с до конца
    второй начинает трек с начала и нарастает, первый затихает. Сторож раз в 2 с и при возврате во вкладку. Новый трек — строка в SP_TRACKS. */
@@ -1006,24 +1175,30 @@ function spaceDeco(on){
   stg.addEventListener('pointerup',up);stg.addEventListener('pointercancel',up);
   const i0=+KS.get('spIdx',-1);spShow(el,Number.isFinite(i0)?i0+1:0,1);spStars(el);   // каждый заход — со следующей аффирмации
 }
-/* выбор темы списком с образцами цвета — как в Юнитке (Андрей 25.10) */
-const THEMES=['auto','light','dark','paper','paperdim','space'],TNAME={auto:'Как в телефоне',light:'Светлая',dark:'Тёмно-серая',paper:'Бумага — как Cool Reader',paperdim:'Бумага приглушённая',space:'Космос — аффирмации'};
-const TSW={auto:['#f2f2f7','#1c1c1e'],light:['#ffffff','#005bff'],dark:['#2c2c2e','#4d8dff'],paper:['#a99878','#0d0805'],paperdim:['#4a4234','#d9c9a3'],space:['#0b0d2a','#a493ff']};
+/* выбор темы — в формате Юнитки (svcPicker из servisy\svc.py, Андрей 29.10 «как в юнитке выбор везде тем формат»): [ключ, название, группа, чей значок] */
+const THEMES=[['auto','Как в системе'],['light','Светлая'],['dark','Тёмно-серая','','dark'],
+  ['farcry','Far Cry 3','Весёлые'],['sonic','Соник','Весёлые'],['solitaire','Пасьянс','Весёлые'],['birds','Angry Birds','Весёлые'],
+  ['paper','Бумага','Спокойные','paper'],['paperdim','Бумага приглушённая','Спокойные','paper'],['space','Космос','Спокойные']],TNAME=Object.fromEntries(THEMES.map(x=>[x[0],x[1]]));
+const TSW={paper:['#a99878','#0d0805'],paperdim:['#4a4234','#d9c9a3']};
 const swatch=k=>`<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="${TSW[k][0]}" stroke="rgba(0,0,0,.18)"/><path d="M10 1a9 9 0 0 1 0 18z" fill="${TSW[k][1]}"/></svg>`;
 function applyTheme(t,anim){
   if(!TNAME[t])t='auto';
   const r=document.documentElement;if(t==='auto')delete r.dataset.theme;else r.dataset.theme=t;
-  $('#themeBtn').innerHTML=t==='light'?IC.sun:t==='dark'?IC.moon:t.startsWith('paper')?IC.paper:t==='space'?IC.star:IC.auto;$('#themeBtn').title='Тема: '+TNAME[t];
-  const dark=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);$('#tc').content=t==='paper'?'#a99878':t==='paperdim'?'#3f382c':t==='space'?'#060818':dark?'#1c1c1e':'#f2f2f7';
-  spaceDeco(t==='space');
+  const dark=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);$('#tc').content={paper:'#a99878',paperdim:'#3f382c',space:'#060818',sonic:'#0b2c8f',solitaire:'#070b09',birds:'#8a5a2b',farcry:'#0e0905'}[t]||(dark?'#1c1c1e':'#f2f2f7');
+  spaceDeco(t==='space');igry(t);
   if(SNDT[t])SNDT[t](soundOff());syncSound();
-  $('#tmenu').innerHTML=`<div class="tgrp">Тема</div>`+THEMES.map(k=>(k==='space'?'<div class="tgrp">Спокойные</div>':'')+`<button role="menuitemradio" aria-checked="${k===t}" data-th="${k}">${swatch(k)}<span>${TNAME[k]}</span>${k===t?IC.check:''}</button>`).join('');
   if(anim)toast('Тема: '+TNAME[t]);
 }
-$('#themeBtn').onclick=e=>{e.stopPropagation();const m=$('#tmenu');m.hidden=!m.hidden;if(!m.hidden){const r=$('#themeBtn').getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px'}};
-$('#tmenu').onclick=e=>{const b=e.target.closest('[data-th]');if(!b)return;KS.set('theme',b.dataset.th);applyTheme(b.dataset.th,true);$('#tmenu').hidden=true;if(window.svcTheme)svcTheme(2,b.dataset.th)};
-document.addEventListener('click',e=>{if(!e.target.closest('#tmenu,#themeBtn'))$('#tmenu').hidden=true});
-addEventListener('scroll',()=>{const m=$('#tmenu');if(m&&!m.hidden)m.hidden=true},{passive:true});
+/* игровые темы Юнитки — /unitka/igry.css + igry.js (один код на три сервиса): грузятся, только когда тема выбрана */
+const IGRY_T=['farcry','sonic','solitaire','birds'];let igryP=null;
+function igry(k){const on=IGRY_T.includes(k),r=document.documentElement;
+  if(!on){if(window.IGRY)IGRY.apply(null);delete r.dataset.igra;return}
+  r.dataset.igra=k;
+  if(!document.getElementById('igcss')){const l=document.createElement('link');l.id='igcss';l.rel='stylesheet';l.href='/unitka/igry.css?v=1';document.head.appendChild(l)}
+  if(!igryP)igryP=new Promise(ok=>{const s=document.createElement('script');s.src='/unitka/igry.js?v=1';s.onload=ok;document.head.appendChild(s)});
+  igryP.then(()=>{const t=IGRY_T.includes(curT())?curT():null;IGRY.apply(t,{name:'Конкуренты',wrap:$('#spWrap'),onSound:syncSound});syncSound()})}
+const PICK=svcPicker({btn:'#themeBtn',list:THEMES,cur:TNAME[KS.get('theme','auto')]?KS.get('theme','auto'):'auto',sw:{paper:swatch('paper'),paperdim:swatch('paperdim')},
+  onPick:k=>{KS.set('theme',k);applyTheme(k,true);svcTheme(2,k)}});
 applyTheme(KS.get('theme','auto'));
 
 /* ---------- подсказка ---------- */
@@ -1563,7 +1738,7 @@ const TOUR={
   {sel:'#rgbox',t:'Срок доставки',d:'0–1 день — товар лежит в этом кластере. Красное у нас и зелёное у них — сигнал довезти туда.'},
   {sel:'.sh',t:'На сколько дней хватит',d:'Сколько всего на складах Озона и сколько довезти, чтобы в каждом кластере хватило на 10 дней.'},
   {sel:'[data-f="clusters"]',t:'Все кластеры',d:'Есть, продаём в день, на сколько хватит и сколько довезти — по каждому кластеру.'},
-  {sel:'#themeBtn',t:'Тема',d:'Как в телефоне, светлая, тёмно-серая, «Бумага» как в Cool Reader, приглушённая бумага или «Космос» с аффирмациями.'}]
+  {sel:'#themeBtn',t:'Тема',d:'Как в системе, светлая, тёмно-серая; весёлые — <b>Far Cry 3</b>, <b>Соник</b>, <b>Пасьянс</b> и <b>Angry Birds</b> с играми на баннере, как в Юнитке; спокойные — «Бумага» как в Cool Reader, приглушённая бумага и «Космос» с аффирмациями. Тема переносится в Юнитку и Склейки, где есть такая же.'}]
 };
 const TORD=['all','konk','keys','sklad'],TN={all:'Сводка',konk:'Конкуренты',keys:'Ключи',sklad:'Склады'};
 let TR=null;
