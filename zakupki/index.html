@@ -9,9 +9,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Закупки">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="/unitka/manifest.webmanifest"><!-- Андрей 29.10: одно приложение на все сервисы (Юнитка, Склейки, Конкуренты, Закупки); своё отдельное — убрано -->
+
 <link rel="apple-touch-icon" href="pwa/apple-180.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f8bff'/%3E%3Cpath d='M8 12h16l-1.6 10.2a2 2 0 0 1-2 1.8h-8.8a2 2 0 0 1-2-1.8z' fill='white'/%3E%3Cpath d='M12 12a4 4 0 0 1 8 0' stroke='white' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='.08' y1='0' x2='.92' y2='1'%3E%3Cstop offset='0' stop-color='#7fd4ff'/%3E%3Cstop offset='.46' stop-color='#2f8bff'/%3E%3Cstop offset='1' stop-color='#3b4bdb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22.5' fill='url(#g)'/%3E%3Cg transform='translate(19.00 19.00) scale(2.5833)' fill='none' stroke='#fff' stroke-width='2.2' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 8h16l-1.6 11.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z' fill='#fff' fill-opacity='.28'/%3E%3Cpath d='M8.5 8a3.5 3.5 0 0 1 7 0'/%3E%3C/g%3E%3C/svg%3E">
 <script>(function(){try{var t=JSON.parse(localStorage.getItem('zak.theme')||'"auto"');if(['light','dark','paper','paperdim','space'].includes(t))document.documentElement.dataset.theme=t}catch(e){}})()</script>
 <style>
 /* «Закупки» — подбор ниш и проверка товара по трём площадкам (Trello АА «Сервис по закупкам», Андрей 27–29.10.2026).
@@ -87,12 +88,12 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .svc-ic svg{position:relative;width:66%;height:66%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
 .svc-ic.u{--svc-glow:rgba(16,185,129,.55);background:linear-gradient(145deg,#4ff0b4 0%,#10b981 48%,#0a7d70 100%)}
 .svc-ic.s{--svc-glow:rgba(168,85,247,.55);background:linear-gradient(145deg,#d8a4ff 0%,#a855f7 46%,#e0338f 100%)}
-.svc-ic.z{--svc-glow:rgba(37,128,255,.55);background:linear-gradient(145deg,#7fd4ff 0%,#2f8bff 46%,#3b4bdb 100%)}
 .svc-ic.k{--svc-glow:rgba(255,112,48,.55);background:linear-gradient(145deg,#ffd166 0%,#ff8a2b 46%,#ee3a52 100%)}
+.svc-ic.z{--svc-glow:rgba(37,128,255,.55);background:linear-gradient(145deg,#7fd4ff 0%,#2f8bff 46%,#3b4bdb 100%)}
 @media (hover:hover){.svc-btn:hover .svc-ic,.svc-it:hover .svc-ic{transform:rotate(-8deg) scale(1.06)}}
 .svc-btn[aria-expanded="true"] .svc-ic{transform:rotate(-8deg) scale(1.06)}
 .svc-menu.on .svc-it .svc-ic{animation:svc-ico .6s cubic-bezier(.34,1.56,.64,1) both}
-.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}
+.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}.svc-menu.on .svc-it:nth-child(5) .svc-ic{animation-delay:.15s}
 @keyframes svc-ico{from{transform:scale(.6) rotate(-20deg);opacity:0}}
 .svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
   background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
@@ -350,6 +351,19 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .vs1 b{display:block;font:700 18px/1.15 var(--fd);margin-top:3px}
 .vs1 b.ok{color:var(--good)}.vs1 b.maybe{color:var(--warn)}.vs1 b.no{color:var(--bad)}.vs1 b.na{color:var(--ink3)}
 .vs1.on{box-shadow:0 0 0 2px var(--mpc),var(--sh1)}
+/* табличка площадок (29.10 Андрей: «стоит / не стоит с МП как-то не очень смотрится») */
+.mpb{margin-top:10px;padding:4px;overflow:hidden}
+.mprow{display:grid;grid-template-columns:96px auto minmax(0,1fr) 18px;gap:10px;align-items:center;width:100%;text-align:left;padding:12px 10px 12px 12px;border-radius:14px;position:relative}
+.mprow+.mprow::before{content:"";position:absolute;left:12px;right:12px;top:0;height:.5px;background:var(--line)}
+.mprow.on{background:var(--fill2)}.mprow.on::before,.mprow.on+.mprow::before{opacity:0}
+.mprow .mpn{display:flex;align-items:center;gap:8px;font:650 15.5px/1.2 var(--fd)}
+.mprow .mpn i{width:10px;height:10px;border-radius:50%;background:var(--mpc);box-shadow:0 0 0 3px color-mix(in srgb,var(--mpc) 22%,transparent)}
+.vp{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+.vp.ok{background:var(--good-soft);color:var(--good)}.vp.maybe{background:var(--warn-soft);color:var(--warn)}.vp.no{background:var(--bad-soft);color:var(--bad)}.vp.na{background:var(--fill);color:var(--ink3)}
+.mprow .w1{font-size:13px;color:var(--ink2);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mprow .chev{width:16px;height:16px;color:var(--ink3);transition:transform .4s var(--spring)}
+.mprow.on .chev{transform:rotate(90deg);color:var(--acc)}
+@media (max-width:560px){.mprow{grid-template-columns:auto 1fr 16px;row-gap:6px}.mprow .vp{justify-self:start}.mprow .w1{grid-column:1/-1;grid-row:2}.mprow .chev{grid-column:3;grid-row:1}}
 .adv1{padding:14px 16px;margin-top:10px;font-size:14.5px;line-height:1.5}
 .adv1 .k{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--acc);margin-bottom:4px}
 .vcard{padding:16px}
@@ -376,6 +390,11 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .cm .s{font-size:12px;color:var(--ink2);margin-top:3px}
 .cm .s2{font-size:11.5px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cmrow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-top:.5px solid var(--line)}
+.cmrow:has(.pick1){grid-template-columns:30px 64px minmax(0,1fr)}
+.pick1{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;font-weight:700;color:var(--ink3)}
+.pick1 input{appearance:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;transition:background .2s,border-color .2s,transform .3s var(--spring)}
+.pick1 input:checked{background:var(--acc);border-color:var(--acc);transform:scale(1.06)}
+.pick1 input:checked::after{content:"✓";color:#fff;font-size:14px;font-weight:800;line-height:1}
 .cmrow img{width:64px;height:64px;border-radius:13px;object-fit:cover;background:var(--fill)}
 .cmrow b{display:block;font-size:14px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cmrow .s{font-size:12.5px;color:var(--ink2);margin-top:3px}
@@ -560,7 +579,7 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 <body>
 <header class="top svc-hdr" id="top">
   <div class="bar">
-    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты"><span class="svc-ic z"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1.6 11.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z" fill="currentColor" fill-opacity=".28"/><path d="M8.5 8a3.5 3.5 0 0 1 7 0"/></svg></span><span class="svc-nm">Закупки</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M4.2 5.2h2.6v5.5h2.4C9.7 7.2 11.6 5 14.7 5c3.6 0 5.6 2.9 5.6 7s-2 7-5.6 7c-3.1 0-5-2.2-5.5-5.6H6.8v5.4H4.2Zm10.5 2.2c-1.9 0-3 1.8-3 4.6s1.1 4.6 3 4.6 3-1.8 3-4.6-1.1-4.6-3-4.6Z"/><circle cx="20.2" cy="4.2" r="1.6" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="6.2" width="9.6" height="13.4" rx="2.6" transform="rotate(-10 7.6 12.9)" fill="currentColor" fill-opacity=".42"/><rect x="10.6" y="4" width="9.6" height="13.4" rx="2.6" transform="rotate(8 15.4 10.7)" fill="currentColor"/><path d="M12 14.6c.9.9 2.4 1 3.4.2" fill="none" stroke="#a21caf" stroke-width="1.6" stroke-linecap="round" transform="rotate(8 15.4 10.7)"/><circle cx="13.6" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/><circle cx="17.2" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="13" width="5.4" height="8.2" rx="1.4" fill="currentColor" fill-opacity=".72"/><rect x="9.3" y="9" width="5.4" height="12.2" rx="1.4" fill="currentColor"/><rect x="15.8" y="15.6" width="5.4" height="5.6" rx="1.4" fill="currentColor" fill-opacity=".55"/><path d="M12 2.6l1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 8.2l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3Z" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" aria-current="page" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1.6 11.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z" fill="currentColor" fill-opacity=".28"/><path d="M8.5 8a3.5 3.5 0 0 1 7 0"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
+    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 8.6h15.2l-1.4 10.5a2.2 2.2 0 0 1-2.2 1.9H8a2.2 2.2 0 0 1-2.2-1.9Z" fill="currentColor"/><path d="M8.6 8.6V7.5a3.4 3.4 0 0 1 6.8 0v1.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.3 13.3c.7 1.1 1.6 1.7 2.7 1.7s2-.6 2.7-1.7" fill="none" stroke="#2f5fe0" stroke-width="1.7" stroke-linecap="round"/><circle cx="19.6" cy="4.4" r="1.6" fill="#fff59d"/></svg></em><span class="svc-nm">Закупки</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M4.2 5.2h2.6v5.5h2.4C9.7 7.2 11.6 5 14.7 5c3.6 0 5.6 2.9 5.6 7s-2 7-5.6 7c-3.1 0-5-2.2-5.5-5.6H6.8v5.4H4.2Zm10.5 2.2c-1.9 0-3 1.8-3 4.6s1.1 4.6 3 4.6 3-1.8 3-4.6-1.1-4.6-3-4.6Z"/><circle cx="20.2" cy="4.2" r="1.6" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="6.2" width="9.6" height="13.4" rx="2.6" transform="rotate(-10 7.6 12.9)" fill="currentColor" fill-opacity=".42"/><rect x="10.6" y="4" width="9.6" height="13.4" rx="2.6" transform="rotate(8 15.4 10.7)" fill="currentColor"/><path d="M12 14.6c.9.9 2.4 1 3.4.2" fill="none" stroke="#a21caf" stroke-width="1.6" stroke-linecap="round" transform="rotate(8 15.4 10.7)"/><circle cx="13.6" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/><circle cx="17.2" cy="10" r=".95" fill="#a21caf" transform="rotate(8 15.4 10.7)"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="13" width="5.4" height="8.2" rx="1.4" fill="currentColor" fill-opacity=".72"/><rect x="9.3" y="9" width="5.4" height="12.2" rx="1.4" fill="currentColor"/><rect x="15.8" y="15.6" width="5.4" height="5.6" rx="1.4" fill="currentColor" fill-opacity=".55"/><path d="M12 2.6l1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 8.2l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3Z" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" aria-current="page" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 8.6h15.2l-1.4 10.5a2.2 2.2 0 0 1-2.2 1.9H8a2.2 2.2 0 0 1-2.2-1.9Z" fill="currentColor"/><path d="M8.6 8.6V7.5a3.4 3.4 0 0 1 6.8 0v1.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.3 13.3c.7 1.1 1.6 1.7 2.7 1.7s2-.6 2.7-1.7" fill="none" stroke="#2f5fe0" stroke-width="1.7" stroke-linecap="round"/><circle cx="19.6" cy="4.4" r="1.6" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
     <div class="sp"></div>
     <nav class="dtabs sgm" id="dtabs"></nav>
     <button class="inst press" id="instBtn" hidden aria-label="Установить приложение"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg><span>Установить</span></button>
@@ -590,8 +609,9 @@ m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return
 addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
-const TH=[['auto','auto','auto','auto'],['light',null,'light'],['dark','graphite','dark','dark'],['space','space','space','space'],['jim','jim',null,null],
-  ['farcry','farcry','farcry'],['sonic','sonic','sonic'],['solitaire','solitaire','solitaire'],['birds','birds','birds']],
+// столбцы: Юнитка, Склейки, Конкуренты, Закупки (svcTheme(3, …) — у Закупок)
+const TH=[['auto','auto','auto','auto'],['light',null,'light','light'],['dark','graphite','dark','dark'],['space','space','space','space'],['jim','jim',null,null],
+  ['farcry','farcry','farcry',null],['sonic','sonic','sonic',null],['solitaire','solitaire','solitaire',null],['birds','birds','birds',null]],
   KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
 /* выбор темы в формате Юнитки: svcPicker({btn:'#id кнопки', list:[[ключ, название, группа, чей значок/кружок]], cur, onPick, sw:{свои кружки}}).
@@ -673,10 +693,30 @@ async function dec(enc,pass){
   if(pass){LS.set('pass',pass);try{const raw=new Uint8Array(await crypto.subtle.exportKey('raw',KEY));let bin='';raw.forEach(x=>bin+=String.fromCharCode(x));LS.set('kc',{salt:enc.salt,k:btoa(bin)})}catch(e){}}
   return JSON.parse(new TextDecoder().decode(plain));
 }
+/* загрузка с полосой и оставшимися секундами (29.10 Андрей: «примерно остаток по времени загрузки можно?») */
+let ENC=null;
+async function fetchProg(url,onp){
+  const r=await fetch(url,{cache:'no-cache'});if(!r.ok)throw new Error('Данные не загрузились ('+r.status+')');
+  const len=+r.headers.get('content-length')||0,gz=/gzip|br/.test(r.headers.get('content-encoding')||''),exp=len?len*(gz?1.32:1):0;
+  if(!r.body||!r.body.getReader)return r.json();
+  const rd=r.body.getReader(),ch=[],t0=performance.now();let got=0;
+  for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;onp&&onp(got,exp,(performance.now()-t0)/1000)}
+  const b=new Uint8Array(got);let o=0;for(const c of ch){b.set(c,o);o+=c.length}return JSON.parse(new TextDecoder().decode(b));
+}
+function loadUI(got,exp,sec){
+  const v=$('#view');if(!v)return;const k=exp?Math.min(.98,got/exp):0,sp=got/Math.max(.2,sec),left=exp&&k<.98?Math.max(1,Math.ceil((exp-got)/sp)):0;
+  let el=$('#ldr');if(!el){v.innerHTML='<div class="card pad" id="ldr" style="margin-top:28px"><b style="font:650 17px/1.3 var(--fd)">Загружаю ниши</b><div class="prog" style="height:6px;margin-top:12px"><i style="animation:none;width:0;transition:width .3s"></i></div><div class="s mut" style="margin-top:8px;font-size:13px"></div></div>';el=$('#ldr')}
+  el.querySelector('.prog i').style.width=Math.round(k*100)+'%';
+  el.querySelector('.s').textContent=`${N1.format(got/1048576)} из ~${N1.format((exp||got)/1048576)} МБ`+(left?` · осталось ~${left} с`:' · расшифровываю…');
+}
 async function load(pass){
-  const res=await fetch('data.enc.json',{cache:'no-cache'});
-  if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
-  return dec(await res.json(),pass);
+  if(!ENC)ENC=await fetchProg('data.enc.json',loadUI);
+  return dec(ENC,pass);
+}
+let TOPS=null,TOPS_NO=false;
+async function loadTops(){
+  try{const r=await fetch('tops.enc.json',{cache:'no-cache'});if(!r.ok){TOPS={};TOPS_NO=true;return}TOPS=(await dec(await r.json())).tops||{};
+    const sb=$('#sbody');if(shw.classList.contains('on')&&sb.dataset.key==='niche'&&sb.dataset.n&&BY[sb.dataset.n]){const y=sb.scrollTop;openSheet(nicheSheet(BY[sb.dataset.n]),'niche',sb.dataset.n);sb.scrollTop=y}}catch(e){}
 }
 async function loadChecks(){
   try{const r=await fetch('checks.enc.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const d=await dec(await r.json());const was=JSON.stringify(CK.checks.map(c=>[c.id,c.state,c.step,c.upd]));CK=d;
@@ -694,7 +734,7 @@ const sg=r=>{const p=Math.round((r-1)*100);return (p>0?'+':p<0?'−':'')+Math.ab
 const plur=(n,a,b,c)=>{const m=Math.abs(n)%100,k=m%10;return m>10&&m<20?c:k===1?a:k>=2&&k<=4?b:c};
 const img=(src,cls)=>`<img src="${esc(src||'')}" alt="" loading="lazy" decoding="async"${cls?` class="${cls}"`:''} onerror="this.style.visibility='hidden'">`;
 const MON=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const VL={ok:'Стоит',maybe:'Можно',no:'Не стоит',na:'Нет данных'};
+const VL={ok:'Заходить',maybe:'Осторожно',no:'Не заходить',na:'Нет данных'},VI={ok:'✓',maybe:'!',no:'✕',na:'—'};
 const NV={ok:'Да',maybe:'Можно',no:'Нет'};
 const MPN={oz:'Озон',wb:'WB',ym:'Маркет'},MPC={oz:'var(--oz)',wb:'var(--wb)',ym:'var(--ym)'};
 const IC={
@@ -777,12 +817,15 @@ function soundOff(){return ZS.get('mute',0)==1}
 function syncSound(){const t=curT(),b=$('#sndBtn'),off=soundOff();b.hidden=!SNDT[t];b.setAttribute('aria-pressed',off);b.title=off?'Звук выключен — включить':'Звук включён — выключить';$$('[data-sp="mute"]').forEach(x=>x.setAttribute('aria-pressed',off))}
 function setSound(off){ZS.set('mute',off?1:0);const t=curT();if(SNDT[t])SNDT[t](off);syncSound()}
 $('#sndBtn').addEventListener('click',()=>setSound(!soundOff()));
-const SP_TRACKS=[['space-music.mp3','Космос']],SP_VOL=.4,SP_XF=5,ms0=SP_XF*1000;
-let spAud=null;const spP={a:[],cur:0,want:false,t:0,lastT:-1,stall:0};
+// Андрей 29.10: четыре мелодии по 3,3–3,5 мин, идут по очереди с плавным переходом; ♫ в окошке — следующая
+const SP_TRACKS=[['space-music.mp3','Космос 1'],['space-music-2.mp3','Космос 2'],['space-music-3.mp3','Космос 3'],['space-music-4.mp3','Космос 4']],SP_VOL=.4,SP_XF=5,ms0=SP_XF*1000;
+let spAud=null;const spP={a:[],cur:0,want:false,t:+ZS.get('spTrack',0)||0,lastT:-1,stall:0};
+function spNext(ms){if(SP_TRACKS.length<2){if(ms)spCross(ms);return}spP.t=(spP.t+1)%SP_TRACKS.length;ZS.set('spTrack',spP.t);
+  $$('[data-sp="next"]').forEach(b=>b.title='Музыка: '+SP_TRACKS[spP.t][1]+' — сменить');if(spP.want)spCross(ms||3000)}
 function spFade(el,to,ms,done){clearInterval(el._fd);const from=el.volume,t0=performance.now();el._fd=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k>=1){clearInterval(el._fd);if(done)done()}},50)}
 function spEl(i){if(!spP.a[i]){const el=new Audio();el.preload='auto';el.volume=0;
-  el.addEventListener('timeupdate',()=>{if(spP.want&&el===spP.a[spP.cur]&&el.duration&&!el._xf&&el.duration-el.currentTime<SP_XF)spCross(ms0)});
-  el.addEventListener('ended',()=>{if(spP.want&&el===spP.a[spP.cur])spCross(ms0)});spP.a[i]=el}return spP.a[i]}
+  el.addEventListener('timeupdate',()=>{if(spP.want&&el===spP.a[spP.cur]&&el.duration&&!el._xf&&el.duration-el.currentTime<SP_XF)spNext(ms0)});
+  el.addEventListener('ended',()=>{if(spP.want&&el===spP.a[spP.cur]&&!el._xf)spNext(ms0)});spP.a[i]=el}return spP.a[i]}
 function spCross(ms){const old=spP.a[spP.cur];spP.cur=1-spP.cur;const nw=spEl(spP.cur),f=SP_TRACKS[spP.t%SP_TRACKS.length][0];
   if(old){old._xf=true;spFade(old,0,ms,()=>{old.pause();old._xf=false})}
   if(!nw.src.endsWith(f))nw.src=f;try{nw.currentTime=0}catch(e){}
@@ -814,14 +857,14 @@ function spaceDeco(on){
    '<div class="sptop"><span class="splogo">ЗАКУПКИ</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
    `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
    '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
-   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button><button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
+   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button>${SP_TRACKS.length>1?`<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[spP.t%SP_TRACKS.length][1]} — сменить" style="font-size:18px;line-height:1">♫</button>`:''}<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
   w.appendChild(el);
   const go=dd=>spShow(el,el._i+dd,dd);
   el.querySelector('.prev').onclick=()=>go(-1);el.querySelector('.next').onclick=()=>go(1);
   el.querySelector('.spbar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=[...b.parentNode.children].indexOf(b);if(k!==el._i)spShow(el,k,k>el._i?1:-1)});
   el.querySelector('.spbar').addEventListener('animationend',e=>{if(e.target.closest('.cur'))go(1)});
   el.querySelector('.spbtns').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b)return;
-    if(b.dataset.sp==='play')el.classList.toggle('stop');else if(b.dataset.sp==='mute')setSound(b.getAttribute('aria-pressed')!=='true');else spBig(el,!el.classList.contains('big'))});
+    if(b.dataset.sp==='play')el.classList.toggle('stop');else if(b.dataset.sp==='mute')setSound(b.getAttribute('aria-pressed')!=='true');else if(b.dataset.sp==='next')spNext();else spBig(el,!el.classList.contains('big'))});
   el.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){go(1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}else if(e.key==='Escape'&&el.classList.contains('big'))spBig(el,false)});
   const stg=el.querySelector('.spstage');let sx=null,sy=0,mv=false;const cur=()=>stg.querySelector('.spq:not(.out)');
   stg.addEventListener('pointerdown',e=>{if(e.button>0)return;sx=e.clientX;sy=e.clientY;mv=false;el.classList.add('hold');try{stg.setPointerCapture(e.pointerId)}catch(x){}});
@@ -861,7 +904,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-tip]');if
 
 /* ---------- лист снизу (тянется пальцем вниз) ---------- */
 const shw=$('#shw'),sheet=$('#sheet');
-function openSheet(html,key){const sb=$('#sbody');sb.dataset.key=key||'';sb.innerHTML=html;shw.classList.add('on');document.body.style.overflow='hidden';sb.scrollTop=0;thumbs(sb);reveal(sb)}
+function openSheet(html,key,nid){const sb=$('#sbody');sb.dataset.key=key||'';sb.dataset.n=nid||'';sb.innerHTML=html;shw.classList.add('on');document.body.style.overflow='hidden';sb.scrollTop=0;thumbs(sb);reveal(sb)}
 function closeSheet(){shw.classList.remove('on');document.body.style.overflow='';sheet.style.transform='';$('#sbody').dataset.key=''}
 $('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 (()=>{let y0=null,dy=0;const g=$('#grab');
@@ -1062,8 +1105,19 @@ function nicheSheet(n){
     ${v&&s&&ok(s.ahead)&&Math.abs(s.ahead-1)>=.15?`<span>С поправкой на ${esc(s.next_txt)}</span><b>${fi(v.target[0]*s.ahead)}–${fi(v.target[1]*s.ahead)} шт/мес</b>`:''}
   </div>
   <div class="note">Сначала тест: выстреливает ~${Math.round(R.hit_rate*100)}% новинок — лучше 10 наименований по 50 шт, чем 3 по 150. Первая партия — с рынков Москвы, дозаказ — Китай.</div>
-  ${(n.top||[]).length?`<h4>Топ-5 товаров ниши за 28 дней</h4><div class="note" style="margin:-4px 0 6px">«Проверить» — разбор именно этого товара на трёх площадках.</div>${n.top.map(t=>`<div class="cmrow">${img(t.photo)}<div style="min-width:0"><b>${esc(t.name)}</b><div class="s">${fm(t.gmv)} ₽ за 28 дн · ${fr(t.price)}${ok(t.drr)?' · ДРР '+N1.format(t.drr)+'%':''}</div><div class="w">${esc(t.seller||'')}</div>
-    <div class="yn"><button class="press" data-ckq="${esc(t.link)}">${IC.check} Проверить</button><a class="press" href="${esc(t.link)}" target="_blank" rel="noopener" style="flex:1;height:34px;border-radius:10px;background:var(--fill);display:grid;place-items:center;font-size:13.5px;font-weight:650;color:var(--ink2)">Открыть на Озоне</a></div></div></div>`).join('')}`:''}`;
+  ${topBlock(n)}`;
+}
+/* топ-10 товаров ниши: выбрать несколько и проверить разом (29.10 Андрей: «куда пропали топы… добавить выбора и по товару любому, и по нише») */
+const SEL=new Set();
+function topBlock(n){
+  const top=(TOPS&&TOPS[n.id])||n.top||[];
+  if(!top.length)return TOPS?`<h4>Топ товаров ниши</h4><div class="note">${TOPS_NO?'Топ этой ниши ещё собирается — появится после обновления данных.':'Озон не отдал товары этой ниши за 28 дней.'}</div>`:`<h4>Топ товаров ниши</h4><div class="skel" style="height:80px"></div>`;
+  return `<h4>Топ-${top.length} товаров ниши за 28 дней</h4>
+  <div class="note" style="margin:-4px 0 8px">Откуда: кабинет Озона, «Аналитика → Товары на Ozon» — продажи всех продавцов за 28 дней по данным самого Озона (не оценка), на ${esc(D.at)}. Отметьте товары и нажмите «Проверить выбранные» — каждый разберу на трёх площадках.</div>
+  ${top.map((t,i)=>`<div class="cmrow"><label class="pick1" title="Выбрать для проверки"><input type="checkbox" data-sel="${esc(t.link)}"${SEL.has(t.link)?' checked':''}><span>${i+1}</span></label>${img(t.photo)}<div style="min-width:0"><b>${esc(t.name)}</b>
+    <div class="s">${t.cnt?fi(t.cnt)+' шт · ':''}${fm(t.gmv)} ₽ за 28 дн · ${fr(t.price)}${ok(t.drr)?' · ДРР '+N1.format(t.drr)+'%':''}</div><div class="w">${esc(t.seller||'')}${t.rating?' · ★ '+N1.format(t.rating):''}${t.reviews?' · '+fi(t.reviews)+' отзывов':''}</div>
+    <div class="yn"><button class="press" data-ckq="${esc(t.link)}">${IC.check} Проверить</button><a class="press" href="${esc(t.link)}" target="_blank" rel="noopener" style="flex:1;height:34px;border-radius:10px;background:var(--fill);display:grid;place-items:center;font-size:13.5px;font-weight:650;color:var(--ink2)">На Озоне ${IC.ext}</a></div></div></div>`).join('')}
+  <button class="btn press" id="cksel" style="width:100%;margin-top:14px"${SEL.size?'':' disabled'}>${IC.check} Проверить выбранные${SEL.size?' ('+SEL.size+')':''}</button>`;
 }
 
 /* ---------- проверка: товар по ссылке или ниша (Андрей 29.10: «проверяем товар или нишу — нужно и нишу по МП, и каждый товар отдельно») ---------- */
@@ -1072,26 +1126,30 @@ function relaySend(o){
   if(!D.relay||!D.relay.topic)return Promise.reject(new Error('нет адреса'));
   return fetch('https://ntfy.sh/'+D.relay.topic,{method:'POST',body:JSON.stringify(o)}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)});
 }
-async function startCheck(url,tid,label){
+async function startCheck(url,tid,label,quiet){
   url=(url||'').trim();if(!url)return;
   const id=Math.random().toString(16).slice(2,12),o={k:'check',id,url};if(tid)o.tid=tid;
   try{await relaySend(o)}catch(e){toast('Не отправилось: '+esc(e.message));return}
   const p=ZS.get('pend',[]);p.unshift({id,url,label:label||url,t:Date.now()});ZS.set('pend',p.slice(0,20));
+  if(quiet)return;
   toast(tid?'Проверяю нишу — около 2 минут':'Проверяю товар — около 3 минут');closeSheet();S.t='check';S.ck=null;render(true);poll(true);
 }
 const startNiche=n=>startCheck('niche:'+n.name,n.id,'Ниша: '+n.name);
 /* ход проверки: шаги и примерное время — 29.10 «5 минут думает» */
 const STEPS={product:['Открываю товар','Смотрю Озон','Смотрю WB','Смотрю Маркет','Сверяю конкурентов по фото','Пишу расклад'],niche:['Открываю нишу','Смотрю Озон','Смотрю WB','Смотрю Маркет','Пишу расклад']};
+/* обратный отсчёт: от начала проверки на сервере (t0) до обычной длительности; тикает каждую секунду */
 function progress(c){
-  const st=STEPS[c.kind==='niche'?'niche':'product'],i=Math.max(0,st.indexOf(c.step)),k=(i+.5)/st.length;
-  const left=Math.max(0,Math.round((c.kind==='niche'?120:200)*(1-k)/60));
-  return `<div class="prog"><i style="animation:none;width:${Math.round(k*100)}%;transition:width .8s var(--out)"></i></div><div class="s" style="margin-top:6px">${esc(c.step||'Собираю…')} · шаг ${i+1} из ${st.length}${left?` · ещё ~${left} мин`:' · почти готово'}</div>`;
+  const st=STEPS[c.kind==='niche'?'niche':'product'],i=Math.max(0,st.indexOf(c.step)),k=(i+.5)/st.length,exp=c.kind==='niche'?120:190;
+  return `<div class="prog"><i style="animation:none;width:${Math.round(k*100)}%;transition:width .8s var(--out)"></i></div><div class="s" style="margin-top:6px">${esc(c.step||'Собираю…')} · шаг ${i+1} из ${st.length} · <span class="eta" data-t0="${c.t0||0}" data-exp="${exp}"></span></div>`;
 }
+function tickEta(){$$('.eta').forEach(el=>{const t0=+el.dataset.t0,exp=+el.dataset.exp;if(!t0){el.textContent='';return}
+  const left=Math.round(exp-(Date.now()/1000-t0));el.textContent=left>5?`осталось ~${Math.floor(left/60)?Math.floor(left/60)+' мин '+String(left%60).padStart(2,'0')+' с':left+' с'}`:'почти готово'})}
+setInterval(tickEta,1000);
 function ckRow(c){
   if(c.local)return `<div class="card ckr reveal"><div class="ph"></div><div style="min-width:0"><b>${esc(c.label||c.url)}</b><div class="s">В очереди — сервер возьмёт в течение минуты</div><div class="prog"><i></i></div></div><span class="spin"></span></div>`;
   const p=c.product||{},work=c.state==='work',nm=c.kind==='niche'?'Ниша: '+(p.name||''):(p.name||c.src);
   return `<button class="card ckr press reveal" data-ck="${esc(c.id)}">${p.photo?img(p.photo):`<div class="ph" style="display:grid;place-items:center;color:var(--acc)">${c.kind==='niche'?IC.pick:''}</div>`}<div style="min-width:0"><b>${esc(nm)}</b>
-   ${work?progress(c):`<div class="s">${c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')+(c.secs?' · '+Math.ceil(c.secs/60)+' мин':'')}</div><div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}">${MPN[m]} · ${VL[v]}</span>`}).join('')}</div>`}</div>
+   ${work?progress(c):`<div class="s">${c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')+(c.secs?' · '+Math.ceil(c.secs/60)+' мин':'')}</div><div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}" title="${VL[v]}">${VI[v]} ${MPN[m]}</span>`}).join('')}</div>`}</div>
    ${work?'<span class="spin"></span>':IC.chev}</button>`;
 }
 function vCheck(){
@@ -1128,6 +1186,9 @@ function mpPanel(c,m){
   ${m==='oz'&&n.gmv28?`<div class="sec"><h2>Маржа с 1 шт</h2><span>как в Юнитке</span></div><div class="card pad reveal">${margBlock(n)}</div>`:''}
   <div class="sec"><h2>${niche?'Топ товаров ниши':'Топ таких же товаров'}</h2><span>${niche?'нажмите — проверить товар':top.length?`${top.length} из ${cs.length} проверенных`:''}</span></div>
   ${top.length?`<div class="rail">${top.map((x,i)=>cmCard(m,x,i,niche)).join('')}</div>`:'<div class="card pad mut">Такого же товара в выдаче не нашлось. Нажмите «Выбрать вручную» и отметьте похожие.</div>'}
+  <div class="note" style="margin-top:2px">${{oz:'Откуда: кабинет Озона, «Товары на Ozon» — продажи за 28 дней по данным самого Озона (точные, не оценка).',
+    wb:'Откуда: выдача WB по запросу «'+esc(c.query||'')+'», первая сотня. Продаж WB не показывает (только в Джеме «Премиум») — вместо них число отзывов, это примерный ориентир.',
+    ym:'Откуда: первая страница выдачи Маркета по запросу «'+esc(c.query||'')+'». «Купили N» пишет сам Маркет на карточке — ориентир, округлён.'}[m]}</div>
   ${p.vova?`<div class="card pad reveal" style="margin-top:10px"><div class="kv num"><span>Закупка по Вове — держать на месяц</span><b>${fi(p.vova.target[0])}–${fi(p.vova.target[1])} шт</b><span class="hint">продажи ${p.vova.donors.length} ${plur(p.vova.donors.length,'донора','доноров','доноров')} из топа за 28 дней (${p.vova.donors.map(fi).join(', ')}) +25–50%</span></div></div>`:''}
   ${niche?'':`<div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost press" data-pickall="${m}" style="flex:1">Выбрать вручную${oth?` · ещё ${oth}`:''}</button><button class="btn ghost press" data-reform="${m}" style="flex:1">${IC.refresh} Переформировать</button></div>`}`;
 }
@@ -1139,8 +1200,8 @@ function vResult(c){
   return `${back}
   <div class="card phero reveal">${niche?`<div style="width:88px;height:88px;border-radius:16px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center">${IC.pick}</div>`:img(p.photo)}<div style="min-width:0"><h1>${esc(niche?'Ниша: '+p.name:p.name)}</h1><p>${niche?'проверка ниши на трёх площадках':(p.price?fr(p.price)+' · ':'')+(MPN[p.mp]||'название')}${p.link?` · <a href="${esc(p.link)}" target="_blank" rel="noopener">открыть ${IC.ext}</a>`:''}</p></div></div>
   ${a.overall?`<div class="card adv1 reveal"><div class="k">Расклад</div>${esc(a.overall)}</div>`:''}
-  <div class="vsum" id="vsum">${['oz','wb','ym'].map(k=>{const v=(((c.mp||{})[k]||{}).verdict||{}).v||'na';return `<button class="vs1 press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><em>${MPN[k]}</em><b class="${v}">${VL[v]}</b></button>`}).join('')}</div>
-  <div class="seg sgm" id="mpseg" style="margin-top:14px">${['oz','wb','ym'].map(k=>`<button class="${k===m?'on':''}" data-mp="${k}"><i class="d" style="background:${MPC[k]}"></i>${MPN[k]}</button>`).join('')}</div>
+  <div class="card mpb reveal" id="mpb">${['oz','wb','ym'].map(k=>{const p=(c.mp||{})[k]||{},vd=p.verdict||{},v=vd.v||'na',why=(v==='ok'?(vd.plus||[])[0]:(vd.why||[])[0])||(vd.plus||[])[0]||p.err||'';
+    return `<button class="mprow press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><span class="mpn"><i></i>${MPN[k]}</span><span class="vp ${v}">${VI[v]} ${VL[v]}</span><span class="w1">${esc(why)}</span>${IC.chev}</button>`}).join('')}</div>
   <div id="mppanel">${mpPanel(c,m)}</div>
   <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>`;
 }
@@ -1314,13 +1375,16 @@ document.addEventListener('click',e=>{
   const gt=t.closest('[data-goto]');if(gt){go(gt.dataset.goto);return}
   const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
   const cq=t.closest('[data-ckq]');if(cq){startCheck(cq.dataset.ckq);return}
-  const nb=t.closest('[data-n]');if(nb&&BY[nb.dataset.n]){openSheet(nicheSheet(BY[nb.dataset.n]),'niche');return}
+  const sl=t.closest('[data-sel]');if(sl){const l=sl.dataset.sel;if(sl.checked)SEL.add(l);else SEL.delete(l);const b=$('#cksel');if(b){b.disabled=!SEL.size;b.innerHTML=`${IC.check} Проверить выбранные${SEL.size?' ('+SEL.size+')':''}`}return}
+  if(t.closest('#cksel')){const ls=[...SEL];SEL.clear();(async()=>{for(const l of ls){await startCheck(l,null,null,true)}toast(`Отправил ${ls.length} ${plur(ls.length,'товар','товара','товаров')} — каждый около 3 минут`);closeSheet();S.t='check';S.ck=null;render(true);poll(true)})();return}
+  const nb=t.closest('[data-n]');if(nb&&BY[nb.dataset.n]){openSheet(nicheSheet(BY[nb.dataset.n]),'niche',nb.dataset.n);return}
   const cm=t.closest('[data-ckm]');if(cm){if(cm.dataset.ckm===S.ckmode)return;S.ckmode=cm.dataset.ckm;ZS.set('ckmode',S.ckmode);render(false);setTimeout(()=>{const i=$('#ckurl')||$('#ckniche');i&&i.focus()},350);return}
   if(t.closest('#ckgo')){if(S.ckmode==='niche')goNiche(($('#ckniche')||{}).value);else startCheck(($('#ckurl')||{}).value);return}
   const ck=t.closest('[data-ck]');if(ck){S.ck=ck.dataset.ck;render(true);return}
   if(t.closest('[data-back]')){S.ck=null;render(true);return}
-  const mp=t.closest('[data-mp]');if(mp&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(!c||mp.dataset.mp===S.mp)return;S.mp=mp.dataset.mp;ZS.set('mp',S.mp);
-    segPick($('#mpseg'),$(`#mpseg [data-mp="${S.mp}"]`));$$('#vsum .vs1').forEach(b=>b.classList.toggle('on',b.dataset.mp===S.mp));swapIn($('#mppanel'),mpPanel(c,S.mp),()=>{reveal($('#mppanel'));thumbs($('#mppanel'))});return}
+  const mp=t.closest('[data-mp]');if(mp&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(!c)return;
+    if(mp.dataset.mp!==S.mp){S.mp=mp.dataset.mp;ZS.set('mp',S.mp);$$('#mpb .mprow').forEach(b=>b.classList.toggle('on',b.dataset.mp===S.mp));swapIn($('#mppanel'),mpPanel(c,S.mp),()=>{reveal($('#mppanel'));thumbs($('#mppanel'))})}
+    const pn=$('#mppanel');if(pn)setTimeout(()=>window.scrollTo({top:scrollY+pn.getBoundingClientRect().top-($('#top').offsetHeight+12),behavior:RM?'auto':'smooth'}),RM?0:180);return}
   const cmb=t.closest('[data-cm]');if(cmb&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)cmSheet(c,S.mp,cmb.dataset.cm);return}
   const pa=t.closest('[data-pickall]');if(pa&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)pickSheet(c,pa.dataset.pickall);return}
   const rf=t.closest('[data-reform]');if(rf&&S.ck){relaySend({k:'reform',id:S.ck,mp:rf.dataset.reform}).then(()=>{toast('Переформирую — новые кандидаты через 2–3 минуты');poll(true)}).catch(()=>toast('Не отправилось'));return}
@@ -1332,7 +1396,7 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- отрисовка ---------- */
-function after(){reveal($('#view'));thumbs($('#view'));qbar()}
+function after(){reveal($('#view'));thumbs($('#view'));qbar();tickEta()}
 function render(anim){
   ZS.set('tab',S.t);renderTabs();if(anim){mini=false;$('#top').classList.remove('mini')}
   const v=$('#view'),html=S.t==='check'?vCheck():S.t==='mine'?vMine():S.t==='rules'?vRules():vPick();
@@ -1342,7 +1406,7 @@ function render(anim){
 function start(d){D=d;R=d.rules;BY={};d.niches.forEach(n=>BY[n.id]=n);
   applyTheme(ZS.get('theme','auto'));
   const hs=location.hash.slice(1);if(hs.startsWith('check=')){S.t='check';history.replaceState(null,'',location.pathname);setTimeout(()=>{$('#ckurl')&&($('#ckurl').value=decodeURIComponent(hs.slice(6)))},300)}
-  render(false);loadChecks().then(()=>{if(S.t==='check')render(false);else renderTabs();poll(false)});
+  render(false);loadChecks().then(()=>{if(S.t==='check')render(false);else renderTabs();poll(false)});loadTops();
 }
 try{history.scrollRestoration='manual'}catch(e){}
 document.addEventListener('touchstart',()=>{},{passive:true});
