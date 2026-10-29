@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600;700&family=Martian+Mono:wght@400;500&family=Rubik:wght@400;500;600;700;800;900&family=Rubik+Moonrocks&family=Press+Start+2P&display=swap">
 <script>/* темы Склеек; «Фарфор» и «Шалфей» убраны 29.10 (Андрей) — у кого они стояли, будет «как в системе» */
 var SKIN_OK=['graphite','aurora','jim','space','farcry','sonic','solitaire','birds'];try{var k=JSON.parse(localStorage.getItem('shov.skin')||'"auto"');if(SKIN_OK.indexOf(k)>=0)document.documentElement.dataset.skin=k;
-  if(['farcry','sonic','solitaire','birds'].indexOf(k)>=0){document.documentElement.dataset.igra=k;document.write('<link rel="stylesheet" id="igcss" href="/unitka/igry.css?v=1">')}}catch(e){}</script>
+  if(['farcry','sonic','solitaire','birds'].indexOf(k)>=0){document.documentElement.dataset.igra=k;document.write('<link rel="stylesheet" id="igcss" href="/unitka/igry.css?v=2">')}}catch(e){}</script>
 <style>
 /* Склейки: закреплённая шапка с выбором магазина, холст разделов, листы снизу. Токены: страница (fg) и панели (ink) раздельно — для игровой темы. */
 :root{
@@ -1508,8 +1508,8 @@ const IGRY_T=['farcry','sonic','solitaire','birds'];let igryP=null;
 function igry(k){const on=IGRY_T.includes(k),r=document.documentElement;
   if(!on){if(window.IGRY)IGRY.apply(null);delete r.dataset.igra;return}
   r.dataset.igra=k;
-  if(!document.getElementById('igcss')){const l=document.createElement('link');l.id='igcss';l.rel='stylesheet';l.href='/unitka/igry.css?v=1';document.head.appendChild(l)}
-  if(!igryP)igryP=new Promise(ok=>{const s=document.createElement('script');s.src='/unitka/igry.js?v=1';s.onload=ok;document.head.appendChild(s)});
+  if(!document.getElementById('igcss')){const l=document.createElement('link');l.id='igcss';l.rel='stylesheet';l.href='/unitka/igry.css?v=2';document.head.appendChild(l)}
+  if(!igryP)igryP=new Promise(ok=>{const s=document.createElement('script');s.src='/unitka/igry.js?v=2';s.onload=ok;document.head.appendChild(s)});
   igryP.then(()=>{const t=IGRY_T.includes(S.skin)?S.skin:null;IGRY.apply(t,{name:'Склейки',wrap:$('#spWrap'),onSound:syncSound});syncSound();requestAnimationFrame(hh)})}
 function renderPop(){if(PICK)PICK.set(S.skin)}
 function togglePop(force){if(PICK&&!force)PICK.close()}   // прежняя всплывашка «Оформление» заменена списком как в Юнитке; вызовы закрыть — остались
