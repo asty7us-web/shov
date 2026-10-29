@@ -941,6 +941,30 @@ window.svcPicker=o=>{
   draw();
   return {set(k){cur=k;draw()},close(){show(false)}};
 };
+/* «назад» на телефоне не выкидывает с сайта (Андрей 29.10: «назад сначала закрывает всплывающее, потом в начало раздела, потом на главную,
+   а на главной — наверх; с сайта не выкидывать, и так везде надо»). Над страницей — запись-«страж»; «назад» снимает её: делаем один шаг
+   и ставим стража снова. Стража ставим при первом касании: записи, добавленные раньше, Chrome кнопкой «назад» пропускает.
+   svcBack({pop:[шаги страницы: вернуть true, если что-то закрыли], main: перейти в главный раздел (true, если перешли), home: «это главная»}) */
+window.svcBack=o=>{
+  const q=s=>document.querySelector(s),rs=history.replaceState.bind(history);
+  let gu=location.href;   // адрес записи-стража: страницы меняют в нём раздел (#skleyki и т.п.) — после «назад» ставим стража с ним же
+  history.replaceState=function(s,t,u){if(history.state&&history.state.svg&&!(s&&s.svg))s=Object.assign({},s,{svg:1});rs(s,t,u);if(history.state&&history.state.svg)gu=location.href};
+  const arm=()=>{try{if(!(history.state&&history.state.svg)){rs(Object.assign({},history.state,{svb:1}),'');history.pushState({svg:1},'')}gu=location.href}catch(e){}};
+  ['pointerdown','keydown'].forEach(k=>document.addEventListener(k,arm,{capture:true,once:true}));
+  const step=()=>{
+    for(const f of o.pop||[])if(f())return;                                   // всплывающее страницы: фишки, листы, окна
+    if(m.classList.contains('on')){open(false);return}                       // выбор сервиса
+    const t=q('.svt-btn[aria-expanded="true"]');if(t){t.click();return}       // выбор темы
+    const big=q('#sxCard.big [data-sx="big"],#ptCard.big [data-pt="big"],#abCard.big [data-ab="big"],#spCard.big [data-sp="big"]');if(big){big.click();return}
+    const g=q('#sxCard.flip [data-sx="back"],#ptCard.flip [data-pt="back"],#abCard.flip [data-ab="back"]');if(g){g.click();return}   // игра — обратно на баннер
+    if(scrollY>40){scrollTo({top:0,behavior:'smooth'});return}              // в начало раздела
+    if(o.main&&o.main())return;                                               // на главный раздел
+    if(o.home)o.home();                                                       // уже на главной, наверху
+  };
+  addEventListener('popstate',e=>{if(e.state&&e.state.svg){gu=location.href;return}
+    const was=location.href;step();const u=location.href!==was?location.href:gu;   // шаг сам сменил раздел — его адрес, иначе — адрес, с которого ушли
+    try{history.pushState({svg:1},'',u);gu=u}catch(x){}});
+};
 })();
 /*/SVC:JS*/</script>
 <div id="spWrap"></div>
@@ -1430,7 +1454,7 @@ function render(){
   if(S.focus){const t=$(`[data-ty$=":${S.focus}"]`);if(t)setTimeout(()=>t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'}),120);S.focus=null}
 }
 function afterMount(root){animRings(root);animCounts(root);bindTilt(root);requestAnimationFrame(()=>mountStages(root))}
-function go(view){if(!VIEWS.some(v=>v[0]===view))view='obzor';const same=S.view===view;S.view=view;const run=()=>{render();if(!same)window.scrollTo({top:0,behavior:'instant'})};if(document.startViewTransition&&!RM&&!same)document.startViewTransition(run);else run();try{history.replaceState(null,'','#'+view)}catch(e){}}
+function go(view){if(!VIEWS.some(v=>v[0]===view))view='obzor';const same=S.view===view;S.view=view;const run=()=>{render();if(!same)window.scrollTo({top:0,behavior:'instant'})};if(document.startViewTransition&&!RM&&!same)document.startViewTransition(run);else run();try{history.replaceState(history.state,'','#'+view)}catch(e){}}   // состояние записи не трогаем — на нём «страж» кнопки «назад» (svcBack)
 function hh(){document.documentElement.style.setProperty('--hh',$('#hdr').offsetHeight+'px')}
 
 /* лист */
@@ -1791,6 +1815,9 @@ function selAll(scope){
 function rerenderView(){const y=scrollY;render();window.scrollTo({top:y})}
 $('#sheetx').innerHTML=ICON.x;
 PICK=svcPicker({btn:'#skinbtn',list:SKINS,cur:S.skin,sw:SKIN_SW,onPick:k=>{applySkin(k,true);buzz();svcTheme(1,k);if(S.view==='obzor'&&D)rerenderView()}});
+/* «назад» на телефоне не выкидывает с сайта (Андрей 29.10): триал → подсказка → лист снизу → (общее: меню, игра, наверх) → «Обзор» → «это главная» */
+svcBack({pop:[()=>!!TR&&(tourEnd(),true),()=>!!tipOwner&&(hideTip(),true),()=>document.documentElement.classList.contains('sheet-open')&&(closeSheet(),true)],
+  main:()=>{if(S.view==='obzor')return false;go('obzor');return true},home:()=>toast('Это главная')});
 $('#trialbtn').addEventListener('click',()=>tourStart());
 $('#sheetx').addEventListener('click',closeSheet);$('#scrim').addEventListener('click',closeSheet);
 document.addEventListener('keydown',e=>{if(TR){if(e.key==='Escape')tourEnd();else if(e.key==='ArrowRight')tourGo(TR.i+1,1);else if(e.key==='ArrowLeft')tourGo(TR.i-1,-1);return}if(e.key==='Escape'){if($('#pop').classList.contains('open'))togglePop(false);else if(tipOwner)hideTip();else closeSheet()}});
