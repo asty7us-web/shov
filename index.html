@@ -1603,7 +1603,8 @@ function setSound(off){const t=curT();if(!IGRY_T.includes(t))LS.set('mute',off?1
 $('#sndbtn').addEventListener('click',()=>setSound(!soundOff()));
 /* Андрей 28.10: музыка без шва и сама возвращается после сна вкладки (как в Отклике). Два плеера по очереди: за SP_XF с до конца
    второй начинает трек с начала и нарастает, первый затихает. Сторож раз в 2 с и при возврате во вкладку. Новый трек — строка в SP_TRACKS. */
-const SP_TRACKS=[['space-music.mp3','Космос']];
+/* Андрей 29.10: четыре мелодии по 3,3–3,5 мин, идут по очереди с плавным переходом; ♫ в окошке — следующая */
+const SP_TRACKS=[['space-music.mp3','Космос 1'],['space-music-2.mp3','Космос 2'],['space-music-3.mp3','Космос 3'],['space-music-4.mp3','Космос 4']];
 const SP_VOL=.4,SP_XF=5;
 let spAud=null;
 const spP={a:[],cur:0,want:false,t:0,lastT:-1,stall:0};
@@ -1611,8 +1612,8 @@ try{spP.t=+localStorage.getItem('shov.spTrack')||0}catch(e){}
 function spFade(el,to,ms,done){clearInterval(el._fd);const from=el.volume,t0=performance.now();
   el._fd=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k>=1){clearInterval(el._fd);if(done)done()}},50)}
 function spEl(i){if(!spP.a[i]){const el=new Audio();el.preload='auto';el.volume=0;
-  el.addEventListener('timeupdate',()=>{if(spP.want&&el===spP.a[spP.cur]&&el.duration&&!el._xf&&el.duration-el.currentTime<SP_XF)spCross(ms0)});
-  el.addEventListener('ended',()=>{if(spP.want&&el===spP.a[spP.cur])spCross(ms0)});spP.a[i]=el}return spP.a[i]}
+  el.addEventListener('timeupdate',()=>{if(spP.want&&el===spP.a[spP.cur]&&el.duration&&!el._xf&&el.duration-el.currentTime<SP_XF)spNext(ms0)});
+  el.addEventListener('ended',()=>{if(spP.want&&el===spP.a[spP.cur]&&!el._xf)spNext(ms0)});spP.a[i]=el}return spP.a[i]}
 const ms0=SP_XF*1000;
 function spCross(ms){const old=spP.a[spP.cur];spP.cur=1-spP.cur;const nw=spEl(spP.cur),f=SP_TRACKS[spP.t%SP_TRACKS.length][0];
   if(old){old._xf=true;spFade(old,0,ms,()=>{old.pause();old._xf=false})}
@@ -1623,7 +1624,8 @@ function spMusic(on){spP.want=!!on&&curT()==='space';
   const el=spP.a[spP.cur];if(el&&el.src&&!el.paused&&!el._xf)return;
   if(el&&el.src&&el.currentTime>0&&el.duration-el.currentTime>SP_XF){el.volume=0;el.play().then(()=>spFade(el,SP_VOL,1500)).catch(()=>{});spAud=el;return}
   spCross(1500)}
-function spNext(){if(SP_TRACKS.length<2)return;spP.t=(spP.t+1)%SP_TRACKS.length;try{localStorage.setItem('shov.spTrack',spP.t)}catch(e){}if(spP.want)spCross(3000)}
+function spNext(ms){if(SP_TRACKS.length<2){if(ms)spCross(ms);return}spP.t=(spP.t+1)%SP_TRACKS.length;try{localStorage.setItem('shov.spTrack',spP.t)}catch(e){}
+  $$('[data-sp="next"]').forEach(b=>b.title='Музыка: '+SP_TRACKS[spP.t][1]+' — сменить');if(spP.want)spCross(ms||3000)}
 function spWatch(){if(!spP.want||document.hidden)return;const el=spP.a[spP.cur];if(!el||!el.src){spMusic(true);return}
   if(el.paused){el.play().catch(()=>{});return}
   if(el.currentTime===spP.lastT){if(++spP.stall>=2){spP.stall=0;el.pause();el.play().catch(()=>{})}}else spP.stall=0;spP.lastT=el.currentTime}
@@ -1646,7 +1648,7 @@ function spaceDeco(on){
    '<div class="sptop"><span class="splogo">СКЛЕЙКИ</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
    `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
    '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
-   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button><button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
+   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button>${SP_TRACKS.length>1?`<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[spP.t%SP_TRACKS.length][1]} — сменить" style="font-size:18px;line-height:1">♫</button>`:''}<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
   w.appendChild(el);
   const go=dd=>spShow(el,el._i+dd,dd);
   el.querySelector('.prev').onclick=()=>go(-1);el.querySelector('.next').onclick=()=>go(1);
@@ -1655,6 +1657,7 @@ function spaceDeco(on){
   el.querySelector('.spbtns').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b)return;
     if(b.dataset.sp==='play')el.classList.toggle('stop');
     else if(b.dataset.sp==='mute')setSound(b.getAttribute('aria-pressed')!=='true');
+    else if(b.dataset.sp==='next')spNext();
     else spBig(el,!el.classList.contains('big'))});
   el.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){go(1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}else if(e.key==='Escape'&&el.classList.contains('big'))spBig(el,false)});
   // свайп: фраза едет за пальцем; дальше 50 px — следующая; короткий тап по краю на телефоне — тоже листает
