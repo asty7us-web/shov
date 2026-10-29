@@ -310,11 +310,11 @@ function viewPick(){
   <div class="note">Все категории Озона за 28 дней и год из ЛК «Аналитика → Категории». Обновлено ${esc(D.at)} · ниш проверено ${fi(D.counts.all)}.</div>
   <div class="card">
     <div class="calc">
-      <div class="fld"><label for="iB">Бюджет на закупку 1 шт, ₽</label><input id="iB" inputmode="numeric" placeholder="например 300" value="${esc(S.B)}"></div>
-      <div class="fld"><label for="iW">Желаемая прибыль с 1 шт, ₽</label><input id="iW" inputmode="numeric" placeholder="например 150" value="${esc(S.W)}"></div>
+      <div class="fld"><label for="iB">Закупка 1 шт, ₽</label><input id="iB" inputmode="numeric" placeholder="например 300" value="${esc(S.B)}"></div>
+      <div class="fld"><label for="iW">Прибыль с 1 шт, ₽</label><input id="iW" inputmode="numeric" placeholder="например 150" value="${esc(S.W)}"></div>
       <div class="fld wide"><label for="iE">Расходы Озона, % от цены</label><input id="iE" inputmode="numeric" placeholder="${R.default_exp}" value="${esc(S.E==null?'':S.E)}"></div>
     </div>
-    <div class="note" style="margin:0 0 10px">Расходы — комиссия, логистика, эквайринг, хранение (по умолчанию ${R.default_exp}%). Реклама сверху — ДРР топ-10 ниши (если не сняли — ${R.default_drr}%). Маржа не ниже ${R.margin_min}%.</div>
+    <div class="note" style="margin:0 0 10px">Закупка — ваш бюджет на 1 шт, прибыль — сколько хотите заработать с 1 шт. Расходы — комиссия, логистика, эквайринг, хранение (по умолчанию ${R.default_exp}%). Реклама сверху — ДРР топ-10 ниши (если не сняли — ${R.default_drr}%). Маржа не ниже ${R.margin_min}%.</div>
     <label class="tog"><input type="checkbox" id="iFit"${S.fit?' checked':''}> Только ниши, где бюджет и прибыль сходятся</label>
   </div>
   <div style="height:12px"></div>
