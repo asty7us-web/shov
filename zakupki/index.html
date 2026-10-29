@@ -9,8 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Закупки">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="/shov/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/shov/pwa/apple-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="pwa/apple-180.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f8bff'/%3E%3Cpath d='M8 12h16l-1.6 10.2a2 2 0 0 1-2 1.8h-8.8a2 2 0 0 1-2-1.8z' fill='white'/%3E%3Cpath d='M12 12a4 4 0 0 1 8 0' stroke='white' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
 <script>(function(){try{var t=JSON.parse(localStorage.getItem('zak.theme')||'"auto"');if(['light','dark','paper','paperdim','space'].includes(t))document.documentElement.dataset.theme=t}catch(e){}})()</script>
 <style>
@@ -72,9 +72,10 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .svc-btn{display:inline-flex;align-items:center;gap:9px;height:40px;margin:0 0 0 -6px;padding:0 9px 0 5px;border:0;border-radius:13px;background:transparent;color:inherit;cursor:pointer;
   -webkit-tap-highlight-color:transparent;white-space:nowrap;transition:background-color .2s ease,transform .4s cubic-bezier(.34,1.56,.64,1)}
 .svc-btn .svc-nm{font:inherit;letter-spacing:inherit}
-@media (hover:hover){.svc-btn:hover{background:var(--svc-hover)}}
+/* подложка — в цвет текста шапки (в игровых темах шапка цветная, а название белое) */
+@media (hover:hover){.svc-btn:hover{background:var(--svc-hover);background:color-mix(in srgb,currentColor 13%,transparent)}}
 .svc-btn:active{transform:scale(.95);transition-duration:.12s}
-.svc-btn[aria-expanded="true"]{background:var(--svc-hover)}
+.svc-btn[aria-expanded="true"]{background:var(--svc-hover);background:color-mix(in srgb,currentColor 13%,transparent)}
 .svc-btn .svc-ic{width:30px;height:30px;border-radius:9px}
 .svc-chev{width:16px;height:16px;flex:none;opacity:.55;margin-left:-3px;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
 .svc-btn[aria-expanded="true"] .svc-chev{transform:rotate(180deg)}
@@ -381,6 +382,8 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .cmrow .w{font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.35}
 .yn{display:flex;gap:6px;margin-top:8px}
 .yn button{flex:1;height:34px;border-radius:10px;background:var(--fill);font-size:13.5px;font-weight:650;color:var(--ink2)}
+.yn button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.yn button svg{width:16px;height:16px;flex:none}
 .yn button.y.on{background:var(--good);color:#fff}.yn button.n.on{background:var(--bad);color:#fff}
 .qbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:65;display:flex;align-items:center;gap:10px;
   padding:8px 8px 8px 16px;border-radius:18px;background:var(--card2);box-shadow:var(--sh2);font-size:14px;font-weight:600;white-space:nowrap;animation:qin .5s var(--spring) both}
@@ -652,7 +655,10 @@ const ZS={get(k,d){try{const v=localStorage.getItem('zak.'+k);return v==null?d:J
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const b64u8=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
 let KEY=null,SALT=null,D=null,R=null,BY={},CK={checks:[]};
-const S={t:ZS.get('tab','pick'),lens:ZS.get('lens','grow'),c1:ZS.get('c1',''),ver:ZS.get('ver','go'),q:'',B:ZS.get('B',''),W:ZS.get('W',''),E:ZS.get('E',null),fit:ZS.get('fit',false),n:30,ck:null,mp:ZS.get('mp','oz')};
+/* M — как считать маржу (как в Юнитке): иксы (закупка = цена ÷ иксы), логистика и возврат ₽, эквайринг, налог, реклама по умолчанию, нужная маржа */
+const MDEF={x:3,logi:130,back:95,acq:1,tax:8,drr:10,target:15};
+const S={t:ZS.get('tab','pick'),lens:ZS.get('lens','grow'),c1:ZS.get('c1',''),c2:ZS.get('c2',''),ver:ZS.get('ver','go'),q:'',B:ZS.get('B',''),fit:ZS.get('fit',false),
+  M:Object.assign({},MDEF,ZS.get('M',{})),n:30,ck:null,mp:ZS.get('mp','oz'),ckmode:ZS.get('ckmode','prod')};
 
 /* ---------- данные: ключ общий со Склейками и Конкурентами (пароль Юнитки) ---------- */
 async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
@@ -709,7 +715,7 @@ const IC={
  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>'
 };
-const TABS=[['pick','Ниши'],['check','Проверка'],['mine','Наши'],['rules','Как считаем']];
+const TABS=[['pick','Ниши'],['check','Проверка'],['mine','Наши'],['rules','Помощь']];
 
 /* ---------- «Космос»: аффирмации, звёзды, метеоры, музыка (как в Конкурентах) ---------- */
 const SP_AFF=['Всё складывается наилучшим образом для моего высшего блага','Из этой ситуации выйдет только хорошее для меня','Я в безопасности','Вселенная любит меня',
@@ -938,180 +944,214 @@ function seasonText(s){
 }
 const sTag=s=>!s||!s.trend||s.trend==='nodata'?'':s.trend==='young'?'<span class="tag">новая категория</span>':s.trend==='end'?'<span class="tag no">сезон кончается</span>':s.trend==='start'?'<span class="tag ok">сезон начинается</span>':'<span class="tag">сезон ровный</span>';
 
-/* ---------- юнит-экономика 1 шт ---------- */
-function unit(n,P){
-  const E=ok(S.E)?+S.E:R.default_exp,Dr=ok(n&&n.drr_top)?n.drr_top:R.default_drr;P=P||(n&&n.price)||0;
-  const net=P*(1-(E+Dr)/100),W=ok(S.W)?+S.W:null,B=ok(S.B)?+S.B:null,floor=P*R.margin_min/100,maxBuy=net-Math.max(W||0,floor);
-  let profit=null,margin=null,fit=true;
-  if(B!=null){profit=net-B;margin=P?profit/P*100:null;fit=profit>=(W||0)&&margin>=R.margin_min}else if(W!=null)fit=maxBuy>0;
-  return {E,Dr,P,net,W,B,maxBuy,profit,margin,fit,drrOwn:ok(n&&n.drr_top)};
+/* ---------- маржа 1 шт, как в Юнитке («жир», Андрей 29.10) ----------
+   Цена − комиссия Озона − эквайринг − логистика − возвраты (невыкуп × возврат) − реклама (ДРР) − налог (АУСН 8%) − закупка = остаётся.
+   Комиссия — с наших товаров этой ниши/подкатегории/категории, если без бустинга (≤35%), иначе 30% (по умолчанию в Юнитке). */
+function commOf(n){const c=D.comm||{};
+  for(const [x,src] of [[(c.type||{})[n.id],'как у нашего товара этой ниши'],[(c.cat2||{})[n.cat2],'как у наших товаров подкатегории'],[(c.cat1||{})[n.cat1],'как у наших товаров категории']])
+    if(x&&x.comm>0&&x.comm<=35)return {pct:x.comm,src};
+  return {pct:30,src:'по умолчанию, как в Юнитке'}}
+function marg(n,P){
+  const M=S.M;P=P||(n&&n.price)||0;const cm=commOf(n||{}),drr=ok(n&&n.drr_top)?n.drr_top:M.drr,bo=(ok(n&&n.buyout)?n.buyout:90)/100,buy=P/M.x;
+  const L={comm:P*cm.pct/100,acq:P*M.acq/100,logi:+M.logi,back:M.back*(1-bo),ads:P*drr/100,tax:P*M.tax/100,buy};
+  const left=P-Object.values(L).reduce((a,b)=>a+b,0),m=P?left/P*100:null;
+  return {P,L,left,m,cm,drr,drrOwn:ok(n&&n.drr_top),bo,buy,fit:m!=null&&m>=M.target&&(!ok(S.B)||buy<=+S.B)};
 }
-const hasBudget=()=>ok(S.B)||ok(S.W);
+const fatPts=n=>{const m=marg(n).m;return ok(m)?Math.round(25*Math.max(0,Math.min(1,m/30))):0};
+const score=n=>(n.pts?(n.pts.grow||0)+(n.pts.free||0)+(n.pts.season||0):0)+fatPts(n);
+const hasBudget=()=>ok(S.B)||S.fit;
 
 /* ---------- ниши: линзы и карточки ---------- */
-const LENS=[['grow','Растут и свободны','Спрос за год растёт, последние 28 дней в плюсе, сезон не кончается, гигантов немного — сверху самые перспективные.'],
- ['season','Сезон впереди','Ниши, у которых по прошлому году следующие 2 месяца сильнее рынка — закупать сейчас.'],
- ['fat','Жир','Где средний продавец ниши зарабатывает больше всего за 28 дней — денег хватает не только топам.'],
+const LENS=[['grow','Растут и свободны','Спрос за год растёт, последние 28 дней в плюсе, сезон не уходит, гигантов немного. Сверху — самая высокая «Перспектива».'],
+ ['season','Сезон впереди','По прошлому году следующие 2 месяца у этих ниш сильнее всего Озона — закупать сейчас.'],
+ ['fat','Маржа','Где после комиссии, логистики, рекламы, налога и закупки остаётся больше всего — расчёт как в Юнитке.'],
  ['all','Все ниши','Все проверенные ниши Озона по «Перспективе», включая «нет» — с причинами.']];
 function lensList(){
   const q=S.q.trim().toLowerCase();
-  let a=D.niches.filter(n=>(!S.c1||n.cat1===S.c1)&&(!q||(n.name+' '+n.cat2+' '+n.cat1).toLowerCase().includes(q)));
+  let a=D.niches.filter(n=>(!S.c1||n.cat1===S.c1)&&(!S.c2||n.cat2===S.c2)&&(!q||(n.name+' '+n.cat2+' '+n.cat1).toLowerCase().includes(q)));
   if(S.ver==='go')a=a.filter(n=>n.verdict!=='no');else if(S.ver!=='all')a=a.filter(n=>n.verdict===S.ver);
   if(S.lens==='grow')a=a.filter(n=>n.trendy&&n.verdict!=='no');
   if(S.lens==='season')a=a.filter(n=>n.season&&n.season.trend==='start');
-  if(S.fit&&hasBudget())a=a.filter(n=>unit(n).fit);
-  const k={grow:n=>-n.score,season:n=>-((n.season||{}).rel||0),fat:n=>-(n.fat||0),all:n=>-n.score}[S.lens]||(n=>-n.score);
-  return a.slice().sort((x,y)=>k(x)-k(y));
+  if(S.fit||ok(S.B))a=a.filter(n=>{const g=marg(n);return (!S.fit||g.m>=S.M.target)&&(!ok(S.B)||g.buy<=+S.B)});
+  const k={season:n=>-((n.season||{}).rel||0),fat:n=>-(marg(n).m||-99)}[S.lens]||(n=>-score(n));
+  return a.map(n=>[k(n),n]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
 }
-function ring(v,size){const r=24,c=2*Math.PI*r,col=v>=65?'var(--good)':v>=40?'var(--acc)':'var(--warn)';
-  return `<div class="ring" data-tip="Перспектива ${v} из 100: рост + свобода от гигантов + жир + сезон"><svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="${r}"/><circle class="fg" cx="28" cy="28" r="${r}" style="stroke:${col};--c:${c.toFixed(1)};--o:${(c*(1-v/100)).toFixed(1)}"/></svg><b>${v}</b></div>`}
+function ring(v){const r=24,c=2*Math.PI*r,col=v>=65?'var(--good)':v>=40?'var(--acc)':'var(--warn)';
+  return `<div class="ring" data-tip="Перспектива ${v} из 100: рост + свобода от гигантов + маржа + сезон"><svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="${r}"/><circle class="fg" cx="28" cy="28" r="${r}" style="stroke:${col};--c:${c.toFixed(1)};--o:${(c*(1-v/100)).toFixed(1)}"/></svg><b>${v}</b></div>`}
 function meters(n){
-  const p=n.pts||{},s=n.season||{};
+  const p=n.pts||{},s=n.season||{},g=marg(n),fp=fatPts(n);
   const m=(lab,val,pt,tipt)=>`<div class="m4 ${pt>=17?'g':pt>=9?'':'w'}" data-tip="${esc(tipt)}"><em>${lab}</em><b>${val}</b><div class="tr"><i style="--w:${Math.max(4,pt/25*100)}%"></i></div></div>`;
   const gtxt=n.young?'новая':ok(n.growth_y)?(n.growth_y>0?'+':n.growth_y<0?'−':'')+NF.format(Math.abs(n.growth_y))+'%':'—';
-  return `<div class="mm">${m('Рост',gtxt,p.grow||0,n.young?'Категория появилась или объединилась за год — рост не сравнить':'Как изменился оборот ниши за год')}${m('Свобода',ok(n.top5)?NF.format(100-n.top5)+'%':'—',p.free||0,'Сколько рынка у всех, кроме топ-5 продавцов')}${m('Жир',ok(n.fat)?fm(n.fat)+' ₽':'—',p.fat||0,'Сколько в среднем делает продавец ниши за 28 дней')}${m('Сезон',s.trend==='start'?'впереди':s.trend==='end'?'уходит':s.trend==='flat'?'ровно':'—',p.season||0,'Следующие 2 месяца по прошлому году против всего Озона')}</div>`;
+  return `<div class="mm">${m('Рост',gtxt,p.grow||0,n.young?'Категория появилась или объединилась за год — рост не сравнить':'Как изменился оборот ниши за год')}${m('Свобода',ok(n.top5)?NF.format(100-n.top5)+'%':'—',p.free||0,'Сколько рынка у всех, кроме топ-5 продавцов')}${m('Маржа',ok(g.m)?NF.format(g.m)+'%':'—',fp,'Сколько остаётся с цены после комиссии, логистики, рекламы, налога и закупки (цена ÷ '+S.M.x+') — как в Юнитке')}${m('Сезон',s.trend==='start'?'впереди':s.trend==='end'?'уходит':s.trend==='flat'?'ровно':'—',p.season||0,'Следующие 2 месяца по прошлому году против всего Озона')}</div>`;
 }
 function ncard(n){
-  const u=hasBudget()?unit(n):null;
-  const line=u?`<div class="ln1">${u.B!=null?`Закупка ${fr(u.B)} → прибыль <b class="${u.fit?'up':'dn'}">&nbsp;${fr(u.profit)}</b>&nbsp;с шт`:`Закупать не дороже <b>&nbsp;${fr(Math.max(0,u.maxBuy))}</b>&nbsp;при цене ${fr(u.P)}`}</div>`
-    :`<div class="ln1">${esc(((n.verdict==='ok'?n.plus:n.why)||[])[0]||((n.plus||[])[0])||'')}</div>`;
+  const g=marg(n);
+  const line=`<div class="ln1">${esc(((n.verdict==='ok'?n.plus:n.why)||[])[0]||((n.plus||[])[0])||'')}</div>`;
   return `<button class="card nc press reveal" data-n="${esc(n.id)}">
-  <div class="hd">${ring(n.score||0)}<div class="ttl"><b>${esc(n.name)}</b><span>${esc(n.cat1)} › ${esc(n.cat2)} · ${fm(n.gmv28)} ₽ за 28 дн</span></div><span class="tag ${n.verdict}">${NV[n.verdict]}</span></div>
+  <div class="hd">${ring(score(n))}<div class="ttl"><b>${esc(n.name)}</b><span>${esc(n.cat2)} · ${fm(n.gmv28)} ₽ за 28 дн · цена ~${fr(n.price)}</span></div><span class="tag ${n.verdict}">${NV[n.verdict]}</span></div>
   ${meters(n)}${line}</button>`;
 }
 function vPick(){
-  const L=LENS.find(x=>x[0]===S.lens)||LENS[0],a=lensList(),nf=(S.c1?1:0)+(S.ver!=='go'?1:0)+(hasBudget()?1:0);
-  return `<h1 class="lt">Что закупать</h1><div class="sub">Ниши Озона, где спрос растёт, мало гигантов и есть деньги ниже топа. ${fi(D.counts.all)} ниш из кабинета, обновлено ${esc(D.at)}.</div>
+  const L=LENS.find(x=>x[0]===S.lens)||LENS[0],a=lensList(),nf=(S.c1?1:0)+(S.c2?1:0)+(S.ver!=='go'?1:0)+(ok(S.B)?1:0)+(S.fit?1:0);
+  return `<h1 class="lt">Что закупать</h1><div class="sub">Ниши Озона из кабинета («Аналитика → Категории»): где спрос растёт, мало гигантов, хорошая маржа и сезон впереди. ${fi(D.counts.all)} ниш, обновлено ${esc(D.at)}.</div>
   <div class="seg sgm" id="lens">${LENS.map(([k,t])=>`<button class="${k===S.lens?'on':''}" data-lens="${k}">${t}</button>`).join('')}</div>
   <div class="lensnote" id="lensnote">${esc(L[2])}</div>
   <div class="tools"><label class="srch">${IC.srch}<input id="q" placeholder="Ниша или категория" value="${esc(S.q)}" autocomplete="off"></label><button class="fb press" id="fbtn">${IC.filt}Фильтры${nf?`<i>${nf}</i>`:''}</button></div>
+  ${S.c1||S.c2?`<div class="chips" style="margin:-4px 0 12px"><button class="on" data-clr="cat">${esc(S.c2||S.c1)} ✕</button></div>`:''}
   <div class="list" id="list">${listHtml(a)}</div>`;
 }
 function listHtml(a){return (a.slice(0,S.n).map(ncard).join('')||'<div class="empty">Под эти условия ниш нет — снимите фильтр</div>')+(a.length>S.n?`<button class="more press" id="more">Показать ещё ${fi(a.length-S.n)}</button>`:'')}
 function relist(){swapIn($('#list'),listHtml(lensList()),()=>reveal($('#list')))}
+function catChips(){
+  const c1=[...new Set(D.niches.map(n=>n.cat1))].sort(),c2=S.c1?[...new Set(D.niches.filter(n=>n.cat1===S.c1).map(n=>n.cat2))].sort():[];
+  return `<div class="chips" id="fc1"><button class="${!S.c1?'on':''}" data-c1="">Все</button>${c1.map(c=>`<button class="${c===S.c1?'on':''}" data-c1="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+   ${S.c1?`<h4 style="margin-top:16px">Подкатегория · ${esc(S.c1)}</h4><div class="chips" id="fc2"><button class="${!S.c2?'on':''}" data-c2="">Все</button>${c2.map(c=>`<button class="${c===S.c2?'on':''}" data-c2="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:''}`;
+}
 function filterSheet(){
-  const c1=[...new Set(D.niches.map(n=>n.cat1))].sort();
+  const M=S.M,F=(id,l,v,ph,u)=>`<div class="fl"><label for="${id}">${l}</label><input id="${id}" inputmode="decimal" placeholder="${ph}" value="${esc(v)}"></div>`;
   openSheet(`<h3>Фильтры</h3>
   <h4>Вердикт</h4><div class="seg sgm" id="fver">${[['go','Да и можно'],['ok','Только да'],['no','Нет'],['all','Все']].map(([k,t])=>`<button class="${S.ver===k?'on':''}" data-ver="${k}">${t}</button>`).join('')}</div>
-  <h4>Категория</h4><div class="chips" id="fc1"><button class="${!S.c1?'on':''}" data-c1="">Все</button>${c1.map(c=>`<button class="${c===S.c1?'on':''}" data-c1="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-  <h4>Деньги на 1 шт</h4>
-  <div class="f2"><div class="fl"><label for="fB">Закупка, ₽</label><input id="fB" inputmode="numeric" placeholder="300" value="${esc(S.B)}"></div><div class="fl"><label for="fW">Хочу прибыль, ₽</label><input id="fW" inputmode="numeric" placeholder="150" value="${esc(S.W)}"></div></div>
-  <div class="fl"><label for="fE">Расходы Озона, % от цены</label><input id="fE" inputmode="numeric" placeholder="${R.default_exp}" value="${esc(S.E==null?'':S.E)}"></div>
-  <div class="note" style="margin-top:-6px">Комиссия, логистика, эквайринг, хранение — по умолчанию ${R.default_exp}%. Реклама сверху — ДРР топа ниши или ${R.default_drr}%. Маржа не ниже ${R.margin_min}%.</div>
-  <label class="sw">Только где закупка и прибыль сходятся<input type="checkbox" id="fFit"${S.fit?' checked':''}></label>
+  <h4>Категории Озона</h4><div class="note" style="margin:-4px 0 10px">Все ниши — из кабинета Озона, раздел «Аналитика → Категории». Сначала категория, потом подкатегория.</div><div id="cats">${catChips()}</div>
+  <h4>Деньги</h4>
+  <div class="f2">${F('fB','Бюджет на закупку 1 шт, ₽',S.B,'не важен')}${F('mtarget','Нужна маржа от, %',M.target,'15')}</div>
+  <label class="sw">Только ниши, где маржа и бюджет проходят<input type="checkbox" id="fFit"${S.fit?' checked':''}></label>
+  <h4>Как считать маржу — как в Юнитке</h4>
+  <div class="note" style="margin:-4px 0 10px">Закупку конкретной ниши мы не знаем, поэтому считаем её как цену ÷ «иксы» (закупаете в N раз дешевле цены продажи). Свой товар с точной закупкой — в Юнитке.</div>
+  <div class="f2">${F('mx','Иксы: цена ÷ закупка',M.x,'3')}${F('mlogi','Логистика, ₽ за шт',M.logi,'130')}${F('mback','Возврат невыкупа, ₽',M.back,'95')}${F('mtax','Налог, % (АУСН «Доходы»)',M.tax,'8')}${F('macq','Эквайринг, %',M.acq,'1')}${F('mdrr','Реклама, если ДРР топа не снят, %',M.drr,'10')}</div>
+  <div class="note" style="margin-top:-4px">Комиссия Озона — как у наших товаров той же ниши или категории (без бустинга), иначе 30%, как в Юнитке.</div>
+  <button class="btn ghost press" id="mreset" style="width:100%;margin-top:12px">Вернуть как в Юнитке</button>
   <button class="btn press" id="fdone" style="width:100%;margin-top:8px">Показать</button>`,'filter');
 }
 
 /* ---------- лист ниши ---------- */
+function margBlock(n){
+  const g=marg(n),L=g.L,row=(l,v,h)=>`<span>${l}${h?`<small class="mut" style="display:block;font-size:12px">${h}</small>`:''}</span><b>${v}</b>`;
+  return `<div class="kv num">
+    ${row('Цена (средняя в нише)',fr(g.P))}
+    ${row('− Комиссия Озона '+N1.format(g.cm.pct)+'%','−'+fr(L.comm),g.cm.src)}
+    ${row('− Эквайринг '+N1.format(S.M.acq)+'%','−'+fr(L.acq))}
+    ${row('− Логистика','−'+fr(L.logi),n.vol?'средний товар ниши '+N1.format(n.vol)+' л':'')}
+    ${row('− Возвраты','−'+fr(L.back),'невыкуп '+NF.format((1-g.bo)*100)+'% × '+fr(S.M.back))}
+    ${row('− Реклама '+N1.format(g.drr)+'%','−'+fr(L.ads),g.drrOwn?'ДРР топ-10 ниши':'по умолчанию')}
+    ${row('− Налог '+N1.format(S.M.tax)+'%','−'+fr(L.tax),'АУСН «Доходы»')}
+    ${row('− Закупка','−'+fr(L.buy),'цена ÷ '+S.M.x+(ok(S.B)?` · ваш бюджет ${fr(+S.B)} ${L.buy<=+S.B?'проходит':'не проходит'}`:''))}
+    <span style="font-weight:700;color:var(--ink)">Остаётся с 1 шт</span><b class="${g.m>=S.M.target?'up':g.m>=0?'wr':'dn'}">${fr(g.left)} · ${ok(g.m)?NF.format(g.m):'—'}%</b>
+  </div><div class="note">Нужно от ${S.M.target}% — ${g.m>=S.M.target?'проходит':'не проходит'}. Изменить иксы, логистику, налог — в «Фильтрах». Точный расчёт своего товара — в Юнитке.</div>`;
+}
 function nicheSheet(n){
-  const u=unit(n),s=n.season,B=u.B,lots=R.test_qty,v=n.vova;
-  return `<div class="shead">${ring(n.score||0)}<div style="min-width:0"><h3>${esc(n.name)}</h3><div class="mut" style="font-size:13px">${esc(n.cat1)} › ${esc(n.cat2)} · Озон</div></div></div>
+  const g=marg(n),s=n.season,lots=R.test_qty,v=n.vova;
+  return `<div class="shead">${ring(score(n))}<div style="min-width:0"><h3>${esc(n.name)}</h3><div class="mut" style="font-size:13px">${esc(n.cat1)} › ${esc(n.cat2)} · Озон</div></div></div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"><span class="tag ${n.verdict}">${{ok:'Да — брать в работу',maybe:'Можно — с оговоркой',no:'Нет'}[n.verdict]}</span>${sTag(s)}</div>
   ${meters(n)}
+  <button class="btn press" data-ckniche="${esc(n.id)}" style="width:100%;margin-top:14px">${IC.check} Проверить эту нишу на WB и Маркете</button>
   <h4>Почему</h4><ul class="why">${(n.plus||[]).map(t=>`<li class="p">${esc(t)}</li>`).join('')}${(n.why||[]).map(t=>`<li class="${n.verdict==='no'?'x':'m'}">${esc(t)}</li>`).join('')}</ul>
   ${s&&s.months?`<h4>Сезон — оборот ниши по месяцам</h4>${chart(s.months)}<div class="say">${esc(seasonText(s))}</div>`:''}
+  <h4>Маржа с 1 шт — как в Юнитке</h4>${margBlock(n)}
   <h4>Цифры ниши</h4><div class="kv num">
     <span>Заказано за 28 дней</span><b>${fm(n.gmv28)} ₽ · ${fi(n.items28)} шт</b>
-    <span>Динамика 28 дней / за год</span><b>${fg(n.growth28)} / ${fg(n.growth_y)}</b>
+    <span>Динамика 28 дней / за год</span><b>${fg(n.growth28)} / ${n.young?'новая':fg(n.growth_y)}</b>
     <span>Доля топ-5 продавцов</span><b>${ok(n.top5)?NF.format(n.top5)+'%':'—'}</b>
     <span>Продавцов · брендов</span><b>${fi(n.sellers)} · ${fi(n.brands)}</b>
-    <span>Средний продавец за 28 дн</span><b>${fm(n.fat)} ₽</b>
     <span>Средняя цена · выкуп</span><b>${fr(n.price)} · ${ok(n.buyout)?NF.format(n.buyout)+'%':'—'}</b>
     ${ok(n.page2)?`<span>2-я страница выдачи (товары 37–50), в месяц</span><b>${fm(n.page2)} ₽</b>`:''}
     ${ok(n.drr_top)?`<span>ДРР топ-10</span><b>${N1.format(n.drr_top)}%</b>`:''}
   </div>
-  <h4>Деньги на 1 шт</h4><div class="kv num">
-    <span>Цена (средняя в нише)</span><b>${fr(u.P)}</b>
-    <span>Расходы Озона ${NF.format(u.E)}% и реклама ${N1.format(u.Dr)}%</span><b>−${fr(u.P*(u.E+u.Dr)/100)}</b>
-    <span>Остаётся до закупки</span><b>${fr(u.net)}</b>
-    ${B!=null?`<span>Закупка</span><b>−${fr(B)}</b><span>Прибыль с 1 шт</span><b class="${u.fit?'up':'dn'}">${fr(u.profit)} (${ok(u.margin)?NF.format(u.margin):'—'}%)</b>`:`<span>Закупать не дороже</span><b>${fr(Math.max(0,u.maxBuy))}</b>`}
-  </div>
   <h4>Сколько закупать</h4><div class="kv num">
-    <span>Тест (видео Mister Seller)</span><b>${lots[0]}–${lots[1]} шт${B!=null?` · ${fm(B*lots[0])}–${fm(B*lots[1])} ₽`:''}</b>
+    <span>Тест (видео Mister Seller)</span><b>${lots[0]}–${lots[1]} шт · ${fm(g.buy*lots[0])}–${fm(g.buy*lots[1])} ₽</b>
     ${v?`<span>Встать вровень с топом (Вова)</span><b>${fi(v.target[0])}–${fi(v.target[1])} шт/мес</b><span class="hint">${v.donors.length} ${plur(v.donors.length,'донор','донора','доноров')} по средней цене ниши продают ${v.donors.map(fi).join(', ')} шт за 28 дней, +25–50% запаса</span>`:''}
     ${v&&s&&ok(s.ahead)&&Math.abs(s.ahead-1)>=.15?`<span>С поправкой на ${esc(s.next_txt)}</span><b>${fi(v.target[0]*s.ahead)}–${fi(v.target[1]*s.ahead)} шт/мес</b>`:''}
   </div>
   <div class="note">Сначала тест: выстреливает ~${Math.round(R.hit_rate*100)}% новинок — лучше 10 наименований по 50 шт, чем 3 по 150. Первая партия — с рынков Москвы, дозаказ — Китай.</div>
-  ${(n.top||[]).length?`<h4>Топ-5 товаров ниши за 28 дней</h4>${n.top.map(t=>`<a class="cmrow" href="${esc(t.link)}" target="_blank" rel="noopener">${img(t.photo)}<div style="min-width:0"><b>${esc(t.name)}</b><div class="s">${fm(t.gmv)} ₽ · ${fr(t.price)}${ok(t.drr)?' · ДРР '+N1.format(t.drr)+'%':''}</div><div class="w">${esc(t.seller||'')}</div></div></a>`).join('')}`:''}
-  <button class="btn press" data-ckq="${esc(n.name)}" style="width:100%;margin-top:18px">${IC.check} Проверить товар этой ниши на трёх площадках</button>`;
+  ${(n.top||[]).length?`<h4>Топ-5 товаров ниши за 28 дней</h4><div class="note" style="margin:-4px 0 6px">«Проверить» — разбор именно этого товара на трёх площадках.</div>${n.top.map(t=>`<div class="cmrow">${img(t.photo)}<div style="min-width:0"><b>${esc(t.name)}</b><div class="s">${fm(t.gmv)} ₽ за 28 дн · ${fr(t.price)}${ok(t.drr)?' · ДРР '+N1.format(t.drr)+'%':''}</div><div class="w">${esc(t.seller||'')}</div>
+    <div class="yn"><button class="press" data-ckq="${esc(t.link)}">${IC.check} Проверить</button><a class="press" href="${esc(t.link)}" target="_blank" rel="noopener" style="flex:1;height:34px;border-radius:10px;background:var(--fill);display:grid;place-items:center;font-size:13.5px;font-weight:650;color:var(--ink2)">Открыть на Озоне</a></div></div></div>`).join('')}`:''}`;
 }
 
-/* ---------- проверка товара ---------- */
+/* ---------- проверка: товар по ссылке или ниша (Андрей 29.10: «проверяем товар или нишу — нужно и нишу по МП, и каждый товар отдельно») ---------- */
 const pendLocal=()=>ZS.get('pend',[]).filter(p=>!CK.checks.some(c=>c.id===p.id)&&Date.now()-p.t<30*60e3);
 function relaySend(o){
   if(!D.relay||!D.relay.topic)return Promise.reject(new Error('нет адреса'));
   return fetch('https://ntfy.sh/'+D.relay.topic,{method:'POST',body:JSON.stringify(o)}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status)});
 }
-async function startCheck(url){
+async function startCheck(url,tid,label){
   url=(url||'').trim();if(!url)return;
-  const id=Math.random().toString(16).slice(2,12);
-  try{await relaySend({k:'check',id,url})}catch(e){toast('Не отправилось: '+esc(e.message));return}
-  const p=ZS.get('pend',[]);p.unshift({id,url,t:Date.now()});ZS.set('pend',p.slice(0,20));
-  toast('Отправлено. Расклад будет через 3–7 минут');S.t='check';S.ck=null;render(true);poll(true);
+  const id=Math.random().toString(16).slice(2,12),o={k:'check',id,url};if(tid)o.tid=tid;
+  try{await relaySend(o)}catch(e){toast('Не отправилось: '+esc(e.message));return}
+  const p=ZS.get('pend',[]);p.unshift({id,url,label:label||url,t:Date.now()});ZS.set('pend',p.slice(0,20));
+  toast(tid?'Проверяю нишу — около 2 минут':'Проверяю товар — около 3 минут');closeSheet();S.t='check';S.ck=null;render(true);poll(true);
+}
+const startNiche=n=>startCheck('niche:'+n.name,n.id,'Ниша: '+n.name);
+/* ход проверки: шаги и примерное время — 29.10 «5 минут думает» */
+const STEPS={product:['Открываю товар','Смотрю Озон','Смотрю WB','Смотрю Маркет','Сверяю конкурентов по фото','Пишу расклад'],niche:['Открываю нишу','Смотрю Озон','Смотрю WB','Смотрю Маркет','Пишу расклад']};
+function progress(c){
+  const st=STEPS[c.kind==='niche'?'niche':'product'],i=Math.max(0,st.indexOf(c.step)),k=(i+.5)/st.length;
+  const left=Math.max(0,Math.round((c.kind==='niche'?120:200)*(1-k)/60));
+  return `<div class="prog"><i style="animation:none;width:${Math.round(k*100)}%;transition:width .8s var(--out)"></i></div><div class="s" style="margin-top:6px">${esc(c.step||'Собираю…')} · шаг ${i+1} из ${st.length}${left?` · ещё ~${left} мин`:' · почти готово'}</div>`;
 }
 function ckRow(c){
-  if(c.local)return `<div class="card ckr reveal"><div class="ph"></div><div style="min-width:0"><b>${esc(c.url)}</b><div class="s">В очереди — сервер возьмёт в течение минуты</div><div class="prog"><i></i></div></div><span class="spin"></span></div>`;
-  const p=c.product||{},work=c.state==='work';
-  return `<button class="card ckr press reveal" data-ck="${esc(c.id)}">${p.photo?img(p.photo):'<div class="ph"></div>'}<div style="min-width:0"><b>${esc(p.name||c.src)}</b>
-   <div class="s">${work?esc(c.step||'Собираю…'):c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')}</div>
-   ${work?'<div class="prog"><i></i></div>':`<div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}">${MPN[m]} · ${VL[v]}</span>`}).join('')}</div>`}</div>
+  if(c.local)return `<div class="card ckr reveal"><div class="ph"></div><div style="min-width:0"><b>${esc(c.label||c.url)}</b><div class="s">В очереди — сервер возьмёт в течение минуты</div><div class="prog"><i></i></div></div><span class="spin"></span></div>`;
+  const p=c.product||{},work=c.state==='work',nm=c.kind==='niche'?'Ниша: '+(p.name||''):(p.name||c.src);
+  return `<button class="card ckr press reveal" data-ck="${esc(c.id)}">${p.photo?img(p.photo):`<div class="ph" style="display:grid;place-items:center;color:var(--acc)">${c.kind==='niche'?IC.pick:''}</div>`}<div style="min-width:0"><b>${esc(nm)}</b>
+   ${work?progress(c):`<div class="s">${c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')+(c.secs?' · '+Math.ceil(c.secs/60)+' мин':'')}</div><div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}">${MPN[m]} · ${VL[v]}</span>`}).join('')}</div>`}</div>
    ${work?'<span class="spin"></span>':IC.chev}</button>`;
 }
 function vCheck(){
   if(S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)return vResult(c);S.ck=null}
-  const rows=pendLocal().map(p=>Object.assign({local:true},p)).concat(CK.checks);
-  return `<h1 class="lt">Проверить товар</h1><div class="sub">Ссылка на товар с Озона, WB или Маркета — или просто название. Сервис найдёт нишу и топ-конкурентов именно такого товара на каждой площадке и скажет, стоит ли заходить и почему.</div>
-  <div class="card ckin" id="ckin"><input id="ckurl" placeholder="Ссылка или название товара" autocomplete="off" inputmode="url"><button class="btn press" id="ckgo">Проверить</button></div>
-  <div class="mps">${['oz','wb','ym'].map(m=>`<span class="mpd"><i style="background:${MPC[m]}"></i>${MPN[m]}</span>`).join('')}<span class="mpd mut">· проверка 3–7 минут, можно закрыть страницу</span></div>
+  const rows=pendLocal().map(p=>Object.assign({local:true},p)).concat(CK.checks),nich=S.ckmode==='niche';
+  return `<h1 class="lt">Проверить</h1><div class="sub">${nich?'Ниша Озона целиком на трёх площадках: объём, гиганты, цены, топ товаров. Из топа можно сразу проверить любой товар.':'Конкретный товар: вставьте ссылку с Озона, WB или Маркета (или название). Найду таких же конкурентов на каждой площадке и скажу, стоит ли заходить.'}</div>
+  <div class="seg sgm" id="ckmode"><button class="${!nich?'on':''}" data-ckm="prod">Товар по ссылке</button><button class="${nich?'on':''}" data-ckm="niche">Ниша</button></div>
+  <div class="card ckin" id="ckin">${nich?`<input id="ckniche" list="nlist" placeholder="Начните писать нишу: фигурка, канистра…" autocomplete="off"><datalist id="nlist">${D.niches.map(n=>`<option value="${esc(n.name)}">`).join('')}</datalist>`:'<input id="ckurl" placeholder="Ссылка на товар или название" autocomplete="off" inputmode="url">'}<button class="btn press" id="ckgo">Проверить</button></div>
+  <div class="mps">${['oz','wb','ym'].map(m=>`<span class="mpd"><i style="background:${MPC[m]}"></i>${MPN[m]}</span>`).join('')}<span class="mpd mut">· ${nich?'около 2 минут':'около 3 минут'}, страницу можно закрыть</span></div>
   <div class="sec"><h2>Проверки</h2><span>${rows.length?fi(rows.length):''}</span></div>
-  <div class="ckl">${rows.map(ckRow).join('')||'<div class="empty">Пока пусто. Вставьте ссылку выше.</div>'}</div>`;
+  <div class="ckl">${rows.map(ckRow).join('')||'<div class="empty">Пока пусто.</div>'}</div>`;
 }
 function tilesOf(m,p){
   const n=p.niche||{},T=(l,v,s)=>`<div class="card tile"><div class="l">${l}</div><div class="v num">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
-  if(m==='oz')return T('Оборот ниши, 28 дн',fm(n.gmv28)+' ₽',`за год ${fg(n.growth_y)}`)+T('Топ-5 продавцов',ok(n.top5)?NF.format(n.top5)+'%':'—','остальным '+(ok(n.top5)?NF.format(100-n.top5)+'%':'—'))+T('Средний продавец',fm(n.fat)+' ₽','за 28 дней · '+fi(n.sellers)+' продавцов')+T('Средняя цена',fr(n.price),'выкуп '+(ok(n.buyout)?NF.format(n.buyout)+'%':'—'));
+  if(m==='oz')return T('Оборот ниши, 28 дн',fm(n.gmv28)+' ₽',`за год ${n.young?'новая':fg(n.growth_y)}`)+T('Топ-5 продавцов',ok(n.top5)?NF.format(n.top5)+'%':'—','остальным '+(ok(n.top5)?NF.format(100-n.top5)+'%':'—'))+T('Маржа, как в Юнитке',ok(marg(n).m)?NF.format(marg(n).m)+'%':'—','цена ÷ '+S.M.x+' на закупку')+T('Средняя цена',fr(n.price),'выкуп '+(ok(n.buyout)?NF.format(n.buyout)+'%':'—'));
   if(m==='wb')return T('Товаров по запросу',fi(n.total),'в первой сотне '+fi(n.sellers)+' продавцов')+T('У 5 продавцов',ok(n.top5_reviews)?NF.format(n.top5_reviews)+'%':'—','всех отзывов сотни')+T('Цена в середине',fr(n.price_med),fr(n.price_p25)+' – '+fr(n.price_p75))+T('Отзывы у топ-10',fi(n.reviews_top10),'медиана · рейтинг '+(n.rating_med||'—'));
   return T('Купили на 1-й странице',fi(n.bought_sum),'товаров с покупками: '+fi(n.with_sales))+T('У 5 товаров',ok(n.top5_bought)?NF.format(n.top5_bought)+'%':'—','всех покупок страницы')+T('Цена в середине',fr(n.price_med),fr(n.price_p25)+' – '+fr(n.price_p75))+T('Рейтинг',n.rating_med||'—','медиана страницы');
 }
 const QD={};   // решения по конкурентам до отправки: QD[id][mp]={sku:'y'|'n'}
-function cmCard(m,c,i,p){
-  const st=c.st==='yes'?'<span class="st yes">ваш выбор</span>':c.v==='same'?'<span class="st same">тот же</span>':c.v==='almost'?'<span class="st almost">почти</span>':'';
+function cmCard(m,c,i,niche){
+  const st=niche?'':c.st==='yes'?'<span class="st yes">ваш выбор</span>':c.v==='same'?'<span class="st same">тот же</span>':c.v==='almost'?'<span class="st almost">почти</span>':'';
   const sale=m==='oz'?`${fi(c.sales)} шт за 28 дн`:m==='ym'?(c.sales?`купили ${fi(c.sales)}`:'покупок не видно'):`${fi(c.reviews)} отзывов`;
   return `<button class="card cm press" data-cm="${esc(c.sku)}"><div class="ph">${img(c.photo)}<span class="n">${i+1}</span>${st}</div><div class="bd"><b>${esc(c.name)}</b><div class="p num">${fr(c.price)}</div><div class="s">${sale}</div><div class="s2">${c.rating?'★ '+c.rating+' · ':''}${esc(c.seller||c.brand||'')}</div></div></button>`;
 }
 function mpPanel(c,m){
-  const p=(c.mp||{})[m]||{},vd=p.verdict||{v:'na',why:['не снималось'],plus:[]},adv=((c.advice||{}).mp||{})[m];
+  const p=(c.mp||{})[m]||{},vd=p.verdict||{v:'na',why:['не снималось'],plus:[]},adv=((c.advice||{}).mp||{})[m],niche=c.kind==='niche';
   if(p.err)return `<div class="card vcard reveal"><div class="vh"><b class="na">${MPN[m]}: нет данных</b></div><ul class="why" style="margin-top:10px"><li class="m">${esc(p.err)}</li></ul></div>`;
-  const cs=p.cands||[],top=(p.top||[]).map(s=>cs.find(x=>x.sku===s)).filter(Boolean),oth=(p.other||[]).length;
-  const n=p.niche||{};
-  return `<div class="card vcard reveal"><div class="vh"><b class="${vd.v}">${VL[vd.v]}</b>${m==='oz'&&n.name?`<span class="tag">${esc(n.name)}</span>`:m==='wb'?'<span class="tag">по выдаче</span>':'<span class="tag">по выдаче</span>'}</div>
+  const cs=p.cands||[],top=(p.top||[]).map(s=>cs.find(x=>x.sku===s)).filter(Boolean),oth=(p.other||[]).length,n=p.niche||{};
+  return `<div class="card vcard reveal"><div class="vh"><b class="${vd.v}">${VL[vd.v]}</b>${m==='oz'&&n.name?`<span class="tag">${esc(n.name)}</span>`:'<span class="tag">по выдаче</span>'}</div>
    ${adv&&adv.say?`<div class="say">${esc(adv.say)}${adv.step?` <b>Первый шаг:</b> ${esc(adv.step)}`:''}</div>`:''}
    <ul class="why" style="margin-top:12px">${(vd.plus||[]).map(t=>`<li class="p">${esc(t)}</li>`).join('')}${(vd.why||[]).map(t=>`<li class="${vd.v==='no'?'x':'m'}">${esc(t)}</li>`).join('')}</ul></div>
   <div class="tiles">${tilesOf(m,p)}</div>
   ${m==='oz'&&n.season&&n.season.months?`<div class="sec"><h2>Сезон ниши</h2><span>${sTag(n.season)}</span></div><div class="card pad reveal">${chart(n.season.months)}<div class="say">${esc(seasonText(n.season))}</div></div>`:''}
-  <div class="sec"><h2>Топ конкурентов</h2><span>${top.length?`${top.length} из ${cs.length} проверенных`:''}</span></div>
-  ${top.length?`<div class="rail">${top.map((x,i)=>cmCard(m,x,i,p)).join('')}</div>`:'<div class="card pad mut">Такого же товара в выдаче не нашлось. Нажмите «Выбрать вручную» и отметьте похожие.</div>'}
+  ${m==='oz'&&n.gmv28?`<div class="sec"><h2>Маржа с 1 шт</h2><span>как в Юнитке</span></div><div class="card pad reveal">${margBlock(n)}</div>`:''}
+  <div class="sec"><h2>${niche?'Топ товаров ниши':'Топ таких же товаров'}</h2><span>${niche?'нажмите — проверить товар':top.length?`${top.length} из ${cs.length} проверенных`:''}</span></div>
+  ${top.length?`<div class="rail">${top.map((x,i)=>cmCard(m,x,i,niche)).join('')}</div>`:'<div class="card pad mut">Такого же товара в выдаче не нашлось. Нажмите «Выбрать вручную» и отметьте похожие.</div>'}
   ${p.vova?`<div class="card pad reveal" style="margin-top:10px"><div class="kv num"><span>Закупка по Вове — держать на месяц</span><b>${fi(p.vova.target[0])}–${fi(p.vova.target[1])} шт</b><span class="hint">продажи ${p.vova.donors.length} ${plur(p.vova.donors.length,'донора','доноров','доноров')} из топа за 28 дней (${p.vova.donors.map(fi).join(', ')}) +25–50%</span></div></div>`:''}
-  <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost press" data-pickall="${m}" style="flex:1">Выбрать вручную${oth?` · ещё ${oth}`:''}</button><button class="btn ghost press" data-reform="${m}" style="flex:1">${IC.refresh} Переформировать</button></div>`;
+  ${niche?'':`<div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost press" data-pickall="${m}" style="flex:1">Выбрать вручную${oth?` · ещё ${oth}`:''}</button><button class="btn ghost press" data-reform="${m}" style="flex:1">${IC.refresh} Переформировать</button></div>`}`;
 }
 function vResult(c){
-  const p=c.product||{},a=c.advice||{};
-  if(c.state==='work')return `<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button><div class="card phero reveal">${p.photo?img(p.photo):'<div></div>'}<div><h1>${esc(p.name||c.src)}</h1><p>${esc(c.step||'Собираю…')}</p><div class="prog"><i></i></div></div></div><div class="note">Можно закрыть страницу — проверка идёт на сервере, результат появится здесь.</div>`;
-  if(c.state==='err')return `<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button><div class="card pad"><b>Не вышло</b><div class="note">${esc(c.err||'')}</div></div>`;
+  const p=c.product||{},a=c.advice||{},niche=c.kind==='niche',back=`<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button>`;
+  if(c.state==='work')return `${back}<div class="card phero reveal">${p.photo?img(p.photo):'<div></div>'}<div><h1>${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</h1>${progress(c)}</div></div><div class="note">Можно закрыть страницу — проверка идёт на сервере, результат появится здесь.</div>`;
+  if(c.state==='err')return `${back}<div class="card pad"><b>Не вышло</b><div class="note">${esc(c.err||'')}</div></div>`;
   const m=S.mp in (c.mp||{})?S.mp:'oz';
-  return `<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button>
-  <div class="card phero reveal">${img(p.photo)}<div style="min-width:0"><h1>${esc(p.name)}</h1><p>${p.price?fr(p.price)+' · ':''}${MPN[p.mp]||'название'}${p.link?` · <a href="${esc(p.link)}" target="_blank" rel="noopener">открыть ${IC.ext}</a>`:''}</p></div></div>
+  return `${back}
+  <div class="card phero reveal">${niche?`<div style="width:88px;height:88px;border-radius:16px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center">${IC.pick}</div>`:img(p.photo)}<div style="min-width:0"><h1>${esc(niche?'Ниша: '+p.name:p.name)}</h1><p>${niche?'проверка ниши на трёх площадках':(p.price?fr(p.price)+' · ':'')+(MPN[p.mp]||'название')}${p.link?` · <a href="${esc(p.link)}" target="_blank" rel="noopener">открыть ${IC.ext}</a>`:''}</p></div></div>
   ${a.overall?`<div class="card adv1 reveal"><div class="k">Расклад</div>${esc(a.overall)}</div>`:''}
   <div class="vsum" id="vsum">${['oz','wb','ym'].map(k=>{const v=(((c.mp||{})[k]||{}).verdict||{}).v||'na';return `<button class="vs1 press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><em>${MPN[k]}</em><b class="${v}">${VL[v]}</b></button>`}).join('')}</div>
   <div class="seg sgm" id="mpseg" style="margin-top:14px">${['oz','wb','ym'].map(k=>`<button class="${k===m?'on':''}" data-mp="${k}"><i class="d" style="background:${MPC[k]}"></i>${MPN[k]}</button>`).join('')}</div>
   <div id="mppanel">${mpPanel(c,m)}</div>
-  <div class="note">Проверено ${esc(c.upd||c.at||'')}. «Тот же / почти» — сверка фото и характеристик моделью. У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>`;
+  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>`;
 }
 function cmSheet(c,m,sku){
-  const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku);if(!x)return;
+  const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku),niche=c.kind==='niche';if(!x)return;
   openSheet(`<div class="shead">${img(x.photo).replace('<img','<img style="width:96px;height:96px;border-radius:16px;object-fit:cover"')}<div style="min-width:0"><h3 style="font-size:18px">${esc(x.name)}</h3><div class="mut" style="font-size:13px">${MPN[m]} · ${esc(x.seller||x.brand||'')}</div></div></div>
    <div class="kv num" style="margin-top:14px"><span>Цена</span><b>${fr(x.price)}</b>${m==='oz'?`<span>Продажи за 28 дн</span><b>${fi(x.sales)} шт · ${fm(x.gmv)} ₽</b>${ok(x.drr)?`<span>ДРР</span><b>${N1.format(x.drr)}%</b>`:''}`:''}${m==='ym'&&x.sales?`<span>Купили</span><b>${fi(x.sales)}</b>`:''}${x.reviews!=null?`<span>Отзывы · рейтинг</span><b>${fi(x.reviews)} · ${x.rating||'—'}</b>`:''}</div>
-   ${x.v?`<h4>Сверка с вашим товаром</h4><ul class="why"><li class="${x.v==='other'?'x':x.v==='almost'?'m':'p'}">${x.v==='same'?'Тот же товар':x.v==='almost'?'Почти такой же':'Другой товар'}${x.why?' — '+esc(x.why):''}</li>${x.diff?`<li class="m">Отличия: ${esc(x.diff)}</li>`:''}</ul>`:''}
-   ${ynBtns(c.id,m,x)}<a class="btn ghost press" href="${esc(x.link)}" target="_blank" rel="noopener" style="width:100%;margin-top:10px">Открыть на ${MPN[m]} ${IC.ext}</a>`,'cm');
+   ${x.v?`<h4>Сверка с вашим товаром</h4><ul class="why"><li class="${x.v==='other'?'x':x.v==='almost'?'m':'p'}">${x.v==='same'?'Тот же товар':x.v==='almost'?'Почти такой же':'Другой товар'}${x.v==='other'?(x.diff?' — '+esc(x.diff):''):(x.why?' — '+esc(x.why):'')}</li>${x.diff&&x.v!=='other'?`<li class="m">Отличия: ${esc(x.diff)}</li>`:''}</ul>`:''}
+   ${niche?'':ynBtns(c.id,m,x)}
+   <button class="btn press" data-ckq="${esc(x.link)}" style="width:100%;margin-top:12px">${IC.check} Проверить этот товар на трёх площадках</button>
+   <a class="btn ghost press" href="${esc(x.link)}" target="_blank" rel="noopener" style="width:100%;margin-top:8px">Открыть на ${MPN[m]} ${IC.ext}</a>`,'cm');
 }
 function ynBtns(id,m,x){const q=((QD[id]||{})[m]||{})[x.sku],st=q||(x.st==='yes'?'y':x.st==='no'?'n':'');
   return `<div class="yn"><button class="y${st==='y'?' on':''}" data-yn="y" data-id="${esc(id)}" data-m="${m}" data-s="${esc(x.sku)}">Взять</button><button class="n${st==='n'?' on':''}" data-yn="n" data-id="${esc(id)}" data-m="${m}" data-s="${esc(x.sku)}">Убрать</button></div>`}
@@ -1121,7 +1161,7 @@ function pickSheet(c,m){
    ${cs.map(x=>`<div class="cmrow">${img(x.photo)}<div style="min-width:0"><b>${esc(x.name)}</b><div class="s">${fr(x.price)} · ${m==='oz'?fi(x.sales)+' шт за 28 дн':m==='ym'?(x.sales?'купили '+fi(x.sales):'—'):fi(x.reviews)+' отзывов'}</div>${x.v?`<div class="w">${x.v==='same'?'тот же':x.v==='almost'?'почти':'другой'}${x.v==='other'?(x.diff||x.why?' — '+esc(x.diff||x.why):''):(x.why?' — '+esc(x.why):'')}</div>`:''}${ynBtns(c.id,m,x)}</div></div>`).join('')}`,'pick');
 }
 function qbar(){
-  let n=0,id=null,m=null;for(const i in QD)for(const k in QD[i]){const c=Object.keys(QD[i][k]).length;if(c){n+=c;id=i;m=k}}
+  let n=0;for(const i in QD)for(const k in QD[i])n+=Object.keys(QD[i][k]).length;
   const b=$('#qbar');if(!n){b.hidden=true;return}
   b.hidden=false;b.innerHTML=`<span>Решений: ${n}</span><button class="btn press" id="qgo">Применить</button><button class="ico press" id="qclr" aria-label="Сбросить">✕</button>`;
 }
@@ -1153,34 +1193,54 @@ function vMine(){
     <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,3).map(p=>`<div class="pr1"><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div>`).join('')}${m.products.length>3?`<div class="mut" style="font-size:12.5px;padding:0 4px">и ещё ${m.products.length-3}</div>`:''}</div></div>`).join('')}</div>`;
 }
 
-/* ---------- как считаем ---------- */
+/* ---------- помощь (29.10 Андрей: «как считаем — не особо понятно, как с ним работать») ---------- */
 function vRules(){
-  const A=(i,t,w,body)=>`<button class="card ad press reveal"><div class="h"><span class="k">${i}</span><div style="min-width:0;flex:1"><b>${t}</b><div class="w">${w}</div><div class="more2"><div><div class="body">${body}</div></div></div></div>${IC.chev}</div></button>`;
-  return `<h1 class="lt">Как считаем</h1><div class="sub">Сначала база из видео Озона, потом шаги из второго видео, сверху — правила Андрея и закупка по Вове. Нажмите, чтобы раскрыть.</div><div class="adv">
-  ${A(1,'«Перспектива» 0–100','Четыре части по 25: рост, свобода, жир, сезон.',`<ul><li><b>Рост</b> — оборот ниши за год: +100% и больше — 25 баллов.</li><li><b>Свобода</b> — сколько рынка не у топ-5: топ-5 ≤ 20% — 25 баллов, 60% и больше — 0.</li><li><b>Жир</b> — оборот ниши ÷ число продавцов за 28 дней: 1 млн ₽ — 25 баллов, 50 тыс — 0.</li><li><b>Сезон</b> — следующие 2 месяца по прошлому году против всего Озона: сильнее рынка — 25, как рынок — 13, слабее — 0.</li></ul>`)}
-  ${A(2,'Вердикт «да / можно / нет»','Объём, гиганты, выкуп, рост, сезон, деньги ниже топа.',`<ul><li><b>Да</b>: объём ${fm(R.vol_min)}–${fm(R.vol_max)} ₽ за 28 дней, топ-5 ≤ ${R.top5_ideal}%, выкуп ≥ ${R.buyout_min}%, спрос за год не падает.</li><li><b>Можно</b>: есть гиганты, но остальным ≥ ${100-R.top5_max}% (Андрей), ниша большая, спрос за год падает, сезон кончается или ниже топа мало денег.</li><li><b>Нет</b>: маленькая ниша, топ-5 > ${R.top5_max}% — «перегружена гигантами, не сможем конкурировать», выкуп ниже ${R.buyout_min}%, одежда, мало денег и монополия.</li></ul>`)}
-  ${A(3,'Видео 1 · Ozon «Как выбрать нишу»','Год и сезон, а не только 28 дней. Доля топ-5.',`<ul><li>Минус за месяц при плюсе за год — сезон: товар не выводить, поставлять меньше.</li><li>Где спрос по прошлому году растёт — поставки увеличивать заранее.</li><li>Топ-5 около 45% — новичку тяжело, меньше 20% — покупатели выбирают разных продавцов.</li></ul>`)}
-  ${A(4,'Видео 2 · Mister Seller «ТОП-5 шагов»','Объём, монополия, выкуп, 2-я страница, юнит, тест.',`<ul><li>Объём 75–300 млн ₽ за 28 дней: проще взять 10% небольшой ниши, чем 5% огромной.</li><li>Топ-5 ≤ 35%, выкуп ≥ 70–75%.</li><li>Товары 37–50 в выдаче делают меньше ${fm(R.page2_min)} ₽ в месяц — денег ниже топа мало.</li><li>Маржа после всех расходов ≥ ${R.margin_min}%. Тест ${R.test_qty[0]}–${R.test_qty[1]} шт, 10 наименований по 50 лучше, чем 3 по 150.</li></ul>`)}
-  ${A(5,'Вова · сколько закупать','4 донора по нашей цене ±20%, их продажи +25–50%.',`<ul><li>У нас 500 заказов, у конкурентов по 2 000 — закуп 500 в топ не выведет.</li><li>Объём = продажи 4 доноров за 28 дней +25–50%, сразу на все склады и трафик без лимита.</li><li>Демперов — отдельно, в минус не продавать.</li><li>Сезон: объём умножаем на то, как ниша менялась в следующие 2 месяца год назад.</li></ul>`)}
-  ${A(6,'Проверка товара на трёх площадках','Озон — по кабинету, WB и Маркет — по выдаче.',`<ul><li><b>Озон</b>: «Товары на Ozon» поиском по названию — тип ниши, продажи похожих за 28 дней, ниша и сезон из «Аналитика → Категории».</li><li><b>WB</b>: первая сотня выдачи — цены, отзывы, продавцы. Продажи конкурентов WB не показывает без Джема «Премиум», поэтому вместо них отзывы.</li><li><b>Маркет</b>: первая страница выдачи — цена, рейтинг, «купили N».</li><li>Конкуренты: цена 60–160% вашей → фото → модель сверяет «тот же / почти / другой» → топ-5. «Взять / Убрать» и «Переформировать» — как в «Конкурентах».</li></ul>`)}
+  const ex=D.niches.filter(n=>n.verdict==='ok'&&n.pts&&!n.young).sort((a,b)=>score(b)-score(a))[0]||D.niches[0],g=marg(ex),p=ex.pts||{};
+  const A=(i,t,w,body,open)=>`<button class="card ad press reveal${open?' open':''}"><div class="h"><span class="k">${i}</span><div style="min-width:0;flex:1"><b>${t}</b><div class="w">${w}</div><div class="more2"><div><div class="body">${body}</div></div></div></div>${IC.chev}</div></button>`;
+  const step=(i,t,d,go,lbl)=>`<div class="card pad reveal" style="display:flex;gap:14px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:11px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700">${i}</span><div style="flex:1;min-width:0"><b style="font:650 16.5px/1.3 var(--fd)">${t}</b><div class="w" style="font-size:14px;color:var(--ink2);margin-top:4px;line-height:1.45">${d}</div>${go?`<button class="btn ghost press" data-goto="${go}" style="margin-top:10px;padding:8px 14px;font-size:14px">${lbl} ›</button>`:''}</div></div>`;
+  return `<h1 class="lt">Помощь</h1><div class="sub">Как работать с сервисом за три шага и откуда берутся все цифры.</div>
+  <div class="adv">
+  ${step(1,'Найдите нишу','«Ниши» → подборка «Растут и свободны» (тренд), «Сезон впереди» (закупать сейчас) или «Маржа» (где больше остаётся). В «Фильтрах» — категория и подкатегория Озона, бюджет на 1 шт и нужная маржа. Кольцо — «Перспектива» 0–100: чем больше, тем лучше.','pick','Открыть ниши')}
+  ${step(2,'Проверьте нишу и товары','В нише нажмите «Проверить эту нишу на WB и Маркете» — увидите, стоит ли заходить на каждую площадку. В топе ниши у каждого товара своя кнопка «Проверить». Или вставьте ссылку на любой товар в «Проверке».','check','Открыть проверку')}
+  ${step(3,'Решите, сколько закупать','В нише и в проверке: тест 50–100 шт (лучше 10 наименований по 50, чем 3 по 150), потом объём по Вове — продажи 4 доноров +25–50%, с поправкой на сезон. Свой товар с точной закупкой досчитайте в Юнитке.','','')}
+  </div>
+  <div class="sec"><h2>На примере: ${esc(ex.name)}</h2><span>Перспектива ${score(ex)}</span></div>
+  <div class="card pad reveal"><div class="kv num">
+    <span>Рост — оборот ниши за год ${ex.young?'(категория новая, не считаем)':fg(ex.growth_y)}</span><b>${p.grow||0} из 25</b>
+    <span>Свобода — у всех, кроме топ-5, ${ok(ex.top5)?NF.format(100-ex.top5)+'%':'—'} рынка</span><b>${p.free||0} из 25</b>
+    <span>Маржа с 1 шт — ${ok(g.m)?NF.format(g.m)+'%':'—'} (30% и больше — полный балл)</span><b>${fatPts(ex)} из 25</b>
+    <span>Сезон — ${ex.season&&ex.season.trend==='start'?'впереди':ex.season&&ex.season.trend==='end'?'уходит':'ровно'}</span><b>${p.season||0} из 25</b>
+    <span style="font-weight:700;color:var(--ink)">Перспектива</span><b>${score(ex)} из 100</b></div></div>
+  <div class="sec"><h2>Маржа — как в Юнитке</h2><span>${esc(ex.name)}</span></div>
+  <div class="card pad reveal">${margBlock(ex)}</div>
+  <div class="sec"><h2>Откуда цифры и правила</h2><span>нажмите</span></div>
+  <div class="adv">
+  ${A(1,'Откуда данные','Озон — кабинет, WB и Маркет — витрина.',`<ul><li><b>Ниши</b> — кабинет Озона, «Аналитика → Категории»: все категории и подкатегории Озона, оборот за 28 дней и год, доля топ-5 продавцов, выкуп, цена. Обновляется раз в неделю.</li><li><b>Сезон</b> — оборот ниши по месяцам за прошлый год там же.</li><li><b>Товары ниши, ДРР, 2-я страница</b> — «Аналитика → Товары на Ozon».</li><li><b>WB</b> — первая сотня выдачи (цены, отзывы, продавцы). Продажи конкурентов WB показывает только в Джеме «Премиум» — его у нас нет.</li><li><b>Маркет</b> — первая страница выдачи (цена, рейтинг, «купили N»).</li></ul>`)}
+  ${A(2,'Вердикт «да / можно / нет»','Объём, гиганты, выкуп, рост, сезон.',`<ul><li><b>Да</b>: оборот ${fm(R.vol_min)}–${fm(R.vol_max)} ₽ за 28 дней, топ-5 ≤ ${R.top5_ideal}%, выкуп ≥ ${R.buyout_min}%, спрос за год не падает.</li><li><b>Можно</b>: гиганты есть, но остальным ≥ ${100-R.top5_max}%; ниша большая; спрос падает; сезон уходит; ниже топа мало денег.</li><li><b>Нет</b>: маленькая ниша; топ-5 > ${R.top5_max}% — «перегружена гигантами, не сможем конкурировать»; выкуп ниже ${R.buyout_min}%; одежда.</li></ul>`)}
+  ${A(3,'Сезон','Прошлый год против всего Озона.',`<ul><li>Берём оборот ниши в следующие 2 месяца год назад против текущего, убираем рост ниши и сравниваем со всем Озоном (в ноябре–декабре растёт почти всё).</li><li>Лучше рынка на 25%+ — «сезон впереди», хуже — «уходит, закупать меньше».</li><li>Категория появилась за год — сезон не считаем, помечаем «новая».</li></ul>`)}
+  ${A(4,'Видео 1 · Ozon «Как выбрать нишу»','Год и сезон, а не только 28 дней.',`<ul><li>Минус за месяц при плюсе за год — это сезон: товар не выводить, поставлять меньше.</li><li>Топ-5 около 45% — новичку тяжело, меньше 20% — покупатели выбирают разных продавцов.</li></ul>`)}
+  ${A(5,'Видео 2 · Mister Seller «ТОП-5 шагов»','Объём, монополия, выкуп, юнит, тест.',`<ul><li>Оборот 75–300 млн ₽ за 28 дней: проще взять 10% небольшой ниши, чем 5% огромной.</li><li>Топ-5 ≤ 35%, выкуп ≥ 70–75%, маржа после всех расходов ≥ ${R.margin_min}%.</li><li>Тест ${R.test_qty[0]}–${R.test_qty[1]} шт.</li></ul>`)}
+  ${A(6,'Вова · сколько закупать','4 донора по нашей цене ±20%, их продажи +25–50%.',`<ul><li>У нас 500 заказов, у конкурентов по 2 000 — закуп 500 в топ не выведет.</li><li>Объём = продажи 4 доноров за 28 дней +25–50%, сразу на все склады и трафик без лимита. Демперов — отдельно, в минус не продавать.</li></ul>`)}
   </div>`;
 }
 
 /* ---------- «Фишки» ---------- */
 const TOUR={
- pick:[{sel:'#lens',t:'Три линзы',d:'«Растут и свободны» — тренд, мало гигантов. «Сезон впереди» — закупать сейчас. «Жир» — где средний продавец зарабатывает больше всего.'},
-  {sel:'#list .nc .ring',t:'Перспектива 0–100',d:'Кольцо — сумма четырёх частей ниже: рост, свобода от гигантов, жир, сезон. Зелёное — смотреть в первую очередь.'},
-  {sel:'#list .nc .mm',t:'Четыре цифры',d:'Рост за год, свобода (сколько рынка не у топ-5), жир (средний продавец за 28 дней), сезон впереди. Полоска — сколько баллов дала часть.'},
-  {sel:'#fbtn',t:'Фильтры и деньги',d:'Категория, вердикт и ваши деньги на 1 шт: закупка и желаемая прибыль — сервис покажет, сходится ли.'},
-  {sel:'#list .nc',t:'Подробно',d:'Нажмите на нишу — «почему», сезон по месяцам с осью, юнит-экономика, сколько закупать и топ-5 товаров.'}],
- check:[{sel:'#ckin',t:'Ссылка или название',d:'Вставьте ссылку с Озона, WB или Маркета. Проверка идёт 3–7 минут на сервере — страницу можно закрыть.'},
+ pick:[{sel:'#lens',t:'Подборки',d:'«Растут и свободны» — тренд, мало гигантов. «Сезон впереди» — закупать сейчас. «Маржа» — где больше всего остаётся с продажи.'},
+  {sel:'#list .nc .ring',t:'Перспектива 0–100',d:'Кольцо — сумма четырёх частей ниже: рост, свобода от гигантов, маржа, сезон. Зелёное — смотреть в первую очередь.'},
+  {sel:'#list .nc .mm',t:'Четыре цифры',d:'Рост за год, свобода (сколько рынка не у топ-5), маржа с 1 шт как в Юнитке, сезон впереди. Полоска — сколько баллов дала часть.'},
+  {sel:'#fbtn',t:'Фильтры',d:'Категория и подкатегория Озона, вердикт, бюджет на 1 шт, нужная маржа и как её считать (иксы, логистика, налог).'},
+  {sel:'#list .nc',t:'Подробно',d:'Нажмите на нишу — «почему», сезон по месяцам, маржа по строкам, сколько закупать, топ-5 товаров с кнопкой «Проверить».'}],
+ check:[{sel:'#ckmode',t:'Товар или ниша',d:'«Товар по ссылке» — конкретный товар и такие же у конкурентов. «Ниша» — вся ниша на трёх площадках.'},
+  {sel:'#ckin',t:'Ссылка или ниша',d:'Вставьте ссылку с Озона, WB или Маркета либо выберите нишу. Товар — около 3 минут, ниша — около 2. Страницу можно закрыть.'},
   {sel:'.ckl',t:'Ход и итог',d:'Пока идёт — полоска и шаг. Готово — по каждой площадке «стоит / можно / не стоит». Нажмите — откроется расклад.'}],
  mine:[{sel:'.oc .alert',t:'Сезон наших ниш',d:'Красное — сезон уходит, закупать меньше. Зелёное — начинается, закупить заранее.'},
   {sel:'.oc .pr1',t:'Сколько держать',d:'Закупка по Вове из «Конкурентов» и та же цифра с поправкой на сезон.'}],
- rules:[{sel:'.adv .ad',t:'Правила',d:'Откуда каждое правило: видео Озона, Mister Seller, Андрей, Вова. Нажмите карточку — раскроется.'},
+ rules:[{sel:'[data-goto]',t:'Три шага',d:'Найти нишу → проверить нишу и товары → решить, сколько закупать. Кнопки ведут прямо в нужный раздел.'},
+  {sel:'button.ad',t:'Откуда цифры',d:'Откуда данные и каждое правило: видео Озона, Mister Seller, Вова. Нажмите — раскроется.'},
   {sel:'#themeBtn',t:'Тема',d:'Как в телефоне, светлая, тёмно-серая, «Бумага» или «Космос» с аффирмациями и музыкой.'}]
 };
-const TORD=['pick','check','mine','rules'],TN={pick:'Ниши',check:'Проверка',mine:'Наши',rules:'Как считаем'};
+const TORD=['pick','check','mine','rules'],TN={pick:'Ниши',check:'Проверка',mine:'Наши',rules:'Помощь'};
 let TR=null;
 const tVis=el=>el&&el.getClientRects().length>0&&el.offsetParent!==null;
 function tourStart(){
@@ -1228,38 +1288,47 @@ addEventListener('keydown',e=>{if(!TR)return;if(e.key==='Escape')tourEnd();else 
 tourPaint();
 
 /* ---------- события ---------- */
-const num=v=>String(v||'').replace(/[^\d]/g,'');
+const MKEYS={mx:'x',mlogi:'logi',mback:'back',mtax:'tax',macq:'acq',mdrr:'drr',mtarget:'target'};
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){S.q=t.value;S.n=30;clearTimeout(t._t);t._t=setTimeout(relist,180);return}
-  if(['fB','fW','fE'].includes(t.id)){const v=num(t.value);if(t.value!==v)t.value=v;const k=t.id.slice(1);S[k]=v===''?(k==='E'?null:''):v;ZS.set(k,S[k])}
+  if(t.id==='fB'){const v=t.value.replace(/[^\d]/g,'');if(t.value!==v)t.value=v;S.B=v;ZS.set('B',S.B);return}
+  if(MKEYS[t.id]){const v=t.value.replace(',','.').replace(/[^\d.]/g,'');if(t.value!==v)t.value=v;const k=MKEYS[t.id];
+    S.M[k]=v===''||!(+v>=0)||(k==='x'&&+v<1)?MDEF[k]:+v;ZS.set('M',S.M)}
 });
 document.addEventListener('change',e=>{if(e.target.id==='fFit'){S.fit=e.target.checked;ZS.set('fit',S.fit)}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ckurl')startCheck(e.target.value)});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(e.target.id==='ckurl')startCheck(e.target.value);if(e.target.id==='ckniche')goNiche(e.target.value)});
+function goNiche(v){const n=D.niches.find(x=>x.name.toLowerCase()===String(v||'').trim().toLowerCase());if(!n){toast('Выберите нишу из списка');return}startNiche(n)}
 document.addEventListener('click',e=>{
   const t=e.target;
   if(t.closest('a'))return;
   const ln=t.closest('[data-lens]');if(ln){if(ln.dataset.lens===S.lens)return;S.lens=ln.dataset.lens;ZS.set('lens',S.lens);S.n=30;segPick($('#lens'),ln);$('#lensnote').textContent=LENS.find(x=>x[0]===S.lens)[2];relist();return}
   if(t.closest('#more')){S.n+=30;relist();return}
   if(t.closest('#fbtn')){filterSheet();return}
+  if(t.closest('[data-clr]')){S.c1=S.c2='';ZS.set('c1','');ZS.set('c2','');render(false);return}
   const fv=t.closest('[data-ver]');if(fv){S.ver=fv.dataset.ver;ZS.set('ver',S.ver);segPick($('#fver'),fv);return}
-  const fc=t.closest('[data-c1]');if(fc){S.c1=fc.dataset.c1;ZS.set('c1',S.c1);$$('#fc1 button').forEach(b=>b.classList.toggle('on',b===fc));return}
+  const fc=t.closest('[data-c1]');if(fc){S.c1=fc.dataset.c1;S.c2='';ZS.set('c1',S.c1);ZS.set('c2','');$('#cats').innerHTML=catChips();return}
+  const f2=t.closest('[data-c2]');if(f2){S.c2=f2.dataset.c2;ZS.set('c2',S.c2);$$('#fc2 button').forEach(b=>b.classList.toggle('on',b===f2));return}
+  if(t.closest('#mreset')){S.M=Object.assign({},MDEF);ZS.set('M',S.M);for(const id in MKEYS){const el=$('#'+id);if(el)el.value=S.M[MKEYS[id]]}toast('Как в Юнитке');return}
   if(t.closest('#fdone')){closeSheet();S.n=30;render(false);return}
+  const gt=t.closest('[data-goto]');if(gt){go(gt.dataset.goto);return}
+  const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
+  const cq=t.closest('[data-ckq]');if(cq){startCheck(cq.dataset.ckq);return}
   const nb=t.closest('[data-n]');if(nb&&BY[nb.dataset.n]){openSheet(nicheSheet(BY[nb.dataset.n]),'niche');return}
-  const cq=t.closest('[data-ckq]');if(cq){closeSheet();startCheck(cq.dataset.ckq);return}
-  if(t.closest('#ckgo')){startCheck($('#ckurl').value);return}
+  const cm=t.closest('[data-ckm]');if(cm){if(cm.dataset.ckm===S.ckmode)return;S.ckmode=cm.dataset.ckm;ZS.set('ckmode',S.ckmode);render(false);setTimeout(()=>{const i=$('#ckurl')||$('#ckniche');i&&i.focus()},350);return}
+  if(t.closest('#ckgo')){if(S.ckmode==='niche')goNiche(($('#ckniche')||{}).value);else startCheck(($('#ckurl')||{}).value);return}
   const ck=t.closest('[data-ck]');if(ck){S.ck=ck.dataset.ck;render(true);return}
   if(t.closest('[data-back]')){S.ck=null;render(true);return}
   const mp=t.closest('[data-mp]');if(mp&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(!c||mp.dataset.mp===S.mp)return;S.mp=mp.dataset.mp;ZS.set('mp',S.mp);
     segPick($('#mpseg'),$(`#mpseg [data-mp="${S.mp}"]`));$$('#vsum .vs1').forEach(b=>b.classList.toggle('on',b.dataset.mp===S.mp));swapIn($('#mppanel'),mpPanel(c,S.mp),()=>{reveal($('#mppanel'));thumbs($('#mppanel'))});return}
-  const cm=t.closest('[data-cm]');if(cm&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)cmSheet(c,S.mp,cm.dataset.cm);return}
+  const cmb=t.closest('[data-cm]');if(cmb&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)cmSheet(c,S.mp,cmb.dataset.cm);return}
   const pa=t.closest('[data-pickall]');if(pa&&S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)pickSheet(c,pa.dataset.pickall);return}
-  const rf=t.closest('[data-reform]');if(rf&&S.ck){relaySend({k:'reform',id:S.ck,mp:rf.dataset.reform}).then(()=>{toast('Переформирую — новые кандидаты через 3–5 минут');poll(true)}).catch(()=>toast('Не отправилось'));return}
+  const rf=t.closest('[data-reform]');if(rf&&S.ck){relaySend({k:'reform',id:S.ck,mp:rf.dataset.reform}).then(()=>{toast('Переформирую — новые кандидаты через 2–3 минуты');poll(true)}).catch(()=>toast('Не отправилось'));return}
   const yn=t.closest('[data-yn]');if(yn){const q=((QD[yn.dataset.id]=QD[yn.dataset.id]||{})[yn.dataset.m]=QD[yn.dataset.id][yn.dataset.m]||{}),s=yn.dataset.s;
     if(q[s]===yn.dataset.yn)delete q[s];else q[s]=yn.dataset.yn;yn.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',q[s]===b.dataset.yn));qbar();return}
   if(t.closest('#qgo')){qSend();return}
   if(t.closest('#qclr')){for(const k in QD)delete QD[k];qbar();$$('.yn button.on').forEach(b=>b.classList.remove('on'));return}
-  const ad=t.closest('.ad');if(ad)ad.classList.toggle('open');
+  const ad=t.closest('.ad');if(ad&&ad.tagName==='BUTTON')ad.classList.toggle('open');
 });
 
 /* ---------- отрисовка ---------- */
