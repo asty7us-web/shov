@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/shov/pwa/apple-180.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23005bff'/%3E%3Crect x='7' y='16' width='4' height='9' rx='2' fill='white'/%3E%3Crect x='14' y='11' width='4' height='14' rx='2' fill='white'/%3E%3Crect x='21' y='7' width='4' height='18' rx='2' fill='white'/%3E%3C/svg%3E">
 <script>(function(){try{var t=JSON.parse(localStorage.getItem('konk.theme')||'"auto"');if(['light','dark','paper','paperdim','space','farcry','sonic','solitaire','birds'].includes(t))document.documentElement.dataset.theme=t;
-  if(['farcry','sonic','solitaire','birds'].includes(t)){document.documentElement.dataset.igra=t;document.write('<link rel="stylesheet" id="igcss" href="/unitka/igry.css?v=1">')}}catch(e){}})()</script>
+  if(['farcry','sonic','solitaire','birds'].includes(t)){document.documentElement.dataset.igra=t;document.write('<link rel="stylesheet" id="igcss" href="/unitka/igry.css?v=2">')}}catch(e){}})()</script>
 <style>
 /* «Конкуренты Озон». Телефон в первую очередь: закреплённая шапка с переключателем «Склейки | Конкуренты» и выбором товара,
    нижняя панель разделов, листы снизу. Темы: светлая, тёмно-серая, авто. Методика — видео Вовы 21.10.2026. */
@@ -1194,8 +1194,8 @@ const IGRY_T=['farcry','sonic','solitaire','birds'];let igryP=null;
 function igry(k){const on=IGRY_T.includes(k),r=document.documentElement;
   if(!on){if(window.IGRY)IGRY.apply(null);delete r.dataset.igra;return}
   r.dataset.igra=k;
-  if(!document.getElementById('igcss')){const l=document.createElement('link');l.id='igcss';l.rel='stylesheet';l.href='/unitka/igry.css?v=1';document.head.appendChild(l)}
-  if(!igryP)igryP=new Promise(ok=>{const s=document.createElement('script');s.src='/unitka/igry.js?v=1';s.onload=ok;document.head.appendChild(s)});
+  if(!document.getElementById('igcss')){const l=document.createElement('link');l.id='igcss';l.rel='stylesheet';l.href='/unitka/igry.css?v=2';document.head.appendChild(l)}
+  if(!igryP)igryP=new Promise(ok=>{const s=document.createElement('script');s.src='/unitka/igry.js?v=2';s.onload=ok;document.head.appendChild(s)});
   igryP.then(()=>{const t=IGRY_T.includes(curT())?curT():null;IGRY.apply(t,{name:'Конкуренты',wrap:$('#spWrap'),onSound:syncSound});syncSound()})}
 const PICK=svcPicker({btn:'#themeBtn',list:THEMES,cur:TNAME[KS.get('theme','auto')]?KS.get('theme','auto'):'auto',sw:{paper:swatch('paper'),paperdim:swatch('paperdim')},
   onPick:k=>{KS.set('theme',k);applyTheme(k,true);svcTheme(2,k)}});
