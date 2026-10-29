@@ -1424,6 +1424,21 @@ function start(d){D=d;R=d.rules;BY={};d.niches.forEach(n=>BY[n.id]=n);
   render(false);loadChecks().then(()=>{if(S.t==='check')render(false);else renderTabs();poll(false)});loadTops();
 }
 try{history.scrollRestoration='manual'}catch(e){}
+/* «назад» не выбрасывает с сайта (Андрей 29.10): закрыть всплывающее → в начало раздела → на главную («Ниши») → наверх.
+   Над страницей всегда одна запись-«страж»: «назад» снимает её, мы делаем шаг и ставим её снова. */
+function backStep(){
+  if(TR){tourEnd();return}
+  const tm=$('#tmenu');if(tm&&!tm.hidden){tm.hidden=true;return}
+  const sm=$('#svcMenu');if(sm&&sm.classList.contains('on')){$('#svcBtn').click();return}
+  if(shw.classList.contains('on')){closeSheet();return}
+  const top=()=>window.scrollTo({top:0,behavior:RM?'auto':'smooth'});
+  if(scrollY>40){top();return}
+  if(S.ck){S.ck=null;render(true);return}
+  if(S.t!=='pick'){go('pick');return}
+  toast('Это главная — «Что закупать»');
+}
+try{if(!(history.state&&history.state.zpg)){history.replaceState({zpb:1},'');history.pushState({zpg:1},'')}}catch(e){}
+addEventListener('popstate',e=>{if(e.state&&e.state.zpg)return;backStep();try{history.pushState({zpg:1},'')}catch(x){}});
 document.addEventListener('touchstart',()=>{},{passive:true});
 function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const g=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=g;$('#pw').onkeydown=e=>{if(e.key==='Enter')g()};setTimeout(()=>$('#pw').focus(),50)}
 applyTheme(ZS.get('theme','auto'));
