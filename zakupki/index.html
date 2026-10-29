@@ -660,6 +660,30 @@ window.svcPicker=o=>{
   draw();
   return {set(k){cur=k;draw()},close(){show(false)}};
 };
+/* «назад» на телефоне не выкидывает с сайта (Андрей 29.10: «назад сначала закрывает всплывающее, потом в начало раздела, потом на главную,
+   а на главной — наверх; с сайта не выкидывать, и так везде надо»). Над страницей — запись-«страж»; «назад» снимает её: делаем один шаг
+   и ставим стража снова. Стража ставим при первом касании: записи, добавленные раньше, Chrome кнопкой «назад» пропускает.
+   svcBack({pop:[шаги страницы: вернуть true, если что-то закрыли], main: перейти в главный раздел (true, если перешли), home: «это главная»}) */
+window.svcBack=o=>{
+  const q=s=>document.querySelector(s),rs=history.replaceState.bind(history);
+  let gu=location.href;   // адрес записи-стража: страницы меняют в нём раздел (#skleyki и т.п.) — после «назад» ставим стража с ним же
+  history.replaceState=function(s,t,u){if(history.state&&history.state.svg&&!(s&&s.svg))s=Object.assign({},s,{svg:1});rs(s,t,u);if(history.state&&history.state.svg)gu=location.href};
+  const arm=()=>{try{if(!(history.state&&history.state.svg)){rs(Object.assign({},history.state,{svb:1}),'');history.pushState({svg:1},'')}gu=location.href}catch(e){}};
+  ['pointerdown','keydown'].forEach(k=>document.addEventListener(k,arm,{capture:true,once:true}));
+  const step=()=>{
+    for(const f of o.pop||[])if(f())return;                                   // всплывающее страницы: фишки, листы, окна
+    if(m.classList.contains('on')){open(false);return}                       // выбор сервиса
+    const t=q('.svt-btn[aria-expanded="true"]');if(t){t.click();return}       // выбор темы
+    const big=q('#sxCard.big [data-sx="big"],#ptCard.big [data-pt="big"],#abCard.big [data-ab="big"],#spCard.big [data-sp="big"]');if(big){big.click();return}
+    const g=q('#sxCard.flip [data-sx="back"],#ptCard.flip [data-pt="back"],#abCard.flip [data-ab="back"]');if(g){g.click();return}   // игра — обратно на баннер
+    if(scrollY>40){scrollTo({top:0,behavior:'smooth'});return}              // в начало раздела
+    if(o.main&&o.main())return;                                               // на главный раздел
+    if(o.home)o.home();                                                       // уже на главной, наверху
+  };
+  addEventListener('popstate',e=>{if(e.state&&e.state.svg){gu=location.href;return}
+    const was=location.href;step();const u=location.href!==was?location.href:gu;   // шаг сам сменил раздел — его адрес, иначе — адрес, с которого ушли
+    try{history.pushState({svg:1},'',u);gu=u}catch(x){}});
+};
 })();
 /*/SVC:JS*/</script>
 <div class="topsp" id="topsp"></div>
@@ -1420,7 +1444,7 @@ function render(anim){
 }
 function start(d){D=d;R=d.rules;BY={};d.niches.forEach(n=>BY[n.id]=n);
   applyTheme(ZS.get('theme','auto'));
-  const hs=location.hash.slice(1);if(hs.startsWith('check=')){S.t='check';history.replaceState(null,'',location.pathname);setTimeout(()=>{$('#ckurl')&&($('#ckurl').value=decodeURIComponent(hs.slice(6)))},300)}
+  const hs=location.hash.slice(1);if(hs.startsWith('check=')){S.t='check';history.replaceState(history.state,'',location.pathname);setTimeout(()=>{$('#ckurl')&&($('#ckurl').value=decodeURIComponent(hs.slice(6)))},300)}
   render(false);loadChecks().then(()=>{if(S.t==='check')render(false);else renderTabs();poll(false)});loadTops();
 }
 try{history.scrollRestoration='manual'}catch(e){}
@@ -1437,8 +1461,14 @@ function backStep(){
   if(S.t!=='pick'){go('pick');return}
   toast('Это главная — «Что закупать»');
 }
-try{if(!(history.state&&history.state.zpg)){history.replaceState({zpb:1},'');history.pushState({zpg:1},'')}}catch(e){}
-addEventListener('popstate',e=>{if(e.state&&e.state.zpg)return;backStep();try{history.pushState({zpg:1},'')}catch(x){}});
+/* 29.10 (чат «Плавный переход»): запись, добавленную без касания страницы, Chrome кнопкой «назад» пропускает вместе с самой страницей —
+   поэтому «страж» ставим только при касании/нажатии клавиши, и после каждого «назад» — снова при следующем касании */
+/* запас из GN «стражей»: несколько «назад» подряд без касания тоже не выбрасывают; при касании запас пополняется */
+const GN=20,gpos=()=>(history.state&&history.state.zpg)||0;
+let POS=gpos();
+function armGuard(){let k=gpos();if(k>=GN)return;try{while(k<GN){k++;history.pushState({zpg:k},'',location.href)}POS=k}catch(e){}}
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,armGuard,{capture:true,passive:true}));
+addEventListener('popstate',()=>{const k=gpos();if(k<POS)backStep();POS=k});
 document.addEventListener('touchstart',()=>{},{passive:true});
 function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const g=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=g;$('#pw').onkeydown=e=>{if(e.key==='Enter')g()};setTimeout(()=>$('#pw').focus(),50)}
 applyTheme(ZS.get('theme','auto'));
