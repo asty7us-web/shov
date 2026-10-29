@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Закупки Озон</title>
+<meta name="theme-color" content="#f2f2f7" id="tc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Закупки">
+<link rel="manifest" href="/shov/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/shov/pwa/apple-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23005bff'/%3E%3Cpath d='M8 11h16l-2 11H10z' fill='white'/%3E%3Cpath d='M12 11a4 4 0 0 1 8 0' stroke='white' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+<script>(function(){try{var t=JSON.parse(localStorage.getItem('zak.theme')||'"auto"');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})()</script>
+<style>
+/* «Закупки Озон» — подбор ниш под закупку по правилам двух видео (Ozon «Как выбрать нишу», Mister Seller «ТОП-5 шагов»)
+   и Андрея (Trello АА 27.10.2026). Телефон в первую очередь. Данные зашифрованы паролем Склеек/Юнитки. */
+:root{
+  --bg:#f2f2f7;--card:#fff;--card2:#f7f7fa;--fill:rgba(118,118,128,.12);--fill2:rgba(118,118,128,.07);
+  --ink:#0b0b0f;--ink2:#55555e;--ink3:#8e8e96;--line:rgba(60,60,67,.12);
+  --hdr:rgba(246,246,250,.8);--acc:#005bff;--acc-soft:rgba(0,91,255,.1);--on-acc:#fff;
+  --good:#1f9d55;--warn:#c26a00;--bad:#e5383b;--good-soft:rgba(31,157,85,.12);--warn-soft:rgba(217,119,6,.13);--bad-soft:rgba(229,56,59,.1);
+  --bar:#c9c9d1;--sh1:0 1px 1px rgba(0,0,0,.03),0 2px 8px rgba(0,0,0,.04);--sh2:0 2px 4px rgba(0,0,0,.04),0 18px 44px -12px rgba(0,0,0,.2);
+  --ease:cubic-bezier(.22,.61,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.16,1,.3,1);
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --fd:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1c1c1e;--card:#2c2c2e;--card2:#323235;--fill:rgba(120,120,128,.24);--fill2:rgba(120,120,128,.14);
+  --ink:#f5f5f7;--ink2:#c3c3c8;--ink3:#8e8e93;--line:rgba(255,255,255,.1);--hdr:rgba(28,28,30,.8);
+  --acc:#4d8dff;--acc-soft:rgba(77,141,255,.18);--on-acc:#0a1430;--good:#32d74b;--warn:#ff9f0a;--bad:#ff5a5f;
+  --good-soft:rgba(50,215,75,.15);--warn-soft:rgba(255,159,10,.16);--bad-soft:rgba(255,90,95,.16);--bar:#5a5a60;
+  --sh1:0 1px 1px rgba(0,0,0,.2);--sh2:0 2px 6px rgba(0,0,0,.3),0 20px 50px -16px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1c1c1e;--card:#2c2c2e;--card2:#323235;--fill:rgba(120,120,128,.24);--fill2:rgba(120,120,128,.14);
+  --ink:#f5f5f7;--ink2:#c3c3c8;--ink3:#8e8e93;--line:rgba(255,255,255,.1);--hdr:rgba(28,28,30,.8);
+  --acc:#4d8dff;--acc-soft:rgba(77,141,255,.18);--on-acc:#0a1430;--good:#32d74b;--warn:#ff9f0a;--bad:#ff5a5f;
+  --good-soft:rgba(50,215,75,.15);--warn-soft:rgba(255,159,10,.16);--bad-soft:rgba(255,90,95,.16);--bar:#5a5a60;
+  --sh1:0 1px 1px rgba(0,0,0,.2);--sh2:0 2px 6px rgba(0,0,0,.3),0 20px 50px -16px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 var(--f);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:var(--acc);text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.num{font-variant-numeric:tabular-nums}
+.press{transition:transform .35s var(--spring),background-color .25s var(--ease),box-shadow .3s var(--ease)}
+.press:active{transform:scale(.97);transition-duration:.12s}
+:focus-visible{outline:2.5px solid var(--acc);outline-offset:2px;border-radius:10px}
+
+/* шапка */
+.top{position:sticky;top:0;z-index:40;background:var(--hdr);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);
+  border-bottom:.5px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.bar{max-width:1180px;margin:0 auto;height:52px;padding:0 16px;display:flex;align-items:center;gap:10px}
+.apps{display:flex;padding:2px;border-radius:11px;background:var(--fill);flex:none}
+.apps>a,.apps>span{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.apps>.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.apps svg{width:15px;height:15px}
+@media (max-width:560px){.apps>a .lbl{display:none}.apps>a{padding:6px 9px}}
+.sp{flex:1}
+.ico{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--fill);color:var(--ink2);flex:none}
+.ico svg{width:18px;height:18px}
+.tabs{max-width:1180px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px}
+.seg{display:flex;padding:2px;border-radius:11px;background:var(--fill);width:100%;max-width:520px}
+.seg button{flex:1;padding:7px 8px;border-radius:9px;font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+main{max-width:1180px;margin:0 auto;padding:14px 16px 90px}
+h2{font:700 22px/1.2 var(--fd);margin:6px 0 4px;letter-spacing:-.01em}
+.mut{color:var(--ink3)}
+.note{color:var(--ink2);font-size:13.5px;margin:2px 0 12px}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--sh1);padding:14px}
+
+/* калькулятор */
+.calc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 12px}
+@media (max-width:640px){.calc{grid-template-columns:1fr 1fr}.calc .wide{grid-column:1/-1}}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.fld input,.fld select{width:100%;min-width:0;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card2);padding:0 12px;font-size:16px}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.chip{padding:7px 12px;border-radius:999px;background:var(--fill);font-size:13.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--acc);color:var(--on-acc)}
+.chip b{font-weight:700;margin-left:4px;opacity:.75}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tog{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink2);cursor:pointer;user-select:none}
+.tog input{width:18px;height:18px;accent-color:var(--acc)}
+
+/* карточки ниш */
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+@media (max-width:400px){.list{grid-template-columns:minmax(0,1fr)}}
+.ni{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;cursor:pointer}
+@media (hover:hover){.ni:hover{box-shadow:var(--sh2)}}
+.ni .hd{display:flex;gap:10px;align-items:flex-start}
+.ni .ttl{flex:1;min-width:0}
+.ni .ttl b{display:block;font:650 16.5px/1.25 var(--fd)}
+.ni .ttl span{font-size:12.5px;color:var(--ink3)}
+.pill{flex:none;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill.ok{background:var(--good-soft);color:var(--good)}.pill.maybe{background:var(--warn-soft);color:var(--warn)}.pill.no{background:var(--bad-soft);color:var(--bad)}
+.mx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
+.mx div{min-width:0}
+.mx i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx b{font:650 15px/1.2 var(--fd)}
+.up{color:var(--good)}.dn{color:var(--bad)}.wr{color:var(--warn)}
+.unit{border-radius:12px;padding:9px 11px;font-size:13.5px;background:var(--fill2)}
+.unit.fit{background:var(--good-soft)}.unit.nofit{background:var(--bad-soft)}
+.unit b{font-weight:700}
+.why{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink2)}
+.why li{display:flex;gap:6px}
+.why li::before{flex:none;font-weight:800;width:12px}
+.why li.p::before{content:"✓";color:var(--good)}
+.why li.m::before{content:"!";color:var(--warn)}
+.why li.m.no::before{color:var(--bad)}
+.spark{display:flex;align-items:flex-end;gap:2px;height:30px}
+.spark span{flex:1;background:var(--bar);border-radius:2px 2px 0 0;min-height:2px}
+.spark span.cur{background:var(--acc)}
+.spark span.nx{background:var(--acc);opacity:.45}
+.sz{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)}
+.sz .spark{flex:1}
+.tag{padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap}
+.tag.end{background:var(--bad-soft);color:var(--bad)}.tag.start{background:var(--good-soft);color:var(--good)}.tag.flat{background:var(--fill);color:var(--ink2)}
+.more{display:block;margin:16px auto 0;padding:11px 22px;border-radius:12px;background:var(--fill);font-weight:600}
+.empty{text-align:center;padding:40px 10px;color:var(--ink3)}
+
+/* лист снизу */
+.shw{position:fixed;inset:0;z-index:60;pointer-events:none}
+.shw.on{pointer-events:auto}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .3s var(--ease)}
+.shw.on .scrim{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);border-radius:22px 22px 0 0;
+  padding:8px 16px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .45s var(--out);box-shadow:var(--sh2)}
+@media (min-width:760px){.sheet{left:50%;right:auto;width:720px;margin-left:-360px;bottom:auto;top:50%;border-radius:22px;max-height:86vh;transform:translateY(-40%) scale(.97);opacity:0;transition:transform .4s var(--out),opacity .25s}
+  .shw.on .sheet{transform:translateY(-50%);opacity:1}}
+.shw.on .sheet{transform:none}
+.grab{display:flex;justify-content:center;padding:4px 0 10px}.grab i{width:38px;height:5px;border-radius:3px;background:var(--fill)}
+.sx{position:absolute;right:12px;top:10px}
+.sh h3{font:700 20px/1.25 var(--fd);margin:0 40px 2px 0}
+.sh h4{font:650 15px/1.3 var(--fd);margin:18px 0 8px}
+.chart{display:flex;align-items:flex-end;gap:4px;height:120px;margin-top:6px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;min-width:0}
+.chart span{width:100%;background:var(--bar);border-radius:4px 4px 0 0;min-height:2px}
+.chart div.cur span{background:var(--acc)}.chart div.nx span{background:var(--acc);opacity:.45}
+.chart em{font-style:normal;font-size:10.5px;color:var(--ink3)}
+.tp{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:.5px solid var(--line)}
+.tp img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:var(--fill)}
+.tp b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp span{font-size:12px;color:var(--ink3)}
+.tp .r{text-align:right;font-size:13px;font-weight:650}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;font-size:14px}
+.kv span{color:var(--ink2)}.kv b{font-weight:650;text-align:right}
+
+/* наши */
+.mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+@media (max-width:400px){.mine{grid-template-columns:minmax(0,1fr)}}
+.alert{border-radius:12px;padding:9px 11px;font-size:13.5px;font-weight:600}
+.alert.end{background:var(--bad-soft);color:var(--bad)}.alert.start{background:var(--good-soft);color:var(--good)}.alert.flat{background:var(--fill2);color:var(--ink2)}
+.prods{font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:2px}
+.prods div{display:flex;gap:8px}.prods div span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prods div.zk{display:block;margin:0 0 6px;padding:6px 9px;border-radius:10px;background:var(--fill2);font-size:12.5px;line-height:1.35}
+.prods div.zk b{color:var(--ink)}
+
+/* правила */
+.rules{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.rules ol,.rules ul{margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--ink2)}
+.rules li{margin:4px 0}
+.rules b{color:var(--ink)}
+
+.lock{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:var(--bg);padding:16px}
+.lock[hidden]{display:none}
+.lock .card{width:min(360px,100%);display:flex;flex-direction:column;gap:10px}
+.lock input{height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card2);padding:0 12px;font-size:16px}
+.btn{height:44px;border-radius:12px;background:var(--acc);color:var(--on-acc);font-weight:700}
+.skel{height:150px;border-radius:18px;background:var(--fill2);margin-bottom:12px;animation:pl 1.4s ease-in-out infinite}
+@keyframes pl{50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <nav class="apps" aria-label="Сервисы">
+      <a href="../" class="press" title="Склейки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg><span class="lbl">Склейки</span></a>
+      <a href="../konkurenty/" class="press" title="Конкуренты"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg><span class="lbl">Конкуренты</span></a>
+      <span class="on" title="Закупки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h16l-1.6 11.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"/><path d="M8.5 8a3.5 3.5 0 0 1 7 0"/></svg><span class="lbl">Закупки</span></span>
+    </nav>
+    <div class="sp"></div>
+    <button class="ico press" id="themeBtn" aria-label="Тема оформления"></button>
+  </div>
+  <div class="tabs"><div class="seg" id="tabs" role="tablist">
+    <button data-t="pick" aria-pressed="true">Подбор ниш</button>
+    <button data-t="mine" aria-pressed="false">Наши товары</button>
+    <button data-t="rules" aria-pressed="false">Правила</button>
+  </div></div>
+</header>
+<main id="view"><div class="skel"></div><div class="skel"></div></main>
+<div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="sh" id="sbody"></div></section></div>
+<div class="lock" id="lock" hidden><div class="card"><b style="font-size:17px">Пароль</b><div class="note" style="margin:0">Тот же, что у Юнитки и Склеек.</div><input id="pw" type="password" autocomplete="current-password"><button class="btn press" id="pwgo">Открыть</button><div class="note" id="pwerr" style="color:var(--bad)"></div></div></div>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const LS={get(k,d){try{const v=localStorage.getItem('shov.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('shov.'+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem('shov.'+k)}catch(e){}}};
+const ZS={get(k,d){try{const v=localStorage.getItem('zak.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('zak.'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const b64u8=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let KEY=null,SALT=null,D=null,R=null,BY={};
+const S={t:ZS.get('tab','pick'),ver:ZS.get('ver','ok'),c1:ZS.get('c1',''),q:'',B:ZS.get('B',''),W:ZS.get('W',''),E:ZS.get('E',null),fit:ZS.get('fit',false),sort:ZS.get('sort','score'),n:40};
+
+/* ---------- данные (ключ общий со Склейками и Конкурентами) ---------- */
+async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
+async function load(pass){
+  const res=await fetch('data.enc.json?t='+Date.now(),{cache:'no-store'});
+  if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
+  const enc=await res.json();
+  if(!KEY||SALT!==enc.salt){
+    const kc=LS.get('kc',null);
+    if(!pass&&kc&&kc.salt===enc.salt)KEY=await crypto.subtle.importKey('raw',b64u8(kc.k),'AES-GCM',false,['decrypt']);
+    else{let p=pass||LS.get('pass','');if(!p){try{p=JSON.parse(localStorage.getItem('unitka.pass')||'""')}catch(e){p=''}}if(!p)throw new Error('NEED_PASS');KEY=await deriveKey(p,enc.salt,enc.iter);pass=p}
+    SALT=enc.salt;
+  }
+  let plain;try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(enc.iv)},KEY,b64u8(enc.ct))}catch(e){KEY=null;LS.del('kc');throw new Error('BAD_PASS')}
+  if(pass){LS.set('pass',pass);try{const raw=new Uint8Array(await crypto.subtle.exportKey('raw',KEY));let bin='';raw.forEach(x=>bin+=String.fromCharCode(x));LS.set('kc',{salt:enc.salt,k:btoa(bin)})}catch(e){}}
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+/* ---------- формат ---------- */
+const NF=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}),N1=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1});
+const ok=v=>v!=null&&v!==''&&!isNaN(v);
+const fi=v=>ok(v)?NF.format(v):'—';
+const fr=v=>ok(v)?NF.format(Math.round(v))+' ₽':'—';
+const fm=v=>!ok(v)?'—':Math.abs(v)>=1e9?N1.format(v/1e9)+' млрд':Math.abs(v)>=1e6?NF.format(v/1e6)+' млн':Math.abs(v)>=1e3?NF.format(v/1e3)+' тыс':NF.format(v);
+const fg=v=>ok(v)?`<span class="${v>=0?'up':'dn'}">${v>0?'+':''}${NF.format(v)}%</span>`:'<span class="mut">—</span>';
+const MON=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const VL={ok:'Да',maybe:'Можно',no:'Нет'};
+const VT={ok:'Да — брать в работу',maybe:'Можно — с оговоркой',no:'Нет'};
+
+/* ---------- юнит-экономика на 1 шт ---------- */
+function unit(n){
+  const E=ok(S.E)?+S.E:R.default_exp, Dr=ok(n.drr_top)?n.drr_top:R.default_drr, P=n.price||0;
+  const net=P*(1-(E+Dr)/100), W=ok(S.W)?+S.W:null, B=ok(S.B)?+S.B:null;
+  const floor=P*R.margin_min/100;
+  const maxBuy=net-Math.max(W||0,floor);
+  let profit=null,margin=null,fit=true;
+  if(B!=null){profit=net-B;margin=P?profit/P*100:null;fit=profit>=(W||0)&&margin>=R.margin_min}
+  else if(W!=null)fit=maxBuy>0;
+  return {E,Dr,P,net,W,B,maxBuy,profit,margin,fit,drrOwn:ok(n.drr_top)};
+}
+function unitHtml(n){
+  const u=unit(n);
+  if(u.B!=null)return `<div class="unit ${u.fit?'fit':'nofit'}">Закупка <b>${fr(u.B)}</b> → прибыль <b>${fr(u.profit)}</b> с 1 шт (${ok(u.margin)?NF.format(u.margin):'—'}% от цены)${u.fit?'':u.margin<R.margin_min?' — меньше '+R.margin_min+'%':' — меньше желаемой'}</div>`;
+  return `<div class="unit${u.maxBuy>0?'':' nofit'}">При цене ${fr(u.P)} закупать <b>не дороже ${fr(Math.max(0,u.maxBuy))}</b> за шт${u.W?` (прибыль ${fr(u.W)})`:` (маржа ${R.margin_min}%)`}</div>`;
+}
+
+/* ---------- сезон ---------- */
+function sparkHtml(s,big){
+  if(!s||!s.months||!s.months.length)return '';
+  const mx=Math.max(...s.months.map(m=>m[1]))||1, m0=new Date().getMonth()+1, nx=[m0%12+1,(m0+1)%12+1];
+  if(big)return `<div class="chart">${s.months.map(([d,v])=>{const m=+d.slice(5,7);return `<div class="${m===m0?'cur':nx.includes(m)?'nx':''}"><span style="height:${Math.max(2,v/mx*100)}%"></span><em>${MON[m-1]}</em></div>`}).join('')}</div>`;
+  return `<div class="spark">${s.months.map(([d,v])=>{const m=+d.slice(5,7);return `<span class="${m===m0?'cur':nx.includes(m)?'nx':''}" style="height:${Math.max(6,v/mx*100)}%" title="${MON[m-1]} ${d.slice(0,4)}: ${fm(v)} ₽"></span>`}).join('')}</div>`;
+}
+function seasonTag(s){
+  if(!s||!s.trend||s.trend==='nodata')return '';
+  if(s.trend==='end')return `<span class="tag end">сезон кончается</span>`;
+  if(s.trend==='start')return `<span class="tag start">сезон начинается</span>`;
+  return `<span class="tag flat">ровно</span>`;
+}
+const sg=r=>{const p=Math.round((r-1)*100);return (p>0?'+':p<0?'−':'')+Math.abs(p)+'%'};
+/* поправка объёма закупки на сезон: реальное изменение ниши год назад в эти 2 месяца, если оно заметное (±15%) */
+const sf=s=>s&&ok(s.ahead)&&Math.abs(s.ahead-1)>=.15?s.ahead:1;
+function seasonText(s){
+  if(!s||!s.months)return 'Сезон не считали: ниша не в числе лучших.';
+  if(s.trend==='nodata')return 'Меньше 9 месяцев продаж за год — сезон не посчитать.'+(s.peak?' Пик: '+s.peak.join(', ')+'.':'');
+  const t=`в прошлом году в ${s.next_txt} ниша ${sg(s.ahead)} к ${s.cur_txt}, весь Озон ${sg(s.market)}`;
+  const w=s.trend==='end'?`Сезон кончается: ${t}. Закупать меньше.`
+    :s.trend==='start'?`Сезон начинается: ${t}. Закупать заранее.`
+    :`Ближайшие 2 месяца — как весь рынок: ${t}.`;
+  return w+` Пик: ${s.peak.join(', ')}; провал: ${s.low.join(', ')}.`;
+}
+
+/* ---------- подбор ---------- */
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  let a=D.niches.filter(n=>(S.ver==='all'||n.verdict===S.ver)&&(!S.c1||n.cat1===S.c1)&&(!q||(n.name+' '+n.cat2).toLowerCase().includes(q)));
+  if(S.fit)a=a.filter(n=>unit(n).fit);
+  const k={score:n=>-n.score,growth:n=>-(n.growth_y||-999),vol:n=>-n.gmv28,free:n=>n.top5==null?999:n.top5,price:n=>n.price||0}[S.sort];
+  return a.slice().sort((x,y)=>k(x)-k(y));
+}
+function card(n){
+  const s=n.season;
+  return `<button class="card ni press" data-id="${esc(n.id)}">
+  <div class="hd"><div class="ttl"><b>${esc(n.name)}</b><span>${esc(n.cat1)} › ${esc(n.cat2)}</span></div><span class="pill ${n.verdict}">${VL[n.verdict]}</span></div>
+  <div class="mx num">
+    <div><i>Оборот 28 дн</i><b>${fm(n.gmv28)} ₽</b></div>
+    <div><i>Рост за год</i><b>${fg(n.growth_y)}</b></div>
+    <div><i>Топ-5 продавцов</i><b class="${n.top5>R.top5_max?'dn':n.top5>R.top5_ideal?'wr':'up'}">${ok(n.top5)?NF.format(n.top5)+'%':'—'}</b></div>
+    <div><i>Средняя цена</i><b>${fr(n.price)}</b></div>
+    <div><i>Выкуп</i><b class="${n.buyout<R.buyout_min?'dn':''}">${ok(n.buyout)?NF.format(n.buyout)+'%':'—'}</b></div>
+    <div><i>Продавцов</i><b>${fi(n.sellers)}</b></div>
+  </div>
+  ${s&&s.months?`<div class="sz">${sparkHtml(s)}${seasonTag(s)}</div>`:''}
+  ${unitHtml(n)}
+  <ul class="why">${(n.plus||[]).slice(0,2).map(t=>`<li class="p">${esc(t)}</li>`).join('')}${(n.why||[]).slice(0,3).map(t=>`<li class="m${n.verdict==='no'?' no':''}">${esc(t)}</li>`).join('')}</ul>
+</button>`;
+}
+function viewPick(){
+  const c1=[...new Set(D.niches.map(n=>n.cat1))].sort();
+  const base=D.niches.filter(n=>!S.c1||n.cat1===S.c1);
+  const cnt=v=>base.filter(n=>v==='all'||n.verdict===v).length;
+  const a=filtered();
+  return `<h2>Подбор ниш на Озоне</h2>
+  <div class="note">Все категории Озона за 28 дней и год из ЛК «Аналитика → Категории». Обновлено ${esc(D.at)} · ниш проверено ${fi(D.counts.all)}.</div>
+  <div class="card">
+    <div class="calc">
+      <div class="fld"><label for="iB">Бюджет на закупку 1 шт, ₽</label><input id="iB" inputmode="numeric" placeholder="например 300" value="${esc(S.B)}"></div>
+      <div class="fld"><label for="iW">Желаемая прибыль с 1 шт, ₽</label><input id="iW" inputmode="numeric" placeholder="например 150" value="${esc(S.W)}"></div>
+      <div class="fld wide"><label for="iE">Расходы Озона, % от цены</label><input id="iE" inputmode="numeric" placeholder="${R.default_exp}" value="${esc(S.E==null?'':S.E)}"></div>
+    </div>
+    <div class="note" style="margin:0 0 10px">Расходы — комиссия, логистика, эквайринг, хранение (по умолчанию ${R.default_exp}%). Реклама сверху — ДРР топ-10 ниши (если не сняли — ${R.default_drr}%). Маржа не ниже ${R.margin_min}%.</div>
+    <label class="tog"><input type="checkbox" id="iFit"${S.fit?' checked':''}> Только ниши, где бюджет и прибыль сходятся</label>
+  </div>
+  <div style="height:12px"></div>
+  <div class="chips" id="ver">${['ok','maybe','no','all'].map(v=>`<button class="chip press" data-v="${v}" aria-pressed="${S.ver===v}">${v==='all'?'Все':VL[v]}<b>${fi(cnt(v))}</b></button>`).join('')}</div>
+  <div class="calc" style="margin-top:0">
+    <div class="fld"><label for="iC">Категория</label><select id="iC"><option value="">Все категории</option>${c1.map(c=>`<option${c===S.c1?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    <div class="fld"><label for="iS">Сортировка</label><select id="iS">${[['score','Лучшие сверху'],['growth','Рост за год'],['free','Меньше гигантов'],['vol','Оборот'],['price','Дешевле']].map(([k,l])=>`<option value="${k}"${S.sort===k?' selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="fld wide"><label for="iQ">Поиск</label><input id="iQ" placeholder="ниша или категория" value="${esc(S.q)}"></div>
+  </div>
+  <div class="list" id="list">${a.slice(0,S.n).map(card).join('')||'<div class="empty">Под эти условия ниш нет — снимите фильтр или поменяйте бюджет</div>'}</div>
+  ${a.length>S.n?`<button class="more press" id="more">Показать ещё (${fi(a.length-S.n)})</button>`:''}`;
+}
+
+/* ---------- лист ниши ---------- */
+function sheetNiche(n){
+  const u=unit(n),s=n.season;
+  const lots=R.test_qty, B=u.B;
+  return `<h3>${esc(n.name)}</h3><div class="mut" style="font-size:13px">${esc(n.cat1)} › ${esc(n.cat2)}</div>
+  <div style="margin-top:10px" class="row"><span class="pill ${n.verdict}">${VT[n.verdict]}</span>${seasonTag(s)}</div>
+  <h4>Почему</h4><ul class="why">${(n.plus||[]).map(t=>`<li class="p">${esc(t)}</li>`).join('')}${(n.why||[]).map(t=>`<li class="m${n.verdict==='no'?' no':''}">${esc(t)}</li>`).join('')}</ul>
+  <h4>Сезон — оборот ниши по месяцам за год</h4>${sparkHtml(s,true)}<div class="note" style="margin-top:8px">${esc(seasonText(s))}</div>
+  <h4>Цифры ниши</h4><div class="kv num">
+    <span>Заказано за 28 дней</span><b>${fm(n.gmv28)} ₽ · ${fi(n.items28)} шт</b>
+    <span>Динамика 28 дней</span><b>${fg(n.growth28)}</b>
+    <span>Заказано за год</span><b>${fm(n.gmv_y)} ₽ ${fg(n.growth_y)}</b>
+    <span>Доля топ-5 продавцов</span><b>${ok(n.top5)?NF.format(n.top5)+'%':'—'}</b>
+    <span>Продавцов / брендов</span><b>${fi(n.sellers)} / ${fi(n.brands)}</b>
+    <span>Средняя цена</span><b>${fr(n.price)}</b>
+    <span>Выкуп</span><b>${ok(n.buyout)?NF.format(n.buyout)+'%':'—'}</b>
+    <span>2-я страница выдачи (товары 37–50), в месяц</span><b>${ok(n.page2)?fm(n.page2)+' ₽':'—'}</b>
+    <span>ДРР топ-10 (реклама от выручки)</span><b>${ok(n.drr_top)?N1.format(n.drr_top)+'%':'—'}</b>
+    <span>Показы у топ-10, медиана за 28 дн</span><b>${ok(n.views_top)?fm(n.views_top):'—'}</b>
+  </div>
+  <h4>Юнит-экономика 1 шт</h4><div class="kv num">
+    <span>Цена (средняя в нише)</span><b>${fr(u.P)}</b>
+    <span>Расходы Озона ${NF.format(u.E)}%</span><b>−${fr(u.P*u.E/100)}</b>
+    <span>Реклама ${N1.format(u.Dr)}%${u.drrOwn?' (ДРР топа)':' (по умолчанию)'}</span><b>−${fr(u.P*u.Dr/100)}</b>
+    <span>Остаётся до закупки</span><b>${fr(u.net)}</b>
+    ${B!=null?`<span>Закупка</span><b>−${fr(B)}</b><span>Прибыль с 1 шт</span><b class="${u.fit?'up':'dn'}">${fr(u.profit)} (${ok(u.margin)?NF.format(u.margin):'—'}%)</b>`:`<span>Закупать не дороже</span><b>${fr(Math.max(0,u.maxBuy))}</b>`}
+  </div>
+  <h4>Сколько закупать</h4><div class="kv num">
+    <span>Тест (видео 2)</span><b>${lots[0]}–${lots[1]} шт${B!=null?` · ${fr(B*lots[0])}–${fr(B*lots[1])}`:''}</b>
+    ${n.vova?`<span>Встать вровень с топом (Вова): ${n.vova.donors.length} ${n.vova.donors.length===1?'донор':'донора'} по цене ${fr(u.P*0.8)}–${fr(u.P*1.2)} продают ${n.vova.donors.map(fi).join(', ')} шт за 28 дн</span><b>${fi(n.vova.target[0])}–${fi(n.vova.target[1])} шт/мес${B!=null?` · ${fm(B*n.vova.target[0])}–${fm(B*n.vova.target[1])} ₽`:''}</b>`:''}
+    ${n.vova&&sf(s)!==1?`<span>С поправкой на ${s.next_txt} (ниша год назад ${sg(s.ahead)})</span><b>${fi(n.vova.target[0]*s.ahead)}–${fi(n.vova.target[1]*s.ahead)} шт/мес</b>`:''}
+  </div>
+  <div class="note" style="margin-top:10px">Сначала тест: из новинок выстреливает ~${Math.round(R.hit_rate*100)}% — лучше 10 наименований по 50 шт, чем 3 по 150; первую партию — с рынков Москвы (быстро, без заморозки денег), дозаказ — Китай. Тест пошёл — объём по Вове: «закуп 500 при 2 000 у конкурентов в топ не выведет», сразу на все склады и трафик без лимита, в минус не продавать.</div>
+  ${(n.top||[]).length?`<h4>Топ-5 товаров ниши за 28 дней</h4>${n.top.map(t=>`<a class="tp" href="${esc(t.link)}" target="_blank" rel="noopener"><img src="${esc(t.photo||'')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><div style="min-width:0"><b>${esc(t.name)}</b><span>${esc(t.seller||'')} · ${fr(t.price)}${ok(t.drr)?' · ДРР '+N1.format(t.drr)+'%':''}</span></div><div class="r num">${fm(t.gmv)} ₽</div></a>`).join('')}`:''}
+  <h4>Дальше — руками</h4><ul class="why"><li class="m">Найти поставщика и запросить прайс; пересчитать юнит по своей закупке и габаритам (логистика зависит от объёма).</li><li class="m">Открыть топ ниши в «Конкурентах»: трафик, конверсии, рекламу — насколько тяжело будет продвигаться.</li></ul>`;
+}
+function openSheet(h){$('#sbody').innerHTML=h;$('#shw').classList.add('on');$('#sheet').scrollTop=0;document.body.style.overflow='hidden'}
+function closeSheet(){$('#shw').classList.remove('on');document.body.style.overflow=''}
+
+/* ---------- наши товары ---------- */
+/* 29.10 Андрей: «наш сервис по конкурентам может пригодиться» — закупка по методу Вовы из «Конкурентов» с поправкой на сезон ниши */
+function zk(p,s){
+  const k=p.konk;if(!k)return '';
+  const f=sf(s), t=k.target;
+  const plan=t?`держать <b>${fi(t[0])}–${fi(t[1])} шт</b> на месяц${f!==1?`, на ${s.next_txt} с сезоном (${sg(f)}) <b>${fi(t[0]*f)}–${fi(t[1]*f)} шт</b>`:''}`:'доноров по нашей цене нет';
+  return `<div class="zk">Закупка по Вове: ${plan}${k.n?` · топ-${k.n}: цена ~${fr(k.price)}${ok(k.drr)?', ДРР '+N1.format(k.drr)+'%':''}`:''} · <a href="../konkurenty/#sku=${esc(p.sku)}">Конкуренты ›</a></div>`;
+}
+function viewMine(){
+  const m0=new Date().getMonth()+1;
+  const items=D.mine.map(m=>{
+    const n=m.niche?BY[m.niche]:null,s=n&&n.season;
+    const mon=m.months.slice(-12),mx=Math.max(...mon.map(x=>x[1][0]))||1;
+    const last3=mon.slice(-4,-1).reduce((a,x)=>a+x[1][1],0), prev3=mon.slice(-7,-4).reduce((a,x)=>a+x[1][1],0);
+    const tr=prev3?Math.round((last3/prev3-1)*100):null;
+    const al=s&&s.trend==='end'?`<div class="alert end">Сезон кончается: год назад в ${esc(s.next_txt)} ниша ${sg(s.ahead)} к ${esc(s.cur_txt)}, весь Озон ${sg(s.market)}. Закупать меньше.</div>`
+      :s&&s.trend==='start'?`<div class="alert start">Сезон начинается: год назад в ${esc(s.next_txt)} ниша ${sg(s.ahead)} к ${esc(s.cur_txt)}, весь Озон ${sg(s.market)}. Закупить заранее.</div>`
+      :s&&s.trend==='flat'?`<div class="alert flat">Ближайшие 2 месяца — как весь рынок (ниша ${sg(s.ahead)}, Озон ${sg(s.market)}).</div>`:`<div class="alert flat">Сезон ниши не посчитать — мало истории.</div>`;
+    return {m,n,s,al,mon,mx,tr,last3,w:s&&s.trend==='end'?0:s&&s.trend==='start'?1:2};
+  }).sort((a,b)=>a.w-b.w||b.last3-a.last3);
+  return `<h2>Наши товары: сезон и тренд</h2><div class="note">Ниши, где у нас были продажи на Озоне за последний год. Сезон — по обороту всей ниши в прошлом году, тренд — наши заказы за 3 последних полных месяца против 3 до них. Закупка по Вове — из «Конкурентов»: продажи 4 доноров по нашей цене за 28 дней +25–50%, с поправкой на сезон ниши.</div>
+  <div class="mine">${items.map(({m,n,s,al,mon,mx,tr,last3})=>`<div class="card ni"${n?` data-id="${esc(n.id)}" style="cursor:pointer"`:''}>
+    <div class="hd"><div class="ttl"><b>${esc(m.name)}</b><span>${m.products.length} ${m.products.length===1?'товар':m.products.length<5?'товара':'товаров'} · заказы 3 мес: ${fi(last3)} шт ${tr!=null?fg(tr):''}</span></div>${n?`<span class="pill ${n.verdict}">${VL[n.verdict]}</span>`:''}</div>
+    ${al}
+    ${s&&s.months?`<div class="sz"><span style="width:62px">ниша</span>${sparkHtml(s)}</div>`:''}
+    <div class="sz"><span style="width:62px">мы</span><div class="spark">${mon.map(([d,v])=>`<span class="${+d.slice(5,7)===m0?'cur':''}" style="height:${Math.max(6,v[0]/mx*100)}%" title="${esc(d)}: ${fr(v[0])}, ${fi(v[1])} шт"></span>`).join('')}</div></div>
+    <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,4).map(p=>`<div><span>${esc(p.offer_id)}</span><b class="num">${fi(p.units)} шт</b></div>${zk(p,s)}`).join('')}${m.products.length>4?`<div class="mut">ещё ${m.products.length-4}</div>`:''}</div>
+  </div>`).join('')}</div>`;
+}
+
+/* ---------- правила ---------- */
+function viewRules(){
+  return `<h2>Как отбираем</h2><div class="note">Сначала базовое из видео Озона, потом шаги из второго видео, сверху — правила Андрея. Пороги меняются в rules.json.</div>
+  <div class="rules">
+  <div class="card"><b>Видео 1 · Ozon «Как выбрать нишу с помощью аналитики»</b><ol>
+    <li>Динамика оборота категории за 28 дней <b>и за год</b>: минус за месяц при плюсе за год — это сезон, а не смерть ниши. Товар не выводить, поставлять меньше.</li>
+    <li>Сезон — помесячный график за год: где спрос растёт, поставки увеличивать заранее.</li>
+    <li>Доля топ-5 продавцов: около 45% — новичку тяжело (бюджеты и доверие у лидеров); меньше 20% — покупатели выбирают разных продавцов.</li>
+    <li>Ценовые сегменты и регионы — смотреть в ЛК перед закупкой; схема продаж — FBO.</li></ol></div>
+  <div class="card"><b>Видео 2 · Mister Seller «ТОП-5 шагов по выбору товара»</b><ol>
+    <li>Объём ниши: <b>${fm(R.vol_min)}–${fm(R.vol_max)} ₽</b> заказов за 28 дней. Меньше — мало денег; сильно больше — нужны большие вложения, проще взять 10% небольшой ниши, чем 5% огромной.</li>
+    <li>Монополизация: доля топ-5 в идеале до <b>${R.top5_ideal}%</b>.</li>
+    <li>Выкуп от <b>${R.buyout_min}%</b>: ниже — товар катается, логистика дороже, деньги заморожены (одежда, обувь).</li>
+    <li>Деньги ниже топа: товары на 2-й странице выдачи (37–50) с выручкой меньше <b>${fm(R.page2_min)} ₽</b> в месяц — денег мало; мало денег + монополия — не заходить.</li>
+    <li>Юнит-экономика: маржа после всех расходов с запасом — не ниже <b>${R.margin_min}%</b>. ДРР конкурентов — из «Товары на Ozon».</li>
+    <li>Тест ${R.test_qty[0]}–${R.test_qty[1]} шт. Попадание новинок ~${Math.round(R.hit_rate*100)}%: 10 наименований по 50 шт лучше, чем 3 по 150. Первую партию — с рынков Москвы.</li></ol></div>
+  <div class="card"><b>Вова · видео 21.10 (ведение кабинета) — закупка от конкурентов</b><ul>
+    <li>Своя категория, 28 дней: у нас 500 заказов, у прямых конкурентов по 2 000 — закуп 500 в топ не выведет.</li>
+    <li>Ориентир — <b>4 донора</b>, которые продают много <b>по нашей цене ±20%</b>. Объём = их продажи <b>+25–50%</b> запаса, сразу на все склады и трафик без лимита (если товар, фото, рейтинг и отзывы в порядке).</li>
+    <li>Демперов (копеечная цена, ДРР ~1%) — отдельно; в минус не продавать и деньгами не догоняться.</li>
+    <li>В сервисе: у наших товаров — из «Конкурентов» (согласованные доноры), у новой ниши — из «Товаров на Ozon» по средней цене ниши; и то и другое — с поправкой на сезон.</li></ul></div>
+  <div class="card"><b>Андрей · Trello АА 27.10</b><ul>
+    <li>Тренды по прошлым периодам и текущий сезон; сезон и спрос кончаются — <b>сообщать</b> (вкладка «Наши товары» и сообщение в «Отчеты К»).</li>
+    <li>Бюджет на закупку 1 шт и желаемая прибыль — поля сверху «Подбора».</li>
+    <li>Кроме гигантов остальные продавцы держат от <b>${100-R.top5_max}%</b> рынка (топ-5 ≤ ${R.top5_max}%) — предлагать. Ниша перегружена гигантами — <b>прямо писать</b>, что не сможем конкурировать.</li></ul></div>
+  <div class="card"><b>Вердикт</b><ul>
+    <li><span class="pill ok">Да</span> объём в коридоре, топ-5 ≤ ${R.top5_ideal}%, выкуп ≥ ${R.buyout_min}%, спрос за год не падает, сезон не кончается.</li>
+    <li><span class="pill maybe">Можно</span> одна оговорка: есть гиганты (топ-5 ${R.top5_ideal}–${R.top5_max}%), большая ниша, спрос за год падает, сезон кончается, ниже топа мало денег.</li>
+    <li><span class="pill no">Нет</span> маленькая ниша, гиганты (топ-5 > ${R.top5_max}%), низкий выкуп, одежда, мало денег + монополия.</li>
+    <li>Сезон — по прошлому году: как менялась ниша в следующие 2 месяца против всего Озона за те же месяцы (в ноябре–декабре растёт почти всё). Хуже рынка на ${Math.round((1-R.season_end)*100)}%+ — «кончается», лучше на ${Math.round((R.season_start-1)*100)}%+ — «начинается». Объём закупки поправляем на реальное изменение ниши.</li></ul></div>
+  </div>`;
+}
+
+/* ---------- отрисовка ---------- */
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===S.t));
+  $('#view').innerHTML=S.t==='pick'?viewPick():S.t==='mine'?viewMine():viewRules();
+  if(S.t==='pick')bindPick();
+}
+function relist(){
+  const a=filtered();
+  $('#list').innerHTML=a.slice(0,S.n).map(card).join('')||'<div class="empty">Под эти условия ниш нет — снимите фильтр или поменяйте бюджет</div>';
+  const mb=$('#more');if(mb){if(a.length>S.n)mb.textContent=`Показать ещё (${fi(a.length-S.n)})`;else mb.remove()}
+  else if(a.length>S.n){$('#list').insertAdjacentHTML('afterend',`<button class="more press" id="more">Показать ещё (${fi(a.length-S.n)})</button>`)}
+}
+function bindPick(){
+  const num=v=>v.replace(/[^\d]/g,'');
+  [['#iB','B'],['#iW','W'],['#iE','E']].forEach(([id,k])=>$(id).addEventListener('input',e=>{const v=num(e.target.value);if(e.target.value!==v)e.target.value=v;S[k]=v===''?(k==='E'?null:''):v;ZS.set(k,S[k]);S.n=40;relist()}));
+  $('#iFit').addEventListener('change',e=>{S.fit=e.target.checked;ZS.set('fit',S.fit);S.n=40;relist()});
+  $('#iC').addEventListener('change',e=>{S.c1=e.target.value;ZS.set('c1',S.c1);S.n=40;render()});
+  $('#iS').addEventListener('change',e=>{S.sort=e.target.value;ZS.set('sort',S.sort);S.n=40;relist()});
+  $('#iQ').addEventListener('input',e=>{S.q=e.target.value;S.n=40;relist()});
+  $('#ver').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;S.ver=b.dataset.v;ZS.set('ver',S.ver);S.n=40;render()});
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('#more')){S.n+=40;relist();return}
+  if(e.target.closest('a'))return;
+  const c=e.target.closest('[data-id]');if(c&&BY[c.dataset.id]&&!e.target.closest('.sheet')){openSheet(sheetNiche(BY[c.dataset.id]));return}
+  const t=e.target.closest('#tabs button');if(t){S.t=t.dataset.t;ZS.set('tab',S.t);render();scrollTo(0,0)}
+});
+$('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;
+addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+
+/* тема: авто → светлая → тёмная */
+const TH=['auto','light','dark'],TI={auto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',dark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"/></svg>'};
+function applyTheme(t){if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;$('#themeBtn').innerHTML=TI[t];
+  const dark=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);$('#tc').content=dark?'#1c1c1e':'#f2f2f7'}
+let TT=ZS.get('theme','auto');applyTheme(TT);
+$('#themeBtn').onclick=()=>{TT=TH[(TH.indexOf(TT)+1)%3];ZS.set('theme',TT);applyTheme(TT)};
+
+function start(d){D=d;R=d.rules;BY={};d.niches.forEach(n=>BY[n.id]=n);$('#lock').hidden=true;render()}
+async function boot(pass){
+  try{start(await load(pass))}
+  catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){$('#lock').hidden=false;$('#pwerr').textContent=e.message==='BAD_PASS'&&pass?'Пароль не подошёл':'';$('#pw').focus()}
+    else $('#view').innerHTML=`<div class="empty">${esc(e.message)}</div>`}
+}
+$('#pwgo').onclick=()=>boot($('#pw').value);
+$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')boot($('#pw').value)});
+boot();
+})();
+</script>
+</body>
+</html>
