@@ -1179,6 +1179,15 @@ async function startCheck(url,tid,label,quiet){
   if(quiet)return;
   toast(tid?'Проверяю нишу — около 2 минут':'Проверяю товар — около 3 минут');closeSheet();S.t='check';S.ck=null;render(true);poll(true);
 }
+/* остановить идущую или ждущую проверку (Андрей 30.10) — сервер снимает её в течение минуты */
+const STOPS={};
+async function stopCheck(id){
+  if(STOPS[id])return;
+  try{await relaySend({k:'stop',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
+  STOPS[id]=1;const p=ZS.get('pend',[]),i=p.findIndex(x=>x.id===id);
+  if(i>=0){p.splice(i,1);ZS.set('pend',p);toast('Отменено')}else toast('Останавливаю — в течение минуты');
+  render(false);poll(true);
+}
 const startNiche=n=>startCheck('niche:'+n.name,n.id,'Ниша: '+n.name);
 /* ход проверки: шаги и примерное время — 29.10 «5 минут думает» */
 const STEPS={product:['Открываю товар','Смотрю Озон','Смотрю WB','Смотрю Маркет','Сверяю конкурентов по фото','Пишу расклад'],niche:['Открываю нишу','Смотрю Озон','Смотрю WB','Смотрю Маркет','Пишу расклад']};
@@ -1191,10 +1200,10 @@ function tickEta(){$$('.eta').forEach(el=>{const t0=+el.dataset.t0,exp=+el.datas
   const left=Math.round(exp-(Date.now()/1000-t0));el.textContent=left>5?`осталось ~${Math.floor(left/60)?Math.floor(left/60)+' мин '+String(left%60).padStart(2,'0')+' с':left+' с'}`:'почти готово'})}
 setInterval(tickEta,1000);
 function ckRow(c){
-  if(c.local)return `<div class="card ckr reveal"><div class="ph"></div><div style="min-width:0"><b>${esc(c.label||c.url)}</b><div class="s">В очереди — сервер возьмёт в течение минуты</div><div class="prog"><i></i></div></div><span class="spin"></span></div>`;
+  if(c.local)return `<div class="card ckr reveal"><div class="ph"></div><div style="min-width:0"><b>${esc(c.label||c.url)}</b><div class="s">В очереди — сервер возьмёт в течение минуты</div><div class="prog"><i></i></div></div><button class="ico press" data-ckstop="${esc(c.id)}" aria-label="Отменить" title="Отменить">✕</button></div>`;
   const p=c.product||{},work=c.state==='work',nm=c.kind==='niche'?'Ниша: '+(p.name||''):(p.name||c.src);
   return `<button class="card ckr press reveal" data-ck="${esc(c.id)}">${p.photo?img(p.photo):`<div class="ph" style="display:grid;place-items:center;color:var(--acc)">${c.kind==='niche'?IC.pick:''}</div>`}<div style="min-width:0"><b>${esc(nm)}</b>
-   ${work?progress(c):`<div class="s">${c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')+(c.secs?' · '+Math.ceil(c.secs/60)+' мин':'')}</div><div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}" title="${VL[v]}">${VI[v]} ${MPN[m]}</span>`}).join('')}</div>`}</div>
+   ${work?progress(c):c.state==='stop'?`<div class="s">${esc(c.at||'')} · остановлено</div>`:`<div class="s">${c.state==='err'?'Не вышло: '+esc(c.err||''):esc(c.at||'')+(p.price?' · '+fr(p.price):'')+(c.secs?' · '+Math.ceil(c.secs/60)+' мин':'')}</div><div class="vs">${['oz','wb','ym'].map(m=>{const v=(((c.mp||{})[m]||{}).verdict||{}).v||'na';return `<span class="vdot ${v}" title="${VL[v]}">${VI[v]} ${MPN[m]}</span>`}).join('')}</div>`}</div>
    ${work?'<span class="spin"></span>':IC.chev}</button>`;
 }
 function vCheck(){
@@ -1239,8 +1248,10 @@ function mpPanel(c,m){
 }
 function vResult(c){
   const p=c.product||{},a=c.advice||{},niche=c.kind==='niche',back=`<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button>`;
-  if(c.state==='work')return `${back}<div class="card phero reveal">${p.photo?img(p.photo):'<div></div>'}<div><h1>${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</h1>${progress(c)}</div></div><div class="note">Можно закрыть страницу — проверка идёт на сервере, результат появится здесь.</div>`;
+  if(c.state==='work')return `${back}<div class="card phero reveal">${p.photo?img(p.photo):'<div></div>'}<div><h1>${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</h1>${progress(c)}</div></div><div class="note">Можно закрыть страницу — проверка идёт на сервере, результат появится здесь.</div>
+   <button class="btn ghost press" data-ckstop="${esc(c.id)}" style="width:100%;margin-top:12px">${STOPS[c.id]?'Останавливаю…':'Остановить проверку'}</button>`;
   if(c.state==='err')return `${back}<div class="card pad"><b>Не вышло</b><div class="note">${esc(c.err||'')}</div></div>`;
+  if(c.state==='stop')return `${back}<div class="card pad"><b>Остановлено</b><div class="note">${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</div></div>${c.src?`<button class="btn press" data-ckq="${esc(c.src)}" style="width:100%;margin-top:12px">${IC.check} Проверить заново</button>`:''}`;
   const m=S.mp in (c.mp||{})?S.mp:'oz';
   return `${back}
   <div class="card phero reveal">${niche?`<div style="width:88px;height:88px;border-radius:16px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center">${IC.pick}</div>`:img(p.photo)}<div style="min-width:0"><h1>${esc(niche?'Ниша: '+p.name:p.name)}</h1><p>${niche?'проверка ниши на трёх площадках':(p.price?fr(p.price)+' · ':'')+(MPN[p.mp]||'название')}${p.link?` · <a href="${esc(p.link)}" target="_blank" rel="noopener">открыть ${IC.ext}</a>`:''}</p></div></div>
@@ -1419,6 +1430,7 @@ document.addEventListener('click',e=>{
   if(t.closest('#fdone')){closeSheet();S.n=30;render(false);return}
   const gt=t.closest('[data-goto]');if(gt){go(gt.dataset.goto);return}
   const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
+  const cs=t.closest('[data-ckstop]');if(cs){stopCheck(cs.dataset.ckstop);return}
   const cq=t.closest('[data-ckq]');if(cq){startCheck(cq.dataset.ckq);return}
   const sl=t.closest('[data-sel]');if(sl){const l=sl.dataset.sel;if(sl.checked)SEL.add(l);else SEL.delete(l);const b=$('#cksel');if(b){b.disabled=!SEL.size;b.innerHTML=`${IC.check} Проверить выбранные${SEL.size?' ('+SEL.size+')':''}`}return}
   if(t.closest('#cksel')){const ls=[...SEL];SEL.clear();(async()=>{for(const l of ls){await startCheck(l,null,null,true)}toast(`Отправил ${ls.length} ${plur(ls.length,'товар','товара','товаров')} — каждый около 3 минут`);closeSheet();S.t='check';S.ck=null;render(true);poll(true)})();return}
