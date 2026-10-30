@@ -340,8 +340,14 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .prog{height:4px;border-radius:2px;background:var(--fill);overflow:hidden;margin-top:8px}
 .prog i{display:block;height:100%;width:30%;border-radius:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));animation:pg 1.6s ease-in-out infinite}
 @keyframes pg{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
-.phero{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;padding:14px;align-items:center}
-.phero img{width:88px;height:88px;border-radius:16px;object-fit:cover;background:var(--fill)}
+.phero{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:14px;align-items:center}
+.phero img{width:120px;height:120px;border-radius:18px;object-fit:cover;background:var(--fill)}
+/* фото крупно по нажатию (30.10 Андрей: «картинку товара чуть крупнее и по клику увеличить») */
+.phero img,.cmrow img,.shead img{cursor:zoom-in}
+#zoom{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.86);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;cursor:zoom-out}
+#zoom.on{opacity:1;visibility:visible}
+#zoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;transform:scale(.92);transition:transform .35s var(--spring)}
+#zoom.on img{transform:none}
 .phero h1{font:700 19px/1.2 var(--fd);letter-spacing:-.015em;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .phero p{margin:4px 0 0;color:var(--ink2);font-size:13.5px}
 .vsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
@@ -389,13 +395,13 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .cm .p{font:700 16px/1.2 var(--fd);margin-top:6px}
 .cm .s{font-size:12px;color:var(--ink2);margin-top:3px}
 .cm .s2{font-size:11.5px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cmrow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-top:.5px solid var(--line)}
-.cmrow:has(.pick1){grid-template-columns:30px 64px minmax(0,1fr)}
+.cmrow{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-top:.5px solid var(--line)}
+.cmrow:has(.pick1){grid-template-columns:30px 80px minmax(0,1fr)}
 .pick1{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;font-weight:700;color:var(--ink3)}
 .pick1 input{appearance:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;transition:background .2s,border-color .2s,transform .3s var(--spring)}
 .pick1 input:checked{background:var(--acc);border-color:var(--acc);transform:scale(1.06)}
 .pick1 input:checked::after{content:"✓";color:#fff;font-size:14px;font-weight:800;line-height:1}
-.cmrow img{width:64px;height:64px;border-radius:13px;object-fit:cover;background:var(--fill)}
+.cmrow img{width:80px;height:80px;border-radius:14px;object-fit:cover;background:var(--fill)}
 .cmrow b{display:block;font-size:14px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cmrow .s{font-size:12.5px;color:var(--ink2);margin-top:3px}
 .cmrow .w{font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.35}
@@ -952,6 +958,13 @@ const shw=$('#shw'),sheet=$('#sheet');
 function openSheet(html,key,nid){const sb=$('#sbody');sb.dataset.key=key||'';sb.dataset.n=nid||'';sb.innerHTML=html;shw.classList.add('on');document.body.style.overflow='hidden';sb.scrollTop=0;thumbs(sb);reveal(sb)}
 function closeSheet(){shw.classList.remove('on');document.body.style.overflow='';sheet.style.transform='';$('#sbody').dataset.key=''}
 $('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+/* фото во весь экран по нажатию; ВБ — большая версия картинки */
+const zoomSrc=s=>s.replace('/images/c516x688/','/images/big/').replace('/images/c246x328/','/images/big/').replace(/\/wc\d+\//,'/');
+const zoomBox=document.createElement('div');zoomBox.id='zoom';zoomBox.innerHTML='<img alt="">';document.body.appendChild(zoomBox);
+function zoomClose(){zoomBox.classList.remove('on')}
+zoomBox.onclick=zoomClose;
+document.addEventListener('click',e=>{const im=e.target.closest('.phero img,.cmrow img,.shead img');if(!im||!im.src)return;e.preventDefault();e.stopPropagation();const z=zoomBox.querySelector('img');z.onerror=()=>{z.onerror=null;z.src=im.src};z.src=zoomSrc(im.src);zoomBox.classList.add('on')},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&zoomBox.classList.contains('on')){zoomClose();e.stopImmediatePropagation()}},true);
 (()=>{let y0=null,dy=0;const g=$('#grab');
   g.addEventListener('pointerdown',e=>{if(innerWidth>=760)return;y0=e.clientY;dy=0;sheet.style.transition='none';g.setPointerCapture(e.pointerId)});
   g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sheet.style.transform=`translateY(${dy}px)`});
@@ -1275,7 +1288,7 @@ function vResult(c){
 }
 function cmSheet(c,m,sku){
   const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku),niche=c.kind==='niche';if(!x)return;
-  openSheet(`<div class="shead">${img(x.photo).replace('<img','<img style="width:96px;height:96px;border-radius:16px;object-fit:cover"')}<div style="min-width:0"><h3 style="font-size:18px">${esc(x.name)}</h3><div class="mut" style="font-size:13px">${MPN[m]} · ${esc(x.seller||x.brand||'')}</div></div></div>
+  openSheet(`<div class="shead">${img(x.photo).replace('<img','<img style="width:120px;height:120px;border-radius:18px;object-fit:cover"')}<div style="min-width:0"><h3 style="font-size:18px">${esc(x.name)}</h3><div class="mut" style="font-size:13px">${MPN[m]} · ${esc(x.seller||x.brand||'')}</div></div></div>
    <div class="kv num" style="margin-top:14px"><span>Цена</span><b>${fr(x.price)}</b>${m==='oz'?`<span>Продажи за 28 дн</span><b>${fi(x.sales)} шт · ${fm(x.gmv)} ₽</b>${ok(x.drr)?`<span>ДРР</span><b>${N1.format(x.drr)}%</b>`:''}`:''}${m==='ym'&&x.sales?`<span>Купили</span><b>${fi(x.sales)}</b>`:''}${x.reviews!=null?`<span>Отзывы · рейтинг</span><b>${fi(x.reviews)} · ${x.rating||'—'}</b>`:''}</div>
    ${x.v?`<h4>Сверка с вашим товаром</h4><ul class="why"><li class="${x.v==='other'?'x':x.v==='almost'?'m':'p'}">${x.v==='same'?'Тот же товар':x.v==='almost'?'Почти такой же':'Другой товар'}${x.v==='other'?(x.diff?' — '+esc(x.diff):''):(x.why?' — '+esc(x.why):'')}</li>${x.diff&&x.v!=='other'?`<li class="m">Отличия: ${esc(x.diff)}</li>`:''}</ul>`:''}
    ${niche?'':ynBtns(c.id,m,x)}
