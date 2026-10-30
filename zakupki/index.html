@@ -755,8 +755,8 @@ async function loadTops(){
     const sb=$('#sbody');if(shw.classList.contains('on')&&sb.dataset.key==='niche'&&sb.dataset.n&&BY[sb.dataset.n]){const y=sb.scrollTop;openSheet(nicheSheet(BY[sb.dataset.n]),'niche',sb.dataset.n);sb.scrollTop=y}}catch(e){}
 }
 async function loadChecks(){
-  try{const r=await fetch('checks.enc.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const d=await dec(await r.json());const was=JSON.stringify(CK.checks.map(c=>[c.id,c.state,c.step,c.upd]));CK=d;
-    return was!==JSON.stringify(CK.checks.map(c=>[c.id,c.state,c.step,c.upd]))}catch(e){return false}
+  try{const r=await fetch('checks.enc.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const d=await dec(await r.json());const sig=k=>JSON.stringify([k.checks.map(c=>[c.id,c.state,c.step,c.upd]),(k.trash||[]).map(c=>c.id)]),was=sig(CK);CK=d;
+    return was!==sig(CK)}catch(e){return false}
 }
 
 /* ---------- формат ---------- */
@@ -1208,13 +1208,24 @@ function ckRow(c){
 }
 function vCheck(){
   if(S.ck){const c=CK.checks.find(x=>x.id===S.ck);if(c)return vResult(c);S.ck=null}
-  const rows=pendLocal().map(p=>Object.assign({local:true},p)).concat(CK.checks),nich=S.ckmode==='niche';
+  const rows=pendLocal().map(p=>Object.assign({local:true},p)).concat(ckList()),nich=S.ckmode==='niche',tr=trList();
   return `<h1 class="lt">Проверить</h1><div class="sub">${nich?'Ниша Озона целиком на трёх площадках: объём, гиганты, цены, топ товаров. Из топа можно сразу проверить любой товар.':'Конкретный товар: вставьте ссылку с Озона, WB или Маркета (или название). Найду таких же конкурентов на каждой площадке и скажу, стоит ли заходить.'}</div>
   <div class="seg sgm" id="ckmode"><button class="${!nich?'on':''}" data-ckm="prod">Товар по ссылке</button><button class="${nich?'on':''}" data-ckm="niche">Ниша</button></div>
   <div class="card ckin" id="ckin">${nich?`<input id="ckniche" list="nlist" placeholder="Начните писать нишу: фигурка, канистра…" autocomplete="off"><datalist id="nlist">${D.niches.map(n=>`<option value="${esc(n.name)}">`).join('')}</datalist>`:'<input id="ckurl" placeholder="Ссылка на товар или название" autocomplete="off" inputmode="url">'}<button class="btn press" id="ckgo">Проверить</button></div>
   <div class="mps">${['oz','wb','ym'].map(m=>`<span class="mpd"><i style="background:${MPC[m]}"></i>${MPN[m]}</span>`).join('')}<span class="mpd mut">· ${nich?'около 2 минут':'около 3 минут'}, страницу можно закрыть</span></div>
   <div class="sec"><h2>Проверки</h2><span>${rows.length?fi(rows.length):''}</span></div>
-  <div class="ckl">${rows.map(ckRow).join('')||'<div class="empty">Пока пусто.</div>'}</div>`;
+  <div class="ckl">${rows.map(ckRow).join('')||'<div class="empty">Пока пусто.</div>'}</div>
+  ${tr.length?`<button class="btn ghost press" data-trtog="1" style="width:100%;margin-top:14px">Корзина · ${fi(tr.length)} ${S.trOpen?'▴':'▾'}</button>
+  ${S.trOpen?`<div class="ckl" style="margin-top:10px">${tr.map(c=>{const p=c.product||{},nm=c.kind==='niche'?'Ниша: '+(p.name||''):(p.name||c.src);
+    return `<div class="card ckr">${p.photo?img(p.photo):'<div class="ph"></div>'}<div style="min-width:0"><b>${esc(nm)}</b><div class="s">${esc(c.at||'')}${p.price?' · '+fr(p.price):''}${c.state==='stop'?' · остановлено':''}</div></div><button class="btn ghost press" data-unhide="${esc(c.id)}" style="height:34px;padding:0 12px">Вернуть</button></div>`}).join('')}</div>`:''}`:''}`;
+}
+/* корзина проверок (Андрей 30.10 «убрать в корзину ненужное»): сервер помнит, сайт сразу прячет/возвращает у себя */
+const TRL={};
+const ckList=()=>CK.checks.filter(c=>TRL[c.id]!=='h');
+const trList=()=>(CK.trash||[]).filter(c=>TRL[c.id]!=='u'&&!CK.checks.some(x=>x.id===c.id)).concat(CK.checks.filter(c=>TRL[c.id]==='h'));
+async function trashCheck(id,back){
+  try{await relaySend({k:back?'unhide':'hide',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
+  TRL[id]=back?'u':'h';if(!back)S.ck=null;toast(back?'Вернётся в список в течение минуты':'Убрано в корзину');render(true);poll(true);
 }
 function tilesOf(m,p){
   const n=p.niche||{},T=(l,v,s)=>`<div class="card tile"><div class="l">${l}</div><div class="v num">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
@@ -1250,8 +1261,9 @@ function vResult(c){
   const p=c.product||{},a=c.advice||{},niche=c.kind==='niche',back=`<button class="btn ghost press" data-back="1" style="margin:14px 0 6px">← Все проверки</button>`;
   if(c.state==='work')return `${back}<div class="card phero reveal">${p.photo?img(p.photo):'<div></div>'}<div><h1>${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</h1>${progress(c)}</div></div><div class="note">Можно закрыть страницу — проверка идёт на сервере, результат появится здесь.</div>
    <button class="btn ghost press" data-ckstop="${esc(c.id)}" style="width:100%;margin-top:12px">${STOPS[c.id]?'Останавливаю…':'Остановить проверку'}</button>`;
-  if(c.state==='err')return `${back}<div class="card pad"><b>Не вышло</b><div class="note">${esc(c.err||'')}</div></div>`;
-  if(c.state==='stop')return `${back}<div class="card pad"><b>Остановлено</b><div class="note">${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</div></div>${c.src?`<button class="btn press" data-ckq="${esc(c.src)}" style="width:100%;margin-top:12px">${IC.check} Проверить заново</button>`:''}`;
+  const bin=`<button class="btn ghost press" data-trash="${esc(c.id)}" style="width:100%;margin-top:12px">Убрать в корзину</button>`;
+  if(c.state==='err')return `${back}<div class="card pad"><b>Не вышло</b><div class="note">${esc(c.err||'')}</div></div>${bin}`;
+  if(c.state==='stop')return `${back}<div class="card pad"><b>Остановлено</b><div class="note">${esc(niche?'Ниша: '+(p.name||''):(p.name||c.src))}</div></div>${c.src?`<button class="btn press" data-ckq="${esc(c.src)}" style="width:100%;margin-top:12px">${IC.check} Проверить заново</button>`:''}${bin}`;
   const m=S.mp in (c.mp||{})?S.mp:'oz';
   return `${back}
   <div class="card phero reveal">${niche?`<div style="width:88px;height:88px;border-radius:16px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center">${IC.pick}</div>`:img(p.photo)}<div style="min-width:0"><h1>${esc(niche?'Ниша: '+p.name:p.name)}</h1><p>${niche?'проверка ниши на трёх площадках':(p.price?fr(p.price)+' · ':'')+(MPN[p.mp]||'название')}${p.link?` · <a href="${esc(p.link)}" target="_blank" rel="noopener">открыть ${IC.ext}</a>`:''}</p></div></div>
@@ -1259,7 +1271,7 @@ function vResult(c){
   <div class="card mpb reveal" id="mpb">${['oz','wb','ym'].map(k=>{const p=(c.mp||{})[k]||{},vd=p.verdict||{},v=vd.v||'na',why=(v==='ok'?(vd.plus||[])[0]:(vd.why||[])[0])||(vd.plus||[])[0]||p.err||'';
     return `<button class="mprow press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><span class="mpn"><i></i>${MPN[k]}</span><span class="vp ${v}">${VI[v]} ${VL[v]}</span><span class="w1">${esc(why)}</span>${IC.chev}</button>`}).join('')}</div>
   <div id="mppanel">${mpPanel(c,m)}</div>
-  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>`;
+  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>${bin}`;
 }
 function cmSheet(c,m,sku){
   const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku),niche=c.kind==='niche';if(!x)return;
@@ -1431,6 +1443,9 @@ document.addEventListener('click',e=>{
   const gt=t.closest('[data-goto]');if(gt){go(gt.dataset.goto);return}
   const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
   const cs=t.closest('[data-ckstop]');if(cs){stopCheck(cs.dataset.ckstop);return}
+  const tb=t.closest('[data-trash]');if(tb){trashCheck(tb.dataset.trash);return}
+  const ub=t.closest('[data-unhide]');if(ub){trashCheck(ub.dataset.unhide,true);return}
+  if(t.closest('[data-trtog]')){S.trOpen=!S.trOpen;render(false);return}
   const cq=t.closest('[data-ckq]');if(cq){startCheck(cq.dataset.ckq);return}
   const sl=t.closest('[data-sel]');if(sl){const l=sl.dataset.sel;if(sl.checked)SEL.add(l);else SEL.delete(l);const b=$('#cksel');if(b){b.disabled=!SEL.size;b.innerHTML=`${IC.check} Проверить выбранные${SEL.size?' ('+SEL.size+')':''}`}return}
   if(t.closest('#cksel')){const ls=[...SEL];SEL.clear();(async()=>{for(const l of ls){await startCheck(l,null,null,true)}toast(`Отправил ${ls.length} ${plur(ls.length,'товар','товара','товаров')} — каждый около 3 минут`);closeSheet();S.t='check';S.ck=null;render(true);poll(true)})();return}
