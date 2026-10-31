@@ -469,8 +469,10 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .an.bad{background:linear-gradient(var(--bad-soft),var(--bad-soft)),var(--card)}
 .an .v{font:700 18px/1.15 var(--fd);letter-spacing:-.02em;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .an .s{font-size:11.5px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rail2{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 14px 8px;margin:0 -14px;scrollbar-width:none}
-.rail2::-webkit-scrollbar{display:none}
+/* топ-5 (Андрей 01.11: «листание не нужно, да, топ-5»): на телефоне сетка по две карточки, без листания вбок; на компьютере — в ряд */
+.rail2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:2px 0 8px}
+@media (max-width:959.98px){.rail2 .cm{width:auto;min-width:0;padding:8px;grid-template-columns:46px minmax(0,1fr);gap:8px}.rail2 .cm .ph,.rail2 .cm .ph img{width:46px;height:46px}}
+.cm .ph .np{display:block;width:100%;height:100%;border-radius:12px;background:var(--fill)}
 .cm{flex:none;width:184px;display:grid;grid-template-columns:50px minmax(0,1fr);gap:9px;align-items:center;padding:8px 10px 8px 8px;text-align:left;scroll-snap-align:start;scroll-margin-left:14px}
 .cm .ph{position:relative;width:50px;height:50px}
 .cm .ph img{width:50px;height:50px;border-radius:12px;object-fit:cover;background:var(--fill);display:block}
@@ -621,14 +623,12 @@ table.cmpd{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
 .qbar .btn{padding:8px 13px;font-size:13.5px;white-space:nowrap}
 .qbar .ico{width:32px;height:32px}
 @media (min-width:960px){.qbar{bottom:22px}}
-/* топ-5 на телефоне, вариант Б (Андрей 01.11: «сделай то, что хотел предложить, ниже, худший удалим»): сетка по два, без листания вбок */
-.g5w{margin:4px 0 6px}
-.g5h{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--ink3);margin:6px 2px 8px;text-transform:uppercase;letter-spacing:.03em}
-.g5h span{font-weight:500;text-transform:none;letter-spacing:0}
-.g5{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.g5 .cm{width:auto;min-width:0;padding:8px}
-.g5 .cm{grid-template-columns:46px minmax(0,1fr);gap:8px}
-.g5 .cm .ph,.g5 .cm .ph img{width:46px;height:46px}
+/* «+ Добавить конкурента» у заголовка топа и его лист */
+.sec .lnk.addc{flex:none;white-space:nowrap;padding:4px 0}
+.adderr{min-height:18px;margin:8px 2px 0;font-size:13px;line-height:1.35;color:var(--bad)}
+.adderr:empty{min-height:0;margin:0}
+#addf .sf:has(input[aria-invalid="true"]){box-shadow:0 0 0 2px var(--bad)}
+#addf .sf svg{width:18px;height:18px;flex:none;color:var(--ink3)}
 /* «Найти заново» под заголовком топа */
 .refr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 2px 10px;font-size:12.5px;color:var(--ink3)}
 .refr .btn{flex:none;padding:7px 12px;font-size:13px;border-radius:11px}
@@ -1557,9 +1557,14 @@ function hero(p){
 /* маленькая карточка конкурента: фото, продавец, цена, штуки — не закрывает экран */
 function cmini(c,i,p){
   const o=p.our||{},d=ok(c.price)&&ok(o.price)&&o.price?c.price/o.price-1:null;
-  return `<button class="card cm press${c.status==='pending'?' pend':''} reveal" data-comp="${c.sku}"><div class="ph">${img(c.photo)}<span class="n">${i+1}</span>${c.status==='yes'?`<span class="st ok">${IC.check}</span>`:c.status==='pending'?`<span class="st wait">${IC.clock}</span>`:''}</div>
-   <div style="min-width:0"><b>${esc(short(c.seller))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${c._q?'взят · нажмите «Отправить»':(ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':'из выдачи')+((c.j||{}).v==='almost'?' · почти такой же':'')}</div></div></button>`;
+  // добавленный вручную (hand / _add) до подбора — без фото и цифр, подпись говорит, что будет дальше
+  const sub=c._q?(c._add?'добавлен':'взят')+(c._sent?' · отправлено':' · нажмите «Отправить»')
+   :c.hand&&!c.photo&&!ok(c.price)?'добавлен · ждёт цифр'
+   :(ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':c.hand?'добавлен вручную':'из выдачи')+((c.j||{}).v==='almost'?' · почти такой же':'');
+  return `<button class="card cm press${c.status==='pending'?' pend':''} reveal" data-comp="${c.sku}"><div class="ph">${c.photo?img(c.photo):'<span class="np"></span>'}<span class="n">${i+1}</span>${c.status==='yes'?`<span class="st ok">${IC.check}</span>`:c.status==='pending'?`<span class="st wait">${IC.clock}</span>`:''}</div>
+   <div style="min-width:0"><b>${esc(cnm(c))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${sub}</div></div></button>`;
 }
+const cnm=c=>c.seller?short(c.seller):'SKU '+c.sku;   // у добавленного вручную до подбора продавца ещё нет
 /* таблица «мы против топа»: телефон — строки продавцы, столбцы цифры раздела; компьютер — вся таблица как в первой версии */
 const SH={'Заказано за 7 дней':'₽ за 7 дн','Штук за 7 дней':'шт 7 дн','Динамика к прошлой неделе':'к прошлой нед.','Штук за 28 дней':'шт 28 дн','Продаж в день, шт':'шт в день',
  'Средняя цена продажи':'цена','Скидка от медианной цены':'скидка','Доля заказов по акциям':'по акциям','Дней в акциях из 7':'дн. в акциях',
@@ -1627,9 +1632,16 @@ function qSet(p,c,d){
    из топа, таблиц и списков, взятый встаёт в топ; внизу «Отменить». Исходный состав — p._c0 / p._pm0 */
 function qView(){D.products.forEach(p=>{
   if(!p._c0){p._c0=p.comps||[];p._pm0=p.pend_more||[]}
-  const q=c=>qOf(p,c.sku),keep=c=>{const x=q(c);return !(x&&x.d==='n')},take=c=>{const x=q(c);return x&&x.d==='y'&&c.status!=='yes'?Object.assign({},c,{status:'yes',_q:1}):c};
-  p.comps=p._c0.filter(keep).map(take).concat((p.rejected||[]).filter(r=>{const x=q(r);return x&&x.d==='y'&&!p._c0.some(c=>c.sku===r.sku)}).map(r=>Object.assign({},r,{status:'yes',_q:1})));
-  p.pend_more=p._pm0.filter(keep).map(take).filter(c=>c.status==='pending')})}
+  // d: y — «Взять», a — «+ Добавить конкурента» (01.11); взятый из «Ждут решения» сверх пятёрки тоже встаёт в топ
+  const q=c=>qOf(p,c.sku),keep=c=>{const x=q(c);return !(x&&x.d==='n')},tk=x=>x&&(x.d==='y'||x.d==='a'),
+    mark=(c,x)=>Object.assign({},c,{status:'yes',_q:1,_add:x.d==='a'?1:0,_sent:x.sent?1:0}),take=c=>{const x=q(c);return tk(x)&&c.status!=='yes'?mark(c,x):c};
+  const known=p._c0.concat(p._pm0,p.rejected||[]);
+  p.comps=p._c0.filter(keep).map(take)
+   .concat(p._pm0.filter(c=>tk(q(c))).map(c=>mark(c,q(c))))
+   .concat((p.rejected||[]).filter(r=>tk(q(r))&&!p._c0.some(c=>c.sku===r.sku)).map(r=>mark(r,q(r))))
+   .concat(Q.filter(x=>x.our===p.sku&&x.d==='a'&&!known.some(c=>c.sku===x.comp))   // добавлен по ссылке, в данных его нет — заглушкой
+     .map(x=>({sku:x.comp,seller:null,link:'https://www.ozon.ru/product/'+x.comp+'/',status:'yes',_q:1,_add:1,_sent:x.sent?1:0})));
+  p.pend_more=p._pm0.filter(keep).filter(c=>!tk(q(c)))})}
 const cAny=(p,s)=>allC(p).find(x=>x.sku===s)||(p._c0||[]).concat(p._pm0||[],p.rejected||[]).find(x=>x.sku===s);
 let SNK=0;
 function snack(html,undo){
@@ -1649,20 +1661,21 @@ function decided(p,c,card,inComp){
       {duration:340,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).onfinish=redraw}else redraw()}
 function qClean(){   // решение уже применено (видно в данных) — из очереди убрать
   Q=Q.filter(x=>{const p=D.products.find(y=>y.sku===x.our);if(!p)return false;if(x.sent&&Date.now()-x.sent>2*864e5)return false;const c=allC(p).find(y=>y.sku===x.comp);
-    if(x.d==='y'&&c&&c.status==='yes')return false;if(x.d==='n'&&!c&&!(p.rejected||[]).some(r=>r.sku===x.comp))return false;return true});
+    if((x.d==='y'||x.d==='a')&&c&&c.status==='yes')return false;if(x.d==='n'&&!c&&!(p.rejected||[]).some(r=>r.sku===x.comp))return false;return true});
   KS.set('q',Q);
 }
 function qbar(){
   const n=Q.filter(x=>!x.sent).length,s=Q.filter(x=>x.sent&&!x.hide).length,b=$('#qbar');
   b.hidden=!n&&!s;
   b.innerHTML=n?`<span style="white-space:nowrap"><b>${n} ${plur(n,'решение','решения','решений')}</b></span><button class="btn press" id="qsend">Отправить</button><button class="ico press" id="qclr" aria-label="Сбросить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`
-   :`<span>${IC.clock} Отправлено: ${s}. Применится само за 5 минут</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+   :`<span>${IC.clock} Отправлено: ${s}. Применится само за 10 минут</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
   document.body.classList.toggle('hasq',!b.hidden);
 }
 async function qSend(){
   const T=D.tg||{},items=Q.filter(x=>!x.sent);if(!T.token||!T.chat){toast('Нет связи с ботом');return}if(!items.length)return;
-  // ссылки …/product/<кандидат>/?ko=<y|n>-<наш sku> — по ним бот применяет решения (k_pult → soglas.py batch)
-  const line=x=>`${x.d==='y'?'✅ взять':'✖ убрать'} <a href="https://www.ozon.ru/product/${x.comp}/?ko=${x.d}-${x.our}">${esc(x.seller)}</a>`;
+  // ссылки …/product/<кандидат>/?ko=<y|n|a>-<наш sku> — по ним Куратор применяет решения (soglas.py watch; y|n — и k_pult → soglas.py batch);
+  // a — «+ Добавить конкурента»: watch берёт его и запускает подбор по товару без модели (soglas.py refresh --light)
+  const line=x=>`${x.d==='y'?'✅ взять':x.d==='a'?'➕ добавить':'✖ убрать'} <a href="https://www.ozon.ru/product/${x.comp}/?ko=${x.d}-${x.our}">${esc(x.seller)}</a>`;
   const by={};items.forEach(x=>(by[x.offer]=by[x.offer]||[]).push(x));
   const blocks=Object.entries(by).map(([o,xs])=>`<b>${esc(o)}</b>\n`+xs.map(line).join('\n'));
   const msgs=[];let cur='🗳 Конкуренты — решения с сайта';
@@ -1677,7 +1690,9 @@ async function qSend(){
       const mid=j.result.message_id;await fetch('https://api.telegram.org/bot'+T.token+'/editMessageReplyMarkup',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({chat_id:T.chat,message_id:mid,reply_markup:{inline_keyboard:[[{text:'✅ Применить',callback_data:'ko:b:'+mid+':'},{text:'✖ Отмена',callback_data:'ko:c:'+mid+':'}]]}})}).catch(()=>{});
     }
-    const now=Date.now();items.forEach(x=>x.sent=now);KS.set('q',Q);qbar();toast('Отправлено — применится само за 5 минут');
+    const now=Date.now();items.forEach(x=>x.sent=now);KS.set('q',Q);qbar();
+    qView();const y=scrollY;render(false);window.scrollTo(0,y);   // подписи «нажмите «Отправить»» → «отправлено»
+    toast('Отправлено — применится само за 10 минут');
   }catch(e){toast('Не отправилось: '+e.message)}
 }
 const qBtns=(p,c)=>{const q=qOf(p,c.sku),on=d=>q&&q.d===d?' on':'',sent=q&&q.sent?' · отправлено':'';
@@ -1690,12 +1705,12 @@ function compSheet(p,sku){
     if(!ok(a)&&!ok(b))return '';let cl='';if(dir&&ok(a)&&ok(b)&&a!==b)cl=(dir>0?a>b:a<b)?'up':'dn';return `<tr><td>${PL(lab)}</td><td class="num ${cl}">${fmt(a,o,p)}</td><td class="num">${fmt(b,cp,p)}</td></tr>`}).join('')).join('');
   const oc=(p.our_card||{}).chars||{},cc=c.chars||{},ks=[...new Set([...Object.keys(oc),...Object.keys(cc)])].slice(0,12);
   const isComp=allC(p).some(x=>x.sku===sku);
-  openSheet(`<div class="csh"><a class="cph" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(short(c.seller))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
-   <div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${!isComp?'<span class="tag">не в конкурентах</span>':c.status==='yes'?`<span class="tag ok">${IC.check}согласован${c.at?' '+ddmm(c.at):''}</span>`:`<span class="tag wait">${IC.clock}ждёт решения</span>`}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}<a class="tag acc" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">на Ozon ${IC.ext}</a></div></div></div>
+  openSheet(`<div class="csh"><a class="cph" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(cnm(c))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
+   <div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${!isComp?'<span class="tag">не в конкурентах</span>':c._q?`<span class="tag wait">${IC.clock}${c._add?'добавлен':'взят'} · ${c._sent?'отправлено':'нажмите «Отправить»'}</span>`:c.status==='yes'?`<span class="tag ok">${IC.check}согласован${c.at?' '+ddmm(c.at):''}</span>`:`<span class="tag wait">${IC.clock}ждёт решения</span>`}${c.hand?'<span class="tag">добавлен вручную</span>':''}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}<a class="tag acc" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">на Ozon ${IC.ext}</a></div></div></div>
    ${qBtns(p,isComp?c:Object.assign({},c,{status:'other'}))}
    ${j.v?`<div class="card pad" style="margin-top:14px;box-shadow:none;background:var(--fill2)"><b>${j.v==='same'?'Тот же товар':j.v==='almost'?'Почти такой же':'Другой товар'}</b> <span class="mut">· проверено по фото и характеристикам</span><div style="margin-top:6px;font-size:14px">${esc(j.why||'')}</div>${j.diff?`<div style="margin-top:6px;font-size:14px" class="mut">Отличие: ${esc(j.diff)}</div>`:''}</div>`:''}
    <div class="pbar" style="margin-top:12px"><span class="mut">${esc(perTxt())}</span></div>
-   <table class="cmp2" style="margin-top:4px"><tr><th></th><th>Мы</th><th>${esc(short(c.seller))}</th></tr>${rows}
+   <table class="cmp2" style="margin-top:4px"><tr><th></th><th>Мы</th><th>${esc(cnm(c))}</th></tr>${rows}
    ${ks.length?`<tr class="g"><td colspan="3">Характеристики</td></tr>`+ks.map(k=>`<tr class="ch"><td>${esc(k)}</td><td>${esc(oc[k]||'—')}</td><td>${esc(cc[k]||'—')}</td></tr>`).join(''):''}</table>
    <div class="note">${AD_NOTE}</div>`);
   $('#sbody').dataset.comp=sku;
@@ -1777,6 +1792,43 @@ async function refSend(p){
     const y=scrollY;render(false);window.scrollTo(0,y);snack('🔄 Ищу конкурентов заново: <b>'+esc(p.offer_id)+'</b>');
   }catch(e){toast('Не отправилось: '+e.message)}
 }
+/* «+ Добавить конкурента» (Андрей 01.11: «возможность добавить самому конкурента»): ссылка на товар Озона или SKU → в очередь решений
+   (d:'a', как «Взять») → «Отправить» → Куратор раз в 10 минут берёт его (soglas.py watch, ссылка ko=a-<наш sku>) и подтягивает фото и цифры */
+function skuOf(v){
+  const s=String(v||'').trim(),url=(s.match(/https?:\/\/\S+/i)||[])[0],d=s.replace(/[\s ]/g,'');
+  if(!s)return {e:'Вставьте ссылку на товар Озона или его SKU'};
+  if(!url&&/^\d+$/.test(d))return d.length>=6&&d.length<=12?{s:d}:{e:`SKU — это номер товара из 6–12 цифр, а здесь ${d.length}`};
+  const bad={e:'Это не ссылка и не SKU. Нужна ссылка на карточку товара Озона или его номер цифрами'};
+  if(!url&&!/\.[a-z]{2,}/i.test(s))return bad;
+  let u;try{u=new URL(url||(/^[a-z]+:\/\//i.test(s)?s:'https://'+s))}catch(e){return bad}
+  if(!/(^|\.)ozon\.(ru|by|kz)$/i.test(u.hostname))return {e:`Это ссылка не на Озон (${u.hostname}). Нужна ссылка на карточку: ozon.ru/product/…`};
+  if(/^\/t\//.test(u.pathname))return {e:'Короткую ссылку ozon.ru/t/… сайт не раскроет. Откройте её и скопируйте адрес из браузера или SKU из карточки'};
+  const m=u.pathname.match(/\/product\/(?:[^/]*-)?(\d{6,12})(?:\/|$)/);
+  return m?{s:m[1]}:{e:'В ссылке нет номера товара. Нужна ссылка на карточку: ozon.ru/product/…'};
+}
+function addComp(p,v){   // ошибка текстом или пусто — добавлен
+  const r=skuOf(v);if(r.e)return r.e;const s=r.s;
+  const own=D.products.find(x=>x.sku===s);if(own)return 'Это наш товар: '+own.offer_id;
+  const c=allC(p).find(x=>x.sku===s);
+  if(c&&c.status==='yes')return `Уже в конкурентах: ${cnm(c)}${c._q?' — в очереди, нажмите «Отправить»':''}`;
+  const k=cAny(p,s)||{},i=Q.findIndex(x=>x.our===p.sku&&x.comp===s);if(i>=0)Q.splice(i,1);
+  Q.push({d:'a',our:p.sku,comp:s,seller:k.seller?short(k.seller):'SKU '+s,offer:p.offer_id});KS.set('q',Q);qbar();
+  closeSheet();qView();const y=scrollY;render(false);window.scrollTo(0,y);
+  snack(`➕ Добавлен: <b>${esc(k.seller?short(k.seller):'SKU '+s)}</b> · нажмите «Отправить»`,()=>{const j=Q.findIndex(x=>x.our===p.sku&&x.comp===s&&x.d==='a'&&!x.sent);if(j>=0){Q.splice(j,1);KS.set('q',Q);qbar()}qView();const y2=scrollY;render(false);window.scrollTo(0,y2)});
+  const el=$(`#view .rail2 [data-comp="${s}"]`);if(el){el.classList.add('hl');el.scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'})}
+  return '';
+}
+function addSheet(p){
+  openSheet(`<div class="note" style="margin:0 0 10px"><b>${esc(p.offer_id)}</b>. Знаете конкурента, которого нет в топе, — вставьте ссылку на его товар на Озоне или SKU (номер в конце ссылки). Он сразу встанет в топ. После «Отправить» Куратор за 10 минут возьмёт его, фото и цифры подтянутся за 15–40 минут.</div>
+   <form id="addf" novalidate><div class="sf">${IC.ext}<input id="addin" type="text" inputmode="url" placeholder="ozon.ru/product/… или SKU" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Ссылка на товар Озона или SKU" aria-describedby="adderr"></div>
+   <div class="adderr" id="adderr" role="alert"></div>
+   <button class="btn press" type="submit" style="width:100%;margin-top:10px">Добавить в топ</button></form>`,
+   `<div class="sec" style="margin:4px 2px 10px"><h2>Добавить конкурента</h2><span></span></div>`);
+  const f=$('#addf'),i=$('#addin'),er=$('#adderr');
+  i.oninput=()=>{er.textContent='';i.removeAttribute('aria-invalid')};
+  f.onsubmit=e=>{e.preventDefault();const t=addComp(p,i.value);if(t){er.textContent=t;i.setAttribute('aria-invalid','true');i.focus()}};
+  setTimeout(()=>i.focus({preventScroll:true}),280);
+}
 /* место магазина в категории — раздел «Конкуренты» в кабинете Озона: продавцы по выручке во всей категории, не товары */
 function shop(p){
   const s=p.shop;if(!s||!ok(s.pos))return '';
@@ -1801,10 +1853,9 @@ function vKonk(p){
   const adv=(p.advice||{}).items||[];
   return `${pn?`<button class="banner press reveal" id="pendgo">${IC.clock}<div style="flex:1;text-align:left"><b>${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения: такой же товар или нет.</b> Решить можно прямо здесь.</div><span class="tag acc">Решить</span></button>`:''}
   ${hero(p)}
-  <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><span></span></div>
+  <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><button class="lnk addc press" id="addc" type="button">+ Добавить конкурента</button></div>
   ${refRow(p)}
   ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
-  ${cs.length||rj?`<div class="g5w only-m"><div class="g5h">Вариант Б — то же без листания вбок<span>худший уберём</span></div><div class="g5">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" data-rej><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div></div>`:''}
   ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор по топу категории, поиску по названию и выдаче по ключам, с проверкой фото.</div>'}
   ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
@@ -1972,7 +2023,8 @@ const TOUR={
   {sel:'#picker',t:'Выбор товара',d:'Нажмите на товар или лупу — список всех товаров с поиском по названию и артикулу, листать вбок не нужно. Красный кружок с числом — сколько товаров кончается на складе, оранжевый — где ждут вашего решения по конкурентам; нажмите — покажет только их. На компьютере поиск открывается клавишей «/».'},
   {sel:'#pendgo',t:'Ждут решения',d:'Новые кандидаты в конкуренты. Отметьте только одно: такой же товар или нет — «Взять» или «Не брать».'},
   {sel:'.ang',t:'Шесть сторон товара',d:'Те же клетки, что в «Сводке», только крупнее. Нажмите на любую — переход туда, где это видно подробно.'},
-  {sel:'.rail2',t:'Топ конкурентов',d:'Номер — место по продажам, галочка — согласован, часы — ждёт решения. Нажмите — сравнение один на один и кнопки «Взять / Убрать».'},
+  {sel:'.rail2',t:'Топ-5 конкурентов',d:'Вся пятёрка плитками на одном экране, листать вбок не нужно. Номер — место по продажам, галочка — согласован, часы — ждёт решения. Нажмите — сравнение один на один и кнопки «Взять / Убрать».'},
+  {sel:'#addc',t:'Добавить конкурента',d:'Знаете конкурента, которого нет в топе, — вставьте ссылку на его товар на Озоне или SKU. Он сразу встанет в топ, после «Отправить» подтянутся фото и цифры.'},
   {sel:'#rej',t:'Другие из топа',d:'Остальные топы категории по продажам. Нужен — «Взять», мешает — «✖», уйдёт из списка.'},
   {sel:'#per',t:'Период',d:'Цифры таблицы за 7 или за 28 дней. Рядом — на какую дату данные Озона.'},
   {sel:'#grp',t:'Разделы таблицы',d:'Продажи, цена, воронка, реклама и поиск, наличие. На компьютере вся таблица целиком.'},
@@ -2064,7 +2116,8 @@ function after(){
    ['Реклама на Озоне','Ставка за клик ставится на товар целиком, не на запрос. Поднять место по отдельному запросу — ставкой на товар, словами запроса в названии и описании, ценой, складами рядом с покупателем.'],
    ['Кто пишет','Opus 5.5 на максимальном разборе, только по цифрам со страницы. Сам ничего не меняет: цены, ставки и рекламу — только по вашему «да».']
   ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`);
-  $$('#view #rej,#view [data-rej]').forEach(b=>b.onclick=()=>otherSheet(P));
+  $$('#view #rej').forEach(b=>b.onclick=()=>otherSheet(P));
+  const ac=$('#addc');if(ac)ac.onclick=()=>addSheet(P);
   const rf=$('#refr');if(rf)rf.onclick=()=>{rf.disabled=true;refSend(P)};
   const sq=$('#svq');if(sq){sq.oninput=()=>{SQ.q=sq.value;svFilter()};
     sq.onkeydown=e=>{if(e.key==='Escape'&&sq.value){e.preventDefault();e.stopPropagation();sq.value='';sq.dispatchEvent(new Event('input'))}if(e.key==='Enter'){e.preventDefault();sq.blur()}};
