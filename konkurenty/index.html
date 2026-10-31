@@ -621,6 +621,27 @@ table.cmpd{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
 .qbar .btn{padding:8px 13px;font-size:13.5px;white-space:nowrap}
 .qbar .ico{width:32px;height:32px}
 @media (min-width:960px){.qbar{bottom:22px}}
+/* топ-5 на телефоне, вариант Б (Андрей 01.11: «сделай то, что хотел предложить, ниже, худший удалим»): сетка по два, без листания вбок */
+.g5w{margin:4px 0 6px}
+.g5h{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--ink3);margin:6px 2px 8px;text-transform:uppercase;letter-spacing:.03em}
+.g5h span{font-weight:500;text-transform:none;letter-spacing:0}
+.g5{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.g5 .cm{width:auto;min-width:0;padding:8px}
+.g5 .cm{grid-template-columns:46px minmax(0,1fr);gap:8px}
+.g5 .cm .ph,.g5 .cm .ph img{width:46px;height:46px}
+/* «Найти заново» под заголовком топа */
+.refr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 2px 10px;font-size:12.5px;color:var(--ink3)}
+.refr .btn{flex:none;padding:7px 12px;font-size:13px;border-radius:11px}
+.refr .btn svg{width:16px;height:16px}
+.refr .btn[disabled]{opacity:.6;cursor:default}
+/* «Убран: … · Отменить» — над плашкой решений и над листом */
+.snk{position:fixed;left:50%;bottom:calc(136px + env(safe-area-inset-bottom,0px));z-index:66;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:14px;
+  background:var(--ink);color:var(--bg);font-size:14px;box-shadow:var(--sh2);max-width:calc(100vw - 24px);white-space:nowrap;
+  opacity:0;transform:translate(-50%,14px) scale(.97);pointer-events:none;transition:opacity .22s var(--ease),transform .45s var(--out)}
+.snk.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.snk span{overflow:hidden;text-overflow:ellipsis}
+.snk button{flex:none;padding:7px 12px;border-radius:10px;font-weight:700;font-size:14px;color:inherit;background:rgba(128,128,128,.28)}
+@media (min-width:960px){.snk{bottom:84px}}
 body.hasq main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 @keyframes hl{0%{box-shadow:0 0 0 0 var(--acc)}20%{box-shadow:0 0 0 4px var(--acc)}100%{box-shadow:0 0 0 2px var(--acc-soft)}}
 @keyframes hlbg{0%,50%{background-color:var(--warn-soft)}100%{background-color:var(--acc-soft)}}
@@ -1113,6 +1134,7 @@ const IC={
  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
  warn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8 1.6 20.5h20.8zM11 9h2v6h-2zm0 7.6h2v2h-2z"/></svg>',
  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+ redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 0 17.6 17"/><path d="M20 4.5v7h-7"/></svg>',
  find:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>',
  x:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".6"/><path d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8" fill="none" style="stroke:var(--card)" stroke-width="2.2" stroke-linecap="round"/></svg>'
 };
@@ -1120,11 +1142,13 @@ const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Кл
 
 /* ---------- тема ---------- */
 /* ---------- «Космос»: аффирмации Андрея (с магнитов, как в Юнитке), звёзды, метеоры, музыка ---------- */
-const SP_AFF=[
+/* 01.11 Андрей: «микс расположений раз в пару дней, на всех, чтобы естественно» — порядок аффирмаций меняется раз в 2 дня (с полуночи МСК), одинаково во всех сервисах; «Благодарю» по-прежнему после каждых трёх */
+const affMix=a=>{let s=Math.floor((Date.now()+108e5)/1728e5)%2147483646+1;const r=()=>(s=s*16807%2147483647)/2147483647;for(let k=0;k<8;k++)r();a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const SP_AFF=affMix([
  'Всё складывается наилучшим образом для моего высшего блага','Из этой ситуации выйдет только хорошее для меня','Я в безопасности','Вселенная любит меня',
  'Жизнь моя полна чудес','Деньги сыплются с небес','Я притягиваю изобилие легко и с радостью','Всё, что мне нужно, приходит ко мне вовремя',
  'Каждый новый день приносит мне подарки','Удача улыбается мне каждый день','Мир полон возможностей, и они сами находят меня','Я выбираю радость и спокойствие'
-].flatMap((s,i)=>i%3===2?[s,'Благодарю']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
+]).flatMap((s,i)=>i%3===2?[s,'Благодарю']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
 const SP_ICO={prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
  play:'<svg class="pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="pl" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 4.8v14.4a1 1 0 0 0 1.5.9l11.2-7.2a1 1 0 0 0 0-1.7L9 4a1 1 0 0 0-1.5.8Z"/></svg>',
@@ -1534,7 +1558,7 @@ function hero(p){
 function cmini(c,i,p){
   const o=p.our||{},d=ok(c.price)&&ok(o.price)&&o.price?c.price/o.price-1:null;
   return `<button class="card cm press${c.status==='pending'?' pend':''} reveal" data-comp="${c.sku}"><div class="ph">${img(c.photo)}<span class="n">${i+1}</span>${c.status==='yes'?`<span class="st ok">${IC.check}</span>`:c.status==='pending'?`<span class="st wait">${IC.clock}</span>`:''}</div>
-   <div style="min-width:0"><b>${esc(short(c.seller))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':'из выдачи'}${(c.j||{}).v==='almost'?' · почти такой же':''}</div></div></button>`;
+   <div style="min-width:0"><b>${esc(short(c.seller))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${c._q?'взят · нажмите «Отправить»':(ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':'из выдачи')+((c.j||{}).v==='almost'?' · почти такой же':'')}</div></div></button>`;
 }
 /* таблица «мы против топа»: телефон — строки продавцы, столбцы цифры раздела; компьютер — вся таблица как в первой версии */
 const SH={'Заказано за 7 дней':'₽ за 7 дн','Штук за 7 дней':'шт 7 дн','Динамика к прошлой неделе':'к прошлой нед.','Штук за 28 дней':'шт 28 дн','Продаж в день, шт':'шт в день',
@@ -1599,13 +1623,37 @@ function qSet(p,c,d){
   else{if(i>=0)Q.splice(i,1);Q.push({d,our:p.sku,comp:c.sku,seller:short(c.seller),offer:p.offer_id})}
   KS.set('q',Q);qbar();
 }
+/* 01.11 Андрей: «нажимаешь убрать — внешне ничего не меняется»: решение видно сразу, ещё до «Отправить» — убранный пропадает
+   из топа, таблиц и списков, взятый встаёт в топ; внизу «Отменить». Исходный состав — p._c0 / p._pm0 */
+function qView(){D.products.forEach(p=>{
+  if(!p._c0){p._c0=p.comps||[];p._pm0=p.pend_more||[]}
+  const q=c=>qOf(p,c.sku),keep=c=>{const x=q(c);return !(x&&x.d==='n')},take=c=>{const x=q(c);return x&&x.d==='y'&&c.status!=='yes'?Object.assign({},c,{status:'yes',_q:1}):c};
+  p.comps=p._c0.filter(keep).map(take).concat((p.rejected||[]).filter(r=>{const x=q(r);return x&&x.d==='y'&&!p._c0.some(c=>c.sku===r.sku)}).map(r=>Object.assign({},r,{status:'yes',_q:1})));
+  p.pend_more=p._pm0.filter(keep).map(take).filter(c=>c.status==='pending')})}
+const cAny=(p,s)=>allC(p).find(x=>x.sku===s)||(p._c0||[]).concat(p._pm0||[],p.rejected||[]).find(x=>x.sku===s);
+let SNK=0;
+function snack(html,undo){
+  let s=$('#snk');if(!s){s=document.createElement('div');s.id='snk';s.className='snk';s.setAttribute('role','status');document.body.appendChild(s)}
+  s.innerHTML=`<span>${html}</span>${undo?'<button class="press" type="button">Отменить</button>':''}`;
+  s.classList.remove('on');void s.offsetWidth;s.classList.add('on');clearTimeout(SNK);SNK=setTimeout(()=>s.classList.remove('on'),6000);
+  if(undo)s.querySelector('button').onclick=()=>{clearTimeout(SNK);s.classList.remove('on');undo()}}
+function decided(p,c,card,inComp){
+  const q=qOf(p,c.sku);
+  const redraw=()=>{qView();const y=scrollY;render(false);window.scrollTo(0,y);if(shw.classList.contains('on'))resheet()};
+  const undo=()=>{const i=Q.findIndex(x=>x.our===p.sku&&x.comp===c.sku&&!x.sent);if(i>=0){Q.splice(i,1);KS.set('q',Q);qbar()}redraw()};
+  if(!q){redraw();return}   // нажали второй раз — решение снято
+  snack(`${q.d==='y'?'✅ Взят':'✖ Убран'}: <b>${esc(short(c.seller))}</b>`,undo);
+  if(inComp){setTimeout(()=>{closeSheet();redraw()},280);return}   // лист конкурента — закрыть, в топе его уже нет
+  if(card&&card.animate&&!RM){const h=card.offsetHeight;card.style.overflow='hidden';
+    card.animate([{opacity:1,height:h+'px',transform:'none'},{opacity:0,height:'0px',paddingTop:'0px',paddingBottom:'0px',marginBottom:'-10px',transform:`translateX(${q.d==='y'?'':'-'}24px)`}],
+      {duration:340,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).onfinish=redraw}else redraw()}
 function qClean(){   // решение уже применено (видно в данных) — из очереди убрать
-  Q=Q.filter(x=>{const p=D.products.find(y=>y.sku===x.our);if(!p)return false;const c=allC(p).find(y=>y.sku===x.comp);
+  Q=Q.filter(x=>{const p=D.products.find(y=>y.sku===x.our);if(!p)return false;if(x.sent&&Date.now()-x.sent>2*864e5)return false;const c=allC(p).find(y=>y.sku===x.comp);
     if(x.d==='y'&&c&&c.status==='yes')return false;if(x.d==='n'&&!c&&!(p.rejected||[]).some(r=>r.sku===x.comp))return false;return true});
   KS.set('q',Q);
 }
 function qbar(){
-  const n=Q.filter(x=>!x.sent).length,s=Q.filter(x=>x.sent).length,b=$('#qbar');
+  const n=Q.filter(x=>!x.sent).length,s=Q.filter(x=>x.sent&&!x.hide).length,b=$('#qbar');
   b.hidden=!n&&!s;
   b.innerHTML=n?`<span style="white-space:nowrap"><b>${n} ${plur(n,'решение','решения','решений')}</b></span><button class="btn press" id="qsend">Отправить</button><button class="ico press" id="qclr" aria-label="Сбросить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`
    :`<span>${IC.clock} Отправлено: ${s}. Применится само за 5 минут</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
@@ -1636,7 +1684,7 @@ const qBtns=(p,c)=>{const q=qOf(p,c.sku),on=d=>q&&q.d===d?' on':'',sent=q&&q.sen
   return c.status==='yes'?`<div class="qa"><button class="qb n press${on('n')}" data-q="n" data-qc="${c.sku}">✖ Убрать из конкурентов${q&&q.d==='n'?sent||' · в очереди':''}</button></div>`
    :`<div class="qa"><button class="qb y press${on('y')}" data-q="y" data-qc="${c.sku}">✅ Взять${q&&q.d==='y'?sent||' · в очереди':''}</button><button class="qb n press${on('n')}" data-q="n" data-qc="${c.sku}">✖ ${c.status==='pending'?'Не брать':'Убрать'}${q&&q.d==='n'?sent||' · в очереди':''}</button></div>`};
 function compSheet(p,sku){
-  const c=allC(p).find(x=>x.sku===sku)||(p.rejected||[]).find(x=>x.sku===sku)||(p.leader&&p.leader.sku===sku?p.leader:null);if(!c)return;
+  const c=cAny(p,sku)||(p.leader&&p.leader.sku===sku?p.leader:null);if(!c)return;
   const o=per(Object.assign({},p.our||{},{rating:(p.our_card||{}).rating,reviews:(p.our_card||{}).reviews})),cp=per(c);const j=c.j||(c.v?{v:c.v,why:c.why}:{});
   const rows=GROUPS.map(([g,n,ms])=>`<tr class="g"><td colspan="3">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(([lab,get,fmt,dir])=>{let a=null,b=null;try{a=get(Object.assign({us:true,sku:p.sku},o),p)}catch(e){}try{b=get(cp,p)}catch(e){}
     if(!ok(a)&&!ok(b))return '';let cl='';if(dir&&ok(a)&&ok(b)&&a!==b)cl=(dir>0?a>b:a<b)?'up':'dn';return `<tr><td>${PL(lab)}</td><td class="num ${cl}">${fmt(a,o,p)}</td><td class="num">${fmt(b,cp,p)}</td></tr>`}).join('')).join('');
@@ -1676,7 +1724,7 @@ function pendSheet(p,keep){
 }
 /* «Другие из топа» (Андрей 25.10): изначально топы по продажам; взять — в конкуренты, ✖ — убрать, чтобы не мешали */
 function otherSheet(p,keep){
-  const rs=(p.rejected||[]).slice().sort((a,b)=>(b.sum7||0)-(a.sum7||0));
+  const rs=(p.rejected||[]).filter(r=>!qOf(p,r.sku)).sort((a,b)=>(b.sum7||0)-(a.sum7||0));   // решённые уже ушли из списка (вернуть — «Отменить»)
   const [hd,cls]=kqHead('Другие из топа','oq',rs,keep);
   openSheet(`<div class="note" style="margin:0 0 10px">Топ категории и выдачи по продажам за 7 дней, кого не взяли в конкуренты. Под каждым — почему. Нужен — «Взять», мешает — «✖», уйдёт из списка.</div>
    <div class="adv">${rs.map(c=>pick(p,Object.assign({},c,{status:'other'}))).join('')||'<div class="mut">Список пуст.</div>'}</div>`,hd,cls);
@@ -1705,6 +1753,30 @@ function resNote(p){
   if(ns.length)h+=`<div class="note" style="margin:2px 2px 0">в запасе ${ns.length} ${plur(ns.length,'согласованный','согласованных','согласованных')} — <b>продаж нет</b> за 28 дней${who(ns)?` (${who(ns)})`:''}: в пятёрку не ставим, вернутся, когда начнут продавать</div>`;
   return h;
 }
+/* «Найти заново» (Андрей 01.11: «нет ни похожих, ни новых — нет кнопки обновить, надо же понимать по каждому товару»):
+   запрос ботом в «Отчеты К» → Куратор раз в 10 минут запускает подбор по товару (soglas.py refresh) → сайт обновится сам */
+const refAt=p=>{const t=(KS.get('refr',{})||{})[p.sku],a=(p.pick||{}).at||'';if(!t)return 0;
+  const done=a.length>10&&Date.parse(a.replace(' ','T')+':00+03:00')>t;   // подбор с временем позже запроса — готово
+  return done||Date.now()-t>4*36e5?0:t};
+function refRow(p){
+  const pk=p.pick||{},t=refAt(p);
+  const how=pk.checked?`Подбор${pk.at?' '+ddmm(pk.at):''}: проверено по фото ${pk.checked}, подошли ${pk.matched}`:'Подбор ещё не делали';
+  return `<div class="refr reveal"><span>${how}</span><button class="btn ghost press" id="refr"${t?' disabled':''}>${IC.redo}${t?'Ищу заново…':'Найти заново'}</button></div>
+   ${t?`<div class="note" style="margin:2px 2px 8px">Запрос отправлен ${new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}. Подбор займёт 15–40 минут (если идёт плановый сбор — после него), страница обновится сама; новые кандидаты появятся в «Ждут решения».</div>`:''}`;
+}
+async function refSend(p){
+  const T=D.tg||{};if(!T.token||!T.chat){toast('Нет связи с ботом');return}
+  const api=(m,b)=>fetch('https://api.telegram.org/bot'+T.token+'/'+m,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
+  try{
+    const j=await api('sendMessage',{chat_id:T.chat,parse_mode:'HTML',disable_web_page_preview:true,
+      text:`🔄 Конкуренты — найти заново\n<a href="https://www.ozon.ru/product/${p.sku}/?ko=r-${p.sku}">${esc(p.offer_id)}</a>`});
+    if(!j.ok)throw new Error(j.description||'ошибка');
+    // номер сообщения бота — в кнопку: Куратор запустит подбор и удалит сообщение (soglas.py watch)
+    await api('editMessageReplyMarkup',{chat_id:T.chat,message_id:j.result.message_id,reply_markup:{inline_keyboard:[[{text:'🔄 Ищу заново…',callback_data:'ko:x:'+j.result.message_id+':'}]]}}).catch(()=>{});
+    const R=KS.get('refr',{})||{};R[p.sku]=Date.now();KS.set('refr',R);
+    const y=scrollY;render(false);window.scrollTo(0,y);snack('🔄 Ищу конкурентов заново: <b>'+esc(p.offer_id)+'</b>');
+  }catch(e){toast('Не отправилось: '+e.message)}
+}
 /* место магазина в категории — раздел «Конкуренты» в кабинете Озона: продавцы по выручке во всей категории, не товары */
 function shop(p){
   const s=p.shop;if(!s||!ok(s.pos))return '';
@@ -1725,13 +1797,15 @@ function others(p){
   return h;
 }
 function vKonk(p){
-  const cs=p.comps||[],pn=pendN(p),pk=p.pick||{},rj=(p.rejected||[]).length;
+  const cs=p.comps||[],pn=pendN(p),rj=(p.rejected||[]).filter(r=>!qOf(p,r.sku)).length;
   const adv=(p.advice||{}).items||[];
   return `${pn?`<button class="banner press reveal" id="pendgo">${IC.clock}<div style="flex:1;text-align:left"><b>${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения: такой же товар или нет.</b> Решить можно прямо здесь.</div><span class="tag acc">Решить</span></button>`:''}
   ${hero(p)}
-  <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><span>${pk.checked?`проверено по фото: ${pk.matched} из ${pk.checked}`:''}</span></div>
+  <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><span></span></div>
+  ${refRow(p)}
   ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
-  ${cs.length?'':'<div class="card pad mut reveal">Подходящих конкурентов пока нет — подбор продолжается.</div>'}
+  ${cs.length||rj?`<div class="g5w only-m"><div class="g5h">Вариант Б — то же без листания вбок<span>худший уберём</span></div><div class="g5">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" data-rej><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div></div>`:''}
+  ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор по топу категории, поиску по названию и выдаче по ключам, с проверкой фото.</div>'}
   ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
@@ -1990,7 +2064,8 @@ function after(){
    ['Реклама на Озоне','Ставка за клик ставится на товар целиком, не на запрос. Поднять место по отдельному запросу — ставкой на товар, словами запроса в названии и описании, ценой, складами рядом с покупателем.'],
    ['Кто пишет','Opus 5.5 на максимальном разборе, только по цифрам со страницы. Сам ничего не меняет: цены, ставки и рекламу — только по вашему «да».']
   ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`);
-  const rj=$('#rej');if(rj)rj.onclick=()=>otherSheet(P);
+  $$('#view #rej,#view [data-rej]').forEach(b=>b.onclick=()=>otherSheet(P));
+  const rf=$('#refr');if(rf)rf.onclick=()=>{rf.disabled=true;refSend(P)};
   const sq=$('#svq');if(sq){sq.oninput=()=>{SQ.q=sq.value;svFilter()};
     sq.onkeydown=e=>{if(e.key==='Escape'&&sq.value){e.preventDefault();e.stopPropagation();sq.value='';sq.dispatchEvent(new Event('input'))}if(e.key==='Enter'){e.preventDefault();sq.blur()}};
     $('#svf').onclick=e=>{const b=e.target.closest('[data-sf]');if(!b)return;SQ.f=b.dataset.sf;$$('#svf [data-sf]').forEach(x=>x.classList.toggle('on',x.dataset.sf===SQ.f));svFilter()};
@@ -2002,10 +2077,12 @@ function resheet(){   // перерисовать открытый лист по
   sb.scrollTop=y;
 }
 document.addEventListener('click',e=>{
-  const qb=e.target.closest('[data-q]');if(qb){const s=qb.dataset.qc,c=allC(P).find(x=>x.sku===s)||(P.rejected||[]).find(x=>x.sku===s);if(c){qSet(P,c,qb.dataset.q);resheet()}return}
-  if(e.target.closest('#qall')){allC(P).filter(c=>c.status==='pending').forEach(c=>{const q=qOf(P,c.sku);if(!q||q.d!=='y')qSet(P,c,'y')});resheet();return}
+  const qb=e.target.closest('[data-q]');if(qb){const s=qb.dataset.qc,c=cAny(P,s);if(c){qSet(P,c,qb.dataset.q);decided(P,c,qb.closest('[data-pk]'),!!$('#sbody').dataset.comp)}return}
+  if(e.target.closest('#qall')){const ps=allC(P).filter(c=>c.status==='pending');ps.forEach(c=>{const q=qOf(P,c.sku);if(!q||q.d!=='y')qSet(P,c,'y')});
+    qView();render(false);closeSheet();snack(`✅ Взяты все: ${ps.length}`,()=>{ps.forEach(c=>{const i=Q.findIndex(x=>x.our===P.sku&&x.comp===c.sku&&!x.sent);if(i>=0)Q.splice(i,1)});KS.set('q',Q);qbar();qView();render(false)});return}
   if(e.target.closest('#qsend')){qSend();return}
-  if(e.target.closest('#qclr')){Q=[];KS.set('q',Q);qbar();if(shw.classList.contains('on'))resheet();return}
+  // крестик: есть неотправленные — сбросить их; только отправленные — спрятать плашку, а убранные так и остаются скрытыми до применения
+  if(e.target.closest('#qclr')){if(Q.some(x=>!x.sent))Q=Q.filter(x=>x.sent);else Q.forEach(x=>x.hide=1);KS.set('q',Q);qbar();qView();const y=scrollY;render(false);window.scrollTo(0,y);if(shw.classList.contains('on'))resheet();return}
   const c=e.target.closest('[data-comp]');if(c){compSheet(P,c.dataset.comp);return}
   const g=e.target.closest('[data-go]');if(g){S.sku=g.dataset.go;S.t=g.dataset.gt||'konk';if(g.dataset.gg){S.grp=g.dataset.gg;KS.set('grp',S.grp)}S.focus=g.dataset.gf||null;closeSheet();render(true);return}
   const kw=e.target.closest('[data-kw]');if(kw){if(kw.dataset.kw===S.kw)return;S.kw=kw.dataset.kw;const y=scrollY;render(false);window.scrollTo(0,y);
@@ -2022,7 +2099,7 @@ function render(anim){
   const swap=()=>{v.innerHTML=html;if(anim){v.classList.remove('view-in');void v.offsetWidth;v.classList.add('view-in');window.scrollTo({top:0})}after()};
   if(anim&&document.startViewTransition&&!RM){const vt=document.startViewTransition(swap);vt.ready.catch(()=>{});vt.finished.catch(()=>{})}else swap();   // поворот экрана обрывает переход — не ошибка
 }
-function start(d){D=d;if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();
+function start(d){D=d;if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
   // ссылка из «К»: #pend — сразу товар с ждущими решения и лист «Ждут решения»; #sku=<sku> — этот товар;
   // из Юнитки (красная «Топ не добавлен», 26.10): #sku=<sku>&pick — этот товар и сразу выбор: «Ждут решения», а если ждущих нет — «Другие из топа»
   const hs=location.hash.slice(1);let pend=false,pick=false;
