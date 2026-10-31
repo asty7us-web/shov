@@ -1319,7 +1319,7 @@ const PICK=svcPicker({btn:'#themeBtn',list:THEMES,cur:TNAME[KS.get('theme','auto
   onPick:k=>{KS.set('theme',k);applyTheme(k,true);svcTheme(2,k)}});
 applyTheme(KS.get('theme','auto'));
 /* «назад» на телефоне не выкидывает с сайта (Андрей 29.10): фишки → лист снизу → (общее: меню, игра, наверх) → «Конкуренты» → «это главная» */
-svcBack({pop:[()=>!!TR&&(tourEnd(),true),()=>shw.classList.contains('on')&&(closeSheet(),true)],
+svcBack({pop:[()=>!!TR&&(tourEnd(),true),()=>shw.classList.contains('on')&&(sheetBack(),true)],
   main:()=>{if(S.t==='konk')return false;go('konk');return true},home:()=>toast('Это главная')});
 
 /* ---------- подсказка ---------- */
@@ -1335,8 +1335,18 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-tip]');if
 const shw=$('#shw'),sheet=$('#sheet');
 // head — неподвижная шапка листа над прокруткой (поиск), cls — 'tall': лист на всю высоту
 function openSheet(html,head,cls){const sb=$('#sbody');delete sb.dataset.comp;delete sb.dataset.pend;delete sb.dataset.other;delete sb.dataset.prod;sb.innerHTML=html;$('#shd').innerHTML=head||'';sheet.className='sheet'+(cls?' '+cls:'');shw.classList.add('on');document.body.style.overflow='hidden';$('#sbody').scrollTop=0;reveal($('#sbody'))}
-function closeSheet(){shw.classList.remove('on');document.body.style.overflow='';sheet.style.transform=''}
-$('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+function closeSheet(){SBACK=null;shw.classList.remove('on');document.body.style.overflow='';sheet.style.transform=''}
+/* 01.11 Андрей: «в «Других из топа» выбираешь, потом «назад» закрывает всех» — из карточки конкурента «назад» (и Esc) ведёт к списку,
+   откуда её открыли, на то же место; крестик и тап мимо листа закрывают всё */
+let SBACK=null;
+function sheetBack(){
+  const b=SBACK,sb=$('#sbody');
+  if(!b||!sb.dataset.comp){closeSheet();return}
+  SBACK=null;if(b.k==='other')otherSheet(P,true);else pendSheet(P,true);
+  if(!sb.dataset.other&&!sb.dataset.pend){closeSheet();return}   // список опустел — нечего показывать
+  sb.scrollTop=b.y;
+}
+$('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape'&&shw.classList.contains('on'))sheetBack()});
 (()=>{let y0=null,dy=0;const g=$('#grab');
   g.addEventListener('pointerdown',e=>{if(innerWidth>=760)return;y0=e.clientY;dy=0;sheet.style.transition='none';g.setPointerCapture(e.pointerId)});
   g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sheet.style.transform=`translateY(${dy}px)`});
@@ -1655,7 +1665,8 @@ function decided(p,c,card,inComp){
   const undo=()=>{const i=Q.findIndex(x=>x.our===p.sku&&x.comp===c.sku&&!x.sent);if(i>=0){Q.splice(i,1);KS.set('q',Q);qbar()}redraw()};
   if(!q){redraw();return}   // нажали второй раз — решение снято
   snack(`${q.d==='y'?'✅ Взят':'✖ Убран'}: <b>${esc(short(c.seller))}</b>`,undo);
-  if(inComp){setTimeout(()=>{closeSheet();redraw()},280);return}   // лист конкурента — закрыть, в топе его уже нет
+  // лист конкурента: открыт из списка — назад к списку (решённый из него уже ушёл), иначе закрыть — в топе его уже нет
+  if(inComp){setTimeout(()=>{if(SBACK){qView();const y=scrollY;render(false);window.scrollTo(0,y);sheetBack()}else{closeSheet();redraw()}},280);return}
   if(card&&card.animate&&!RM){const h=card.offsetHeight;card.style.overflow='hidden';
     card.animate([{opacity:1,height:h+'px',transform:'none'},{opacity:0,height:'0px',paddingTop:'0px',paddingBottom:'0px',marginBottom:'-10px',transform:`translateX(${q.d==='y'?'':'-'}24px)`}],
       {duration:340,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).onfinish=redraw}else redraw()}
@@ -1705,7 +1716,8 @@ function compSheet(p,sku){
     if(!ok(a)&&!ok(b))return '';let cl='';if(dir&&ok(a)&&ok(b)&&a!==b)cl=(dir>0?a>b:a<b)?'up':'dn';return `<tr><td>${PL(lab)}</td><td class="num ${cl}">${fmt(a,o,p)}</td><td class="num">${fmt(b,cp,p)}</td></tr>`}).join('')).join('');
   const oc=(p.our_card||{}).chars||{},cc=c.chars||{},ks=[...new Set([...Object.keys(oc),...Object.keys(cc)])].slice(0,12);
   const isComp=allC(p).some(x=>x.sku===sku);
-  openSheet(`<div class="csh"><a class="cph" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(cnm(c))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
+  const back=SBACK?`<button class="lnk press" data-sback style="display:block;margin:2px 0 10px;font-size:15px">‹ ${SBACK.k==='other'?'Другие из топа':'Ждут решения'}</button>`:'';
+  openSheet(`${back}<div class="csh"><a class="cph" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(cnm(c))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
    <div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${!isComp?'<span class="tag">не в конкурентах</span>':c._q?`<span class="tag wait">${IC.clock}${c._add?'добавлен':'взят'} · ${c._sent?'отправлено':'нажмите «Отправить»'}</span>`:c.status==='yes'?`<span class="tag ok">${IC.check}согласован${c.at?' '+ddmm(c.at):''}</span>`:`<span class="tag wait">${IC.clock}ждёт решения</span>`}${c.hand?'<span class="tag">добавлен вручную</span>':''}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}<a class="tag acc" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">на Ozon ${IC.ext}</a></div></div></div>
    ${qBtns(p,isComp?c:Object.assign({},c,{status:'other'}))}
    ${j.v?`<div class="card pad" style="margin-top:14px;box-shadow:none;background:var(--fill2)"><b>${j.v==='same'?'Тот же товар':j.v==='almost'?'Почти такой же':'Другой товар'}</b> <span class="mut">· проверено по фото и характеристикам</span><div style="margin-top:6px;font-size:14px">${esc(j.why||'')}</div>${j.diff?`<div style="margin-top:6px;font-size:14px" class="mut">Отличие: ${esc(j.diff)}</div>`:''}</div>`:''}
@@ -2136,7 +2148,9 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#qsend')){qSend();return}
   // крестик: есть неотправленные — сбросить их; только отправленные — спрятать плашку, а убранные так и остаются скрытыми до применения
   if(e.target.closest('#qclr')){if(Q.some(x=>!x.sent))Q=Q.filter(x=>x.sent);else Q.forEach(x=>x.hide=1);KS.set('q',Q);qbar();qView();const y=scrollY;render(false);window.scrollTo(0,y);if(shw.classList.contains('on'))resheet();return}
-  const c=e.target.closest('[data-comp]');if(c){compSheet(P,c.dataset.comp);return}
+  if(e.target.closest('[data-sback]')){sheetBack();return}
+  const c=e.target.closest('[data-comp]');if(c){const sb=$('#sbody'),open=shw.classList.contains('on');   // открыли из списка — «назад» вернёт к нему
+    SBACK=open&&(sb.dataset.other||sb.dataset.pend)?{k:sb.dataset.other?'other':'pend',y:sb.scrollTop}:null;compSheet(P,c.dataset.comp);return}
   const g=e.target.closest('[data-go]');if(g){S.sku=g.dataset.go;S.t=g.dataset.gt||'konk';if(g.dataset.gg){S.grp=g.dataset.gg;KS.set('grp',S.grp)}S.focus=g.dataset.gf||null;closeSheet();render(true);return}
   const kw=e.target.closest('[data-kw]');if(kw){if(kw.dataset.kw===S.kw)return;S.kw=kw.dataset.kw;const y=scrollY;render(false);window.scrollTo(0,y);
     const hm=$$('#view [data-f="heat"]').find(x=>x.offsetParent);if(hm){hm.classList.remove('hl');void hm.offsetWidth;hm.classList.add('hl')}
