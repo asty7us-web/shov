@@ -181,17 +181,60 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;paddin
 .top.mini .inst span{display:none}
 .ico svg{width:19px;height:19px}
 .dtabs{display:none}
-.picker{max-width:1240px;margin:0 auto;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 10px;scrollbar-width:none;scroll-snap-type:x proximity;
+/* товар — поиском, не лентой вбок (Андрей 31.10: «двигать в сторону, когда их столько, неудобно»): в шапке выбранный товар, поиск и счётчики */
+.picker{max-width:1240px;margin:0 auto;display:flex;gap:8px;align-items:center;overflow:hidden;padding:2px 14px 10px;
   max-height:70px;transition:max-height .45s var(--out),opacity .3s var(--ease),padding .45s var(--out)}
-.picker::-webkit-scrollbar{display:none}
 .top.mini .picker{max-height:0;opacity:0;padding-bottom:0}
-.chip{flex:none;scroll-snap-align:start;display:flex;align-items:center;gap:9px;padding:6px 12px 6px 6px;border-radius:15px;background:var(--card);box-shadow:var(--sh1);text-align:left;max-width:240px;position:relative}
+.chip{flex:none;display:flex;align-items:center;gap:9px;height:52px;padding:6px 12px 6px 6px;border-radius:15px;background:var(--card);box-shadow:var(--sh1);text-align:left;position:relative;color:var(--ink)}
 .chip img{width:40px;height:40px;border-radius:11px;object-fit:cover;background:var(--fill);flex:none}
-.chip b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
-.chip span{display:block;font-size:12px;color:var(--ink3);white-space:nowrap}
-.chip.on{box-shadow:0 0 0 2px var(--acc),var(--sh1)}
-.dot{position:absolute;top:5px;left:5px;width:10px;height:10px;border-radius:50%;border:2px solid var(--card)}
-.dot.r{background:var(--bad)}.dot.o{background:var(--warn);left:auto;right:6px}
+.pcur{flex:1 1 auto;min-width:0}
+.pcur span{flex:1;min-width:0}
+.pcur b{display:block;font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcur i{display:block;font-style:normal;font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcur>svg{width:16px;height:16px;color:var(--ink3);flex:none}
+.psr{padding:0 16px;gap:8px;color:var(--ink2);font-size:14px;font-weight:600}
+.psr svg{width:20px;height:20px;flex:none}
+.psr kbd{display:none}
+.pfb{padding:0 12px;gap:7px;font-size:14px;font-weight:700}
+.pfb i,.sfl i{width:10px;height:10px;border-radius:50%;flex:none}
+.pfb.r i,.sfl .r i{background:var(--bad)}.pfb.o i,.sfl .o i{background:var(--warn)}
+@media (max-width:560px){.psr{width:52px;padding:0;justify-content:center}.psr span{display:none}.pfb{padding:0 10px;gap:6px}}
+@media (max-width:440px){   /* телефон: название в две строки вместо обрезки; продажи за 7 дней — в списке товаров */
+  .pcur b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:13.5px;line-height:1.2}
+  .pcur i{display:none}.pcur{gap:8px;padding-right:8px}.pfb{padding:0 9px;gap:5px}.psr{width:48px}}
+@media (min-width:760px){.pcur{flex:0 1 400px}.psr{flex:1;min-width:0}.psr span{flex:1;font-weight:500;color:var(--ink3)}
+  .psr kbd{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;background:var(--fill);color:var(--ink3);font:600 12px/1 var(--f)}}
+/* поиск в листах и в «Сводке» */
+.shd{padding:0 18px 10px}
+.shd:empty{display:none}
+.shd .sec{padding-right:46px}
+.sf{display:flex;align-items:center;gap:8px;height:44px;padding:0 5px 0 12px;border-radius:13px;background:var(--fill);transition:box-shadow .25s var(--ease)}
+.sf:focus-within{box-shadow:0 0 0 2px var(--acc)}
+.sf>svg{width:18px;height:18px;color:var(--ink3);flex:none}
+.sf input{flex:1;min-width:0;height:100%;border:0;background:none;outline:none;color:var(--ink);font:inherit;font-size:16px}   /* 16px — iPhone не приближает страницу при вводе */
+.sf input::placeholder{color:var(--ink3)}
+.sf input::-webkit-search-cancel-button{display:none}
+.sfx{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink3);flex:none}
+.sfx[hidden]{display:none}
+.sfx svg{width:16px;height:16px}
+.sfl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sfl button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;background:var(--fill);color:var(--ink2);font-size:13px;font-weight:600;transition:background-color .25s var(--ease),color .25s var(--ease)}
+.sfl button em{font-style:normal;opacity:.65}
+.sfl button.on{background:var(--acc);color:var(--on-acc)}
+.sfl button.on i{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.sfn{font-size:12.5px;color:var(--ink3);margin:8px 2px 0}
+.sfn:empty{display:none}
+mark.hit{background:var(--acc-soft);color:inherit;border-radius:4px;padding:0 1px}
+.sheet.tall{height:92vh;height:92dvh}   /* поиск: высота не скачет, пока список сжимается */
+@media (min-width:760px){.sheet.tall{height:min(720px,86vh)}}
+.ad[data-pick]{position:relative}
+.ad[data-pick].kb{box-shadow:0 0 0 2px var(--acc)}
+.ad[data-pick] .pdot{position:absolute;top:8px;left:8px;width:10px;height:10px;border-radius:50%;border:2px solid var(--fill2)}
+.ad[data-pick] .pdot.r{background:var(--bad)}.ad[data-pick] .pdot.o{background:var(--warn);left:48px}
+.svq{margin:0 0 10px}
+.svq .sf{background:var(--card);box-shadow:var(--sh1)}
+.svq .sfl button{background:var(--card);box-shadow:var(--sh1)}.svq .sfl button.on{background:var(--acc)}
+#view [hidden],#sbody [hidden]{display:none!important}
 
 /* нижняя панель разделов */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--hdr);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);
@@ -583,8 +626,7 @@ body.hasq main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 @keyframes hlbg{0%,50%{background-color:var(--warn-soft)}100%{background-color:var(--acc-soft)}}
 .card.hl,.mc.hl{animation:hl 2.2s var(--out) forwards}
 td.hl,th.hl,tr.hl>td{animation:hlbg 2.4s var(--out) forwards}
-.wsel{display:flex;gap:6px;overflow-x:auto;padding:2px 14px 10px;margin:0 -14px;scrollbar-width:none}
-.wsel::-webkit-scrollbar{display:none}
+.wsel{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px}   /* 31.10: в несколько строк, не вбок */
 .wsel button{flex:none;display:flex;align-items:center;gap:7px;padding:5px 11px 5px 5px;border-radius:13px;background:var(--card);box-shadow:var(--sh1);text-align:left}
 .wsel button{transition:background-color .3s var(--ease),color .3s var(--ease),transform .35s var(--spring)}
 .wsel button.on{background:var(--acc);color:var(--on-acc);box-shadow:0 4px 14px -4px var(--acc)}
@@ -1008,7 +1050,7 @@ window.svcBack=o=>{
 <main id="view"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
 <div class="qbar" id="qbar" hidden></div>
 <nav class="tabbar" id="tabbar"></nav>
-<div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="sbody" id="sbody"></div></section></div>
+<div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="shd" id="shd"></div><div class="sbody" id="sbody"></div></section></div>
 <div class="tip" id="tip"></div>
 <div class="lock" id="lock" hidden><div class="card"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input id="pw" type="password" autocomplete="current-password"><button class="btn press" id="pwgo" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></div></div>
 <script>
@@ -1070,7 +1112,9 @@ const IC={
  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
  warn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8 1.6 20.5h20.8zM11 9h2v6h-2zm0 7.6h2v2h-2z"/></svg>',
- ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+ ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+ find:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>',
+ x:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".6"/><path d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8" fill="none" style="stroke:var(--card)" stroke-width="2.2" stroke-linecap="round"/></svg>'
 };
 const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Ключи'],['sklad','Склады']];
 
@@ -1265,7 +1309,8 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-tip]');if
 
 /* ---------- лист снизу ---------- */
 const shw=$('#shw'),sheet=$('#sheet');
-function openSheet(html){const sb=$('#sbody');delete sb.dataset.comp;delete sb.dataset.pend;delete sb.dataset.other;sb.innerHTML=html;shw.classList.add('on');document.body.style.overflow='hidden';$('#sbody').scrollTop=0;reveal($('#sbody'))}
+// head — неподвижная шапка листа над прокруткой (поиск), cls — 'tall': лист на всю высоту
+function openSheet(html,head,cls){const sb=$('#sbody');delete sb.dataset.comp;delete sb.dataset.pend;delete sb.dataset.other;delete sb.dataset.prod;sb.innerHTML=html;$('#shd').innerHTML=head||'';sheet.className='sheet'+(cls?' '+cls:'');shw.classList.add('on');document.body.style.overflow='hidden';$('#sbody').scrollTop=0;reveal($('#sbody'))}
 function closeSheet(){shw.classList.remove('on');document.body.style.overflow='';sheet.style.transform=''}
 $('#scrim').onclick=closeSheet;$('#sx').onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 (()=>{let y0=null,dy=0;const g=$('#grab');
@@ -1302,9 +1347,63 @@ const prod=()=>D.products.find(p=>p.sku===S.sku)||D.products[0];
 const allC=p=>(p.comps||[]).concat(p.pend_more||[]);   // в топе не больше 5 (Андрей 26.10); ждущие сверх мест — только в «Ждут решения»
 const pendN=p=>allC(p).filter(c=>c.status==='pending').length;
 const skladBad=p=>(p.clusters||[]).some(c=>(c.ads||0)>=0.1&&((c.stock||0)===0||(c.idc!=null&&c.idc<=4)));
+/* ---------- поиск (Андрей 31.10: «поиск удобный везде, двигать в сторону, когда их столько, неудобно») ---------- */
+// без регистра, ё = е, «_-*/.,» = пробел, 10*10 = 10х10 = 10x10; длина строки та же — подсветка ложится на те же буквы
+const sNorm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/(\d)[*×хx](?=\d)/g,'$1x').replace(/[_\-–—*×\/\\.,;:()«»"'+#№]/g,' ');
+const KB_EN="`qwertyuiop[]asdfghjkl;'zxcvbnm,.",KB_RU='ёйцукенгшщзхъфывапролджэячсмитьбю';
+const kbSwap=s=>s.replace(/[a-z`\[\];',.]/gi,ch=>{const i=KB_EN.indexOf(ch.toLowerCase());return i<0?ch:KB_RU[i]});   // набрал в английской раскладке
+// hay(x) → [главное, остальное]: все слова запроса в главном — выше, в остальном — ниже; ничего — пробуем русскую раскладку
+function sFind(list,q,hay){
+  const words=q=>sNorm(q).split(/\s+/).filter(Boolean);
+  const run=t=>{const r=[];list.forEach(x=>{const [m,o]=hay(x),nm=sNorm(m),no=sNorm(o);
+    if(t.every(w=>nm.includes(w)))r.push({x,main:1});else if(t.every(w=>nm.includes(w)||no.includes(w)))r.push({x,main:0})});return r.sort((a,b)=>b.main-a.main)};
+  const t=words(q);if(!t.length)return {t,r:list.map(x=>({x,main:1}))};
+  const r=run(t);if(!r.length&&/[a-z]/i.test(q)){const t2=words(kbSwap(q)),r2=run(t2);if(r2.length)return {t:t2,r:r2,kb:kbSwap(q)}}
+  return {t,r};
+}
+function hl(s,t){s=String(s||'');if(!t||!t.length)return esc(s);const n=sNorm(s),m=new Uint8Array(s.length);
+  t.forEach(w=>{let i=n.indexOf(w);while(i>=0){m.fill(1,i,i+w.length);i=n.indexOf(w,i+w.length)}});
+  let h='',on=0;for(let i=0;i<s.length;i++){if(m[i]!==on){h+=m[i]?'<mark class="hit">':'</mark>';on=m[i]}h+=esc(s[i])}return h+(on?'</mark>':'')}
+const sfBox=(id,ph,q)=>`<div class="sf">${IC.find}<input id="${id}" type="search" placeholder="${ph}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" value="${esc(q||'')}"><button class="sfx press" type="button" data-sfx="${id}" aria-label="Очистить"${q?'':' hidden'}>${IC.x}</button></div>`;
+const sfChips=(attr,cur,list)=>`<div class="sfl">${list.filter(x=>x[0]==='all'||x[2]).map(([k,n,c,cl])=>`<button type="button" class="press ${cl}${cur===k?' on':''}" ${attr}="${k}">${cl?'<i></i>':''}${n} <em>${c}</em></button>`).join('')}</div>`;
+document.addEventListener('click',e=>{   // крестик чистит, тап по полю — в поле
+  const x=e.target.closest('[data-sfx]');if(x){const i=document.getElementById(x.dataset.sfx);if(i){i.value='';i.dispatchEvent(new Event('input'));i.focus()}return}
+  const f=e.target.closest('.sf');if(f&&e.target.tagName!=='INPUT'){const i=f.querySelector('input');if(i)i.focus()}});
+document.addEventListener('input',e=>{const i=e.target;if(i.matches&&i.matches('.sf input')){const x=i.parentNode.querySelector('.sfx');if(x)x.hidden=!i.value}});
+const PF={sklad:p=>skladBad(p),pend:p=>pendN(p)>0};
+const pfList=()=>[['all','Все',D.products.length,''],['sklad','Кончаются',D.products.filter(PF.sklad).length,'r'],['pend','Ждут решения',D.products.filter(PF.pend).length,'o']];
+const pHay=p=>[p.offer_id,[p.name,p.sku,p.type_name].join(' ')];
+const pBase=f=>f==='all'?D.products:D.products.filter(PF[f]||(()=>true));
+const FINE=matchMedia('(pointer:fine)').matches;   // мышь: в поле сразу; на телефоне клавиатура — только по лупе
+/* лист «Товары»: поиск по названию и артикулу продавца, отбор «кончаются» / «ждут решения»; Enter — первый, стрелки — по списку */
+const PQ={q:'',f:'all'};let PKB=-1;
+function prodSheet(focus,f){
+  if(f){PQ.f=f;PQ.q=''}
+  openSheet('',`<div class="sec" style="margin:4px 2px 10px"><h2>Товары</h2><span>${D.products.length}</span></div>${sfBox('pq','Название или артикул',PQ.q)}<div id="pqf">${sfChips('data-pf',PQ.f,pfList())}</div><div class="sfn" id="pqn"></div>`,'tall');
+  $('#sbody').dataset.prod=1;prodList();
+  const i=$('#pq');i.oninput=()=>{PQ.q=i.value;prodList();$('#sbody').scrollTop=0};
+  i.onkeydown=e=>{const bs=$$('#sbody [data-pick]');
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!bs.length)return;PKB=(PKB+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length;bs.forEach((b,k)=>b.classList.toggle('kb',k===PKB));bs[PKB].scrollIntoView({block:'nearest'});return}
+    if(e.key==='Enter'){e.preventDefault();const b=bs[Math.max(0,PKB)];if(b)b.click();return}
+    if(e.key==='Escape'&&i.value){e.preventDefault();e.stopPropagation();i.value='';i.dispatchEvent(new Event('input'))}};
+  if(focus){i.focus({preventScroll:true});if(i.value)i.select()}
+}
+function prodList(){
+  const R=sFind(pBase(PQ.f),PQ.q,pHay),on=PQ.q.trim()!=='';PKB=on&&R.r.length?0:-1;
+  const sub=p=>`7 дн: ${fi((p.our||{}).cnt7)} шт · ${(p.comps||[]).length} ${plur((p.comps||[]).length,'конкурент','конкурента','конкурентов')}${pendN(p)?' · ждут решения '+pendN(p):''}${skladBad(p)?' · кончается на складе':''}`;
+  $('#sbody').innerHTML=R.r.length?`<div class="adv">${R.r.map(({x:p,main},k)=>`<button class="card ad press${k===PKB?' kb':''}" data-pick="${p.sku}" style="display:flex;gap:12px;align-items:center;box-shadow:none;background:var(--fill2)">${skladBad(p)?'<i class="pdot r"></i>':''}${pendN(p)?'<i class="pdot o"></i>':''}${img(pphoto(p))}<div style="min-width:0;flex:1"><b>${hl(p.offer_id,R.t)}</b><div class="w">${main?sub(p):`<span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${hl(p.name,R.t)}</span>`}</div></div>${p.sku===P.sku?'<span class="tag acc">сейчас</span>':''}</button>`).join('')}</div>`
+    :`<div class="empty">Ничего не нашли${PQ.f!=='all'?`<br><button class="lnk press" data-pf="all" style="margin-top:8px">Искать во всех товарах</button>`:''}</div>`;
+  $('#pqn').innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:R.r.length&&(on||PQ.f!=='all')?`Найдено ${R.r.length} из ${D.products.length}`:'';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pf]');if(!b)return;PQ.f=b.dataset.pf;$$('#pqf [data-pf]').forEach(x=>x.classList.toggle('on',x.dataset.pf===PQ.f));prodList();$('#sbody').scrollTop=0});
+addEventListener('keydown',e=>{   // «/» или Ctrl+K — поиск товара (на компьютере)
+  if(!D||e.altKey||e.defaultPrevented)return;const t=e.target;if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable]'))return;
+  if((e.code==='Slash'&&!e.ctrlKey&&!e.metaKey)||((e.ctrlKey||e.metaKey)&&e.code==='KeyK')){e.preventDefault();prodSheet(true)}});
 function renderPicker(){
-  $('#picker').innerHTML=D.products.map(p=>`<button class="chip press${p.sku===P.sku?' on':''}" data-sku="${p.sku}">${skladBad(p)?'<i class="dot r" title="Кончается на складе"></i>':''}${pendN(p)?'<i class="dot o" title="Ждут согласования"></i>':''}${img(p.photo||(p.our_card||{}).photo)}<div><b>${esc(p.offer_id)}</b><span>7 дн: ${fi((p.our||{}).cnt7)} шт</span></div></button>`).join('');
-  const on=$('#picker .chip.on');if(on)on.scrollIntoView({inline:'center',block:'nearest',behavior:RM?'auto':'smooth'});
+  const pl=pfList();
+  $('#picker').innerHTML=`<button class="chip pcur press" data-pp="cur" aria-label="Сменить товар">${img(pphoto(P))}<span><b>${esc(P.offer_id)}</b><i>7 дн: ${fi((P.our||{}).cnt7)} шт${skladBad(P)?' · кончается на складе':pendN(P)?' · ждут решения '+pendN(P):''}</i></span>${IC.down}</button>`
+   +`<button class="chip psr press" data-pp="find" aria-label="Найти товар">${IC.find}<span>Найти товар — название или артикул</span><kbd>/</kbd></button>`
+   +pl.slice(1).filter(x=>x[2]).map(([k,n,c,cl])=>`<button class="chip pfb ${cl} press" data-pp="${k}" aria-label="${k==='sklad'?'Кончаются на складе':n}: ${c}" title="${k==='sklad'?'Кончаются на складе':'Ждут решения по конкурентам'}">${'<i></i>'+c}</button>`).join('');
   $('#ctx').innerHTML=`${img(P.photo||(P.our_card||{}).photo)}<b>${esc(P.offer_id)}</b><i>· ${TABS.find(t=>t[0]===S.t)[1]}</i>${IC.down}`;
 }
 function renderTabs(){
@@ -1316,9 +1415,10 @@ function renderTabs(){
 let mini=false;addEventListener('scroll',()=>{const y=scrollY,m=mini?y>24:y>90;if(m!==mini){mini=m;$('#top').classList.toggle('mini',m)}},{passive:true});
 let TOPH=0;function sizeTop(force){if(mini)return;const h=$('#top').offsetHeight;if(force||h>TOPH){TOPH=h;$('#topsp').style.height=h+'px'}}   // во время анимации высота меньше — берём наибольшую
 addEventListener('resize',()=>{sizeTop(true);if(typeof thumbs==='function')thumbs()});
-$('#ctx').onclick=()=>openSheet(`<div class="sec" style="margin-top:4px"><h2>Товары</h2><span>${D.products.length}</span></div><div class="adv">${D.products.map(p=>`<button class="card ad press" data-pick="${p.sku}" style="display:flex;gap:12px;align-items:center;box-shadow:none;background:var(--fill2)">${img(p.photo||(p.our_card||{}).photo)}<div style="min-width:0;flex:1"><b>${esc(p.offer_id)}</b><div class="w">7 дн: ${fi((p.our||{}).cnt7)} шт · ${(p.comps||[]).length} конкурентов${pendN(p)?' · ждут согласования '+pendN(p):''}</div></div>${p.sku===P.sku?'<span class="tag acc">сейчас</span>':''}</button>`).join('')}</div>`);
+$('#ctx').onclick=()=>prodSheet(FINE);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(b){S.sku=b.dataset.pick;closeSheet();render(true)}});
-$('#picker').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b&&b.dataset.sku!==S.sku){S.sku=b.dataset.sku;render(true)}});
+$('#picker').addEventListener('click',e=>{const b=e.target.closest('[data-pp]');if(!b)return;const k=b.dataset.pp;
+  if(k==='find')prodSheet(true);else if(k==='cur')prodSheet(FINE);else prodSheet(FINE,k)});
 function go(t){if(t===S.t)return window.scrollTo({top:0,behavior:RM?'auto':'smooth'});S.t=t;render(true)}
 $('#tabbar').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)go(b.dataset.t)});
 $('#dtabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)go(b.dataset.t)});
@@ -1553,21 +1653,34 @@ function compSheet(p,sku){
   $('#sbody').dataset.comp=sku;
 }
 /* ждут решения — все кандидаты товара на одном листе */
-function pendSheet(p){
+/* поиск по продавцу и названию в листах кандидатов, когда их больше 6; keep — перерисовка после решения, запрос не сбрасываем */
+const KQ={pq2:{q:''},oq:{q:''}};
+const kqHead=(h,id,list,keep)=>{if(!keep)KQ[id].q='';const big=list.length>6;
+  return [`<div class="sec" style="margin:4px 2px 10px"><h2>${h}</h2><span>${list.length}</span></div>${big?sfBox(id,'Продавец или название',KQ[id].q)+`<div class="sfn" id="${id}n"></div>`:''}`,big?'tall':''];};
+function kqWire(id,list){
+  const i=$('#'+id);if(!i)return;const st=KQ[id];
+  const run=()=>{const R=sFind(list,st.q,c=>[c.seller,c.name]),on=new Set(R.r.map(x=>String(x.x.sku)));
+    $$('#sbody [data-pk]').forEach(el=>{const c=list.find(x=>String(x.sku)===el.dataset.pk),b=el.querySelector('.pkm b');el.hidden=!on.has(el.dataset.pk);if(b&&c)b.innerHTML=hl(short(c.seller),R.t)});
+    $('#'+id+'n').innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:st.q.trim()?(on.size?`Найдено ${on.size} из ${list.length}`:'Ничего не нашли'):''};
+  i.oninput=()=>{st.q=i.value;run();$('#sbody').scrollTop=0};
+  i.onkeydown=e=>{if(e.key==='Escape'&&i.value){e.preventDefault();e.stopPropagation();i.value='';i.dispatchEvent(new Event('input'))}if(e.key==='Enter'){e.preventDefault();i.blur()}};
+  if(st.q)run();
+}
+function pendSheet(p,keep){
   const ps=allC(p).filter(c=>c.status==='pending');if(!ps.length)return;
-  openSheet(`<div class="sec" style="margin-top:4px"><h2>Ждут решения</h2><span>${ps.length}</span></div>
-   <div class="note" style="margin:0 0 10px">Нужно только одно: такой же это товар или нет. Что они в топе по продажам, уже проверено. Отметьте здесь, потом «Отправить» внизу и в «Отчеты К» одно нажатие «Применить».</div>
+  const [hd,cls]=kqHead('Ждут решения','pq2',ps,keep);
+  openSheet(`<div class="note" style="margin:0 0 10px">Нужно только одно: такой же это товар или нет. Что они в топе по продажам, уже проверено. Отметьте здесь, потом «Отправить» внизу и в «Отчеты К» одно нажатие «Применить».</div>
    <button class="btn press" id="qall" style="width:100%;margin-bottom:10px">✅ Взять всех ${ps.length}</button>
-   <div class="adv">${ps.map(c=>pick(p,c)).join('')}</div>`);
-  $('#sbody').dataset.pend=p.sku;
+   <div class="adv">${ps.map(c=>pick(p,c)).join('')}</div>`,hd,cls);
+  $('#sbody').dataset.pend=p.sku;kqWire('pq2',ps);
 }
 /* «Другие из топа» (Андрей 25.10): изначально топы по продажам; взять — в конкуренты, ✖ — убрать, чтобы не мешали */
-function otherSheet(p){
+function otherSheet(p,keep){
   const rs=(p.rejected||[]).slice().sort((a,b)=>(b.sum7||0)-(a.sum7||0));
-  openSheet(`<div class="sec" style="margin-top:4px"><h2>Другие из топа</h2><span>${rs.length}</span></div>
-   <div class="note" style="margin:0 0 10px">Топ категории и выдачи по продажам за 7 дней, кого не взяли в конкуренты. Под каждым — почему. Нужен — «Взять», мешает — «✖», уйдёт из списка.</div>
-   <div class="adv">${rs.map(c=>pick(p,Object.assign({},c,{status:'other'}))).join('')||'<div class="mut">Список пуст.</div>'}</div>`);
-  $('#sbody').dataset.other=p.sku;
+  const [hd,cls]=kqHead('Другие из топа','oq',rs,keep);
+  openSheet(`<div class="note" style="margin:0 0 10px">Топ категории и выдачи по продажам за 7 дней, кого не взяли в конкуренты. Под каждым — почему. Нужен — «Взять», мешает — «✖», уйдёт из списка.</div>
+   <div class="adv">${rs.map(c=>pick(p,Object.assign({},c,{status:'other'}))).join('')||'<div class="mut">Список пуст.</div>'}</div>`,hd,cls);
+  $('#sbody').dataset.other=p.sku;kqWire('oq',rs);
 }
 function pick(p,c){
   const q=qOf(p,c.sku),v=c.v||(c.j||{}).v,why=c.why||((c.j||{}).diff||(c.j||{}).why)||'';
@@ -1708,13 +1821,24 @@ function vKeys(p){
 /* ---------- раздел «Сводка»: все товары на одном экране ---------- */
 function vAll(){
   const ps=D.products,H=angles(ps[0]).map(a=>a.h);
-  const rows=ps.map(p=>{const A=angles(p),pn=pendN(p);return `<tr><td><button class="who press" data-go="${p.sku}"${pn?` title="${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения"`:''}>${img(pphoto(p))}${pn?'<i class="pd"></i>':''}<b>${esc(p.offer_id)}</b></button></td>${A.map(a=>`<td><button class="pc press ${stc(a.st)}" ${goAttr(p,a)} title="${esc(p.offer_id+' · '+a.h+': '+a.t)}">${a.c}</button></td>`).join('')}</tr>`}).join('');
+  const rows=ps.map(p=>{const A=angles(p),pn=pendN(p);return `<tr data-sv="${p.sku}"><td><button class="who press" data-go="${p.sku}"${pn?` title="${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения"`:''}>${img(pphoto(p))}${pn?'<i class="pd"></i>':''}<b>${esc(p.offer_id)}</b></button></td>${A.map(a=>`<td><button class="pc press ${stc(a.st)}" ${goAttr(p,a)} title="${esc(p.offer_id+' · '+a.h+': '+a.t)}">${a.c}</button></td>`).join('')}</tr>`}).join('');
   const first=ps.map(p=>({p,a:((p.advice||{}).items||[])[0]})).filter(x=>x.a);
   return `<h1 class="lt reveal">Сводка</h1><p class="sub reveal">Все ${ps.length} ${plur(ps.length,'товар','товара','товаров')} против своего топа. Нажмите клетку — откроется нужный раздел, нужное место подсветится.</p>
-  <div class="card sv reveal"><table><thead><tr><th>Товар</th>${H.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="svq reveal">${sfBox('svq','Найти товар в сводке',SQ.q)}<div id="svf">${sfChips('data-sf',SQ.f,pfList())}</div><div class="sfn" id="svn"></div></div>
+  <div class="card sv reveal"><table><thead><tr><th>Товар</th>${H.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}<tr class="svnone" hidden><td colspan="${H.length+1}" class="mut" style="padding:22px 10px;text-align:center">Ничего не нашли</td></tr></tbody></table></div>
   <div class="legend"><span><i style="background:var(--good)"></i>как топ или лучше</span><span><i style="background:var(--warn)"></i>отстаём</span><span><i style="background:var(--bad)"></i>сильно хуже</span><span><i style="background:var(--warn);border-radius:50%"></i>ждут решения по конкурентам</span></div>
   <div class="note"><b>Заказы</b> — штук за 7 дней. <b>Цена к топу</b> — на сколько наша средняя цена продажи выше (+) или ниже (−) середины конкурентов. <b>ДРР</b> — доля рекламы от заказов. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Склады</b> — на сколько дней хватит остатка. <b>Карточка → корзина</b> — из открывших карточку сколько положили в корзину: оценка самой карточки (фото, слайды, отзывы, цена), реклама и показы на неё не влияют.<br>В сервисе товары с выручкой на Озоне от 20 тыс ₽ за 28 дней.</div>
   ${first.length?`<div class="sec"><h2>Первый шаг по каждому</h2><span>из разбора</span></div><div class="card reveal" style="padding:2px 0">${first.map(x=>`<button class="st1 press" data-go="${x.p.sku}">${img(pphoto(x.p))}<div style="min-width:0"><b>${esc(x.p.offer_id)}${x.a.area?` · <span class="mut" style="display:inline;font-weight:500">${esc(x.a.area)}</span>`:''}</b><span>${esc(x.a.title)}</span></div></button>`).join('')}</div>`:''}`;
+}
+
+/* поиск и отбор в «Сводке»: лишние строки прячем, порядок тот же; запрос живёт, пока открыта страница */
+const SQ={q:'',f:'all'};
+function svFilter(){
+  const R=sFind(pBase(SQ.f),SQ.q,pHay),on=new Set(R.r.map(x=>String(x.x.sku))),act=SQ.q.trim()!==''||SQ.f!=='all';
+  $$('#view tr[data-sv]').forEach(tr=>{const s=tr.dataset.sv,p=D.products.find(x=>String(x.sku)===s),b=tr.querySelector('.who b');tr.hidden=!on.has(s);if(b&&p)b.innerHTML=hl(p.offer_id,R.t)});
+  $$('#view .st1[data-go]').forEach(b=>b.hidden=!on.has(b.dataset.go));
+  const nn=$('#view .svnone');if(nn)nn.hidden=on.size>0;
+  $('#svn').innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:act?`Показано ${on.size} из ${D.products.length}`:'';
 }
 
 /* ---------- раздел «Склады» ---------- */
@@ -1766,11 +1890,12 @@ function vSklad(p){
 /* ---------- «Фишки»: пошаговые подсказки с подсветкой по всем разделам, начиная с открытого (как в Юнитке) ---------- */
 const TOUR={
  all:[
+  {sel:'.svq',t:'Поиск в сводке',d:'Начните набирать название или артикул — в таблице останутся только подходящие товары. Ниже — отбор: кончаются на складе, ждут решения.'},
   {sel:'.sv table',t:'Все товары на одной странице',d:'Строка — товар, клетки — шесть сторон: заказы, цена к топу, ДРР, место в поиске, склады, карточка. Зелёный — как топ или лучше, жёлтый — отстаём, красный — сильно хуже.'},
   {sel:'.sv button.pc',t:'Клетка ведёт внутрь',d:'Нажмите на клетку — откроется нужный раздел этого товара, и место, куда смотреть, подсветится.'},
   {sel:'.st1',t:'Первый шаг по каждому',d:'Главный совет из разбора по каждому товару. Нажмите — откроется товар со всеми советами.'}],
  konk:[
-  {sel:'#picker',t:'Выбор товара',d:'Листайте товары. Красная точка — кончается на складе, оранжевая — есть конкуренты, по которым ждём вашего решения.'},
+  {sel:'#picker',t:'Выбор товара',d:'Нажмите на товар или лупу — список всех товаров с поиском по названию и артикулу, листать вбок не нужно. Красный кружок с числом — сколько товаров кончается на складе, оранжевый — где ждут вашего решения по конкурентам; нажмите — покажет только их. На компьютере поиск открывается клавишей «/».'},
   {sel:'#pendgo',t:'Ждут решения',d:'Новые кандидаты в конкуренты. Отметьте только одно: такой же товар или нет — «Взять» или «Не брать».'},
   {sel:'.ang',t:'Шесть сторон товара',d:'Те же клетки, что в «Сводке», только крупнее. Нажмите на любую — переход туда, где это видно подробно.'},
   {sel:'.rail2',t:'Топ конкурентов',d:'Номер — место по продажам, галочка — согласован, часы — ждёт решения. Нажмите — сравнение один на один и кнопки «Взять / Убрать».'},
@@ -1866,10 +1991,14 @@ function after(){
    ['Кто пишет','Opus 5.5 на максимальном разборе, только по цифрам со страницы. Сам ничего не меняет: цены, ставки и рекламу — только по вашему «да».']
   ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`);
   const rj=$('#rej');if(rj)rj.onclick=()=>otherSheet(P);
+  const sq=$('#svq');if(sq){sq.oninput=()=>{SQ.q=sq.value;svFilter()};
+    sq.onkeydown=e=>{if(e.key==='Escape'&&sq.value){e.preventDefault();e.stopPropagation();sq.value='';sq.dispatchEvent(new Event('input'))}if(e.key==='Enter'){e.preventDefault();sq.blur()}};
+    $('#svf').onclick=e=>{const b=e.target.closest('[data-sf]');if(!b)return;SQ.f=b.dataset.sf;$$('#svf [data-sf]').forEach(x=>x.classList.toggle('on',x.dataset.sf===SQ.f));svFilter()};
+    if(SQ.q||SQ.f!=='all')svFilter()}
 }
 function resheet(){   // перерисовать открытый лист после решения, не теряя прокрутку
   const sb=$('#sbody'),y=sb.scrollTop,d=Object.assign({},sb.dataset);
-  if(d.comp)compSheet(P,d.comp);else if(d.pend)pendSheet(P);else if(d.other)otherSheet(P);
+  if(d.comp)compSheet(P,d.comp);else if(d.pend)pendSheet(P,true);else if(d.other)otherSheet(P,true);
   sb.scrollTop=y;
 }
 document.addEventListener('click',e=>{
