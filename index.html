@@ -996,7 +996,7 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelect
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches, TOUCH=matchMedia('(hover: none)').matches;
 const LS={get(k,d){try{const v=localStorage.getItem('shov.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('shov.'+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem('shov.'+k)}catch(e){}}};
 let D=null,IT,G,GK,SINGLES,FIX,ADV={},ADVFIX=new Map(),TASKS=new Map(),CFG={};
-const S={view:'obzor',mp:LS.get('mp','all'),q:'',sort:'orders',gf:'all',pf:'all',skin:SKIN_OK.includes(LS.get('skin','auto'))?LS.get('skin','auto'):'auto',sel:new Set(LS.get('sel',[])),jobs:LS.get('jobs',{}),rjobs:{},openTy:new Set(),lim:{},focus:null};
+const S={view:'obzor',mp:LS.get('mp','all'),q:'',sort:'orders',gf:'all',pf:'all',skin:SKIN_OK.includes(LS.get('skin','auto'))?LS.get('skin','auto'):'auto',sel:new Set(LS.get('sel',[])),jobs:LS.get('jobs',{}),rjobs:{},openTy:new Set(),lim:{},focus:null,mper:['week','w2','month'].includes(LS.get('mper','w2'))?LS.get('mper','w2'):'w2'};
 const VIEWS=[['obzor','Обзор'],['skleyki','Склейки'],['perelivy','Переливы'],['sdelat','Что сделать'],['skleit','Пересклейки']];
 const CHS=['wb1','wb2','oz','ym'];
 const CHN={wb1:'WB · Каб 1',wb2:'WB · Каб 2',oz:'Ozon',ym:'Маркет'}, CHS_SHORT={wb1:'Каб 1',wb2:'Каб 2',oz:'Ozon',ym:'ЯМ'};
@@ -1106,6 +1106,40 @@ function prepare(d){
 }
 let ARTS=null;   // артикул → карточка: раньше перебор всех 344 карточек на каждый артикул в каждом предложении
 const itByArt=(art,ch)=>{if(!ARTS||ARTS.d!==D){ARTS=new Map();ARTS.d=D;D.items.forEach(i=>{if(!ARTS.has(i.art))ARTS.set(i.art,i);if(!ARTS.has(i.art+'\u0001'+i.ch))ARTS.set(i.art+'\u0001'+i.ch,i)})}return ARTS.get(ch?art+'\u0001'+ch:art)};
+
+/* чистая маржа по панелям (Андрей 02.11): берём готовый факт Юнитки /unitka/fact.enc.json (тот же пароль) — «Валовая прибыль» листов панели / продажи.
+   Неделя — целая неделя (w1; панель режет её по месяцам), 2 недели — w2, месяц — лист SKU панели. У ЯМ в панели только месяц. */
+const MPERS=[['week','Неделя'],['w2','2 недели'],['month','Месяц']],MCH={wb1:['wb',null],wb2:['wb',null],oz:['ozon',''],ym:['ym','']};   // ИП кабинета ВБ — по номерам карточек в месячном листе (имён в открытой странице нет)
+let MF=null,MFKEY=null,MIDX=new Map();
+const mnorm=s=>String(s||'').replace(/ /g,' ').split(/\s+/).filter(Boolean).join(' ').toLowerCase();
+async function loadMargin(){
+  try{const res=await fetch('/unitka/fact.enc.json',{cache:'no-cache'});if(!res.ok)throw 0;const enc=await res.json();
+    if(!MFKEY||MFKEY.salt!==enc.salt){let p=LS.get('pass','');if(!p){try{p=JSON.parse(localStorage.getItem('unitka.pass')||'""')}catch(e){p=''}}if(!p)throw 0;MFKEY={salt:enc.salt,k:await deriveKey(p,enc.salt,enc.iter)}}
+    MF=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(enc.iv)},MFKEY.k,b64u8(enc.ct))));MIDX=new Map();mcabs();
+  }catch(e){MF=MF||false}
+  if(D){refreshSheet();if(S.view==='skleyki')rerenderView()}
+}
+function mcabs(){const wb=MF&&MF.mp&&MF.mp.wb;if(!wb||!D)return;const byNm=new Map(wb.rows.filter(r=>r.nm&&r.ip).map(r=>[String(Math.round(r.nm)),r.ip]));['wb1','wb2'].forEach(ch=>{const c={};D.items.filter(i=>i.ch===ch).forEach(i=>{const ip=byNm.get(String(i.id));if(ip)c[ip]=(c[ip]||0)+1});const best=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];MCH[ch][1]=best?best[0]:''})}
+function mperOf(ch){const k=(MCH[ch]||[])[0];return k==='ym'?'month':S.mper}   // Маркет — всегда месяц
+function mrowsOf(k,per){const p=MF&&MF.mp&&MF.mp[k];if(!p)return null;if(per==='month')return {rows:p.rows,label:p.month};const x=p.per&&(per==='week'?(p.per.w1||p.per.week):p.per[per]);return x?{rows:x.rows,label:x.label}:null}
+function mrow(it){
+  const [k,ip]=MCH[it.ch]||[];if(!k)return undefined;const per=mperOf(it.ch),ik=k+'|'+per;
+  if(!MIDX.has(ik)){const src=mrowsOf(k,per),m=new Map();if(src)src.rows.forEach(r=>{const a=mnorm(r.a),add=key=>{const o=m.get(key)||{units:0,sales:0,profit:0};o.units+=r.units||0;o.sales+=r.sales||0;o.profit+=r.profit||0;m.set(key,o)};add(a+'|'+(r.ip||''));add(a+'|*')});MIDX.set(ik,src?{m,label:src.label}:null)}
+  const x=MIDX.get(ik);if(!x)return undefined;return x.m.get(mnorm(it.art)+'|'+(ip||'*'))||null;   // undefined — срока нет, null — продаж нет
+}
+function mlabel(ch){const [k]=MCH[ch]||[];const per=mperOf(ch);mrow({ch,art:''});const x=MIDX.get(k+'|'+per);return x?x.label:''}
+function mtot(its){const rs=its.map(mrow).filter(Boolean);if(!rs.length)return null;const o={units:sum(rs,r=>r.units),sales:sum(rs,r=>r.sales),profit:sum(rs,r=>r.profit)};o.m=o.sales?o.profit/o.sales:null;return o}
+const mcls=m=>m==null?'na':m>=.15?'good':m>=.05?'warn':'bad';
+function mperPills(ch){return ch==='ym'?'<span class="chip">у Маркета в панели только месяц</span>':`<div class="pills">${MPERS.map(([k,n])=>`<button class="pill ${S.mper===k?'on':''}" data-mper="${k}">${n}</button>`).join('')}</div>`}
+function marginLine(g){if(!MF)return '';const t=mtot(g.its),l=mlabel(g.ch);if(!t)return `<div class="meta">Маржа по панели: продаж нет${l?' · '+esc(l):''}</div>`;return `<div class="meta">Маржа по панели <b class="${mcls(t.m)}-c">${pct(t.m,1)}</b> · прибыль ${fmt(t.profit)} ₽ · ${esc(l)}</div>`}
+function marginBlock(g){
+  if(MF===null)return `<div class="sec"><div class="sec-h"><h2 class="h2">Чистая маржа по панели</h2></div><div class="hint"><span class="ico">⏳</span><div>Загружаю цифры панелей…</div></div></div>`;
+  if(!MF)return `<div class="sec"><div class="sec-h"><h2 class="h2">Чистая маржа по панели</h2></div><div class="hint"><span class="ico">ℹ️</span><div>Цифры панелей не открылись. Откройте один раз Юнитку в этом браузере и обновите страницу.</div></div></div>`;
+  const t=mtot(g.its),l=mlabel(g.ch),has=g.its.map(mrow);
+  return `<div class="sec"><div class="sec-h"><h2 class="h2">Чистая маржа по панели</h2>${mperPills(g.ch)}</div>
+  <div class="panel" style="padding:16px 18px;display:grid;gap:6px"><div class="eyebrow">${esc(l||'срок не посчитан')} · прибыль после всех расходов, рекламы и налога, делённая на продажи</div>
+  ${t?`<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:baseline"><div class="big ${mcls(t.m)}-c" style="font-size:34px;font-weight:700">${pct(t.m,1)}</div><div>прибыль <b>${fmt(t.profit)} ₽</b></div><div>продажи <b>${fmt(t.sales)} ₽</b> · ${fmt(t.units)} шт</div></div>`:`<div style="color:var(--ink2)">${has.every(x=>x===undefined)?'За этот срок панель ещё не посчитана.':'Продаж за этот срок нет.'}</div>`}</div>
+  ${t?`<div class="mx" style="margin-top:10px"><table><thead><tr><th>Вариант</th><th>Маржа</th><th>Прибыль</th><th>Продажи</th><th>Шт</th></tr></thead><tbody>${g.its.map((it,ix)=>{const r=has[ix],m=r&&r.sales?r.profit/r.sales:null;return `<tr><td><button class="art" data-item="${esc(it.uid)}"><i style="width:6px;height:30px;border-radius:3px;background:${vcol(ix)};flex:none"></i>${img(it)}<b>${esc(it.art)}</b></button></td><td>${r?`<b class="${mcls(m)}-c">${pct(m,1)}</b>`:'—'}</td><td>${r?fmt(r.profit)+' ₽':'—'}</td><td>${r?fmt(r.sales)+' ₽':'продаж нет'}</td><td>${r?fmt(r.units):'—'}</td></tr>`}).join('')}</tbody></table></div>`:''}</div>`}
 
 /* кольца и счётчики */
 function ring(score,size=46,sw=5,fs=13){const r=(size-sw)/2,c=2*Math.PI*r,k=cls(score),v=score==null?0:Math.max(0,Math.min(100,score));return `<span class="ring" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}"><circle class="tr" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}"/><circle class="${k}-s" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-to="${c*(1-v/100)}"/></svg><span class="v ${k}-c" style="font-size:${fs}px">${score==null?'—':Math.round(score)}</span></span>`}
@@ -1246,6 +1280,7 @@ function gtile(g,i=0){
   return `<button class="gt clk" data-open="${esc(g.key)}" data-tilt style="${i<10?`animation-delay:${i*40}ms`:'animation:none'}"><span class="glare"></span>${fan(g)}<div class="body"><div class="hdr2">${chl(g.ch)}${ring(g.score,42,4.5,12)}</div><div class="ttl">${esc(g.title||g.subj)}</div>
     <div class="lead">Тащит: <b>${esc(lead.art)}</b>${O?` · ${pct((lead.orders||0)/O)} заказов`:''} ${stk(lead)}</div>
     <div class="meta">${g.n} ${plural(g.n,'вариант','варианта','вариантов')} · в наличии ${g.inStock} · ${g.issues} ${plural(g.issues,'замечание','замечания','замечаний')}</div>
+    ${marginLine(g)}
     ${(g.mixed||oos||split||nt)?`<div class="warns">${g.mixed?'<span class="chip bad">разные товары</span>':''}${oos?`<span class="chip warn">${oos} без остатка</span>`:''}${split?'<span class="chip warn">склеено по-разному</span>':''}${nt?`<span class="ai">${nt} ${plural(nt,'предложение','предложения','предложений')} аналитика</span>`:''}</div>`:''}
     ${fingerprint(g)}<div><span class="tap">Открыть склейку ${ICON.arrow}</span></div></div></button>`;
 }
@@ -1321,7 +1356,7 @@ function vSkleyki(){const gs=filterGroups();
   return `<h1 class="lt">Склейки</h1>
   <p class="sub">Каждая плитка — одна склейка. Спереди фото того, кто тащит продажи, рядом — сколько заказов он даёт и сколько осталось. Цветная полоска — как делятся заказы между вариантами. Нажмите на плитку: варианты в 3D, разбор аналитика, предложения и правки.</p>
   <label class="search">${ICON.search}<input id="q" type="search" placeholder="Артикул, название, номер склейки…" value="${esc(S.q)}" autocomplete="off"></label>
-  <div class="pills" style="margin-bottom:10px">${[['orders','Кто больше продаёт'],['worst','Сначала проблемные'],['issues','Больше замечаний']].map(([k,n])=>`<button class="pill ${S.sort===k?'on':''}" data-sort="${k}">${n}</button>`).join('')}</div>
+  <div class="pills" style="margin-bottom:10px">${[['orders','Кто больше продаёт'],['worst','Сначала проблемные'],['issues','Больше замечаний']].map(([k,n])=>`<button class="pill ${S.sort===k?'on':''}" data-sort="${k}">${n}</button>`).join('')}</div><div class="pills" style="margin-bottom:10px;align-items:center"><span class="eyebrow" style="margin-right:4px">Маржа по панели за</span>${MPERS.map(([k,n])=>`<button class="pill ${S.mper===k?'on':''}" data-mper="${k}">${n}</button>`).join('')}<span class="eyebrow">· у Маркета всегда месяц</span></div>
   <div class="pills" style="margin-bottom:18px">${[['all','Все'],['mixed','Разные товары'],['oos','Есть без остатка'],['split','Склеено по-разному']].map(([k,n])=>`<button class="pill ${S.gf===k?'on':''}" data-gf="${k}">${n}</button>`).join('')}</div>
   ${gs.length?`<div class="ggrid">${gs.map(gtile).join('')}</div>`:'<div class="empty">Ничего не нашлось.</div>'}`}
 function vPerelivy(){const st=allStories(fg()),mixedCnt=fg().filter(g=>g.mixed).length;
@@ -1416,6 +1451,7 @@ function vGroup(g){
   return `${carousel(g)}
   ${a?`<div class="panel" style="padding:18px 20px;display:grid;gap:10px;margin-top:6px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><b style="font-size:16px">Разбор аналитика</b><span class="ai">Opus 5.5 · усилие максимум</span></div><div class="summary">${esc(a.summary||'')}</div></div>`:`<p class="summary">${g.n} ${plural(g.n,'вариант','варианта','вариантов')}, в наличии ${g.inStock}, ${fmt(O)} заказов за ${period()}. Разбор аналитика по этой склейке ещё готовится.</p>`}
   ${g.mixed?`<div class="warnbox" style="margin-top:14px"><b>⚠ В склейке разные товары</b><div style="display:flex;gap:8px;flex-wrap:wrap">${g.kinds.map((k,i)=>`<span class="chip ${i?'bad':''}">${esc(k.label)} · ${k.n}</span>`).join('')}</div><div style="font-size:14px">${esc(EX.mixed.why)}</div></div>`:''}
+  ${marginBlock(g)}
   ${tasks.length?`<div class="sec"><div class="sec-h"><h2 class="h2">Предложения</h2><span class="eyebrow">отметьте нужное → «Решить» внизу</span></div><div class="panel">${tasks.map(taskRow).join('')}</div></div>`:''}
   <div class="sec"><div class="sec-h"><h2 class="h2">Баллы склейки</h2><span class="eyebrow">нажмите на строку — объясню</span></div>
   <div class="panel score-blk">${rings4(g.subs,172)}<div><div class="eyebrow">Рейтинг склейки</div><div class="big ${cls(g.score)}-c"><span data-count="${g.score??0}" data-dec="1">0</span><span style="font-size:16px;color:var(--ink3);letter-spacing:0"> из 100</span></div>
@@ -1785,7 +1821,7 @@ document.addEventListener('change',e=>{if(e.target.id==='iread'){const b=$('[dat
 document.addEventListener('click',e=>{
   if(TR&&!e.target.closest('.tour-tip'))return;
   if(e.target.closest('.st3')&&!e.target.closest('[data-tip]'))return;  // 3D-сцену крутят, а не открывают
-  const t=e.target.closest('[data-tip],[data-go],[data-open],[data-item],[data-seg],[data-sort],[data-gf],[data-pf],[data-sel],[data-unsel],[data-selall],[data-acc],[data-tyt],[data-more],.skin[data-skin],[data-mp],[data-ins],[data-ring],[data-resolve],[data-clr],[data-send],[data-close],[data-car],[data-trial],[data-introhide],#jobpill,.lk,.nd');
+  const t=e.target.closest('[data-tip],[data-go],[data-open],[data-item],[data-seg],[data-sort],[data-mper],[data-gf],[data-pf],[data-sel],[data-unsel],[data-selall],[data-acc],[data-tyt],[data-more],.skin[data-skin],[data-mp],[data-ins],[data-ring],[data-resolve],[data-clr],[data-send],[data-close],[data-car],[data-trial],[data-introhide],#jobpill,.lk,.nd');
   if(!t)return;
   if(t.dataset.tip!=null){e.stopPropagation();e.preventDefault();tipOwner===t?hideTip():showTip(t);return}
   if(t.dataset.sel!=null){e.stopPropagation();if(t.dataset.locked){toast('Этот пункт уже в работе или сделан');return}toggleSel(t.dataset.sel);t.classList.toggle('on',S.sel.has(t.dataset.sel));t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),700);buzz();renderSelbar();renderChrome();return}
@@ -1797,6 +1833,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.seg){S.mp=t.dataset.seg;LS.set('mp',S.mp);$$('#seg button').forEach(b=>b.classList.toggle('on',b===t));moveThumb();buzz();requestAnimationFrame(()=>render());return}
   if(t.dataset.mp){S.mp=t.dataset.mp;LS.set('mp',S.mp);go('skleyki');return}
   if(t.dataset.sort){S.sort=t.dataset.sort;render();return}
+  if(t.dataset.mper){S.mper=t.dataset.mper;LS.set('mper',S.mper);buzz();refreshSheet();if(S.view==='skleyki')rerenderView();return}
   if(t.dataset.gf){S.gf=t.dataset.gf;render();return}
   if(t.dataset.pf){S.pf=t.dataset.pf;render();return}
   if(t.dataset.ins){const c=JSON.parse(t.dataset.ins);if(c.gf)S.gf=c.gf;if(c.pf)S.pf=c.pf;if(c.focus)S.focus=c.focus;go(c.go);return}
@@ -1840,7 +1877,7 @@ function showLock(msg){const l=$('#lock');l.hidden=false;$('#boot').style.opacit
   const tryIt=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await decryptFile('data.enc.json',p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};
   $('#pwgo').onclick=tryIt;$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryIt()});setTimeout(()=>$('#pw').focus(),100)}
 function start(d){prepare(d);applySkin(S.skin,false);const h=(location.hash||'').slice(1);S.view=VIEWS.some(v=>v[0]===h)?h:'obzor';render();hh();tourPaint();
-  const b=$('#boot');b.style.opacity=0;setTimeout(()=>b.hidden=true,500);pollJobs();
+  const b=$('#boot');b.style.opacity=0;setTimeout(()=>b.hidden=true,500);pollJobs();loadMargin();
   if(LS.get('tourMax',0)<1&&!LS.get('introHide',false))setTimeout(()=>toast('Впервые здесь? Нажмите «Триал» — покажу всё за 2 минуты'),1400);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{moveThumb(false);hh()})}
 (async()=>{applySkin(S.skin,false);hh();tourPaint();try{const d=await decryptFile('data.enc.json');if(!d)throw new Error('Данные ещё не выложены');start(d)}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')showLock(e.message);else $('#boot').innerHTML='<div style="text-align:center;max-width:360px;padding:20px;margin:40px auto">Не удалось открыть данные: '+esc(e.message)+'<br><br><button class="btn" onclick="location.reload()">Обновить</button></div>'}})();
