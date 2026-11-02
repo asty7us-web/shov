@@ -1138,18 +1138,18 @@ function mtot(its){const rs=its.map(mrow).filter(Boolean);if(!rs.length)return n
 const mcls=m=>m==null?'na':m>=.15?'good':m>=.05?'warn':'bad';
 function mperPills(ch){return ch==='ym'?'<span class="chip">у Маркета в панели только месяц</span>':`<div class="pills">${MPERS.map(([k,n])=>`<button class="pill ${S.mper===k?'on':''}" data-mper="${k}">${n}</button>`).join('')}</div>`}
 function marginLine(g){if(!MF)return '';const t=mtot(g.its),l=mlabel(g.ch);if(!t)return `<div class="meta">Маржа по панели: продаж нет${l?' · '+esc(l):''}</div>`;return `<div class="meta">Маржа по панели <b class="${mcls(t.m)}-c">${pct(t.m,1)}</b> · прибыль ${fmt(t.profit)} ₽ · ${esc(l)}</div>`}
-/* гистограмма маржи за 8 недель пн–вс, Озон и ВБ по тем же артикулам склейки (Андрей 02.11); данные — per.h8 факта Юнитки (panel_week.history) */
+/* гистограмма маржи за 8 недель пн–вс, только площадка склейки, по её артикулам (Андрей 02.11); данные — per.h8 факта Юнитки (panel_week.history) */
 const HGMON={'янв':'01','фев':'02','мар':'03','апр':'04','май':'05','мая':'05','июн':'06','июл':'07','авг':'08','сен':'09','окт':'10','ноя':'11','дек':'12'};
 const hgDay=l=>{const m=String(l).toLowerCase().match(/(\d{1,2})\.\s*([а-яё]+)/);return m?m[1]+'.'+(HGMON[m[2].slice(0,3)]||''):''};
 function hgSeries(g){
-  const arts=new Set(g.its.map(i=>mnorm(i.art))),out=[];
-  for(const [k,n,c] of [['ozon','Озон','#3d7bff'],['wb','ВБ','#b04dff']]){
+  const arts=new Set(g.its.map(i=>mnorm(i.art))),out=[],own=(MCH[g.ch]||[])[0];   // только площадка этой склейки: у каждой площадки свои склейки (Андрей 02.11)
+  for(const [k,n,c] of [['ozon','Озон','#3d7bff'],['wb','ВБ','#b04dff'],['ym','Маркет','#ffcc00']]){if(k!==own)continue;
     const h=MF&&MF.mp&&MF.mp[k]&&MF.mp[k].per&&MF.mp[k].per.h8;if(!h)continue;
     const ip=k==='wb'&&MCH[g.ch]&&MCH[g.ch][0]==='wb'?MCH[g.ch][1]:'',w=h.labels.map(()=>[0,0]);let any=false;
     h.rows.forEach(r=>{if(!arts.has(mnorm(r.a))||(ip&&r.ip&&r.ip!==ip))return;any=true;r.w.forEach((x,i)=>{w[i][0]+=x[0];w[i][1]+=x[1]})});
     if(any)out.push({k,n,c,labels:h.labels,w:w.map(([s,p])=>({s,p,m:s?p/s:null}))});
   }
-  const own=(MCH[g.ch]||[])[0];return out.sort((a,b)=>(b.k===own)-(a.k===own));
+  return out;
 }
 function hgTip(ss,i){return `${esc(ss[0].labels[i].replace(/\./g,' ').replace(/\s+/g,' ').trim())}: `+ss.map(s=>{const x=s.w[i];return `${s.n} <b class="${mcls(x.m)}-c">${x.m==null?'—':pct(x.m,1)}</b>${x.s?` · ${fmt(x.p)} ₽`:''}`}).join(' &nbsp; ')}
 function marginHist(g){
