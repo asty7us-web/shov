@@ -1860,6 +1860,51 @@ function others(p){
   if(dm.length)h+=`<div class="card mc reveal"><h3>Демперы — следим<em>дешевле нас на 30%+</em></h3><div class="verdict mut">В минус не догоняем — смотрим, вдруг поднимут цену</div>${dm.map(c=>`<div class="br" style="grid-template-columns:30px 1fr auto">${img(c.photo).replace('<img','<img style="width:30px;height:30px;border-radius:9px"')}<span class="nm">${esc(short(c.seller))} · ${fi(c.cnt7)} шт/нед</span><span class="vl num">${fr(c.price)}</span></div>`).join('')}</div>`;
   return h;
 }
+/* 06.11 Андрей: цены соседей на сайте по дням + наша скидка Озона по складам (ceny.py).
+   Свою цену до скидки Озона чужой продавец не показывает — видно только цену на сайте. Выросла в один день у большинства соседей —
+   похоже, Озон урезал скидку всей категории: ценой и рекламой тогда не догоняем. Мы — синей линией, соседи — серыми, пунктир — середина соседей. */
+function cenyBlock(p){
+  const C=p.ceny,K=p.skidka;if(!C&&!K)return '';
+  let h=`<div class="sec"><h2>Цены на сайте по дням</h2><span></span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;align-items:start">`;
+  if(C&&C.days&&C.days.length){
+    const days=C.days,n=days.length,us=C.by[p.sku]||[],cs=(p.comps||[]).filter(c=>C.by[c.sku]&&C.by[c.sku].some(ok));
+    const mid=days.map((d,i)=>med(cs.map(c=>C.by[c.sku][i])));
+    const all=[...us,...cs.flatMap(c=>C.by[c.sku])].filter(ok);
+    const W=640,H=200,L=46,R=14,T=12,B=26,lo=Math.min(...all)*0.9,hi=Math.max(...all)*1.05;
+    const X=i=>n<2?L+(W-L-R)/2:L+i*(W-L-R)/(n-1),Y=v=>T+(H-T-B)*(1-(v-lo)/((hi-lo)||1));
+    const path=a=>{let s='',pen=false;a.forEach((v,i)=>{if(!ok(v)){pen=false;return}s+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});return s};
+    const ticks=[lo+(hi-lo)*0.1,lo+(hi-lo)*0.5,lo+(hi-lo)*0.9].map(v=>Math.round(v/10)*10);
+    const step=n>8?2:1;
+    let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Цены на сайте по дням: мы и соседи">`;
+    svg+=ticks.map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink3)">${NF.format(v)}</text>`).join('');
+    svg+=days.map((d,i)=>i%step&&i!==n-1?'':`<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--ink3)">${ddmm(d)}</text>`).join('');
+    svg+=cs.map(c=>`<path d="${path(C.by[c.sku])}" fill="none" stroke="var(--ink3)" stroke-opacity=".5" stroke-width="1.5" stroke-linejoin="round"/>`+C.by[c.sku].map((v,i)=>ok(v)?`<circle cx="${X(i)}" cy="${Y(v)}" r="2.5" fill="var(--ink3)" fill-opacity=".6"/>`:'').join('')).join('');
+    if(cs.length>1)svg+=`<path d="${path(mid)}" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="5 4"/>`;
+    svg+=`<path d="${path(us)}" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linejoin="round"/>`+us.map((v,i)=>ok(v)?`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/>`:'').join('');
+    const cw=n<2?(W-L-R):(W-L-R)/(n-1);
+    svg+=days.map((d,i)=>{const rows=[`<b>${ddmm(d)}</b>`,`Мы: ${fr(us[i])}`].concat(cs.map(c=>`${esc(short(c.seller))}: ${fr(C.by[c.sku][i])}`));if(cs.length>1)rows.push(`Середина соседей: ${fr(mid[i])}`);
+      return `<rect x="${X(i)-cw/2}" y="0" width="${cw}" height="${H}" fill="transparent" data-tip="${esc(rows.join('<br>'))}"/>`}).join('');
+    svg+='</svg>';
+    // сигнал: за последний день цена выросла (на 5%+) у большинства соседей
+    let sig='';
+    if(n>=2&&cs.length>=3){const up=cs.filter(c=>{const a=C.by[c.sku][n-2],b=C.by[c.sku][n-1];return ok(a)&&ok(b)&&b>=a*1.05}).length,has=cs.filter(c=>ok(C.by[c.sku][n-2])&&ok(C.by[c.sku][n-1])).length;
+      if(has&&up/has>=2/3)sig=`<div class="verdict">У ${up} из ${has} соседей цена на сайте выросла за день на 5% и больше. Похоже, Озон урезал скидку всей категории: ценой и рекламой не догоняем, ждём.</div>`}
+    const lastMid=mid[n-1],lastUs=us[n-1];
+    h+=`<div class="card mc reveal"><h3>Мы и соседи<em>${ok(lastUs)&&ok(lastMid)?'сейчас мы '+(lastUs>lastMid?'дороже':'дешевле')+' середины соседей на '+NF.format(Math.abs(Math.round(100*(lastUs/lastMid-1))))+'%':'цена покупателя в Москве'}</em></h3>${sig}
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin:2px 0 6px"><span><i style="display:inline-block;width:16px;height:3px;border-radius:2px;background:var(--acc);vertical-align:middle;margin-right:5px"></i>Мы</span><span><i style="display:inline-block;width:16px;height:2px;background:var(--ink3);opacity:.6;vertical-align:middle;margin-right:5px"></i>Соседи из топа (${cs.length})</span>${cs.length>1?`<span><i style="display:inline-block;width:16px;border-top:2px dashed var(--ink2);vertical-align:middle;margin-right:5px"></i>Середина соседей</span>`:''}</div>
+      ${svg}
+      <div class="note" style="margin:6px 0 0">Цена, которую видит покупатель в Москве (уже со скидкой Озона), последний замер дня. Записываем с 06.11, 4 раза в день. Цену соседей до скидки Озона не видно никому: Озон её не показывает. Наведите на день — цены всех.</div></div>`;
+  }
+  if(K&&K.sklady&&K.sklady.length){
+    const top=K.sklady.slice(0,8),mx=Math.max(...top.map(s=>s.skidka||0),1);
+    const dn=Object.entries(K.dni||{});
+    h+=`<div class="card mc reveal"><h3>Скидка Озона на наш товар<em>${fp(K.skidka)} · ${fi(K.sht)} шт · заказы ${ddmm(K.okno[0])}–${ddmm(K.okno[1])}</em></h3>
+      ${top.map(s=>`<div class="br" style="grid-template-columns:1fr 110px 52px;align-items:center" data-tip="${esc('<b>'+esc(s.n)+'</b>'+fi(s.sht)+' шт, Озон доплатил '+fp(s.skidka)+' от нашей цены')}"><span class="nm">${esc(s.n)} · ${fi(s.sht)} шт</span><span style="height:8px;border-radius:4px;background:var(--fill)"><i style="display:block;height:8px;border-radius:4px;background:var(--acc);width:${(100*(s.skidka||0)/mx).toFixed(0)}%"></i></span><span class="vl num">${fp(s.skidka)}</span></div>`).join('')}
+      ${dn.length?`<div class="note" style="margin:8px 0 0"><b>По дню заказа:</b> ${dn.map(([d,v])=>`${ddmm(d)} — ${NF.format(Math.round(v[0]))}%`).join(', ')}.</div>`:''}
+      <div class="note" style="margin:4px 0 0">Скидка = насколько покупатель заплатил меньше нашей цены, по деньгам Озона. Считаем только выданные заказы, поэтому последние 3–7 дней неполные. Пересчёт каждое утро${K.at?', последний '+esc(ddmm(K.at)+' '+K.at.slice(11)):''}.</div></div>`;
+  }
+  return h+'</div>';
+}
 function vKonk(p){
   const cs=p.comps||[],pn=pendN(p),rj=(p.rejected||[]).filter(r=>!qOf(p,r.sku)).length;
   const adv=(p.advice||{}).items||[];
@@ -1872,6 +1917,7 @@ function vKonk(p){
   ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
+  ${cenyBlock(p)}
   <div class="duo"><div class="main">
   ${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div><div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
