@@ -431,6 +431,7 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .pr1 .t{display:flex;gap:8px;justify-content:space-between;font-weight:650}
 .pr1 .t span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pr1 .z{color:var(--ink2);margin-top:3px}
+.pr1.f{display:flex;gap:10px;align-items:flex-start}.pr1.f>img,.pr1.f>.ph{width:48px;height:48px;flex:none;border-radius:10px;object-fit:cover;background:var(--fill);display:block}.pr1.f>div{min-width:0;flex:1}  /* Бондарев 09.11 «не грузит картинки товаров, без них тяжелее ориентироваться» */
 .pr1 .z b{color:var(--ink)}
 
 /* как считаем */
@@ -1334,7 +1335,7 @@ function vMine(){
   return `<h1 class="lt">Наши товары</h1><div class="sub">Ниши, где мы продавали на Озоне за год: что будет с сезоном и сколько держать по методу Вовы (из «Конкурентов»).</div>
   <div class="ours">${items.map(({m,n,s,mon,last3,tr})=>`<div class="card oc reveal"><div class="hd"><div style="min-width:0"><b>${esc(m.name)}</b><span>${m.products.length} ${plur(m.products.length,'товар','товара','товаров')} · заказы за 3 мес: ${fi(last3)} шт ${tr!=null?fg(tr):''}</span></div>${n?`<button class="tag ${n.verdict} press" data-n="${esc(n.id)}">ниша: ${NV[n.verdict]} ›</button>`:''}</div>
     ${al(s)}${s&&s.months?chart(s.months,{h:150,legend:false}):''}
-    <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,3).map(p=>`<div class="pr1"><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div>`).join('')}${m.products.length>3?`<div class="mut" style="font-size:12.5px;padding:0 4px">и ещё ${m.products.length-3}</div>`:''}</div></div>`).join('')}</div>`;
+    <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,3).map(p=>`<div class="pr1 f">${p.photo?img(p.photo):'<div class="ph"></div>'}<div><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div></div>`).join('')}${m.products.length>3?`<div class="mut" style="font-size:12.5px;padding:0 4px">и ещё ${m.products.length-3}</div>`:''}</div></div>`).join('')}</div>`;
 }
 
 /* ---------- помощь (29.10 Андрей: «как считаем — не особо понятно, как с ним работать») ---------- */
