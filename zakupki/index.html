@@ -1099,8 +1099,10 @@ function ncard(n){
   ${nthumbs(n)}${meters(n)}${line}</button>`;
 }
 /* Бондарев 09.11 «фото не только во вкладке Наши, а вообще везде»: в карточке ниши — фото топ-товаров */
+/* маленькое превью Озона (5 КБ вместо 0,5 МБ) — фото появляются сразу */
+const tmb=u=>String(u||'').replace(/^(https:\/\/ir\.ozone\.ru\/s3\/[^/]+\/)(?!wc\d)/,'$1wc200/');
 function nthumbs(n){const t=((TOPS&&TOPS[n.id])||n.top||[]).filter(x=>x.photo).slice(0,5);
-  return t.length?`<div class="nth">${t.map(x=>img(x.photo)).join('')}</div>`:''}
+  return t.length?`<div class="nth">${t.map(x=>img(tmb(x.photo))).join('')}</div>`:''}
 function vPick(){
   const L=LENS.find(x=>x[0]===S.lens)||LENS[0],a=lensList(),nf=(S.c1?1:0)+(S.c2?1:0)+(S.ver!=='go'?1:0)+(ok(S.B)?1:0)+(S.fit?1:0);
   return `<h1 class="lt">Что закупать</h1><div class="sub">Ниши Озона из кабинета («Аналитика → Категории»): где спрос растёт, мало гигантов, хорошая маржа и сезон впереди. ${fi(D.counts.all)} ниш, обновлено ${esc(D.at)}.</div>
@@ -1338,7 +1340,7 @@ function vMine(){
     :`<div class="alert flat">Ближайшие 2 месяца — как весь рынок (ниша ${sg(s.ahead)}, Озон ${sg(s.market)}).</div>`;
   const zk=(p,s)=>{const k=p.konk;if(!k)return '';const f=s&&ok(s.ahead)&&Math.abs(s.ahead-1)>=.15?s.ahead:1,t=k.target;
     return `<div class="z">${t?`Закупка по Вове: <b>${fi(t[0])}–${fi(t[1])} шт</b> на месяц${f!==1?`, на ${esc(s.next_txt)} с сезоном <b>${fi(t[0]*f)}–${fi(t[1]*f)}</b>`:''}`:'Доноров по нашей цене нет'}${k.n?` · топ-${k.n}: ~${fr(k.price)}`:''} · <a href="../konkurenty/#sku=${esc(p.sku)}">Конкуренты ›</a></div>`};
-  const pr1=(p,s)=>`<div class="pr1 f">${p.photo?img(p.photo):'<div class="ph"></div>'}<div><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div></div>`;
+  const pr1=(p,s)=>`<div class="pr1 f">${p.photo?img(tmb(p.photo)):'<div class="ph"></div>'}<div><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div></div>`;
   return `<h1 class="lt">Наши товары</h1><div class="sub">Ниши, где мы продавали на Озоне за год: что будет с сезоном и сколько держать по методу Вовы (из «Конкурентов»).</div>
   <div class="ours">${items.map(({m,n,s,mon,last3,tr})=>`<div class="card oc reveal"><div class="hd"><div style="min-width:0"><b>${esc(m.name)}</b><span>${m.products.length} ${plur(m.products.length,'товар','товара','товаров')} · заказы за 3 мес: ${fi(last3)} шт ${tr!=null?fg(tr):''}</span></div>${n?`<button class="tag ${n.verdict} press" data-n="${esc(n.id)}">ниша: ${NV[n.verdict]} ›</button>`:''}</div>
     ${al(s)}${s&&s.months?chart(s.months,{h:150,legend:false}):''}
