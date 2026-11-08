@@ -431,6 +431,8 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .pr1 .t{display:flex;gap:8px;justify-content:space-between;font-weight:650}
 .pr1 .t span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pr1 .z{color:var(--ink2);margin-top:3px}
+.nc .nth{display:flex;gap:6px;overflow:hidden}.nc .nth img{width:52px;height:52px;flex:none;border-radius:10px;object-fit:cover;background:var(--fill)}
+.pmore summary{font-size:12.5px;padding:2px 4px;cursor:pointer;list-style:none}.pmore summary::-webkit-details-marker{display:none}.pmore[open] summary{margin-bottom:6px}
 .pr1.f{display:flex;gap:10px;align-items:flex-start}.pr1.f>img,.pr1.f>.ph{width:48px;height:48px;flex:none;border-radius:10px;object-fit:cover;background:var(--fill);display:block}.pr1.f>div{min-width:0;flex:1}  /* Бондарев 09.11 «не грузит картинки товаров, без них тяжелее ориентироваться» */
 .pr1 .z b{color:var(--ink)}
 
@@ -759,6 +761,7 @@ async function load(pass){
 let TOPS=null,TOPS_NO=false;
 async function loadTops(){
   try{const r=await fetch('tops.enc.json',{cache:'no-cache'});if(!r.ok){TOPS={};TOPS_NO=true;return}TOPS=(await dec(await r.json())).tops||{};
+    document.querySelectorAll('.nc[data-n]').forEach(el=>{const n=BY[el.dataset.n];if(n&&!el.querySelector('.nth')){const t=nthumbs(n);if(t)el.querySelector('.hd').insertAdjacentHTML('afterend',t)}});
     const sb=$('#sbody');if(shw.classList.contains('on')&&sb.dataset.key==='niche'&&sb.dataset.n&&BY[sb.dataset.n]){const y=sb.scrollTop;openSheet(nicheSheet(BY[sb.dataset.n]),'niche',sb.dataset.n);sb.scrollTop=y}}catch(e){}
 }
 async function loadChecks(){
@@ -1093,8 +1096,11 @@ function ncard(n){
   const line=`<div class="ln1">${esc(((n.verdict==='ok'?n.plus:n.why)||[])[0]||((n.plus||[])[0])||'')}</div>`;
   return `<button class="card nc press reveal" data-n="${esc(n.id)}">
   <div class="hd">${ring(score(n))}<div class="ttl"><b>${esc(n.name)}</b><span>${esc(n.cat2)} · ${fm(n.gmv28)} ₽ за 28 дн · цена ~${fr(n.price)}</span></div><span class="tag ${n.verdict}">${NV[n.verdict]}</span></div>
-  ${meters(n)}${line}</button>`;
+  ${nthumbs(n)}${meters(n)}${line}</button>`;
 }
+/* Бондарев 09.11 «фото не только во вкладке Наши, а вообще везде»: в карточке ниши — фото топ-товаров */
+function nthumbs(n){const t=((TOPS&&TOPS[n.id])||n.top||[]).filter(x=>x.photo).slice(0,5);
+  return t.length?`<div class="nth">${t.map(x=>img(x.photo)).join('')}</div>`:''}
 function vPick(){
   const L=LENS.find(x=>x[0]===S.lens)||LENS[0],a=lensList(),nf=(S.c1?1:0)+(S.c2?1:0)+(S.ver!=='go'?1:0)+(ok(S.B)?1:0)+(S.fit?1:0);
   return `<h1 class="lt">Что закупать</h1><div class="sub">Ниши Озона из кабинета («Аналитика → Категории»): где спрос растёт, мало гигантов, хорошая маржа и сезон впереди. ${fi(D.counts.all)} ниш, обновлено ${esc(D.at)}.</div>
@@ -1332,10 +1338,11 @@ function vMine(){
     :`<div class="alert flat">Ближайшие 2 месяца — как весь рынок (ниша ${sg(s.ahead)}, Озон ${sg(s.market)}).</div>`;
   const zk=(p,s)=>{const k=p.konk;if(!k)return '';const f=s&&ok(s.ahead)&&Math.abs(s.ahead-1)>=.15?s.ahead:1,t=k.target;
     return `<div class="z">${t?`Закупка по Вове: <b>${fi(t[0])}–${fi(t[1])} шт</b> на месяц${f!==1?`, на ${esc(s.next_txt)} с сезоном <b>${fi(t[0]*f)}–${fi(t[1]*f)}</b>`:''}`:'Доноров по нашей цене нет'}${k.n?` · топ-${k.n}: ~${fr(k.price)}`:''} · <a href="../konkurenty/#sku=${esc(p.sku)}">Конкуренты ›</a></div>`};
+  const pr1=(p,s)=>`<div class="pr1 f">${p.photo?img(p.photo):'<div class="ph"></div>'}<div><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div></div>`;
   return `<h1 class="lt">Наши товары</h1><div class="sub">Ниши, где мы продавали на Озоне за год: что будет с сезоном и сколько держать по методу Вовы (из «Конкурентов»).</div>
   <div class="ours">${items.map(({m,n,s,mon,last3,tr})=>`<div class="card oc reveal"><div class="hd"><div style="min-width:0"><b>${esc(m.name)}</b><span>${m.products.length} ${plur(m.products.length,'товар','товара','товаров')} · заказы за 3 мес: ${fi(last3)} шт ${tr!=null?fg(tr):''}</span></div>${n?`<button class="tag ${n.verdict} press" data-n="${esc(n.id)}">ниша: ${NV[n.verdict]} ›</button>`:''}</div>
     ${al(s)}${s&&s.months?chart(s.months,{h:150,legend:false}):''}
-    <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,3).map(p=>`<div class="pr1 f">${p.photo?img(p.photo):'<div class="ph"></div>'}<div><div class="t"><span>${esc(p.offer_id)}</span><span class="num">${fi(p.units)} шт</span></div>${zk(p,s)}</div></div>`).join('')}${m.products.length>3?`<div class="mut" style="font-size:12.5px;padding:0 4px">и ещё ${m.products.length-3}</div>`:''}</div></div>`).join('')}</div>`;
+    <div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(0,3).map(p=>pr1(p,s)).join('')}${m.products.length>3?`<details class="pmore"><summary class="mut">и ещё ${m.products.length-3} ›</summary><div class="prods">${m.products.slice().sort((a,b)=>b.units-a.units).slice(3).map(p=>pr1(p,s)).join('')}</div></details>`:''}</div></div>`).join('')}</div>`;
 }
 
 /* ---------- помощь (29.10 Андрей: «как считаем — не особо понятно, как с ним работать») ---------- */
