@@ -350,6 +350,11 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .ad .more>div{overflow:hidden}
 .ad.open .more{grid-template-rows:1fr}
 .ad .do{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--fill2);font-size:13.5px;line-height:1.45}
+.ad .dt{font-size:12px;color:var(--ink3);margin-left:8px;font-weight:500}
+.ad .st{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.ad .stb{padding:9px 14px;border-radius:12px;background:var(--acc);color:#fff;font-weight:650;font-size:14px;cursor:pointer;user-select:none}
+.ad .stb.done{background:var(--fill2);color:var(--ink2)}
+.ad .stc{font-size:12.5px;color:var(--ink3)}
 .ad .chev{margin-left:auto;width:18px;height:18px;color:var(--ink3);transition:transform .4s var(--spring);flex:none}
 .ad.open .chev{transform:rotate(90deg)}
 
@@ -1682,6 +1687,16 @@ function qbar(){
    :`<span>${IC.clock} Отправлено: ${s}. Применится само за 10 минут</span><button class="ico press" id="qclr" aria-label="Скрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
   document.body.classList.toggle('hasq',!b.hidden);
 }
+// 11.11 Андрей: «▶ Начать» у предложения — с подтверждением; задачу берёт нужный чат, бот пишет там план и дальше ведём в чате
+function stBtn(p,x){const z=(KS.get('start',{}))[x.id];
+  return `<div class="st"><span class="stb${z?' done':''}" role="button" data-start="${esc(p.sku)}|${esc(x.id)}">${z?'✓ Начато '+esc(z):'▶ Начать'}</span><span class="stc">в чате «${esc(x.chat||'Маркетолог К')}»</span></div>`}
+async function stStart(el){const [sku,id]=el.dataset.start.split('|'),p=(D.products||[]).find(q=>String(q.sku)===sku),x=(((p||{}).advice||{}).items||[]).find(q=>q.id===id);
+  if(!x)return;const z=KS.get('start',{});
+  if(!confirm((z[id]?'Уже начинали '+z[id]+'. Начать ещё раз?\n\n':'')+'Начать задачу?\n«'+x.title+'»\n\nЗаймётся чат «'+(x.chat||'Маркетолог К')+'»: напишет там, что сделает. В кабинете ничего не меняется без вашего «да».'))return;
+  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify({t:'start',sku,id})});if(!r.ok)throw 0;
+    const d=new Date(),dd=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');z[id]=dd;KS.set('start',z);
+    el.classList.add('done');el.textContent='✓ Начато '+dd;toast('Отправил: план придёт в «'+(x.chat||'Маркетолог К')+'»')}
+  catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
 async function qSend(){
   const T=D.tg||{},items=Q.filter(x=>!x.sent);if(!T.token||!T.chat){toast('Нет связи с ботом');return}if(!items.length)return;
   // ссылки …/product/<кандидат>/?ko=<y|n|a>-<наш sku> — по ним Куратор применяет решения (soglas.py watch; y|n — и k_pult → soglas.py batch);
@@ -1927,7 +1942,7 @@ function vKonk(p){
   <div id="cmpbox">${cmpBlock(p)}</div>
   ${cenyBlock(p)}
   <div class="duo"><div class="main">
-  ${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div><div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
+  ${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div><div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
   <div class="sec"><h2>Реклама, закупка, рынок</h2><span></span></div>${ourRk(p)}${zakup(p)}${others(p)}
   </div></div>`;
@@ -2196,6 +2211,7 @@ function resheet(){   // перерисовать открытый лист по
   sb.scrollTop=y;
 }
 document.addEventListener('click',e=>{
+  const sb0=e.target.closest('[data-start]');if(sb0){e.stopPropagation();stStart(sb0);return}
   const qb=e.target.closest('[data-q]');if(qb){const s=qb.dataset.qc,c=cAny(P,s);if(c){qSet(P,c,qb.dataset.q);decided(P,c,qb.closest('[data-pk]'),!!$('#sbody').dataset.comp)}return}
   if(e.target.closest('#qall')){const ps=allC(P).filter(c=>c.status==='pending');ps.forEach(c=>{const q=qOf(P,c.sku);if(!q||q.d!=='y')qSet(P,c,'y')});
     qView();render(false);closeSheet();snack(`✅ Взяты все: ${ps.length}`,()=>{ps.forEach(c=>{const i=Q.findIndex(x=>x.our===P.sku&&x.comp===c.sku&&!x.sent);if(i>=0)Q.splice(i,1)});KS.set('q',Q);qbar();qView();render(false)});return}
