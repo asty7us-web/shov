@@ -1084,7 +1084,7 @@ const KS={get(k,d){try{const v=localStorage.getItem('konk.'+k);return v==null?d:
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // base64 → байты: встроенным fromBase64, где он есть, иначе простым циклом (28.10: Uint8Array.from с функцией на каждый знак — секунда на телефоне при открытии)
 const b64u8=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
-let KEY=null,SALT=null,D=null,P=null;
+let KEY=null,SALT=null,D=null,P=null,PHO={};   // PHO: своя копия фото (ph/…) → ссылка Озона, 10.11
 const S={t:KS.get('tab','konk'),sku:KS.get('sku',null),grp:KS.get('grp','sales'),cv:KS.get('cv','tab'),per:KS.get('per',7),rv:KS.get('rv','tab'),kw:'us',focus:null};
 
 /* ---------- данные: ключ общий со Склейками (пароль Юнитки) ---------- */
@@ -1117,7 +1117,7 @@ const ddmm=s=>s?s.slice(8,10)+'.'+s.slice(5,7):'';
 const plur=(n,a,b,c)=>{const m=Math.abs(n)%100,k=m%10;return m>10&&m<20?c:k===1?a:k>=2&&k<=4?b:c};
 const dlv=s=>{const m=(s||'').match(/\d+/g);return m?+m[m.length-1]:null};
 const short=s=>(s||'').replace(/[«»"]/g,'').replace(/^(ООО|ИП|АО|ТД)\s*/,'').trim().slice(0,22)||'—';
-const img=(src,cls)=>`<img src="${esc(src||'')}" alt="" loading="lazy" decoding="async"${cls?` class="${cls}"`:''} onerror="this.style.visibility='hidden'">`;
+const img=(src,cls)=>`<img src="${esc(src||'')}"${/^ph\//.test(src||'')&&PHO[src]?` data-o="${esc(PHO[src])}"`:''} alt="" loading="lazy" decoding="async"${cls?` class="${cls}"`:''} onerror="if(this.dataset.o){this.src=this.dataset.o;this.removeAttribute('data-o')}else this.style.visibility='hidden'">`;
 const IC={
  all:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.2"/><rect x="13" y="3" width="8" height="8" rx="2.2" opacity=".55"/><rect x="3" y="13" width="8" height="8" rx="2.2" opacity=".55"/><rect x="13" y="13" width="8" height="8" rx="2.2"/></svg>',
  konk:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg>',
@@ -1526,7 +1526,7 @@ function mcard(p,m){
     verdict=b?`<span class="up">▲ лучше медианы топа (${fmt(mid)})</span>`:w?`<span class="dn">▼ хуже медианы топа (${fmt(mid)})</span>`:`<span class="mut">на уровне медианы топа (${fmt(mid)})</span>`}
   else if(ok(mid))verdict=`<span class="mut">медиана топа ${fmt(mid)}</span>`;
   return `<div class="card mc reveal" data-f="m:${esc(lab)}"><h3>${PL(lab)}${hint?`<em>${PL(hint)}</em>`:''}</h3><div class="verdict">${verdict}</div>${C.map((c,i)=>{const v=vals[i];const w=ok(v)?Math.max(2,Math.abs(v)/mx*100):0;
-    return `<div class="br${c.us?' us':''}${c.status==='pending'?' pend':''}${ok(v)&&v===best?' best':''}" data-tip="<b>${esc(c.us?'Мы — '+p.offer_id:short(c.seller))}</b>${esc(lab)}: ${esc(String(fmt(v,c,p)).replace(/<[^>]+>/g,''))}">${img(c.photo)}<span class="nm">${esc(c.us?'Мы':short(c.seller))}</span><span class="tr"><i style="--w:${w}%"></i></span><span class="vl num">${fmt(v,c,p)}</span></div>`}).join('')}</div>`;
+    return `<div class="br${c.us?' us':''}${c.status==='pending'?' pend':''}${ok(v)&&v===best?' best':''}" data-tip="<b>${esc(c.us?'Мы — '+p.offer_id:cnm(c))}</b>${esc(lab)}: ${esc(String(fmt(v,c,p)).replace(/<[^>]+>/g,''))}">${img(c.photo)}<span class="nm">${esc(c.us?'Мы':cnm(c))}</span><span class="tr"><i style="--w:${w}%"></i></span><span class="vl num">${fmt(v,c,p)}</span></div>`}).join('')}</div>`;
 }
 /* ситуация с шести сторон — одна функция и для товара, и для «Сводки» (Андрей 25.10: «на ладони под разным углом») */
 function angles(p){
@@ -1574,7 +1574,7 @@ function cmini(c,i,p){
   return `<button class="card cm press${c.status==='pending'?' pend':''} reveal" data-comp="${c.sku}"><div class="ph">${c.photo?img(c.photo):'<span class="np"></span>'}<span class="n">${i+1}</span>${c.status==='yes'?`<span class="st ok">${IC.check}</span>`:c.status==='pending'?`<span class="st wait">${IC.clock}</span>`:''}</div>
    <div style="min-width:0"><b>${esc(cnm(c))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${sub}</div></div></button>`;
 }
-const cnm=c=>c.seller?short(c.seller):'SKU '+c.sku;   // у добавленного вручную до подбора продавца ещё нет
+const cnm=c=>c.seller?cnm(c):c.name?String(c.name).slice(0,22).trim()+'…':'SKU '+c.sku;   // 10.11 Бондарев: без продавца было «—» — теперь начало названия   // у добавленного вручную до подбора продавца ещё нет
 /* таблица «мы против топа»: телефон — строки продавцы, столбцы цифры раздела; компьютер — вся таблица как в первой версии */
 const SH={'Заказано за 7 дней':'₽ за 7 дн','Штук за 7 дней':'шт 7 дн','Динамика к прошлой неделе':'к прошлой нед.','Штук за 28 дней':'шт 28 дн','Продаж в день, шт':'шт в день',
  'Средняя цена продажи':'цена','Скидка от медианной цены':'скидка','Доля заказов по акциям':'по акциям','Дней в акциях из 7':'дн. в акциях',
@@ -1590,12 +1590,12 @@ function cmpPhone(p,g){
   const C=cols(p),ms=rowsOf(g[2]).map(m=>({m,vals:mvals(p,m,C)})).filter(x=>x.vals.some(ok));
   const marks=ms.map(x=>mmark(x.vals,x.m[3]));
   return `<div class="card tw reveal"><table class="ct"><thead><tr><th></th>${ms.map(x=>`<th data-f="m:${esc(x.m[0])}">${esc(PL(SH[x.m[0]]||x.m[0]))}</th>`).join('')}</tr></thead><tbody>
-   ${C.map((c,i)=>`<tr class="${c.us?'us':''}${c.status==='pending'?' pend':''}"${c.us?'':` data-comp="${c.sku}"`}><td><div class="who">${img(c.photo)}<span>${esc(c.us?'Мы':short(c.seller))}</span></div></td>${ms.map((x,j)=>`<td class="${marks[j][i]}" data-f="m:${esc(x.m[0])}">${cpt(x.m[2](x.vals[i],c,p))}</td>`).join('')}</tr>`).join('')}
+   ${C.map((c,i)=>`<tr class="${c.us?'us':''}${c.status==='pending'?' pend':''}"${c.us?'':` data-comp="${c.sku}"`}><td><div class="who">${img(c.photo)}<span>${esc(c.us?'Мы':cnm(c))}</span></div></td>${ms.map((x,j)=>`<td class="${marks[j][i]}" data-f="m:${esc(x.m[0])}">${cpt(x.m[2](x.vals[i],c,p))}</td>`).join('')}</tr>`).join('')}
    <tr class="md"><td>медиана топа</td>${ms.map(x=>`<td data-f="m:${esc(x.m[0])}">${cpt(x.m[2](med(x.vals.slice(1).filter(ok)),{},p))}</td>`).join('')}</tr></tbody></table></div>`;
 }
 function cmpDesk(p){
   const C=cols(p);
-  const head=`<thead><tr><th></th>${C.map(c=>`<th class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><div class="ph">${img(c.photo)}<b>${esc(c.us?'Мы — '+p.offer_id:short(c.seller))}</b><i>${c.us?(c.rank?c.rank+'-е место в категории':'ниже 200-го места'):esc((c.name||'').slice(0,60))}</i>${c.status==='pending'?'<span class="tag wait">ждёт ✅</span>':''}</div></th>`).join('')}</tr></thead>`;
+  const head=`<thead><tr><th></th>${C.map(c=>`<th class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><div class="ph">${img(c.photo)}<b>${esc(c.us?'Мы — '+p.offer_id:cnm(c))}</b><i>${c.us?(c.rank?c.rank+'-е место в категории':'ниже 200-го места'):esc((c.name||'').slice(0,60))}</i>${c.status==='pending'?'<span class="tag wait">ждёт ✅</span>':''}</div></th>`).join('')}</tr></thead>`;
   const body=GROUPS.map(([,n,ms])=>`<tr class="g"><td colspan="${C.length+1}">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(m=>{const vals=mvals(p,m,C);if(!vals.some(ok))return '';const mk=mmark(vals,m[3]);
     return `<tr data-f="m:${esc(m[0])}"><td>${PL(m[0])}${m[4]?`<span class="hint">${PL(m[4])}</span>`:''}</td>${vals.map((v,i)=>`<td class="${C[i].us?'us ':''}${mk[i]}">${m[2](v,C[i],p)}</td>`).join('')}</tr>`}).join('')).join('');
   return `<div class="card tw reveal"><table class="cmpd">${head}<tbody>${body}</tbody></table></div>`;
@@ -1635,7 +1635,7 @@ const qOf=(p,c)=>Q.find(x=>x.our===p.sku&&x.comp===c);
 function qSet(p,c,d){
   const i=Q.findIndex(x=>x.our===p.sku&&x.comp===c.sku);
   if(i>=0&&Q[i].d===d&&!Q[i].sent)Q.splice(i,1);
-  else{if(i>=0)Q.splice(i,1);Q.push({d,our:p.sku,comp:c.sku,seller:short(c.seller),offer:p.offer_id})}
+  else{if(i>=0)Q.splice(i,1);Q.push({d,our:p.sku,comp:c.sku,seller:cnm(c),offer:p.offer_id})}
   KS.set('q',Q);qbar();
 }
 /* 01.11 Андрей: «нажимаешь убрать — внешне ничего не меняется»: решение видно сразу, ещё до «Отправить» — убранный пропадает
@@ -1664,7 +1664,7 @@ function decided(p,c,card,inComp){
   const redraw=()=>{qView();const y=scrollY;render(false);window.scrollTo(0,y);if(shw.classList.contains('on'))resheet()};
   const undo=()=>{const i=Q.findIndex(x=>x.our===p.sku&&x.comp===c.sku&&!x.sent);if(i>=0){Q.splice(i,1);KS.set('q',Q);qbar()}redraw()};
   if(!q){redraw();return}   // нажали второй раз — решение снято
-  snack(`${q.d==='y'?'✅ Взят':'✖ Убран'}: <b>${esc(short(c.seller))}</b>`,undo);
+  snack(`${q.d==='y'?'✅ Взят':'✖ Убран'}: <b>${esc(cnm(c))}</b>`,undo);
   // лист конкурента: открыт из списка — назад к списку (решённый из него уже ушёл), иначе закрыть — в топе его уже нет
   if(inComp){setTimeout(()=>{if(SBACK){qView();const y=scrollY;render(false);window.scrollTo(0,y);sheetBack()}else{closeSheet();redraw()}},280);return}
   if(card&&card.animate&&!RM){const h=card.offsetHeight;card.style.overflow='hidden';
@@ -1743,7 +1743,7 @@ const kqHead=(h,id,list,keep)=>{if(!keep)KQ[id].q='';const big=list.length>6;
 function kqWire(id,list){
   const i=$('#'+id);if(!i)return;const st=KQ[id];
   const run=()=>{const R=sFind(list,st.q,c=>[c.seller,c.name]),on=new Set(R.r.map(x=>String(x.x.sku)));
-    $$('#sbody [data-pk]').forEach(el=>{const c=list.find(x=>String(x.sku)===el.dataset.pk),b=el.querySelector('.pkm b');el.hidden=!on.has(el.dataset.pk);if(b&&c)b.innerHTML=hl(short(c.seller),R.t)});
+    $$('#sbody [data-pk]').forEach(el=>{const c=list.find(x=>String(x.sku)===el.dataset.pk),b=el.querySelector('.pkm b');el.hidden=!on.has(el.dataset.pk);if(b&&c)b.innerHTML=hl(cnm(c),R.t)});
     $('#'+id+'n').innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:st.q.trim()?(on.size?`Найдено ${on.size} из ${list.length}`:'Ничего не нашли'):''};
   i.oninput=()=>{st.q=i.value;run();$('#sbody').scrollTop=0};
   i.onkeydown=e=>{if(e.key==='Escape'&&i.value){e.preventDefault();e.stopPropagation();i.value='';i.dispatchEvent(new Event('input'))}if(e.key==='Enter'){e.preventDefault();i.blur()}};
@@ -1767,7 +1767,7 @@ function otherSheet(p,keep){
 }
 function pick(p,c){
   const q=qOf(p,c.sku),v=c.v||(c.j||{}).v,why=c.why||((c.j||{}).diff||(c.j||{}).why)||'';
-  return `<div class="card pk${q&&q.d==='n'?' gone':''}" data-pk="${c.sku}"><button class="pkm press" data-comp="${c.sku}">${img(c.photo)}<div style="min-width:0"><b>${esc(short(c.seller))}</b>
+  return `<div class="card pk${q&&q.d==='n'?' gone':''}" data-pk="${c.sku}"><button class="pkm press" data-comp="${c.sku}">${img(c.photo)}<div style="min-width:0"><b>${esc(cnm(c))}</b>
    <div class="s">${ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':ok(c.sum7)?fk(c.sum7)+' за 7 дн':'продажи не видны'}${ok(c.price)?' · '+fr(c.price):''}</div>
    <div class="w">${v==='same'?'<b>Тот же.</b> ':v==='almost'?'<b>Почти такой же.</b> ':v==='other'?'<b>Другой.</b> ':''}${esc(why.slice(0,140))}</div></div></button>${qBtns(p,c)}</div>`;
 }
@@ -1782,7 +1782,7 @@ function zakup(p){
 /* запас: согласованные сверх пятёрки и (Андрей 28.10) согласованные без продаж за 28 дней */
 function resNote(p){
   const r=p.reserve||[],ns=r.filter(x=>x.nosale),ex=r.filter(x=>!x.nosale);
-  const who=a=>[...new Set(a.map(x=>short(x.seller)).filter(s=>s&&s!=='—'))].map(esc).join(', ');
+  const who=a=>[...new Set(a.map(x=>cnm(x)).filter(s=>s&&s!=='—'))].map(esc).join(', ');
   let h='';
   if(ex.length)h+=`<div class="note" style="margin:2px 2px 0">в запасе ${ex.length} ${plur(ex.length,'согласованный','согласованных','согласованных')}${who(ex)?` (${who(ex)})`:''} — встанут, если кто-то из пятёрки упадёт по продажам</div>`;
   if(ns.length)h+=`<div class="note" style="margin:2px 2px 0">в запасе ${ns.length} ${plur(ns.length,'согласованный','согласованных','согласованных')} — <b>продаж нет</b> за 28 дней${who(ns)?` (${who(ns)})`:''}: в пятёрку не ставим, вернутся, когда начнут продавать</div>`;
@@ -1832,9 +1832,9 @@ function addComp(p,v){   // ошибка текстом или пусто — д
   const c=allC(p).find(x=>x.sku===s);
   if(c&&c.status==='yes')return `Уже в конкурентах: ${cnm(c)}${c._q?' — в очереди, нажмите «Отправить»':''}`;
   const k=cAny(p,s)||{},i=Q.findIndex(x=>x.our===p.sku&&x.comp===s);if(i>=0)Q.splice(i,1);
-  Q.push({d:'a',our:p.sku,comp:s,seller:k.seller?short(k.seller):'SKU '+s,offer:p.offer_id});KS.set('q',Q);qbar();
+  Q.push({d:'a',our:p.sku,comp:s,seller:k.seller?cnm(k):'SKU '+s,offer:p.offer_id});KS.set('q',Q);qbar();
   closeSheet();qView();const y=scrollY;render(false);window.scrollTo(0,y);
-  snack(`➕ Добавлен: <b>${esc(k.seller?short(k.seller):'SKU '+s)}</b> · нажмите «Отправить»`,()=>{const j=Q.findIndex(x=>x.our===p.sku&&x.comp===s&&x.d==='a'&&!x.sent);if(j>=0){Q.splice(j,1);KS.set('q',Q);qbar()}qView();const y2=scrollY;render(false);window.scrollTo(0,y2)});
+  snack(`➕ Добавлен: <b>${esc(k.seller?cnm(k):'SKU '+s)}</b> · нажмите «Отправить»`,()=>{const j=Q.findIndex(x=>x.our===p.sku&&x.comp===s&&x.d==='a'&&!x.sent);if(j>=0){Q.splice(j,1);KS.set('q',Q);qbar()}qView();const y2=scrollY;render(false);window.scrollTo(0,y2)});
   const el=$(`#view .rail2 [data-comp="${s}"]`);if(el){el.classList.add('hl');el.scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'})}
   return '';
 }
@@ -1864,8 +1864,8 @@ function shop(p){
 }
 function others(p){
   const dm=p.dumpers||[],L=p.leader;let h=shop(p);
-  if(L)h+=`<div class="card mc reveal"><h3>Лидер категории<em>${L.v==='other'?'похожий, но не такой же':L.v?'тот же товар':'больше всех продаж из похожих'}</em></h3><button class="br press" data-comp="${L.sku}" style="grid-template-columns:44px 1fr auto;width:100%;text-align:left">${img(L.photo).replace('<img','<img style="width:44px;height:44px;border-radius:12px"')}<span class="nm" style="white-space:normal"><b style="color:var(--ink)">${esc(short(L.seller))}</b><br>${fi(L.cnt7)} шт за 7 дней${ok(L.drr)?' · ДРР '+fp(L.drr):''}</span><span class="vl num">${fr(L.price)}</span></button>${L.diff?`<div class="note" style="margin:6px 0 0">Отличие: ${esc(L.diff.slice(0,160))}</div>`:''}</div>`;
-  if(dm.length)h+=`<div class="card mc reveal"><h3>Демперы — следим<em>дешевле нас на 30%+</em></h3><div class="verdict mut">В минус не догоняем — смотрим, вдруг поднимут цену</div>${dm.map(c=>`<div class="br" style="grid-template-columns:30px 1fr auto">${img(c.photo).replace('<img','<img style="width:30px;height:30px;border-radius:9px"')}<span class="nm">${esc(short(c.seller))} · ${fi(c.cnt7)} шт/нед</span><span class="vl num">${fr(c.price)}</span></div>`).join('')}</div>`;
+  if(L)h+=`<div class="card mc reveal"><h3>Лидер категории<em>${L.v==='other'?'похожий, но не такой же':L.v?'тот же товар':'больше всех продаж из похожих'}</em></h3><button class="br press" data-comp="${L.sku}" style="grid-template-columns:44px 1fr auto;width:100%;text-align:left">${img(L.photo).replace('<img','<img style="width:44px;height:44px;border-radius:12px"')}<span class="nm" style="white-space:normal"><b style="color:var(--ink)">${esc(cnm(L))}</b><br>${fi(L.cnt7)} шт за 7 дней${ok(L.drr)?' · ДРР '+fp(L.drr):''}</span><span class="vl num">${fr(L.price)}</span></button>${L.diff?`<div class="note" style="margin:6px 0 0">Отличие: ${esc(L.diff.slice(0,160))}</div>`:''}</div>`;
+  if(dm.length)h+=`<div class="card mc reveal"><h3>Демперы — следим<em>дешевле нас на 30%+</em></h3><div class="verdict mut">В минус не догоняем — смотрим, вдруг поднимут цену</div>${dm.map(c=>`<div class="br" style="grid-template-columns:30px 1fr auto">${img(c.photo).replace('<img','<img style="width:30px;height:30px;border-radius:9px"')}<span class="nm">${esc(cnm(c))} · ${fi(c.cnt7)} шт/нед</span><span class="vl num">${fr(c.price)}</span></div>`).join('')}</div>`;
   return h;
 }
 /* 06.11 Андрей: цены соседей на сайте по дням + наша скидка Озона по складам (ceny.py).
@@ -1890,7 +1890,7 @@ function cenyBlock(p){
     if(cs.length>1)svg+=`<path d="${path(mid)}" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="5 4"/>`;
     svg+=`<path d="${path(us)}" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linejoin="round"/>`+us.map((v,i)=>ok(v)?`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/>`:'').join('');
     const cw=n<2?(W-L-R):(W-L-R)/(n-1);
-    svg+=days.map((d,i)=>{const rows=[`<b>${ddmm(d)}</b>`,`Мы: ${fr(us[i])}`].concat(cs.map(c=>`${esc(short(c.seller))}: ${fr(C.by[c.sku][i])}`));if(cs.length>1)rows.push(`Середина соседей: ${fr(mid[i])}`);
+    svg+=days.map((d,i)=>{const rows=[`<b>${ddmm(d)}</b>`,`Мы: ${fr(us[i])}`].concat(cs.map(c=>`${esc(cnm(c))}: ${fr(C.by[c.sku][i])}`));if(cs.length>1)rows.push(`Середина соседей: ${fr(mid[i])}`);
       return `<rect x="${X(i)-cw/2}" y="0" width="${cw}" height="${H}" fill="transparent" data-tip="${esc(rows.join('<br>'))}"/>`}).join('');
     svg+='</svg>';
     // сигнал: за последний день цена выросла (на 5%+) у большинства соседей
@@ -1966,14 +1966,14 @@ const kcOf=p=>{const m=KS.get('kc',{}),all=byRank(p).map(c=>c.sku);let v=(m[p.sk
 function kcToggle(p,sku){const m=KS.get('kc',{});let v=kcOf(p);if(v.includes(sku)){if(v.length>1)v=v.filter(s=>s!==sku)}else{v=v.concat(sku);if(v.length>3)v=v.slice(-3)}m[p.sku]=v;KS.set('kc',m)}
 function whoSel(p){
   const w=kwOf(p),cs=byRank(p);
-  return `<div class="wsel" id="kw"><button class="press${w==='us'?' on':''}" data-kw="us">${img(pphoto(p))}<span><b>Мы</b><i>${fi((p.our||{}).cnt7)} шт</i></span></button>${cs.map((c,i)=>`<button class="press${w===c.sku?' on':''}" data-kw="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(short(c.seller))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span></button>`).join('')}</div>`;
+  return `<div class="wsel" id="kw"><button class="press${w==='us'?' on':''}" data-kw="us">${img(pphoto(p))}<span><b>Мы</b><i>${fi((p.our||{}).cnt7)} шт</i></span></button>${cs.map((c,i)=>`<button class="press${w===c.sku?' on':''}" data-kw="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(cnm(c))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span></button>`).join('')}</div>`;
 }
 /* «Средняя позиция по дням» — тепловая таблица первой версии: на телефоне строка ключа в две линии, всё на одном экране */
 function heat(p,ks){
   const w=kwOf(p),sku=w==='us'?p.sku:w,c=w==='us'?null:(p.comps||[]).find(x=>x.sku===w)||{};
   const days=kdays(p),n=days.length,S0=Object.fromEntries(ks.map(k=>[k.q,series(p,k.q,sku)]));
   const avgD=i=>{const a=ks.map(k=>S0[k.q][i].pos).filter(ok);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};
-  const who=w==='us'?'Мы':short(c.seller);
+  const who=w==='us'?'Мы':cnm(c);
   const mob=`<div class="card hm reveal only-m" data-f="heat"><div class="hwho">${w==='us'?'Наши места':'Места: <b>'+esc(who)+'</b>'}</div><div class="hr hh"><div class="cells" style="--n:${n}">${days.map(d=>`<span>${+d.slice(8,10)}</span>`).join('')}</div><span class="nw0">сейчас</span></div>
    ${ks.map((k,i)=>{const nw=nowPos(p,k.q,sku);return `<button class="hr" data-key="${i}"><div class="hq"><b>${esc(k.q)}</b><small>${fi(k.searched)} поиск. · ${fi(k.orders)} зак.</small></div><div class="cells" style="--n:${n}">${S0[k.q].map(x=>`<span class="${pc(x.pos)}">${pshort(x.pos)}</span>`).join('')}</div><span class="pc nw ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></button>`}).join('')}
    <div class="hr avg"><div class="hq"><b>В среднем по ключам</b></div><div class="cells" style="--n:${n}">${days.map((d,i)=>{const v=avgD(i);return `<span class="${pc(v)}">${pshort(v)}</span>`}).join('')}</div><span></span></div></div>`;
@@ -1994,7 +1994,7 @@ function vKeys(p){
   ${whoSel(p)}
   ${heat(p,ks)}
   <div class="sec"><h2>По каждому ключу</h2><span>сравнить — до 3</span></div>
-  <div class="wsel multi" id="kc">${rk.map((c,i)=>`<button class="press${KC.includes(c.sku)?' on':''}" data-kc="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(short(c.seller))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span><em>${KC.includes(c.sku)?IC.check:''}</em></button>`).join('')}</div>
+  <div class="wsel multi" id="kc">${rk.map((c,i)=>`<button class="press${KC.includes(c.sku)?' on':''}" data-kc="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(cnm(c))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span><em>${KC.includes(c.sku)?IC.check:''}</em></button>`).join('')}</div>
   <div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся с 25.10 по нашим замерам выдачи (4 раза в день) — каждый день добавляется столбик. Историю за прошлые дни по чужим товарам Озон даёт только в Premium Pro.</div>
   ${ks.map((k,i)=>{const now=nowPos(p,k.q,p.sku),sk=((p.snap||{}).keys||{})[k.q]||{};
    const row=(lab,ph,pts,nw,p28,us,none)=>`<div class="kr${us?' us':''}"><span class="kn">${ph}<b>${lab}</b></span>${spark(pts,'s',p28,none)}<span class="pc ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></div>`;
@@ -2002,9 +2002,9 @@ function vKeys(p){
     <div class="now"><b style="color:${!ok(now)?'var(--ink3)':now<=10?'var(--good)':now<=30?'var(--warn)':'var(--bad)'}">${ok(now)?now:'—'}</b><span class="pc ${pc(now)}" style="height:20px;min-width:0;font-size:11px;margin-top:4px">${!ok(now)?'нет в выдаче':now<=10?'топ-10':now<=30?'до 30':'ниже 30'}</span></div></div>
     <div class="kd"><div class="kl"><span>место по дням</span><span>${ddmm(kdays(p)[0]||'')} — ${ddmm(kdays(p).slice(-1)[0]||'')} · сейчас</span></div>
      ${row('Мы',img(pphoto(p)),series(p,k.q,p.sku),now,k.pos28,true)}
-     ${TS.map(T=>{const tr=snapRow(p,T.sku,k.q)||{};return row(esc(short(T.seller)),img(T.photo),series(p,k.q,T.sku),tr.pos,null,false,'в замерах не попадал в первые ~140 мест')
+     ${TS.map(T=>{const tr=snapRow(p,T.sku,k.q)||{};return row(esc(cnm(T)),img(T.photo),series(p,k.q,T.sku),tr.pos,null,false,'в замерах не попадал в первые ~140 мест')
        +(tr.pos||tr.cpc||tr.price?`<div class="kx">${tr.pos?tr.pos+'-е место':'нет в выдаче'}${tr.pos?' · '+esc(adTxt(tr)):''}${tr.price?' · '+fr(tr.price):''}</div>`:'')}).join('')}</div>
-    ${(sk.top3||[]).length?`<div class="top3"><span class="mut" style="font-size:12px;align-self:center">топ-3 сейчас:</span>${sk.top3.map(t=>`<span class="tag" data-tip="<b>${esc(short(t.seller))}</b>${esc(adTxt(t)||(t.cpc?'ставка '+N1.format(t.cpc)+' ₽':'без рекламы'))}${t.price?' · '+fr(t.price):''}">${t.pos}. ${esc(short(t.seller))}${t.mine?' (мы)':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
+    ${(sk.top3||[]).length?`<div class="top3"><span class="mut" style="font-size:12px;align-self:center">топ-3 сейчас:</span>${sk.top3.map(t=>`<span class="tag" data-tip="<b>${esc(cnm(t))}</b>${esc(adTxt(t)||(t.cpc?'ставка '+N1.format(t.cpc)+' ₽':'без рекламы'))}${t.price?' · '+fr(t.price):''}">${t.pos}. ${esc(cnm(t))}${t.mine?' (мы)':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
   ${junk.length?`<div class="sec"><h2>Показы есть, заказов нет</h2><span>топ-${junk.length} за 28 дней</span></div>
    <div class="card pad reveal"><div class="note" style="margin:0 0 6px">Чужие запросы (как «унитаз» у сиденья) — убрать из названия и описания. Свои — поднимать позицию. Столбики — место по дням за 14 дней: выше столбик — выше в выдаче, зелёный — лучше прошлого дня, красный — хуже.</div>
    ${junk.map(j=>`<div class="jr"><div class="q">${esc(j.q)}<small>увидели ${fi(j.seen)} · в карточку ${fp(j.ctr)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
@@ -2039,7 +2039,7 @@ const CS={'Москва':'Мск','СПб':'СПб','Казань':'Кзн','С�
 const dcls=d=>d==null?'p0':d<=1?'p1':d<=3?'p2':'p3';
 function regView(p){
   const reg=(p.regions||{}).by||{},cities=Object.keys(reg),who=[{sku:p.sku,seller:'Мы',photo:pphoto(p),us:true}].concat(byRank(p));
-  const day=(c,ct)=>dlv((reg[ct]||{})[c.sku]),nm=c=>c.us?'Мы':short(c.seller);
+  const day=(c,ct)=>dlv((reg[ct]||{})[c.sku]),nm=c=>c.us?'Мы':cnm(c);
   const foot=`<div class="legend"><span><i style="background:var(--good)"></i>0–1 день — лежит в этом кластере</span><span><i style="background:var(--warn)"></i>2–3 дня</span><span><i style="background:var(--bad)"></i>4+ — везут издалека</span><span><i style="background:var(--fill)"></i>не нашли в выдаче</span></div>
    <div class="note">Срок доставки по запросу «${esc((p.regions||{}).q||'')}» в 9 городах, ${ddmm((p.regions||{}).at||'')}. Конкуренты — по старшинству продаж; нажмите — сравнение один на один.</div>`;
   if(S.rv==='city')return `<div class="card reveal" style="padding:4px 0">${cities.map(ct=>{const us=day(who[0],ct),near=who.slice(1).filter(c=>{const d=day(c,ct);return d!=null&&d<=1});
@@ -2220,7 +2220,7 @@ function render(anim){
   const swap=()=>{v.innerHTML=html;if(anim){v.classList.remove('view-in');void v.offsetWidth;v.classList.add('view-in');window.scrollTo({top:0})}after()};
   if(anim&&document.startViewTransition&&!RM){const vt=document.startViewTransition(swap);vt.ready.catch(()=>{});vt.finished.catch(()=>{})}else swap();   // поворот экрана обрывает переход — не ошибка
 }
-function start(d){D=d;if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
+function start(d){D=d;PHO=d.pho||{};if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
   // ссылка из «К»: #pend — сразу товар с ждущими решения и лист «Ждут решения»; #sku=<sku> — этот товар;
   // из Юнитки (красная «Топ не добавлен», 26.10): #sku=<sku>&pick — этот товар и сразу выбор: «Ждут решения», а если ждущих нет — «Другие из топа»
   const hs=location.hash.slice(1);let pend=false,pick=false;
