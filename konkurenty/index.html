@@ -1940,9 +1940,9 @@ function others(p){
    Свою цену до скидки Озона чужой продавец не показывает — видно только цену на сайте. Выросла в один день у большинства соседей —
    похоже, Озон урезал скидку всей категории: ценой и рекламой тогда не догоняем. Мы — синей линией, соседи — серыми, пунктир — середина соседей. */
 function cenyBlock(p){
-  const C=p.ceny,K=p.skidka;if(!C&&!K)return '';
-  let h=`<div class="sec"><h2>Цены на сайте по дням</h2><span></span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;align-items:start">`;
-  if(C&&C.days&&C.days.length){
+  const C=p.ceny,K=p.skidka;if(!(K&&K.sklady&&K.sklady.length))return '';
+  let h=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;align-items:start">`;
+  if(false&&C&&C.days&&C.days.length){  // 11.11 Андрей «лишнее убери» — график «Мы и соседи» скрыт
     const days=C.days,n=days.length,us=C.by[p.sku]||[],cs=(p.comps||[]).filter(c=>C.by[c.sku]&&C.by[c.sku].some(ok));
     const mid=days.map((d,i)=>med(cs.map(c=>C.by[c.sku][i])));
     const all=[...us,...cs.flatMap(c=>C.by[c.sku])].filter(ok);
