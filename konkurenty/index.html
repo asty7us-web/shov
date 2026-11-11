@@ -964,6 +964,7 @@ table.rg2{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
 :root[data-theme="farcry"] .btn,:root[data-theme="farcry"] .seg button.on{background:var(--acc);color:#fff;clip-path:var(--rough);box-shadow:none;font-weight:700}
 :root[data-theme="farcry"] .svt-menu .tgrp{text-transform:uppercase;letter-spacing:.06em}
 @media (prefers-reduced-motion:reduce){:root:not([data-theme="space"]):not([data-igra]) *,:root:not([data-theme="space"]):not([data-igra]) *::before,:root:not([data-theme="space"]):not([data-igra]) *::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}   /* «Космос» и игровые темы двигаются всегда, как в Юнитке и Отклике */
+.ozq{color:inherit;text-decoration:none;border-bottom:1px dashed var(--ink3)}.ozq:hover{color:var(--acc,#4ea1ff)}
 </style>
 </head>
 <body>
@@ -2066,7 +2067,7 @@ function vKeys(p){
   <div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся с 25.10 по нашим замерам выдачи (4 раза в день) — каждый день добавляется столбик. Историю за прошлые дни по чужим товарам Озон даёт только в Premium Pro.</div>
   ${ks.map((k,i)=>{const now=nowPos(p,k.q,p.sku),sk=((p.snap||{}).keys||{})[k.q]||{};
    const row=(lab,ph,pts,nw,p28,us,none)=>`<div class="kr${us?' us':''}"><span class="kn">${ph}<b>${lab}</b></span>${spark(pts,'s',p28,none)}<span class="pc ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></div>`;
-   return `<div class="card kc reveal" id="k${i}"><div class="hd"><div style="min-width:0"><div class="q">${esc(k.q)}</div><div class="meta"><span class="tag">искали ${fi(k.searched)}</span><span class="tag">заказов ${fi(k.orders)}</span>${k.pinned?'<span class="tag acc">закреплён</span>':''}</div></div>
+   return `<div class="card kc reveal" id="k${i}"><div class="hd"><div style="min-width:0"><div class="q">${ozq(k.q)}</div><div class="meta"><span class="tag">искали ${fi(k.searched)}</span><span class="tag">заказов ${fi(k.orders)}</span>${k.pinned?'<span class="tag acc">закреплён</span>':''}</div></div>
     <div class="now"><b style="color:${!ok(now)?'var(--ink3)':now<=10?'var(--good)':now<=30?'var(--warn)':'var(--bad)'}">${ok(now)?now:'—'}</b><span class="pc ${pc(now)}" style="height:20px;min-width:0;font-size:11px;margin-top:4px">${!ok(now)?'нет в выдаче':now<=10?'топ-10':now<=30?'до 30':'ниже 30'}</span></div></div>
     <div class="kd"><div class="kl"><span>место по дням</span><span>${ddmm(kdays(p)[0]||'')} — ${ddmm(kdays(p).slice(-1)[0]||'')} · сейчас</span></div>
      ${row('Мы',img(pphoto(p)),series(p,k.q,p.sku),now,k.pos28,true)}
@@ -2075,8 +2076,10 @@ function vKeys(p){
     ${(sk.top3||[]).length?`<div class="top3"><span class="mut" style="font-size:12px;align-self:center">топ-3 сейчас:</span>${sk.top3.map(t=>`<span class="tag" data-tip="<b>${esc(cnm(t))}</b>${esc(adTxt(t)||(t.cpc?'ставка '+N1.format(t.cpc)+' ₽':'без рекламы'))}${t.price?' · '+fr(t.price):''}">${t.pos}. ${esc(cnm(t))}${t.mine?' (мы)':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
   ${junk.length?`<div class="sec"><h2>Показы есть, заказов нет</h2><span>топ-${junk.length} за 28 дней</span></div>
    <div class="card pad reveal"><div class="note" style="margin:0 0 6px">Чужие запросы (как «унитаз» у сиденья) — убрать из названия и описания. Свои — поднимать позицию. Столбики — место по дням за 14 дней: выше столбик — выше в выдаче, зелёный — лучше прошлого дня, красный — хуже.</div>
-   ${junk.map(j=>`<div class="jr"><div class="q">${esc(j.q)}<small>увидели ${fi(j.seen)} · в карточку ${fp(j.ctr)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
+   ${junk.map(j=>`<div class="jr"><div class="q">${ozq(j.q)}<small>увидели ${fi(j.seen)} · в карточку ${fp(j.ctr)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
 }
+// 11.11 Андрей: запрос — ссылка на поиск Озона с этим запросом
+const ozq=q=>`<a class="ozq" href="https://www.ozon.ru/search/?text=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(q)} ↗</a>`;
 /* ---------- раздел «Сводка»: все товары на одном экране ---------- */
 function vAll(){
   const ps=D.products,H=angles(ps[0]).map(a=>a.h);
