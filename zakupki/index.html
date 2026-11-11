@@ -1205,6 +1205,26 @@ async function startCheck(url,tid,label,quiet){
 }
 /* остановить идущую или ждущую проверку (Андрей 30.10) — сервер снимает её в течение минуты */
 const STOPS={};
+/* 11.11 Андрей: «по кнопке получить оптовиков, но только по кнопке — тратить токены не надо до» */
+const OPTS={};
+function optBlock(c){
+  const o=c.opt||{};
+  if(o.state==='work'||(OPTS[c.id]&&!o.state))return `<div class="card pad" style="margin-top:12px"><b>🏭 Ищу производителя и оптовиков…</b><div class="note">Обычно 5–15 минут, можно закрыть страницу.</div></div>`;
+  const btn=`<button class="btn press" data-ckopt="${esc(c.id)}" style="width:100%;margin-top:12px">🏭 ${o.state==='done'?'Искать оптовиков заново':'Найти производителя и оптовиков'}</button>`;
+  if(o.state==='err')return `<div class="card pad" style="margin-top:12px"><b>Оптовиков найти не вышло</b><div class="note">${esc(o.err||'')}</div></div>${btn}`;
+  if(o.state!=='done')return btn;
+  const row=x=>`<li style="margin:8px 0"><b>${esc(x.name||'')}</b>${x.kind?' · '+esc(x.kind):''}${x.city?' · '+esc(x.city):''}${x.site?`<br><a href="${esc(/^https?:/.test(x.site)?x.site:'https://'+x.site)}" target="_blank" rel="noopener">${esc(x.site)}</a>`:''}${x.phone?`<br><a href="tel:${esc(x.phone.replace(/[^+\d]/g,''))}">${esc(x.phone)}</a>`:''}${x.email?`<br><a href="mailto:${esc(x.email)}">${esc(x.email)}</a>`:''}${x.note?`<div class="mut" style="font-size:13px">${esc(x.note)}</div>`:''}</li>`;
+  const m=o.maker||{};
+  return `<div class="card pad" style="margin-top:12px"><div class="k">🏭 Производитель и оптовики · ${esc(o.at||'')}</div>${o.summary?`<div style="margin:6px 0">${esc(o.summary)}</div>`:''}
+   <ul style="padding-left:18px;margin:6px 0">${m.name?row(Object.assign({kind:'производитель'+(m.brand?', бренд '+m.brand:'')},m)):''}${(o.list||[]).map(row).join('')}</ul>
+   <div class="note">Нашёл в интернете, контакты перед звонком проверяйте.</div></div>${btn}`;
+}
+async function optCheck(id){
+  if(OPTS[id])return;
+  if(!confirm('Найти производителя и оптовиков по России? Это платный поиск, займёт 5–15 минут.'))return;
+  try{await relaySend({k:'opt',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
+  OPTS[id]=1;toast('Ищу — список появится здесь');render(false);poll(true);
+}
 async function stopCheck(id){
   if(STOPS[id])return;
   try{await relaySend({k:'stop',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
@@ -1295,7 +1315,7 @@ function vResult(c){
   <div class="card mpb reveal" id="mpb">${['oz','wb','ym'].map(k=>{const p=(c.mp||{})[k]||{},vd=p.verdict||{},v=vd.v||'na',why=(v==='ok'?(vd.plus||[])[0]:(vd.why||[])[0])||(vd.plus||[])[0]||p.err||'';
     return `<button class="mprow press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><span class="mpn"><i></i>${MPN[k]}</span><span class="vp ${v}">${VI[v]} ${VL[v]}</span><span class="w1">${esc(why)}</span>${IC.chev}</button>`}).join('')}</div>
   <div id="mppanel">${mpPanel(c,m)}</div>
-  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>${bin}`;
+  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>${niche?'':optBlock(c)}${bin}`;
 }
 function cmSheet(c,m,sku){
   const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku),niche=c.kind==='niche';if(!x)return;
@@ -1468,6 +1488,7 @@ document.addEventListener('click',e=>{
   const gt=t.closest('[data-goto]');if(gt){go(gt.dataset.goto);return}
   const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
   const cs=t.closest('[data-ckstop]');if(cs){stopCheck(cs.dataset.ckstop);return}
+  const co=t.closest('[data-ckopt]');if(co){optCheck(co.dataset.ckopt);return}
   const tb=t.closest('[data-trash]');if(tb){trashCheck(tb.dataset.trash);return}
   const ub=t.closest('[data-unhide]');if(ub){trashCheck(ub.dataset.unhide,true);return}
   if(t.closest('[data-trtog]')){S.trOpen=!S.trOpen;render(false);return}
