@@ -354,6 +354,13 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .ad .st{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .ad .stb{padding:9px 14px;border-radius:12px;background:var(--acc);color:#fff;font-weight:650;font-size:14px;cursor:pointer;user-select:none}
 .ad .stb.done{background:var(--fill2);color:var(--ink2)}
+.rg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 12px}
+.rgb{padding:9px 14px;border-radius:12px;background:var(--fill2);color:var(--ink);font-weight:650;font-size:14px;cursor:pointer;user-select:none}
+.rg .stc,.rgh span{font-size:13px;color:var(--ink2)}
+.rgp{margin:2px 0 12px;padding:12px 14px;border-radius:14px;background:var(--fill2)}
+.rgh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px}
+.rgbar{height:8px;border-radius:8px;background:var(--fill);overflow:hidden}
+.rgbar i{display:block;height:100%;border-radius:8px;background:var(--acc);transition:width 1s linear}
 .ad .stc{font-size:12.5px;color:var(--ink3)}
 .ad .chev{margin-left:auto;width:18px;height:18px;color:var(--ink3);transition:transform .4s var(--spring);flex:none}
 .ad.open .chev{transform:rotate(90deg)}
@@ -1697,6 +1704,48 @@ async function stStart(el){const [sku,id]=el.dataset.start.split('|'),p=(D.produ
     const d=new Date(),dd=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');z[id]=dd;KS.set('start',z);
     el.classList.add('done');el.textContent='✓ Начато '+dd;toast('Отправил: план придёт в «'+(x.chat||'Маркетолог К')+'»')}
   catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
+// 11.11 Андрей: «↻ Обновить предложения» — только по кнопке (тратит лимит Claude); пока идёт — полоса, этап и сколько ждать
+const rgH=s=>{let x=0;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return x};
+const rgSig=p=>rgH(JSON.stringify(((p||{}).advice||{}).items||[]));
+function rgGet(){return KS.get('rg',{})}function rgSet(o){KS.set('rg',o)}
+function rgBlock(p){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==='yes'))return '';
+  const z=rgGet()[p.sku];if(z)return `<div class="rgp" data-rgp="${esc(p.sku)}">${rgInner(z)}</div>`;
+  const m=Math.max(1,Math.round((((D.rgt||{})[p.sku])||((D.rgt||{})._)||330)/60));
+  return `<div class="rg"><span class="rgb press" role="button" data-regen="${esc(p.sku)}">↻ ${(p.advice||{}).items&&p.advice.items.length?'Обновить предложения':'Сделать разбор'}</span><span class="stc">~${m} мин, тратит лимит Claude</span></div>`}
+function rgCalc(z){const el=(Date.now()-(z.s0||z.at))/1000,E=Math.max(10,z.eta||60),f=Math.min(.95,el/E),A=z.adv||180,P=z.dep||150;
+  if(z.st==='sent')return{pct:1+3*Math.min(1,el/20),left:A+P,txt:'Отправил, жду, когда возьмётся'};
+  if(z.st==='run')return{pct:4+76*f,left:Math.max(10,E-el)+P,txt:'Разбираю товар и конкурентов'};
+  if(z.st==='deploy')return{pct:80+17*f,left:Math.max(10,E-el),txt:'Выкладываю на сайт'};
+  return{pct:97+3*Math.min(.9,el/90),left:Math.max(5,90-el),txt:'Загружаю новые предложения'}}
+function rgInner(z){const c=rgCalc(z),m=c.left>=90?'~'+Math.round(c.left/60)+' мин':'меньше минуты';
+  return `<div class="rgh"><b>${c.txt}…</b><span>${Math.round(c.pct)}% · осталось ${m}</span></div><div class="rgbar"><i style="width:${c.pct.toFixed(1)}%"></i></div>`}
+function rgRedraw(){if(S.t==='konk'&&P)render(false)}
+async function rgStart(el){const sku=el.dataset.regen,p=(D.products||[]).find(q=>String(q.sku)===sku);if(!p)return;
+  const m=Math.max(1,Math.round((((D.rgt||{})[sku])||((D.rgt||{})._)||330)/60));
+  if(!confirm('Обновить предложения «Что доделать до топа»?\n«'+(p.offer_id||'')+'»\n\nЗаймёт ~'+m+' мин и потратит лимит Claude. Пока идёт, здесь будет видно, сколько осталось.'))return;
+  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify({t:'regen',sku})});if(!r.ok)throw 0;
+    const o=rgGet(),T=D.rgt||{},a=(T[sku]||T._||330)-150;o[sku]={st:'sent',at:Date.now(),s0:Date.now(),adv:Math.max(60,a),dep:150,old:rgSig(p)};rgSet(o);rgRedraw();rgLoop()}
+  catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
+let rgBusy=false,rgTick=null;
+async function rgPoll(){if(rgBusy)return;rgBusy=true;try{
+  const o=rgGet(),ks=Object.keys(o);if(!ks.length)return;
+  const since=Math.floor(Math.min(...ks.map(k=>o[k].at))/1000)-5;
+  let evs=[];try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic+'/json?poll=1&since='+since,{cache:'no-store'});
+    evs=(await r.text()).split('\n').map(l=>{try{const e=JSON.parse(l);return e.event==='message'?JSON.parse(e.message):null}catch(x){return null}}).filter(q=>q&&q.t==='prog')}catch(e){}
+  let ch=false;
+  for(const sku of ks){const z=o[sku];const my=evs.filter(q=>String(q.sku)===sku&&q.t0*1000>=z.at-5000);const q=my[my.length-1];
+    if(q&&q.st!==z.st&&!(z.st==='reload'&&q.st==='done')){
+      if(q.st==='busy'||q.st==='fail'){delete o[sku];toast(q.st==='busy'?'Сейчас обновляется другой товар — нажмите через пару минут':'Не получилось: '+(q.msg||'сбой')+'. Попробуйте ещё раз');ch=true;continue}
+      z.s0=q.t0*1000;z.eta=q.eta;if(q.st==='run')z.adv=q.eta;if(q.st==='deploy')z.dep=q.eta;z.st=q.st==='done'?'reload':q.st;z.tries=0;ch=true}
+    if(z.st==='sent'&&Date.now()-z.at>180e3){delete o[sku];toast('Бот не взял задачу — попробуйте ещё раз');ch=true;continue}
+    if(z.st!=='reload'&&Date.now()-z.at>45*60e3){delete o[sku];ch=true;continue}
+    if(z.st==='reload'&&Date.now()-(z.last||0)>20e3){z.last=Date.now();z.tries=(z.tries||0)+1;
+      try{const d=await load();const np=(d.products||[]).find(x=>String(x.sku)===sku);
+        if((np&&rgSig(np)!==z.old)||z.tries>=8){delete o[sku];rgSet(o);start(d);toast(np&&rgSig(np)!==z.old?'Предложения обновлены':'Обновил, но сайт ещё не подхватил — обновите страницу через минуту');ch=false;continue}}catch(e){}}
+  }
+  rgSet(o);if(ch)rgRedraw()}finally{rgBusy=false}}
+function rgLoop(){if(rgTick)return;let n=0;rgTick=setInterval(()=>{const o=rgGet();if(!Object.keys(o).length){clearInterval(rgTick);rgTick=null;return}
+  document.querySelectorAll('[data-rgp]').forEach(e=>{const z=o[e.dataset.rgp];if(z)e.innerHTML=rgInner(z)});if(++n%5===0)rgPoll()},1000);rgPoll()}
 async function qSend(){
   const T=D.tg||{},items=Q.filter(x=>!x.sent);if(!T.token||!T.chat){toast('Нет связи с ботом');return}if(!items.length)return;
   // ссылки …/product/<кандидат>/?ko=<y|n|a>-<наш sku> — по ним Куратор применяет решения (soglas.py watch; y|n — и k_pult → soglas.py batch);
@@ -1942,7 +1991,7 @@ function vKonk(p){
   <div id="cmpbox">${cmpBlock(p)}</div>
   ${cenyBlock(p)}
   <div class="duo"><div class="main">
-  ${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div><div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
+  ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
   <div class="sec"><h2>Реклама, закупка, рынок</h2><span></span></div>${ourRk(p)}${zakup(p)}${others(p)}
   </div></div>`;
@@ -2212,6 +2261,7 @@ function resheet(){   // перерисовать открытый лист по
 }
 document.addEventListener('click',e=>{
   const sb0=e.target.closest('[data-start]');if(sb0){e.stopPropagation();stStart(sb0);return}
+  const rg0=e.target.closest('[data-regen]');if(rg0){e.stopPropagation();rgStart(rg0);return}
   const qb=e.target.closest('[data-q]');if(qb){const s=qb.dataset.qc,c=cAny(P,s);if(c){qSet(P,c,qb.dataset.q);decided(P,c,qb.closest('[data-pk]'),!!$('#sbody').dataset.comp)}return}
   if(e.target.closest('#qall')){const ps=allC(P).filter(c=>c.status==='pending');ps.forEach(c=>{const q=qOf(P,c.sku);if(!q||q.d!=='y')qSet(P,c,'y')});
     qView();render(false);closeSheet();snack(`✅ Взяты все: ${ps.length}`,()=>{ps.forEach(c=>{const i=Q.findIndex(x=>x.our===P.sku&&x.comp===c.sku&&!x.sent);if(i>=0)Q.splice(i,1)});KS.set('q',Q);qbar();qView();render(false)});return}
@@ -2236,7 +2286,7 @@ function render(anim){
   const swap=()=>{v.innerHTML=html;if(anim){v.classList.remove('view-in');void v.offsetWidth;v.classList.add('view-in');window.scrollTo({top:0})}after()};
   if(anim&&document.startViewTransition&&!RM){const vt=document.startViewTransition(swap);vt.ready.catch(()=>{});vt.finished.catch(()=>{})}else swap();   // поворот экрана обрывает переход — не ошибка
 }
-function start(d){D=d;PHO=d.pho||{};if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
+function start(d){D=d;PHO=d.pho||{};if(Object.keys(rgGet()).length)setTimeout(rgLoop,300);if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
   // ссылка из «К»: #pend — сразу товар с ждущими решения и лист «Ждут решения»; #sku=<sku> — этот товар;
   // из Юнитки (красная «Топ не добавлен», 26.10): #sku=<sku>&pick — этот товар и сразу выбор: «Ждут решения», а если ждущих нет — «Другие из топа»
   const hs=location.hash.slice(1);let pend=false,pick=false;
