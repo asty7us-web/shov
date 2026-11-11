@@ -1712,19 +1712,23 @@ function rgBlock(p){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==
   const z=rgGet()[p.sku];if(z)return `<div class="rgp" data-rgp="${esc(p.sku)}">${rgInner(z)}</div>`;
   const m=Math.max(1,Math.round((((D.rgt||{})[p.sku])||((D.rgt||{})._)||330)/60));
   return `<div class="rg"><span class="rgb press" role="button" data-regen="${esc(p.sku)}">↻ ${(p.advice||{}).items&&p.advice.items.length?'Обновить предложения':'Сделать разбор'}</span><span class="stc">~${m} мин, тратит лимит Claude</span></div>`}
+// 11.11 Андрей «по каждому разделу отдельно»: переделать только шаги этого раздела, остальные остаются
+function rgAreaBtn(p,a){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==='yes')||rgGet()[p.sku])return '';
+  const m=Math.max(1,Math.round((((D.rgt||{})._area)||300)/60));
+  return `<div class="st"><span class="stb" role="button" data-regen="${esc(p.sku)}" data-area="${esc(a)}">↻ Обновить раздел «${esc(a)}»</span><span class="stc">~${m} мин, тратит лимит Claude</span></div>`}
 function rgCalc(z){const el=(Date.now()-(z.s0||z.at))/1000,E=Math.max(10,z.eta||60),f=Math.min(.95,el/E),A=z.adv||180,P=z.dep||150;
   if(z.st==='sent')return{pct:1+3*Math.min(1,el/20),left:A+P,txt:'Отправил, жду, когда возьмётся'};
-  if(z.st==='run')return{pct:4+76*f,left:Math.max(10,E-el)+P,txt:'Разбираю товар и конкурентов'};
+  if(z.st==='run')return{pct:4+76*f,left:Math.max(10,E-el)+P,txt:z.area?'Переделываю раздел «'+z.area+'»':'Разбираю товар и конкурентов'};
   if(z.st==='deploy')return{pct:80+17*f,left:Math.max(10,E-el),txt:'Выкладываю на сайт'};
   return{pct:97+3*Math.min(.9,el/90),left:Math.max(5,90-el),txt:'Загружаю новые предложения'}}
 function rgInner(z){const c=rgCalc(z),m=c.left>=90?'~'+Math.round(c.left/60)+' мин':'меньше минуты';
   return `<div class="rgh"><b>${c.txt}…</b><span>${Math.round(c.pct)}% · осталось ${m}</span></div><div class="rgbar"><i style="width:${c.pct.toFixed(1)}%"></i></div>`}
 function rgRedraw(){if(S.t==='konk'&&P)render(false)}
-async function rgStart(el){const sku=el.dataset.regen,p=(D.products||[]).find(q=>String(q.sku)===sku);if(!p)return;
-  const m=Math.max(1,Math.round((((D.rgt||{})[sku])||((D.rgt||{})._)||330)/60));
-  if(!confirm('Обновить предложения «Что доделать до топа»?\n«'+(p.offer_id||'')+'»\n\nЗаймёт ~'+m+' мин и потратит лимит Claude. Пока идёт, здесь будет видно, сколько осталось.'))return;
-  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify({t:'regen',sku})});if(!r.ok)throw 0;
-    const o=rgGet(),T=D.rgt||{},a=(T[sku]||T._||330)-150;o[sku]={st:'sent',at:Date.now(),s0:Date.now(),adv:Math.max(60,a),dep:150,old:rgSig(p)};rgSet(o);rgRedraw();rgLoop()}
+async function rgStart(el){const sku=el.dataset.regen,area=el.dataset.area||'',p=(D.products||[]).find(q=>String(q.sku)===sku);if(!p)return;
+  const T=D.rgt||{},tot=area?(T._area||300):(T[sku]||T._||330),m=Math.max(1,Math.round(tot/60));
+  if(!confirm((area?'Переделать только раздел «'+area+'» в «Что доделать до топа»?\nОстальные предложения останутся как есть.':'Обновить предложения «Что доделать до топа»?')+'\n«'+(p.offer_id||'')+'»\n\nЗаймёт ~'+m+' мин и потратит лимит Claude. Пока идёт, здесь будет видно, сколько осталось.'))return;
+  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify(area?{t:'regen',sku,area}:{t:'regen',sku})});if(!r.ok)throw 0;
+    const o=rgGet(),a=tot-150;o[sku]={st:'sent',at:Date.now(),s0:Date.now(),adv:Math.max(60,a),dep:150,old:rgSig(p),area};rgSet(o);rgRedraw();rgLoop()}
   catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
 let rgBusy=false,rgTick=null;
 async function rgPoll(){if(rgBusy)return;rgBusy=true;try{
@@ -1991,7 +1995,7 @@ function vKonk(p){
   <div id="cmpbox">${cmpBlock(p)}</div>
   ${cenyBlock(p)}
   <div class="duo"><div class="main">
-  ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
+  ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}${x.area?rgAreaBtn(p,x.area):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
   <div class="sec"><h2>Реклама, закупка, рынок</h2><span></span></div>${ourRk(p)}${zakup(p)}${others(p)}
   </div></div>`;
