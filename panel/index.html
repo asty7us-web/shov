@@ -484,6 +484,22 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 }
 @keyframes k3in{from{transform:translateY(44vh) scale(.965)}}
 @keyframes k3up{0%,30%{transform:translateY(78vh)}}
+/* «Погружение»: кнопка в шапке убирает страницу, остаётся сцена во весь экран; можно осмотреться и сменить место */
+#k3Btn{display:none}
+:root[data-theme="space"][data-k3d="1"] #k3Btn{display:grid}
+:root[data-k3d="1"] .top,:root[data-k3d="1"] .ctx,:root[data-k3d="1"] .dfr,:root[data-k3d="1"] main,:root[data-k3d="1"] .tabbar{transition:opacity .55s var(--ease)}
+:root.k3see .top,:root.k3see .ctx,:root.k3see .dfr,:root.k3see main,:root.k3see .tabbar{opacity:0;pointer-events:none}
+#k3ov{position:fixed;inset:0;z-index:65;touch-action:none;cursor:grab;color:#f1f2ff;opacity:0;transition:opacity .55s var(--ease);user-select:none;-webkit-user-select:none}
+#k3ov.on{opacity:1}
+#k3ov.drag{cursor:grabbing}
+#k3ov .shx{position:absolute;right:14px;top:calc(12px + env(safe-area-inset-top,0px));width:38px;height:38px;background:rgba(150,160,255,.24);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.k3cap{position:absolute;left:0;right:0;bottom:0;padding:70px 16px calc(16px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(2,3,12,0),rgba(2,3,12,.8) 62%);pointer-events:none}
+.k3cap b{display:block;font:700 23px/1.2 var(--fd);letter-spacing:-.015em}
+.k3cap small{display:block;font-size:13px;line-height:1.4;color:#b9bdea;margin-top:5px;max-width:640px}
+.k3cap .pills{pointer-events:auto;margin:12px -16px 0;padding:2px 16px}
+.k3cap .pill{background:rgba(150,160,255,.2);color:#e4e6ff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.k3cap .pill.on{background:#a996ff;color:#0b0a26}
+@media (min-width:900px){.k3cap{padding-left:30px;padding-right:30px}.k3cap .pills{margin:12px 0 0;padding:2px 0}}
 /* «Космос»: звёзды, туманность, строка с посылом */
 #stars{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:none;pointer-events:none}
 :root[data-theme="space"] #stars{display:block}
@@ -573,6 +589,7 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
     <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки, Панель"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-nm">Панель</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" id="toZakup" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/panel/" aria-current="page" role="menuitem"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Панель</b><small>продажи, прибыль, ДРР по товарам</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
     <nav class="dtabs seg" id="dtabs" aria-label="Разделы"></nav>
     <div class="sp"></div>
+    <button class="ico press" id="k3Btn" aria-label="Погрузиться в космос" title="Погрузиться в космос"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="ico press" id="sndBtn" aria-label="Музыка" aria-pressed="true" hidden><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg></button>
     <button class="press" id="themeBtn" aria-label="Тема оформления"></button>
   </div>
@@ -1485,7 +1502,7 @@ function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.ta
   if(document.startViewTransition&&!K3.live&&!matchMedia('(prefers-reduced-motion:reduce)').matches){try{const tr=document.startViewTransition(doit);for(const q of [tr.ready,tr.finished,tr.updateCallbackDone])q&&q.catch(()=>{})}catch(e){doit()}}else doit()}
 $('#tabbar').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)go(b.dataset.tab)};
 $('#pPrev').onclick=()=>step(-1);$('#pNext').onclick=()=>step(1);$('#pLab').onclick=periodSheet;
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Escape'){if(!ORI.close())closeSheet()}else if(ORI.isOpen())return;else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Escape'){if(!K3.see(false)&&!ORI.close())closeSheet()}else if(ORI.isOpen())return;else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
 const ctxEl=$('#ctx');addEventListener('scroll',()=>ctxEl.classList.toggle('stuck',innerWidth<900&&scrollY>=ctxEl.offsetTop-1),{passive:true});
 
 document.addEventListener('click',e=>{
@@ -1554,11 +1571,30 @@ const K3=(()=>{let st=0,want=false,lz=false,obs=null;const R=document.documentEl
     if(!obs){obs=new MutationObserver(()=>{if(live())KOSMOS.pause('ori',ORI.isOpen())});obs.observe(R,{attributes:true,attributeFilter:['class']})}};   // полёт к Ориону закрывает страницу — сцена ждёт
   const load=()=>{if(st===2)return run();if(st)return;st=1;const s=document.createElement('script');s.src='kosmos/scene.js';s.async=true;
     s.onload=()=>{st=window.KOSMOS?2:3;run()};s.onerror=()=>{st=3};document.head.appendChild(s)};
-  return {on(user){want=true;if(user)lz=true;if(st===3)return;if(D)setTimeout(load,user?0:300)},
+  /* «Погружение»: страница уходит, сцена остаётся одна. Места те же, что у разделов; выход — крестик, Escape или «назад» */
+  const PL={sum:['Орбита Земли','впереди рассвет'],cat:['Земля целиком','день и ночь'],skl:['Над Луной','восход Земли'],prod:['Ночная сторона','огни городов'],spp:['Луна','граница дня и ночи'],year:['Издалека','Земля на фоне Млечного Пути']};
+  let ov=null,seen=false,pl='';
+  const cap=()=>{const p=PL[pl]||PL.sum;ov.querySelector('#k3t').textContent=p[0]+' · '+p[1];ov.querySelectorAll('[data-pl]').forEach(b=>b.classList.toggle('on',b.dataset.pl===pl))};
+  function see(v){v=!!v;if(v===seen||(v&&!live()))return false;
+    if(v&&!ov){ov=document.createElement('div');ov.id='k3ov';ov.hidden=true;
+      ov.innerHTML=`<button class="shx press" id="k3x" aria-label="Вернуться к цифрам"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+<div class="k3cap"><b id="k3t"></b><small>Земля, Луна и звёздное небо — по снимкам и картам NASA. Солнце, Луна и граница дня и ночи стоят так, как сейчас на самом деле.</small>
+<div class="pills" id="k3go">${Object.keys(PL).map(k=>`<button class="pill" data-pl="${k}">${PL[k][0]}</button>`).join('')}</div><small>Проведите по экрану, чтобы осмотреться. Место меняется прыжком.</small></div>`;
+      document.body.appendChild(ov);let pt=null;
+      ov.addEventListener('click',e=>{const b=e.target.closest('[data-pl]');if(b){pl=b.dataset.pl;KOSMOS.go(pl);cap();return}if(e.target.closest('#k3x'))see(false)});
+      ov.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;pt=[e.clientX,e.clientY];ov.classList.add('drag');try{ov.setPointerCapture(e.pointerId)}catch(q){}});
+      ov.addEventListener('pointermove',e=>{if(!pt)return;KOSMOS.look(e.clientX-pt[0],e.clientY-pt[1]);pt=[e.clientX,e.clientY]});
+      const up=()=>{pt=null;ov.classList.remove('drag')};ov.addEventListener('pointerup',up);ov.addEventListener('pointercancel',up)}
+    seen=v;R.classList.toggle('k3see',v);R.classList.toggle('noscroll',v);
+    if(v){pl=S.tab;cap();ov.hidden=false;requestAnimationFrame(()=>ov.classList.add('on'));KOSMOS.see(true)}
+    else{ov.classList.remove('on');setTimeout(()=>{if(!seen)ov.hidden=true},600);if(window.KOSMOS){KOSMOS.see(false);KOSMOS.go(S.tab)}}
+    return true}
+  return {see,get seen(){return seen},on(user){want=true;if(user)lz=true;if(st===3)return;if(D)setTimeout(load,user?0:300)},
     boot(){if(want&&!st)setTimeout(load,300)},
-    off(){want=false;lz=false;delete R.dataset.k3d;R.classList.remove('k3up');if(window.KOSMOS)KOSMOS.stop()},
+    off(){want=false;lz=false;if(seen)see(false);delete R.dataset.k3d;R.classList.remove('k3up');if(window.KOSMOS)KOSMOS.stop()},
     call(fn,a,b){if(live())try{KOSMOS[fn](a,b)}catch(e){}},
     get live(){return live()},get st(){return st}}})();
+$('#k3Btn').onclick=()=>K3.see(true);
 
 /* «Космос»: звёзды */
 const stars=(()=>{const cv=$('#stars'),cx=cv.getContext('2d');let st=[],raf=0,on=false,w=0,h=0,last=0;
@@ -1734,7 +1770,7 @@ const LOCKF="<form class=\"card\" id=\"pwf\"><div class=\"lg\"><svg viewBox=\"0 
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
-if(window.svcBack)svcBack({pop:[()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
+if(window.svcBack)svcBack({pop:[()=>K3.see(false),()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
 window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
