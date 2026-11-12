@@ -1708,7 +1708,7 @@ async function stStart(el){const [sku,id]=el.dataset.start.split('|'),p=(D.produ
 // 11.11 Андрей: «↻ Обновить предложения» — только по кнопке (тратит лимит Claude); пока идёт — полоса, этап и сколько ждать
 const rgH=s=>{let x=0;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return x};
 const rgSig=p=>rgH(JSON.stringify(((p||{}).advice||{}).items||[]));
-function rgGet(){return KS.get('rg',{})}function rgSet(o){KS.set('rg',o)}
+function rgGet(){const o=KS.get('rg',{}),t=Date.now();let ch=false;for(const k in o){if(t-((o[k]||{}).at||0)>45*60e3){delete o[k];ch=true}}if(ch)KS.set('rg',o);return o}   // 11.11: зависшая полоса старше 45 мин прятала кнопки навсегдаfunction rgSet(o){KS.set('rg',o)}
 function rgBlock(p){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==='yes'))return '';
   const z=rgGet()[p.sku];if(z)return `<div class="rgp" data-rgp="${esc(p.sku)}">${rgInner(z)}</div>`;
   const m=Math.max(1,Math.round((((D.rgt||{})[p.sku])||((D.rgt||{})._)||330)/60));
@@ -2300,6 +2300,7 @@ function start(d){D=d;PHO=d.pho||{};if(Object.keys(rgGet()).length)setTimeout(rg
   if(hs.startsWith('sku=')){const [s,...f]=hs.slice(4).split('&');S.sku=s;S.t='konk';pick=f.includes('pick')}else if(hs==='pend'){const p=D.products.find(x=>pendN(x));if(p){S.sku=p.sku;S.t='konk';pend=true}}
   if(hs==='pend'||hs.startsWith('sku='))history.replaceState(null,'',location.pathname+location.search);
   render(false);if(pend)setTimeout(()=>pendSheet(P),500);
+  if(Object.keys(rgGet()).length)rgLoop();   // 11.11: после перезагрузки страницы полоса раньше не проверялась и висела
   if(pick&&P.sku===S.sku)setTimeout(()=>pendN(P)?pendSheet(P):otherSheet(P),500);
   // 26.10 Андрей: «обновление возвращает на главную» — страница строится после расшифровки данных, браузер не успевал вернуть прокрутку: возвращаем сами
   if(!hs){let y=null;try{y=JSON.parse(sessionStorage.getItem('konk.y')||'null')}catch(e){}
