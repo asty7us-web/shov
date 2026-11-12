@@ -1817,7 +1817,7 @@ function stBtn(p,x){const z=(KS.get('start',{}))[x.id];
 async function stStart(el){const [sku,id]=el.dataset.start.split('|'),p=(D.products||[]).find(q=>String(q.sku)===sku),x=(((p||{}).advice||{}).items||[]).find(q=>q.id===id);
   if(!x)return;const z=KS.get('start',{});
   if(!confirm((z[id]?'Уже начинали '+z[id]+'. Начать ещё раз?\n\n':'')+'Начать задачу?\n«'+x.title+'»\n\nЗаймётся чат «'+(x.chat||'Маркетолог К')+'»: напишет там, что сделает. В кабинете ничего не меняется без вашего «да».'))return;
-  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify({t:'start',sku,id})});if(!r.ok)throw 0;
+  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify(Object.assign({t:'start',sku,id},OZ?{}:{mp:MP}))});if(!r.ok)throw 0;
     const d=new Date(),dd=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');z[id]=dd;KS.set('start',z);
     el.classList.add('done');el.textContent='✓ Начато '+dd;toast('Отправил: план придёт в «'+(x.chat||'Маркетолог К')+'»')}
   catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
