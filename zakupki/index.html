@@ -710,7 +710,7 @@ window.svcBack=o=>{
 <nav class="tabbar" id="tabbar"></nav>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="sbody sh" id="sbody"></div></section></div>
 <div class="tip" id="tip"></div>
-<div class="lock" id="lock" hidden><div class="card"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input id="pw" type="password" autocomplete="current-password"><button class="btn press" id="pwgo" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></div></div>
+<div class="lock" id="lock" hidden></div>
 <script>
 (()=>{
 'use strict';
@@ -1538,7 +1538,10 @@ if(window.svcBack)svcBack({
   main:()=>{if(S.t!=='pick'){go('pick');return true}},
   home:()=>toast('Это главная — «Что закупать»')});
 document.addEventListener('touchstart',()=>{},{passive:true});
-function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const g=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=g;$('#pw').onkeydown=e=>{if(e.key==='Enter')g()};setTimeout(()=>$('#pw').focus(),50)}
+/* 12.11 Андрей: «выскакивает в поиске пароль постоянно» — поле пароля лежало на странице всегда (спрятанное), и браузер считал поля поиска и ссылки логином к нему:
+   при тапе в них предлагал сохранённый пароль. Теперь окно пароля — отдельная форма со своим «логином» и есть на странице, только пока спрашиваем пароль (как в «Конкурентах») */
+const LOCKF='<form class="card" id="pwf" style="margin:0"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input type="text" name="username" autocomplete="username" value="Сервисы" readonly tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;min-height:0;padding:0;margin:0;border:0;opacity:0;pointer-events:none"><input id="pw" name="password" type="password" autocomplete="current-password" aria-label="Пароль"><button class="btn press" id="pwgo" type="submit" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></form>';
+function lock(msg){const l=$('#lock');l.innerHTML=LOCKF;l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const g=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;l.innerHTML='';start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwf').onsubmit=e=>{e.preventDefault();g()};setTimeout(()=>$('#pw').focus(),50)}
 applyTheme(ZS.get('theme','auto'));
 (async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else $('#view').innerHTML='<div class="empty">Не удалось открыть данные: '+esc(e.message)+'</div>'}})();
 })();
