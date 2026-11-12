@@ -2077,7 +2077,7 @@ function vKonk(p){
   <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><button class="lnk addc press" id="addc" type="button">+ Добавить конкурента</button></div>
   ${refRow(p)}
   ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
-  ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор ${OZ?'по топу категории, поиску по названию и выдаче по ключам':'по выдаче по ключам и поиску по названию'}, с проверкой фото.</div>'}
+  ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор '+(OZ?'по топу категории, поиску по названию и выдаче по ключам':'по выдаче по ключам и поиску по названию')+', с проверкой фото.</div>'}
   ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
