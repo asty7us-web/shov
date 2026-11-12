@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Конкуренты Озон</title>
+<title>Конкуренты</title>
 <meta name="theme-color" content="#f2f2f7" id="tc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -514,8 +514,18 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .vt2{display:flex;padding:2px;border-radius:9px;background:var(--fill)}
 .vt2 button{padding:4px 10px;border-radius:7px;font-size:12px;font-weight:600;color:var(--ink2)}
 .vt2 button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.mps{flex:0 0 auto}.mps button{padding:7px 9px;font-size:12.5px}
-@media (max-width:759px){.mps button{padding:7px 7px}}
+.mps{flex:0 0 auto}.mps button{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;font-size:12.5px}
+/* значки площадок — настоящие цветные, как в Склейках (Андрей 12.11: «чтобы было понятно везде, какой мп щас»); невыбранная площадка сереет */
+.mpi{display:inline-block;width:20px;height:20px;border-radius:6px;background:center/cover no-repeat var(--fill);flex:none;vertical-align:-5px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.mpi.oz{background-color:#005bff}.mpi.wb{background-color:#a51ce0}.mpi.ym{background-color:#ffd60a}
+.mpi.sm{width:16px;height:16px;border-radius:5px;vertical-align:-3px}
+.mpi.big{width:28px;height:28px;border-radius:8px;vertical-align:-4px;margin-right:10px}
+.mps button .mpi{transition:filter .25s,opacity .25s}.mps button:not(.on) .mpi{filter:grayscale(.9);opacity:.5}
+.mpn{display:inline-flex;align-items:center;gap:5px;font-weight:650;color:var(--ink);vertical-align:bottom}
+.ctx .mpi{margin-right:-1px}
+/*MPI:IMG*/.mpi.oz{background-image:url("data:image/png;base64,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")}.mpi.wb{background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzgwMTBfNzc2KSI+CjxtYXNrIGlkPSJtYXNrMF84MDEwXzc3NiIgc3R5bGU9Im1hc2stdHlwZTphbHBoYSIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iMCIgeT0iMCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4Ij4KPHBhdGggZD0iTTAgMTMuNjUzM0MwIDguODc0MjIgMCA2LjQ4NDY2IDAuOTMwMDc4IDQuNjU5MjhDMS43NDgyIDMuMDUzNjMgMy4wNTM2MyAxLjc0ODIgNC42NTkyOCAwLjkzMDA3OEM2LjQ4NDY2IDAgOC44NzQyMiAwIDEzLjY1MzMgMEgzNC4zNDY3QzM5LjEyNTggMCA0MS41MTUzIDAgNDMuMzQwNyAwLjkzMDA3OEM0NC45NDY0IDEuNzQ4MiA0Ni4yNTE4IDMuMDUzNjMgNDcuMDY5OSA0LjY1OTI4QzQ4IDYuNDg0NjYgNDggOC44NzQyMiA0OCAxMy42NTMzVjM0LjM0NjdDNDggMzkuMTI1OCA0OCA0MS41MTUzIDQ3LjA2OTkgNDMuMzQwN0M0Ni4yNTE4IDQ0Ljk0NjQgNDQuOTQ2NCA0Ni4yNTE4IDQzLjM0MDcgNDcuMDY5OUM0MS41MTUzIDQ4IDM5LjEyNTggNDggMzQuMzQ2NyA0OEgxMy42NTMzQzguODc0MjIgNDggNi40ODQ2NiA0OCA0LjY1OTI4IDQ3LjA2OTlDMy4wNTM2MyA0Ni4yNTE4IDEuNzQ4MiA0NC45NDY0IDAuOTMwMDc4IDQzLjM0MDdDMCA0MS41MTUzIDAgMzkuMTI1OCAwIDM0LjM0NjdWMTMuNjUzM1oiIGZpbGw9IiNGRjAwMDAiIHN0eWxlPSJmaWxsOiNGRjAwMDA7ZmlsbDpjb2xvcihkaXNwbGF5LXAzIDEuMDAwMCAwLjAwMDAgMC4wMDAwKTtmaWxsLW9wYWNpdHk6MTsiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzgwMTBfNzc2KSI+CjxyZWN0IHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgZmlsbD0iI0ZGMDBGRiIgc3R5bGU9ImZpbGw6I0ZGMDBGRjtmaWxsOmNvbG9yKGRpc3BsYXktcDMgMS4wMDAwIDAuMDAwMCAxLjAwMDApO2ZpbGwtb3BhY2l0eToxOyIvPgo8cGF0aCBkPSJNMzUuNjU4NyAxNy43NDI2QzM0LjA1ODcgMTcuNzQyNiAzMi42MTM3IDE4LjIyMzcgMzEuMzggMTkuMDQ3MVYxMS41MzIySDI3Ljk2NjlWMjUuMzkxM0MyNy45NjY5IDI5LjYwNzggMzEuNDE3NSAzMy4wMDEgMzUuNjQgMzMuMDAxQzM5Ljg2MjQgMzMuMDAxIDQzLjM1MjIgMjkuNjI4MSA0My4zNTIyIDI1LjM1MjNDNDMuMzUyMiAyMS4wNzY1IDM5LjkzOTEgMTcuNzQyNiAzNS42NTg3IDE3Ljc0MjZaTTIwLjE2OTUgMjYuMzcwNEwxNy4wNDYxIDE4LjI4MTNIMTQuNjU1NEwxMS41MTMzIDI2LjM3MDRMOC4zNzExNSAxOC4yODEzSDQuNjQ3OTVMMTAuMTQzMyAzMi41MDQ2SDEyLjUzNEwxNS44MzEyIDI0LjAzMjdMMTkuMTQ3MSAzMi41MDQ2SDIxLjUzNzhMMjcuMDE0NCAxOC4yODEzSDIzLjMxMTdMMjAuMTY5NSAyNi4zNzA0Wk0zNS42NDE3IDI5LjYwOTVDMzMuMzI3NyAyOS42MDk1IDMxLjM4IDI3Ljc2OTcgMzEuMzggMjUuMzcyN0MzMS4zOCAyMi45NzU2IDMzLjIxMTggMjEuMTU2MSAzNS42NjA0IDIxLjE1NjFDMzguMTA5IDIxLjE1NjEgMzkuOTQwOCAyMy4wNTM1IDM5Ljk0MDggMjUuMzcyN0MzOS45NDA4IDI3LjY5MTggMzcuOTkzMiAyOS42MDk1IDM1LjY0MTcgMjkuNjA5NVoiIGZpbGw9IndoaXRlIiBzdHlsZT0iZmlsbDp3aGl0ZTtmaWxsLW9wYWNpdHk6MTsiLz4KPC9nPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzgwMTBfNzc2Ij4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZpbGw6d2hpdGU7ZmlsbC1vcGFjaXR5OjE7Ii8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==")}.mpi.ym{background-image:url("data:image/png;base64,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")}/*/MPI:IMG*/
+@media (max-width:759px){.mps button{padding:5px 8px 5px 6px}}
+@media (max-width:560px){.mps button{padding:5px 6px}.mps button .t{display:none}}   /* телефон: одни значки — товару в шапке остаётся место */
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table.ct{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
 .ct th{font-size:10.5px;font-weight:600;color:var(--ink3);text-align:right;padding:9px 6px 6px;line-height:1.15;vertical-align:bottom}
@@ -1097,19 +1107,20 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LS={get(k,d){try{const v=localStorage.getItem('shov.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('shov.'+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem('shov.'+k)}catch(e){}}};
 /* 12.11 Андрей: «конкуренты аналогично надо вб каб1 ям» — площадка выбирается в шапке; данные, выбранный товар и очередь решений у каждой свои */
-const MPL={oz:{n:'Озон',g:'Озона',na:'на Озоне',btn:'на Ozon',f:'data.enc.json'},wb:{n:'ВБ',g:'ВБ',na:'на ВБ',btn:'на WB',f:'data_wb.enc.json'},ym:{n:'ЯМ',g:'Маркета',na:'на Маркете',btn:'на Маркет',f:'data_ym.enc.json'}};
+const MPL={oz:{n:'Озон',full:'Озон',g:'Озона',na:'на Озоне',btn:'на Ozon',f:'data.enc.json'},wb:{n:'ВБ',full:'ВБ Каб 1',g:'ВБ',na:'на ВБ',btn:'на WB',f:'data_wb.enc.json'},ym:{n:'ЯМ',full:'Яндекс Маркет',g:'Маркета',na:'на Маркете',btn:'на Маркет',f:'data_ym.enc.json'}};
 let MP='oz';try{const hm=(location.hash.match(/mp=(oz|wb|ym)/)||[])[1],v=hm||JSON.parse(localStorage.getItem('konk.mp')||'"oz"');if(MPL[v])MP=v;if(hm)localStorage.setItem('konk.mp',JSON.stringify(hm))}catch(e){}
-const M=MPL[MP],OZ=MP==='oz';
+const M=MPL[MP],OZ=MP==='oz';try{document.title='Конкуренты · '+M.full}catch(e){}
 M.link=OZ?s=>'https://www.ozon.ru/product/'+s+'/':MP==='wb'?s=>'https://www.wildberries.ru/catalog/'+s+'/detail.aspx':s=>'https://market.yandex.ru/search?text='+encodeURIComponent(s);
 M.q=OZ?q=>'https://www.ozon.ru/search/?text='+encodeURIComponent(q):MP==='wb'?q=>'https://www.wildberries.ru/catalog/0/search.aspx?search='+encodeURIComponent(q):q=>'https://market.yandex.ru/search?text='+encodeURIComponent(q);
-const MPK=new Set(['sku','q','kc','refr','tab']),mk=k=>!OZ&&MPK.has(k)?k+'_'+MP:k;
+const MPK=new Set(['sku','q','kc','refr','tab','rg']),mk=k=>!OZ&&MPK.has(k)?k+'_'+MP:k;
 const KS={get(k,d){try{const v=localStorage.getItem('konk.'+mk(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('konk.'+mk(k),JSON.stringify(v))}catch(e){}}};
-const mpSwitch=()=>`<span class="vt2 mps" id="mps" aria-label="Площадка">${Object.keys(MPL).map(k=>`<button type="button" class="press${k===MP?' on':''}" data-mp="${k}">${MPL[k].n}</button>`).join('')}</span>`;
+const mpi=(k,c)=>`<span class="mpi ${k||MP}${c?' '+c:''}" role="img" aria-label="${MPL[k||MP].full}"></span>`;   // значок площадки (12.11 вечер)
+const mpSwitch=()=>`<span class="vt2 mps" id="mps" role="group" aria-label="Площадка">${Object.keys(MPL).map(k=>`<button type="button" class="press${k===MP?' on':''}" data-mp="${k}" title="${MPL[k].full}" aria-pressed="${k===MP}">${mpi(k)}<span class="t">${MPL[k].n}</span></button>`).join('')}</span>`;
 document.addEventListener('click',e=>{const b=e.target.closest('[data-mp]');if(!b||b.dataset.mp===MP)return;try{localStorage.setItem('konk.mp',JSON.stringify(b.dataset.mp))}catch(x){}history.replaceState(null,'',location.pathname+location.search);location.reload()});
-const MPNOTE=MP==='wb'?'<b>Откуда цифры.</b> Наши продажи и воронка — кабинет ВБ Каб 1. Цена, рейтинг, отзывы, остаток и срок — витрина ВБ в Москве. <b>Продажи конкурентов ВБ не показывает никому</b> — здесь оценка: новые отзывы конкурента за период × сколько наших заказов приходится на один наш отзыв по этому товару. Порядок цифр верный, точность — нет. Остаток конкурента ВБ показывает не больше 50, ставки рекламы не показывает.'
- :'<b>Откуда цифры.</b> Наши продажи и остаток — кабинет Маркета. Цена, рейтинг, оценки, «купили» и метка рекламы — плитка товара в выдаче Маркета. «Купили» — счётчик самого Маркета на плитке; за какой срок он считает, Маркет не пишет. Штук за 7 дней у конкурентов — насколько вырос счётчик по нашим замерам, появится через неделю после первого сбора.';
-const ALLNOTE=MP==='wb'?'В сервисе только активные товары ВБ Каб 1: от 30 заказов или от 50 тыс ₽ за 28 дней и есть остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом середина топа (оценка по отзывам). <b>Цена к топу</b> — наша цена на витрине против середины конкурентов. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Доставка</b> — срок в Москву, дней.'
- :'В сервисе только активные товары Маркета: есть заказы за 28 дней и остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом счётчик «купили» у середины топа. <b>Цена к топу</b> — наша цена против середины конкурентов. <b>Место в поиске</b> — середина наших мест по запросам из названия товара.';
+const MPNOTE=MP==='wb'?'<b>Откуда цифры.</b> Наши продажи, воронка, реклама и остатки — кабинет ВБ Каб 1. Цена, рейтинг, отзывы, фото, акция, склад и срок — витрина ВБ в Москве. <b>Продажи конкурентов ВБ не показывает никому</b> — здесь оценка: новые отзывы конкурента за период × сколько наших заказов приходится на один наш отзыв по этому товару. Порядок цифр верный, точность — нет. Остаток конкурента ВБ показывает не полностью: число с «+» значит «не меньше». Ставки и расход на рекламу конкурентов ВБ не показывает.'
+ :'<b>Откуда цифры.</b> Наши продажи и остатки по магазинам — кабинет Маркета. Цена, рейтинг, оценки, «купили», метка рекламы и срок — плитка товара в выдаче Маркета. «Купили» — счётчик самого Маркета на плитке; за какой срок он считает, Маркет не пишет. Штук за 7 дней у конкурентов — насколько вырос счётчик по нашим замерам, появится через неделю после первого сбора.';
+const ALLNOTE=MP==='wb'?'В сервисе все товары ВБ Каб 1, у которых есть остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом середина топа (оценка по отзывам). <b>Цена к топу</b> — наша цена на витрине против середины конкурентов. <b>Реклама</b> — наша доля рекламы от заказов за 7 дней (до 15% — норма); у конкурентов ВБ её не показывает. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Склады</b> — срок доставки в Москву, дней, против середины топа. <b>Карточка</b> — наш рейтинг против середины топа, с поправкой на число отзывов и фото.'
+ :'В сервисе все товары Маркета, у которых есть остаток хотя бы в одном нашем магазине. <b>Заказы</b> — наши штуки за 7 дней, рядом счётчик «купили» у середины топа. <b>Цена к топу</b> — наша цена против середины конкурентов. <b>Реклама</b> — есть ли у нашей плитки метка рекламы в выдаче. <b>Место в поиске</b> — середина наших мест по запросам из названия товара. <b>Склады</b> — в скольких наших магазинах Маркета товар выставлен. <b>Карточка</b> — наш рейтинг против середины топа.';
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // base64 → байты: встроенным fromBase64, где он есть, иначе простым циклом (28.10: Uint8Array.from с функцией на каждый знак — секунда на телефоне при открытии)
 const b64u8=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
@@ -1167,7 +1178,7 @@ const IC={
  find:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>',
  x:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".6"/><path d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8" fill="none" style="stroke:var(--card)" stroke-width="2.2" stroke-linecap="round"/></svg>'
 };
-const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Ключи'],['sklad','Склады']].filter(t=>MP!=='ym'||t[0]!=='sklad');   // у Маркета сроков по городам и кластеров нет
+const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Ключи'],['sklad','Склады']];   // 12.11 вечер: «Склады» есть и у Маркета — наши магазины и срок доставки
 if(!TABS.some(t=>t[0]===S.t))S.t='konk';
 
 /* ---------- тема ---------- */
@@ -1443,7 +1454,7 @@ const FINE=matchMedia('(pointer:fine)').matches;   // мышь: в поле ср
 const PQ={q:'',f:'all'};let PKB=-1;
 function prodSheet(focus,f){
   if(f){PQ.f=f;PQ.q=''}
-  openSheet('',`<div class="sec" style="margin:4px 2px 10px"><h2>Товары</h2><span>${D.products.length}</span></div>${sfBox('pq','Название или артикул',PQ.q)}<div id="pqf">${sfChips('data-pf',PQ.f,pfList())}</div><div class="sfn" id="pqn"></div>`,'tall');
+  openSheet('',`<div class="sec" style="margin:4px 2px 10px"><h2>${mpi(MP,'sm')} Товары · ${M.full}</h2><span>${D.products.length}</span></div>${sfBox('pq','Название или артикул',PQ.q)}<div id="pqf">${sfChips('data-pf',PQ.f,pfList())}</div><div class="sfn" id="pqn"></div>`,'tall');
   $('#sbody').dataset.prod=1;prodList();
   const i=$('#pq');i.oninput=()=>{PQ.q=i.value;prodList();$('#sbody').scrollTop=0};
   i.onkeydown=e=>{const bs=$$('#sbody [data-pick]');
@@ -1468,7 +1479,7 @@ function renderPicker(){
   $('#picker').innerHTML=mpSwitch()+`<button class="chip pcur press" data-pp="cur" aria-label="Сменить товар">${img(pphoto(P))}<span><b>${esc(P.offer_id)}</b><i>7 дн: ${fi((P.our||{}).cnt7)} шт${skladBad(P)?' · кончается на складе':pendN(P)?' · ждут решения '+pendN(P):''}</i></span>${IC.down}</button>`
    +`<button class="chip psr press" data-pp="find" aria-label="Найти товар">${IC.find}<span>Найти товар — название или артикул</span><kbd>/</kbd></button>`
    +pl.slice(1).filter(x=>x[2]).map(([k,n,c,cl])=>`<button class="chip pfb ${cl} press" data-pp="${k}" aria-label="${k==='sklad'?'Кончаются на складе':n}: ${c}" title="${k==='sklad'?'Кончаются на складе':'Ждут решения по конкурентам'}">${'<i></i>'+c}</button>`).join('');
-  $('#ctx').innerHTML=`${img(P.photo||(P.our_card||{}).photo)}<b>${esc(P.offer_id)}</b><i>· ${TABS.find(t=>t[0]===S.t)[1]}</i>${IC.down}`;
+  $('#ctx').innerHTML=`${mpi(MP,'sm')}${img(P.photo||(P.our_card||{}).photo)}<b>${esc(P.offer_id)}</b><i>· ${TABS.find(t=>t[0]===S.t)[1]}</i>${IC.down}`;
 }
 function renderTabs(){
   const b=t=>t==='konk'&&D.products.reduce((s,p)=>s+pendN(p),0);
@@ -1548,33 +1559,47 @@ const GROUPS_OZ=[
 ];
 const nReg=()=>((D||{}).regions||[]).length||9;
 const dH=c=>ok(c.dlv_h)?Math.max(1,Math.ceil(c.dlv_h/24)):ok(c.dlv)?c.dlv:null;   // срок доставки, дней: ВБ отдаёт часы, Маркет — дату
+const ynT=v=>!ok(v)?'—':v>=0.5?'да':'нет';
+const discP=c=>ok(c.price)&&ok(c.old_price)&&c.old_price>c.price?(1-c.price/c.old_price)*100:null;
+const pct0=v=>ok(v)?NF.format(v)+'%':'—';
+/* 12.11 вечер (Андрей: «сам анализ, пункты и представленность сделай лучше»): к прежним строкам — скидка на витрине, акция, наша цена до скидки ВБ и сама скидка,
+   фото в карточке, рейтинг продавца, наша реклама (доля, расход, дни), с какого склада везут. Строки «только наши» у конкурентов пустые: ВБ этого не показывает */
 const GROUPS_WB=[
  ['sales','Продажи',[
   ['Штук за 7 дней',c=>c.cnt7,fi,1,'у конкурентов — оценка по отзывам'],['Заказано за 7 дней',c=>c.sum7,fk,1,'у конкурентов — оценка'],
   ['Динамика к прошлой неделе',c=>c.dyn7,v=>ok(v)?(v>0?'+':'')+NF.format(v)+'%':'—',1],['Штук за 28 дней',c=>c.cnt28,fi,1,'у конкурентов — оценка по отзывам'],
   ['Новых отзывов за 7 дней',c=>c.fb7,fi,1]]],
- ['price','Цена',[['Цена на витрине',c=>c.price,fr,0,'Москва, сейчас'],['Цена до скидки',c=>c.old_price,fr,0]]],
+ ['price','Цена',[['Цена на витрине',c=>c.price,fr,0,'Москва, сейчас'],['Цена до скидки',c=>c.old_price,fr,0],
+  ['Скидка на витрине',c=>discP(c),pct0,0,'от цены до скидки'],['В акции ВБ',c=>c.promo==null?null:c.promo?1:0,ynT,0,'метка акции на витрине'],
+  ['Наша цена до скидки ВБ',c=>c.us?c.price_seller:null,fr,0,'только наши — середина по заказам за 7 дней'],['Скидка ВБ',c=>c.us?c.spp:null,pct0,0,'только наши — её ставит сам ВБ']]],
  ['funnel','Карточка',[
-  ['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Отзывов',c=>c.reviews,fi,1],
+  ['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Отзывов',c=>c.reviews,fi,1],['Фото в карточке',c=>c.pics,fi,1],['Рейтинг продавца',c=>c.seller_rating,v=>ok(v)?N1.format(v):'—',1],
   ['Открытий карточки',c=>c.sessions,fi,1,'только наши — кабинет'],['Карточка → корзина',c=>c.cv_card_cart,fp,1,'только наши'],
   ['Корзина → заказ',c=>c.cv_cart_order,fp,1,'только наши'],['Доля выкупа',c=>c.redemption,fp,1,'только наши']]],
- ['ads','Поиск',[
+ ['ads','Реклама и поиск',[
+  ['ДРР',c=>c.us?c.drr:null,fp,-1,'только наши — расход ÷ заказы; до 15% — норма'],['Расход на рекламу в день',c=>c.us?c.ad_day:null,fr,0,'только наши'],
+  ['Дней с рекламой из 7',c=>c.us?c.ad_days:null,fi,0,'только наши'],
   ['Позиция по главному ключу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},fi,-1,'Москва, сейчас; меньше — лучше'],
   ['Ключей в первой сотне',(c,p)=>{const ks=p.keys||[];if(!ks.length)return null;return ks.filter(k=>{const r=snapRow(p,c.sku,k.q);return r&&r.pos<=100}).length},fi,1,'из главных ключей']]],
  ['stock','Наличие',[
-  ['Остаток',c=>c.stock,(v,c)=>!ok(v)?'—':c&&c.stock_more?'50+':fi(v),0,'у конкурентов ВБ показывает не больше 50'],
+  ['Остаток',c=>c.stock,(v,c)=>!ok(v)?'—':c&&c.stock_more?fi(v)+'+':fi(v),0,'у конкурентов ВБ показывает не полностью: «+» — не меньше'],
+  ['Везут со склада ВБ',c=>c.fbs==null?null:c.fbs?0:1,ynT,1,'в Москву; «нет» — продавец везёт со своего склада, это дольше'],
   ['Срок доставки в Москву, дней',c=>dH(c),fi,-1,'меньше — лучше'],
   ['Городов с доставкой за 1–2 дня',(c,p)=>{const f=fastCities(p,c.sku);return f?f[0]:null},v=>ok(v)?v+' из '+nReg():'—',1]]]
 ];
 const GROUPS_YM=[
  ['sales','Продажи',[
-  ['Купили, счётчик Маркета',c=>c.bought,fi,1,'на плитке товара'],['Штук за 7 дней',c=>c.cnt7,fi,1,'у конкурентов — рост счётчика по нашим замерам'],['Штук за 28 дней',c=>c.cnt28,fi,1,'только наши']]],
+  ['Купили, счётчик Маркета',c=>c.bought,fi,1,'на плитке товара'],['Штук за 7 дней',c=>c.cnt7,fi,1,'у конкурентов — рост счётчика по нашим замерам'],
+  ['Заказано за 7 дней',c=>c.sum7,fk,1],['Штук за 28 дней',c=>c.cnt28,fi,1,'только наши']]],
  ['price','Цена',[['Цена на витрине',c=>c.price,fr,0,'сейчас']]],
  ['funnel','Карточка',[['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Оценок',c=>c.reviews,fi,1]]],
- ['ads','Поиск',[
+ ['ads','Реклама и поиск',[
   ['Позиция по главному запросу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},fi,-1,'сейчас; меньше — лучше'],
-  ['Реклама в выдаче',c=>c.ad==null?null:c.ad?1:0,v=>!ok(v)?'—':v?'да':'нет',0,'метка на плитке']]],
- ['stock','Наличие',[['Остаток',c=>c.stock,fi,0,'только наши'],['Срок доставки, дней',c=>dH(c),fi,-1,'меньше — лучше']]]
+  ['Реклама в выдаче',c=>c.ad==null?null:c.ad?1:0,ynT,0,'метка на плитке'],
+  ['Запросов с местом на первой странице',(c,p)=>{const ks=p.keys||[];if(!ks.length)return null;return ks.filter(k=>snapRow(p,c.sku,k.q)).length},fi,1,'из запросов по названию']]],
+ ['stock','Наличие',[['Остаток',c=>c.stock,fi,0,'только наши'],
+  ['Магазинов с товаром',c=>c.us?c.shops_stock:null,(v,c)=>ok(v)?v+' из '+((c&&c.shops_all)||10):'—',0,'только наши — наши магазины на Маркете'],
+  ['Срок доставки, дней',c=>dH(c),fi,-1,'меньше — лучше']]]
 ];
 const GROUPS=OZ?GROUPS_OZ:MP==='wb'?GROUPS_WB:GROUPS_YM;
 function mcard(p,m){
@@ -1598,20 +1623,34 @@ function anglesMp(p){
   const mp=med(cs.map(c=>c.price)),d=ok(p.price)&&ok(mp)&&mp?p.price/mp-1:null;
   A.push({k:'Цена',st:d==null?'mut':Math.abs(d)<=0.1?'good':d>0.1&&so==='bad'?'bad':'warn',v:fr(p.price),c:d==null?'—':(d>0?'+':'')+NF.format(d*100)+'%',
    s:d==null?'':Math.abs(d)<=0.1?'как у топа':(d>0?'дороже':'дешевле')+' на '+NF.format(Math.abs(d)*100)+'%',t:`Мы ${fr(p.price)}, середина топа ${fr(mp)}`});
-  const rt=(p.our_card||{}).rating,mr=med(cs.map(c=>c.rating)),rv=(p.our_card||{}).reviews,mv=med(cs.map(c=>c.reviews));
-  A.push({k:'Рейтинг',st:!ok(rt)||!ok(mr)?'mut':rt>=mr-0.05?'good':rt>=mr-0.3?'warn':'bad',v:ok(rt)?N1.format(rt):'—',c:ok(rt)?N1.format(rt):'—',s:(ok(mr)?'топ '+N1.format(mr):'')+(ok(rv)?' · '+fi(rv)+' отз.':''),
-   t:`Рейтинг: мы ${ok(rt)?N1.format(rt):'—'}, середина топа ${ok(mr)?N1.format(mr):'—'}. Отзывов: мы ${fi(rv)}, топ ${fi(mv)}`});
+  if(ym){const sk=((p.snap||{}).keys||{})[MAIN(p)]||{},n10=sk.ads10,cad=cs.filter(c=>c.ad).length;
+    A.push({k:'Реклама',st:o.ad==null&&!ok(n10)&&!cs.length?'mut':o.ad?'good':(ok(n10)&&n10>=5)||(cs.length&&cad>=cs.length/2)?'warn':'mut',v:o.ad==null?'—':o.ad?'идёт':'нет',c:o.ad==null?'—':o.ad?'да':'нет',
+     s:ok(n10)?'в топ-10 рекламных '+n10:cs.length?'с рекламой '+cad+' из '+cs.length:'',
+     t:`Метка рекламы на плитке в выдаче Маркета: у нас ${o.ad==null?'не видно — нас нет на первой странице':o.ad?'есть':'нет'}; среди конкурентов с рекламой ${cad} из ${cs.length}${ok(n10)?'; в первой десятке по главному запросу рекламных плиток '+n10:''}`})}
+  else{const dr=o.drr,has=Array.isArray(p.rk),on=has?p.rk.filter(x=>x.on).length:0;
+    A.push({k:'Реклама',st:!has?'mut':ok(dr)?(dr<=15?'good':dr<=25?'warn':'bad'):on?'warn':'mut',v:!has?'—':ok(dr)?fp(dr)+' ДРР':on?'идёт':'не идёт',c:!has?'—':ok(dr)?N1.format(dr)+'%':on?'идёт':'нет',
+     s:!has?'':(on?on+' '+plur(on,'кампания идёт','кампании идут','кампаний идут'):'кампании не идут')+(ok(o.ad_day)&&o.ad_day>0?' · '+fr(o.ad_day)+' в день':''),
+     t:`Наша доля рекламы от заказов за 7 дней: ${fp(dr)} (расход по кабинету ÷ заказы). До 15% — норма. Кампаний идёт: ${on}. Ставки и расход конкурентов ВБ не показывает`})}
   const ks=p.keys||[],pn=med(ks.map(k=>(snapRow(p,p.sku,k.q)||{}).pos)),p28=med(ks.map(k=>k.pos28));
   A.push({k:'Поиск',st:!ks.length?'mut':!ok(pn)?'bad':pn<=10?'good':pn<=30?'warn':'bad',v:ok(pn)?fi(pn)+' место':ks.length?'нет в выдаче':'—',c:ok(pn)?fi(pn):ks.length?'нет':'—',
    s:ok(p28)?'по Джему '+fi(p28):'',t:`Середина наших мест по ${ks.length} запросам сейчас: ${fi(pn)}${ok(p28)?'. Средняя позиция за 7 дней по Джему (все показы, с рекламой): '+fi(p28):''}`});
-  const du=dH(o),md=med(cs.map(dH));
-  A.push({k:'Доставка',st:!ok(du)||!ok(md)?'mut':du<=md?'good':du<=md+1?'warn':'bad',v:ok(du)?fi(du)+' дн':'—',c:ok(du)?fi(du)+' д':'—',s:ok(md)?'топ '+fi(md)+' дн':'',
-   t:`Срок доставки${ym?'':' в Москву'}: мы ${fi(du)} дн, середина топа ${fi(md)} дн`});
-  const st=o.stock;
-  A.push({k:'Остаток',st:!ok(st)?'mut':st>0?'good':'bad',v:ok(st)?fi(st)+' шт':'—',c:ok(st)?fi(st):'—',s:!ym&&ok(o.stock_fbo)?'на складах ВБ '+fi(o.stock_fbo):'',
-   t:`Наш остаток: ${fi(st)} шт${ym?'':' (на складах ВБ '+fi(o.stock_fbo)+', на своём '+fi(o.stock_fbs)+')'}`});
-  const NAV=[{h:'Заказы, шт',t:'konk',g:'sales',f:'m:Штук за 7 дней'},{h:'Цена к топу',t:'konk',g:'price',f:'m:Цена на витрине'},{h:'Рейтинг',t:'konk',g:'funnel',f:'m:Рейтинг'},
-   {h:'Место в поиске',t:'keys',f:'heat'},{h:'Доставка, дн',t:'konk',g:'stock',f:ym?'m:Срок доставки, дней':'m:Срок доставки в Москву, дней'},{h:'Остаток',t:'konk',g:'stock',f:'m:Остаток'}];
+  const du=dH(o),md=med(cs.map(dH)),sd=!ok(du)||!ok(md)?null:du<=md?'good':du<=md+1?'warn':'bad';
+  if(ym){const sh=o.shops_stock,all=o.shops_all||10;
+    A.push({k:'Склады',st:ok(sh)?(sh>=3?(sd||'good'):sh>=2?'warn':'bad'):(sd||'mut'),v:ok(sh)?sh+' из '+all:ok(du)?fi(du)+' дн':'—',c:ok(sh)?sh+'/'+all:ok(du)?fi(du)+' д':'—',
+     s:(ok(sh)?'магазинов с товаром':'')+(ok(du)?(ok(sh)?' · ':'')+'везём '+fi(du)+' дн':''),
+     t:`Товар выставлен в ${ok(sh)?sh+' из '+all+' наших магазинов Маркета':'— (нет данных)'}. Срок доставки: мы ${fi(du)} дн, середина топа ${fi(md)} дн. Остаток: ${fi(o.stock)} шт`})}
+  else{const fc=fastCities(p,p.sku);
+    A.push({k:'Склады',st:sd||((o.stock_fbo||0)>0?'good':'mut'),v:ok(du)?fi(du)+' дн':'—',c:ok(du)?fi(du)+' д':'—',
+     s:(ok(md)?'топ '+fi(md)+' дн':'')+(o.fbs===true?' · свой склад':o.fbs===false?' · склад ВБ':''),
+     t:`Срок доставки в Москву: мы ${fi(du)} дн, середина топа ${fi(md)} дн.${o.fbs===true?' В Москву везём со своего склада.':o.fbs===false?' В Москву везём со склада ВБ.':''} На складах ВБ ${fi(o.stock_fbo)} шт, на своём ${fi(o.stock_fbs)} шт${fc?'. За 1–2 дня доставляем в '+fc[0]+' из '+fc[1]+' городов':''}`})}
+  const rt=(p.our_card||{}).rating,mr=med(cs.map(c=>c.rating)),rv=(p.our_card||{}).reviews,mv=med(cs.map(c=>c.reviews)),pc0=o.pics,mpc=med(cs.map(c=>c.pics));
+  let sc='mut';if(ok(rt)&&ok(mr)){sc=rt>=mr-0.05?'good':rt>=mr-0.3?'warn':'bad';if(sc==='good'&&((ok(pc0)&&ok(mpc)&&pc0<mpc*0.7)||(ok(rv)&&ok(mv)&&mv>0&&rv<mv*0.3)))sc='warn'}
+  else if(ok(rt))sc=rt>=4.7?'good':rt>=4.4?'warn':'bad';
+  A.push({k:'Карточка',st:sc,v:ok(rt)?'★ '+N1.format(rt):'—',c:ok(rt)?N1.format(rt):'—',
+   s:(ok(mr)?'топ '+N1.format(mr):'')+(ok(rv)?(ok(mr)?' · ':'')+fi(rv)+' отз.':'')+(ok(pc0)?' · фото '+pc0:''),
+   t:`Рейтинг: мы ${ok(rt)?N1.format(rt):'—'}, середина топа ${ok(mr)?N1.format(mr):'—'}. Отзывов: мы ${fi(rv)}, топ ${fi(mv)}${ok(pc0)?'. Фото в карточке: мы '+pc0+', топ '+fi(mpc):''}${ok(o.cv_card_cart)?'. Из открывших карточку кладут в корзину '+fp(o.cv_card_cart):''}`});
+  const NAV=[{h:'Заказы, шт',t:'konk',g:'sales',f:'m:Штук за 7 дней'},{h:'Цена к топу',t:'konk',g:'price',f:'m:Цена на витрине'},{h:'Реклама',t:'konk',g:'ads',f:ym?'m:Реклама в выдаче':'rk'},
+   {h:'Место в поиске',t:'keys',f:'heat'},{h:'Склады',t:'sklad',f:'skl'},{h:'Карточка',t:'konk',g:'funnel',f:'m:Рейтинг'}];
   A.forEach((a,i)=>Object.assign(a,NAV[i]));return A}
 function angles(p){
   if(!OZ)return anglesMp(p);
@@ -1645,7 +1684,7 @@ const goAttr=(p,a)=>`data-go="${p.sku}" data-gt="${a.t}"${a.g?` data-gg="${a.g}"
 const stc=s=>s==='good'?'p1':s==='warn'?'p2':s==='bad'?'p3':'p0';
 function hero(p){
   const o=p.our||{};
-  return `<div class="card hero sm reveal">${img(pphoto(p))}<div style="min-width:0"><h1>${esc(p.offer_id)}</h1><p>${esc(p.type_name||'')}${!OZ?'':o.rank?` · ${o.rank}-е место в категории по заказам`:' · ниже 200-го места в категории'}</p>
+  return `<div class="card hero sm reveal">${img(pphoto(p))}<div style="min-width:0"><h1>${esc(p.offer_id)}</h1><p><span class="mpn">${mpi(MP,'sm')}${M.full}</span> · ${esc(p.type_name||'')}${!OZ?'':o.rank?` · ${o.rank}-е место в категории по заказам`:' · ниже 200-го места в категории'}</p>
    <div class="tags">${pendN(p)?`<span class="tag wait">${IC.clock}${pendN(p)} ${plur(pendN(p),'ждёт','ждут','ждут')} согласования</span>`:''}${skladBad(p)?`<span class="tag bad">${IC.warn}кончается на складе</span>`:''}<a class="tag acc" href="${esc(OZ?'https://www.ozon.ru/product/'+p.sku+'/':(p.our||{}).link||M.link(p.sku))}" target="_blank" rel="noopener">${M.btn} ${IC.ext}</a></div></div></div>
   <div class="ang">${angles(p).map(a=>`<button class="card an press ${a.st} reveal" ${goAttr(p,a)} title="${esc(a.t)}"><div class="l"><i></i>${a.k}</div><div class="v">${a.v}</div><div class="s">${esc(a.s)||'&nbsp;'}</div></button>`).join('')}</div>`;
 }
@@ -1667,6 +1706,7 @@ const SH={'Заказано за 7 дней':'₽ за 7 дн','Штук за 7 
  'Показы всего':'показы','Показы в поиске':'в поиске','Посещения карточки':'визиты','Показ → заказ':'показ → заказ','Поиск → корзина':'поиск → корз.','Карточка → корзина':'карт. → корз.','Доля выкупа':'выкуп',
  'ДРР':'ДРР','Расход на рекламу в день':'₽ в день','Дней с оплатой за клик из 7':'реклама, дн','Ставка за клик, главный ключ':'ставка','Позиция по главному ключу':'место','Рейтинг':'рейтинг','Отзывов':'отзывы',
  'Остаток на конец недели':'остаток','Цена на витрине':'цена','Цена до скидки':'до скидки','Новых отзывов за 7 дней':'отз. 7 дн','Открытий карточки':'открытий','Корзина → заказ':'корз. → заказ','Ключей в первой сотне':'ключей в 100','Остаток':'остаток','Срок доставки в Москву, дней':'срок, дн','Срок доставки, дней':'срок, дн','Купили, счётчик Маркета':'купили','Оценок':'оценки','Позиция по главному запросу':'место','Реклама в выдаче':'реклама','Дней без остатка из 28':'дн. без ост.','Упущенные продажи':'упущено','Городов с доставкой за 1–2 дня':'быстрая дост.'};
+Object.assign(SH,{'Скидка на витрине':'скидка','В акции ВБ':'акция','Наша цена до скидки ВБ':'до скидки ВБ','Скидка ВБ':'скидка ВБ','Фото в карточке':'фото','Рейтинг продавца':'рейт. прод.','Дней с рекламой из 7':'реклама, дн','Везут со склада ВБ':'склад ВБ','Магазинов с товаром':'магазинов','Запросов с местом на первой странице':'запросов'});
 const cpt=s=>String(s).replace(/ тыс ₽/,'к').replace(/ млн ₽/,' млн').replace(/ из \d+$/,'');   // телефон: «35 тыс ₽» → «35к»
 function mvals(p,m,C){const [,get]=m;return C.map(c=>{try{const v=get(c,p);return typeof v==='number'&&isFinite(v)?v:null}catch(e){return null}})}
 function mmark(vals,dir){   // подсветка: наш столбец лучше/хуже медианы конкурентов на 10%, лучшее значение — подчёркнуто
@@ -1784,13 +1824,17 @@ async function stStart(el){const [sku,id]=el.dataset.start.split('|'),p=(D.produ
 // 11.11 Андрей: «↻ Обновить предложения» — только по кнопке (тратит лимит Claude); пока идёт — полоса, этап и сколько ждать
 const rgH=s=>{let x=0;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return x};
 const rgSig=p=>rgH(JSON.stringify(((p||{}).advice||{}).items||[]));
-function rgGet(){const o=KS.get('rg',{}),t=Date.now();let ch=false;for(const k in o){if(t-((o[k]||{}).at||0)>45*60e3){delete o[k];ch=true}}if(ch)KS.set('rg',o);return o}   // 11.11: зависшая полоса старше 45 мин прятала кнопки навсегдаfunction rgSet(o){KS.set('rg',o)}
-function rgBlock(p){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==='yes'))return '';
+function rgGet(){const o=KS.get('rg',{}),t=Date.now();let ch=false;for(const k in o){if(t-((o[k]||{}).at||0)>45*60e3){delete o[k];ch=true}}if(ch)KS.set('rg',o);return o}   // 11.11: зависшая полоса старше 45 мин прятала кнопки навсегда
+function rgSet(o){KS.set('rg',o)}   // 12.11: стояла в хвосте примечания строкой выше и не работала — после нажатия писало «не отправилось», хотя запрос уходил
+const rgCan=p=>(p.comps||[]).some(c=>OZ?c.status==='yes':true);   // ВБ и ЯМ (12.11): разбор можно и по ждущим решения — иначе кнопки не было бы почти нигде
+const rgNum=s=>OZ||/^\d+$/.test(s)?s:String(Math.abs(rgH('k'+s))||7);   // бот берёт только номер из цифр; настоящий ключ товара идёт рядом (key)
+function rgBlock(p){if(!(D.zadachi||{}).topic)return '';
+  if(!rgCan(p))return OZ?'':'<div class="rg"><span class="stc">Разбор появится, когда у товара будет хотя бы один конкурент: «Найти заново» или «+ Добавить конкурента» выше.</span></div>';
   const z=rgGet()[p.sku];if(z)return `<div class="rgp" data-rgp="${esc(p.sku)}">${rgInner(z)}</div>`;
   const m=Math.max(1,Math.round((((D.rgt||{})[p.sku])||((D.rgt||{})._)||330)/60));
   return `<div class="rg"><span class="rgb press" role="button" data-regen="${esc(p.sku)}">↻ ${(p.advice||{}).items&&p.advice.items.length?'Обновить предложения':'Сделать разбор'}</span><span class="stc">~${m} мин, тратит лимит Claude</span></div>`}
 // 11.11 Андрей «по каждому разделу отдельно»: переделать только шаги этого раздела, остальные остаются
-function rgAreaBtn(p,a){if(!(D.zadachi||{}).topic||!(p.comps||[]).some(c=>c.status==='yes')||rgGet()[p.sku])return '';
+function rgAreaBtn(p,a){if(!(D.zadachi||{}).topic||!rgCan(p)||rgGet()[p.sku])return '';
   const m=Math.max(1,Math.round((((D.rgt||{})._area)||300)/60));
   return `<div class="st"><span class="stb" role="button" data-regen="${esc(p.sku)}" data-area="${esc(a)}">↻ Обновить раздел «${esc(a)}»</span><span class="stc">~${m} мин, тратит лимит Claude</span></div>`}
 function rgCalc(z){const el=(Date.now()-(z.s0||z.at))/1000,E=Math.max(10,z.eta||60),f=Math.min(.95,el/E),A=z.adv||180,P=z.dep||150;
@@ -1804,7 +1848,7 @@ function rgRedraw(){if(S.t==='konk'&&P)render(false)}
 async function rgStart(el){const sku=el.dataset.regen,area=el.dataset.area||'',p=(D.products||[]).find(q=>String(q.sku)===sku);if(!p)return;
   const T=D.rgt||{},tot=area?(T._area||300):(T[sku]||T._||330),m=Math.max(1,Math.round(tot/60));
   if(!confirm((area?'Переделать только раздел «'+area+'» в «Что доделать до топа»?\nОстальные предложения останутся как есть.':'Обновить предложения «Что доделать до топа»?')+'\n«'+(p.offer_id||'')+'»\n\nЗаймёт ~'+m+' мин и потратит лимит Claude. Пока идёт, здесь будет видно, сколько осталось.'))return;
-  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify(area?{t:'regen',sku,area}:{t:'regen',sku})});if(!r.ok)throw 0;
+  try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic,{method:'POST',body:JSON.stringify(Object.assign({t:'regen',sku:rgNum(sku)},area?{area}:{},OZ?{}:{mp:MP,key:sku}))});if(!r.ok)throw 0;
     const o=rgGet(),a=tot-150;o[sku]={st:'sent',at:Date.now(),s0:Date.now(),adv:Math.max(60,a),dep:150,old:rgSig(p),area};rgSet(o);rgRedraw();rgLoop()}
   catch(e){toast('Не отправилось, нет связи — попробуйте ещё раз')}}
 let rgBusy=false,rgTick=null;
@@ -1814,7 +1858,7 @@ async function rgPoll(){if(rgBusy)return;rgBusy=true;try{
   let evs=[];try{const r=await fetch('https://ntfy.sh/'+D.zadachi.topic+'/json?poll=1&since='+since,{cache:'no-store'});
     evs=(await r.text()).split('\n').map(l=>{try{const e=JSON.parse(l);return e.event==='message'?JSON.parse(e.message):null}catch(x){return null}}).filter(q=>q&&q.t==='prog')}catch(e){}
   let ch=false;
-  for(const sku of ks){const z=o[sku];const my=evs.filter(q=>String(q.sku)===sku&&q.t0*1000>=z.at-5000);const q=my[my.length-1];
+  for(const sku of ks){const z=o[sku];const my=evs.filter(q=>String(q.key||q.sku)===sku&&(q.mp||'oz')===MP&&q.t0*1000>=z.at-5000);const q=my[my.length-1];
     if(q&&q.st!==z.st&&!(z.st==='reload'&&q.st==='done')){
       if(q.st==='busy'||q.st==='fail'){delete o[sku];toast(q.st==='busy'?'Сейчас обновляется другой товар — нажмите через пару минут':'Не получилось: '+(q.msg||'сбой')+'. Попробуйте ещё раз');ch=true;continue}
       z.s0=q.t0*1000;z.eta=q.eta;if(q.st==='run')z.adv=q.eta;if(q.st==='deploy')z.dep=q.eta;z.st=q.st==='done'?'reload':q.st;z.tries=0;ch=true}
@@ -2070,6 +2114,25 @@ function cenyBlock(p){
   }
   return h+'</div>';
 }
+/* наша реклама по товару на ВБ (12.11 вечер): кампании Каб 1 из кабинета — идёт или на паузе, за показы или за клики, ставка, расход за 7 дней, остаток бюджета */
+function ourRkWb(p){
+  if(!Array.isArray(p.rk))return '';const rk=p.rk,o=p.our||{},on=rk.filter(r=>r.on).length;
+  const rows=rk.map(r=>`<div class="rk${r.on?' on':''}"><i></i><b>${esc(r.t||'Кампания')}</b><span class="vl num">${ok(r.bid)?N1.format(r.bid)+' ₽':''}</span>
+    <small>${r.on?'идёт':'на паузе'}${r.pay?' · '+esc(r.pay):''}${r.pl?' · '+esc(r.pl):''}${ok(r.s7)&&r.s7>0?' · за 7 дн '+fr(r.s7):''}${r.on&&ok(r.bud)?' · остаток бюджета '+fr(r.bud):''}</small></div>`).join('');
+  return `<div class="card mc reveal" data-f="rk"><h3>Наша реклама по товару<em>${rk.length?on+' из '+rk.length+' '+plur(on,'идёт','идут','идут'):''}</em></h3>
+   <div class="verdict">${ok(o.drr)?`<span class="${o.drr<=15?'up':o.drr<=25?'mut':'dn'}">Доля рекламы от заказов за 7 дней: ${fp(o.drr)}</span>${ok(o.ad_day)&&o.ad_day>0?' · '+fr(o.ad_day)+' в день':''}`:`<span class="mut">${on?'Реклама идёт, заказов за 7 дней нет — доля не считается':'За 7 дней расхода на рекламу нет'}</span>`}</div>
+   ${rows||'<div class="mut" style="font-size:13px;padding:4px 0 6px">Кампаний с этим товаром нет.</div>'}
+   <div class="note" style="margin:6px 0 0">Кабинет ВБ Каб 1. Ставка — как стоит в кампании: за 1000 показов или за клик. До 15% от заказов — норма. Ставки и расход конкурентов ВБ не показывает никому.</div></div>`;
+}
+function howMp(){const W=MP==='wb';openSheet(`<div class="sec" style="margin-top:4px"><h2>Как получаются предложения</h2><span></span></div><div class="adv">${[
+   ['Кого сравниваем','Наш товар и до пяти конкурентов из топа: тот же или почти такой же товар по фото'+(W?' и характеристикам':'')+'. Согласованные и ждущие решения — модель видит, кто есть кто.'],
+   ['Какие цифры',W?'Наши — из кабинета ВБ Каб 1: заказы, воронка, реклама, остатки, заказы по округам, цена и скидка ВБ. Конкурентов — с витрины: цена, рейтинг, отзывы, фото, акция, чей склад, срок доставки. Продажи конкурентов ВБ не показывает — это оценка по новым отзывам.'
+     :'Наши — из кабинета Маркета: заказы, остатки по магазинам, цена. Конкурентов — с плиток выдачи: цена, рейтинг, оценки, «купили», метка рекламы, срок доставки. Своих поисковых запросов Маркет не отдаёт — запросы взяты из названия товара.'],
+   ['Порядок','Склады → реклама → цена → карточка → ключи → закупка. Нет товара близко к покупателю — реклама и цена работают хуже. Первым стоит шаг, где разрыв в деньгах больше.'],
+   ['Деньги','Советы про цену и рекламу считаются через панель: сколько останется прибыли с одной штуки. В минус цену не предлагаем.'],
+   ['Чего нет','Ставки и расход на рекламу конкурентов '+(W?'ВБ':'Маркет')+' не показывает никому, поэтому таких цифр в предложениях нет.'],
+   ['Кто пишет','Opus 5.5 на глубоком разборе, только по цифрам со страницы. Сам ничего не меняет: цены, ставки и рекламу — только по вашему «да». Обновление — по кнопке, оно тратит лимит Claude.']
+  ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`)}
 function vKonk(p){
   const cs=p.comps||[],pn=pendN(p),rj=(p.rejected||[]).filter(r=>!qOf(p,r.sku)).length;
   const adv=(p.advice||{}).items||[];
@@ -2084,9 +2147,9 @@ function vKonk(p){
   <div id="cmpbox">${cmpBlock(p)}</div>
   ${cenyBlock(p)}
   <div class="duo"><div class="main">
-  ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}${x.area?rgAreaBtn(p,x.area):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
+  ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic&&(OZ||x.chat)?stBtn(p,x):''}${x.area?rgAreaBtn(p,x.area):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
-  <div class="sec"><h2>${OZ?'Реклама, закупка, рынок':'Закупка и рынок'}</h2><span></span></div>${OZ?ourRk(p):''}${zakup(p)}${others(p)}${OZ?'':`<div class="card pad reveal"><div class="note" style="margin:0">${MPNOTE}</div></div>`}
+  <div class="sec"><h2>${MP==='ym'?'Закупка и рынок':'Реклама, закупка, рынок'}</h2><span></span></div>${OZ?ourRk(p):MP==='wb'?ourRkWb(p):''}${zakup(p)}${others(p)}${OZ?'':`<div class="card pad reveal"><div class="note" style="margin:0">${MPNOTE}</div></div>`}
   </div></div>`;
 }
 
@@ -2144,7 +2207,7 @@ function vKeys(p){
   const nowAvg=med(ks.map(k=>nowPos(p,k.q,p.sku)));
   const junk=p.junk||[],w=kwOf(p),rk=byRank(p);
   const KC=kcOf(p),TS=KC.map(s=>rk.find(c=>c.sku===s)).filter(Boolean);   // с кем сравнивать в ключах: свой выбор, до 3 (по умолчанию два главных по продажам)
-  return `<h1 class="lt reveal">Ключи</h1><p class="sub reveal">${OZ?ks.length+' главных запросов по заказам за 28 дней — как Sellium у Вовы.':MP==='wb'?ks.length+' главных запросов по заказам за 7 дней — из Джема ВБ.':'Запросы взяты из названия товара: своих поисковых запросов Маркет не отдаёт.'} Место — чем меньше, тем выше в выдаче.</p>
+  return `<h1 class="lt reveal">${mpi(MP,'big')}Ключи</h1><p class="sub reveal">${OZ?ks.length+' главных запросов по заказам за 28 дней — как Sellium у Вовы.':MP==='wb'?ks.length+' главных запросов по заказам за 7 дней — из Джема ВБ.':'Запросы взяты из названия товара: своих поисковых запросов Маркет не отдаёт.'} Место — чем меньше, тем выше в выдаче.</p>
   <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">Середина наших мест сейчас</div><div class="v">${ok(nowAvg)?`<span data-count="${Math.round(nowAvg)}">${fi(nowAvg)}</span>`:'—'}</div><div class="s">по ${ks.length} ключам${MP==='ym'?'':', Москва'}</div></div>
   <div class="card tile reveal"><div class="l">Замер</div><div class="v" style="font-size:20px">${esc(((p.snap||{}).at||'').slice(11))}</div><div class="s">${esc(ddmm((p.snap||{}).at||''))}, обновляется 4 раза в день</div></div></div>
   <div class="sec"><h2>Средняя позиция по дням</h2><span>чьи места — выберите</span></div>
@@ -2173,7 +2236,7 @@ function vAll(){
   const ps=D.products,H=angles(ps[0]).map(a=>a.h);
   const rows=ps.map(p=>{const A=angles(p),pn=pendN(p);return `<tr data-sv="${p.sku}"><td><button class="who press" data-go="${p.sku}"${pn?` title="${pn} ${plur(pn,'кандидат ждёт','кандидата ждут','кандидатов ждут')} решения"`:''}>${img(pphoto(p))}${pn?'<i class="pd"></i>':''}<b>${esc(p.offer_id)}</b></button></td>${A.map(a=>`<td><button class="pc press ${stc(a.st)}" ${goAttr(p,a)} title="${esc(p.offer_id+' · '+a.h+': '+a.t)}">${a.c}</button></td>`).join('')}</tr>`}).join('');
   const first=ps.map(p=>({p,a:((p.advice||{}).items||[])[0]})).filter(x=>x.a);
-  return `<h1 class="lt reveal">Сводка</h1><p class="sub reveal">Все ${ps.length} ${plur(ps.length,'товар','товара','товаров')} против своего топа. Нажмите клетку — откроется нужный раздел, нужное место подсветится.</p>
+  return `<h1 class="lt reveal">${mpi(MP,'big')}Сводка</h1><p class="sub reveal">${M.full}: все ${ps.length} ${plur(ps.length,'товар','товара','товаров')} против своего топа. Нажмите клетку — откроется нужный раздел, нужное место подсветится.</p>
   <div class="svq reveal">${sfBox('svq','Найти товар в сводке',SQ.q)}<div id="svf">${sfChips('data-sf',SQ.f,pfList())}</div><div class="sfn" id="svn"></div></div>
   <div class="card sv reveal"><table><thead><tr><th>Товар</th>${H.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}<tr class="svnone" hidden><td colspan="${H.length+1}" class="mut" style="padding:22px 10px;text-align:center">Ничего не нашли</td></tr></tbody></table></div>
   <div class="legend"><span><i style="background:var(--good)"></i>как топ или лучше</span><span><i style="background:var(--warn)"></i>отстаём</span><span><i style="background:var(--bad)"></i>сильно хуже</span><span><i style="background:var(--warn);border-radius:50%"></i>ждут решения по конкурентам</span></div>
@@ -2211,13 +2274,36 @@ function regView(p){
      return `<td><span class="dd ${dcls(d)}" title="${esc(nm(c)+' · '+ct+': '+(v||'не нашли в выдаче города'))}">${d==null?'—':d}</span></td>`}).join('')}</tr>`).join('')}</tbody></table></div>`+foot;
 }
 function vSkladMp(p){
-  const o=p.our||{},reg=(p.regions||{}).by||{};
+  const o=p.our||{},ym=MP==='ym',reg=(p.regions||{}).by||{},cs=p.comps||[];
   const cities=Object.keys(reg).some(ct=>Object.keys(reg[ct]||{}).length)?Object.keys(reg):[];
-  return `<h1 class="lt reveal">Склады</h1><p class="sub reveal">Где товар лежит ближе к покупателю: срок доставки по городам у нас и у конкурентов, витрина ВБ.</p>
-  <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">На складах ВБ</div><div class="v">${fi(o.stock_fbo)}</div><div class="s">шт, везёт ВБ</div></div>
+  const who=[{us:true,seller:'Мы',photo:pphoto(p),fbs:o.fbs,d:dH(o)}].concat(byRank(p).map(c=>Object.assign({},c,{d:dH(c)})));
+  if(ym){
+    const sk=p.sklady||[],tot=sk.reduce((s,x)=>s+(x.cnt28||0),0),mxs=Math.max(...sk.map(x=>x.cnt28||0),1),withS=sk.filter(x=>x.stock>0).length,all=o.shops_all||sk.length,mxd=Math.max(...who.map(c=>c.d||0),1);
+    return `<h1 class="lt reveal">${mpi(MP,'big')}Склады</h1><p class="sub reveal">В каких наших магазинах Маркета товар выставлен, откуда его заказывают и как быстро везём мы и конкуренты.</p>
+    <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">Магазинов с товаром</div><div class="v">${p.sklady?fi(withS)+`<small>из ${fi(all)}</small>`:'—'}</div><div class="s">наши магазины-склады на Маркете</div></div>
+    <div class="card tile reveal"><div class="l">Заказов за 28 дней</div><div class="v">${p.sklady?fi(tot):fi(o.cnt28)}</div><div class="s">шт, по всем магазинам</div></div></div>
+    ${sk.length?`<div class="sec"><h2>Наши магазины</h2><span>${sk.length}</span></div><div class="card mc reveal" data-f="skl"><h3>Откуда заказывают<em>штук за 28 дней · остаток</em></h3>
+     ${sk.map(x=>`<div class="br${x.stock>0?'':' pend'}" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto" data-tip="<b>${esc(x.n)}</b>${esc(x.type||'')} · заказов за 28 дней ${fi(x.cnt28)} · остаток ${fi(x.stock)}"><span class="nm" style="white-space:normal">${esc(x.n)}${x.type?` <small class="mut">${esc(x.type)}</small>`:''}</span><span class="tr"><i style="--w:${Math.max(2,(x.cnt28||0)/mxs*100)}%"></i></span><span class="vl num">${fi(x.cnt28)} шт · ${x.stock>0?'ост. '+fi(x.stock):'<b style="color:var(--bad)">нет</b>'}</span></div>`).join('')}
+     <div class="note" style="margin:6px 0 0">Магазин без остатка покупателю рядом с ним товар не покажет или повезёт издалека. Остаток — как выставлен в кабинете Маркета. FBS — отгружаем сами, FBY — склад Маркета.</div></div>`
+     :'<div class="card pad mut reveal" data-f="skl" style="margin-top:10px">Остатки по магазинам появятся после полного сбора.</div>'}
+    ${who.some(c=>ok(c.d))?`<div class="sec"><h2>Срок доставки</h2><span>дней, с плитки выдачи</span></div><div class="card mc reveal"><h3>Мы и конкуренты<em>меньше — лучше</em></h3>${who.map(c=>`<div class="br${c.us?' us':''}"${c.us?'':` data-comp="${c.sku}"`}>${img(c.photo)}<span class="nm">${esc(c.us?'Мы':cnm(c))}</span><span class="tr"><i style="--w:${ok(c.d)?Math.max(4,c.d/mxd*100):0}%"></i></span><span class="vl num">${ok(c.d)?fi(c.d)+' дн':'—'}</span></div>`).join('')}
+     <div class="note" style="margin:6px 0 0">Срок — что Маркет обещал на плитке в момент замера. Нас или конкурента нет на первой странице выдачи — прочерк.</div></div>`:''}`;
+  }
+  const sk=p.sklad||{},okr=sk.okr||[],fbo=sk.fbo||[],q28=sk.q28||okr.reduce((s,x)=>s+(x.q||0),0),mxo=Math.max(...okr.map(x=>x.q||0),1),sh=ok(sk.fbo_share28)?sk.fbo_share28*100:null;
+  const cf=cs.filter(c=>c.fbs===false).length,ckn=cs.filter(c=>c.fbs!=null).length;
+  return `<h1 class="lt reveal">${mpi(MP,'big')}Склады</h1><p class="sub reveal">Где товар лежит и откуда его везут: чем ближе к покупателю, тем быстрее доставка и выше место в выдаче ВБ.</p>
+  <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">На складах ВБ</div><div class="v">${fi(o.stock_fbo)}</div><div class="s">шт, везёт ВБ${ok(sk.way_to)&&sk.way_to?' · к покупателям едет '+fi(sk.way_to):''}</div></div>
   <div class="card tile reveal"><div class="l">На своём складе</div><div class="v">${fi(o.stock_fbs)}</div><div class="s">шт, отгружаем сами</div></div></div>
+  <div class="card mc reveal" data-f="skl" style="margin-top:10px"><h3>Откуда везут в Москву<em>со склада ВБ быстрее</em></h3>
+   <div class="verdict">${o.fbs===true?'<span class="dn">Мы — со своего склада</span>':o.fbs===false?'<span class="up">Мы — со склада ВБ</span>':'<span class="mut">Про нас витрина не показала</span>'}${ckn?` · у конкурентов со склада ВБ ${cf} из ${ckn}`:''}</div>
+   ${who.map(c=>`<div class="br${c.us?' us':''}" style="grid-template-columns:30px minmax(0,1fr) auto"${c.us?'':` data-comp="${c.sku}"`}>${img(c.photo)}<span class="nm">${esc(c.us?'Мы':cnm(c))}</span><span class="vl num">${c.fbs===true?'свой склад':c.fbs===false?'склад ВБ':'—'}${ok(c.d)?' · '+fi(c.d)+' дн':''}</span></div>`).join('')}
+   <div class="note" style="margin:6px 0 0">С какого склада товар едет покупателю в Москве и за сколько дней — как показывает витрина ВБ сейчас.</div></div>
+  ${okr.length?`<div class="sec"><h2>Куда уходят заказы</h2><span>${fi(q28)} шт за 28 дней</span></div><div class="card mc reveal"><h3>Заказы по округам<em>${ok(sh)?'со складов ВБ уехало '+NF.format(sh)+'%':''}</em></h3>
+   ${okr.map(x=>`<div class="br" style="grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto" data-tip="<b>${esc(x.n)}</b>${fi(x.q)} шт за 28 дней, из них со складов ВБ ${fi(x.fbo)}"><span class="nm" style="white-space:normal">${esc(x.n)}</span><span class="tr"><i style="--w:${Math.max(2,(x.q||0)/mxo*100)}%"></i></span><span class="vl num">${fi(x.q)} шт<small class="mut"> · ВБ ${x.q?NF.format((x.fbo||0)/x.q*100):0}%</small></span></div>`).join('')}
+   <div class="note" style="margin:6px 0 0">Округ — куда заказали. «ВБ %» — какая доля этих заказов уехала со складов ВБ, остальное — со своего склада. Много заказов в округе и мало со складов ВБ — туда стоит довезти.</div></div>`:''}
+  ${fbo.length>1?`<div class="sec"><h2>Наши остатки на складах ВБ</h2><span>${fbo.length}</span></div><div class="card sv reveal"><table><thead><tr><th>Склад ВБ</th><th>Остаток, шт</th></tr></thead><tbody>${fbo.map(x=>`<tr><td><b style="font-size:12.5px;font-weight:600">${esc(x.n)}</b></td><td class="num">${fi(x.q)}</td></tr>`).join('')}</tbody></table></div>`:''}
   ${cities.length?`<div class="sec" style="margin-top:14px"><h2>Где лежат конкуренты</h2><span>срок доставки, дней</span></div><div class="pbar"><span class="vt2 sgm" id="rv">${[['tab','Таблица'],['city','По городам'],['bars','Полоски']].map(([k,n])=>`<button class="${S.rv===k?'on':''}" data-rv="${k}">${n}</button>`).join('')}</span></div><div id="rgbox">${regView(p)}</div>`
-   :'<div class="card pad mut reveal">Сроки по городам ещё не сняты — появятся после полного сбора.</div>'}`;
+   :'<div class="card pad mut reveal" style="margin-top:10px">Сроки по городам ещё не сняты — появятся после полного сбора.</div>'}`;
 }
 function vSklad(p){
   if(!OZ)return vSkladMp(p);
@@ -2229,7 +2315,7 @@ function vSklad(p){
   const R=54,Cn=2*Math.PI*R,frac=days==null?0:Math.min(1,days/30),rc=days==null?'var(--bar)':(days<=4||bad.length)?'var(--bad)':days<=10?'var(--warn)':'var(--good)';
   const reg=(p.regions||{}).by||{},cs=p.comps||[];
   const cities=cs.some(c=>Object.values(reg).some(v=>v[c.sku]))?Object.keys(reg):[];   // ни одного конкурента в выдаче городов — блок не показываем
-  return `<h1 class="lt reveal">Склады</h1><p class="sub reveal">Остатки FBO по кластерам. Вова: везти на 7–10 дней, Москву — в начале недели, подсвечивать за 3–4 дня до нуля.</p>
+  return `<h1 class="lt reveal">${mpi(MP,'big')}Склады</h1><p class="sub reveal">Остатки FBO по кластерам. Вова: везти на 7–10 дней, Москву — в начале недели, подсвечивать за 3–4 дня до нуля.</p>
   ${cities.length?`<div class="sec" style="margin-top:14px"><h2>Где лежат конкуренты</h2><span>срок доставки, дней</span></div><div class="pbar"><span class="vt2 sgm" id="rv">${[['tab','Таблица'],['city','По городам'],['bars','Полоски']].map(([k,n])=>`<button class="${S.rv===k?'on':''}" data-rv="${k}">${n}</button>`).join('')}</span></div><div id="rgbox">${regView(p)}</div>`:''}
   <div class="card sh reveal"><div class="ring"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${R}" stroke="var(--fill)"/><circle cx="66" cy="66" r="${R}" stroke="${rc}" stroke-dasharray="${Cn}" stroke-dashoffset="${Cn}" class="rg" data-off="${Cn*(1-frac)}" style="transition:stroke-dashoffset 1.3s var(--out)"/></svg><div class="rv"><b>${days==null?'—':`<span data-count="${Math.round(days)}">${fi(days)}</span>`}</b><span>дней в среднем</span></div></div>
    <div class="tx"><b style="font-size:17px">${bad.length?`${bad.length} ${plur(bad.length,'кластер пустеет','кластера пустеют','кластеров пустеют')}, а там продажи`:`${fi(tot)} шт на складах Озона`}</b><p>${bad.length?`Всего ${fi(tot)} шт. `:''}Продаём ${N1.format(ads)} шт в день.${need?` Чтобы хватило на 10 дней в каждом кластере, довезти <b>${fi(need)} шт</b>.`:' На 10 дней хватает везде.'}</p>
@@ -2343,14 +2429,14 @@ function after(){
     const r=els[0].getBoundingClientRect();window.scrollTo({top:scrollY+r.top-($('#top').offsetHeight+18),behavior:RM?'auto':'smooth'})},RM?0:380)}
   const cv=$('#cv');if(cv)cv.onclick=e=>{const b=e.target.closest('[data-cv]');if(!b||b.dataset.cv===S.cv)return;S.cv=b.dataset.cv;KS.set('cv',S.cv);segPick(cv,b);
     $('#grp').classList.toggle('only-m',S.cv==='tab');thumbs(box);body()};
-  const ha=$('#howadv');if(ha)ha.onclick=()=>openSheet(`<div class="sec" style="margin-top:4px"><h2>Как получаются советы</h2><span></span></div><div class="adv">${[
+  const ha=$('#howadv');if(ha)ha.onclick=()=>{if(!OZ)return howMp();openSheet(`<div class="sec" style="margin-top:4px"><h2>Как получаются советы</h2><span></span></div><div class="adv">${[
    ['Кого сравниваем','Наш товар и до 7 конкурентов: тот же или почти такой же товар по фото и характеристикам, цена 70–150% нашей, больше всех заказов за 7 дней. Согласованные в «К» и ждущие ✅ — модель видит, кто есть кто.'],
    ['Где слабое место','Сравниваем все цифры из таблицы «Мы против топа»: продажи, цену, воронку, рекламу, места по ключам, склады. Где мы хуже середины топа больше чем на 10% — там и чинить.'],
    ['Порядок по методу Вовы','Склады → реклама → цена → карточка → закупка. Нет товара в кластере — реклама бессмысленна. Из рекламы не выходить. Ставку лидера не перебить — догонять ценой и складами. Демперов в минус не догоняем.'],
    ['Как сортируем','Первым — шаг, где разрыв в рублях больше. Метка над шагом — о чём он: склады, реклама, цена, карточка, ключи, закупка.'],
    ['Реклама на Озоне','Ставка за клик ставится на товар целиком, не на запрос. Поднять место по отдельному запросу — ставкой на товар, словами запроса в названии и описании, ценой, складами рядом с покупателем.'],
    ['Кто пишет','Opus 5.5 на максимальном разборе, только по цифрам со страницы. Сам ничего не меняет: цены, ставки и рекламу — только по вашему «да».']
-  ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`);
+  ].map(([h,t],i)=>`<div class="card ad" style="box-shadow:none;background:var(--fill2)"><div class="h"><span class="k">${i+1}</span><div><b>${h}</b><div class="w">${t}</div></div></div></div>`).join('')}</div>`);}
   $$('#view #rej').forEach(b=>b.onclick=()=>otherSheet(P));
   const ac=$('#addc');if(ac)ac.onclick=()=>addSheet(P);
   const rf=$('#refr');if(rf)rf.onclick=()=>{rf.disabled=true;refSend(P)};
