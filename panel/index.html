@@ -500,6 +500,19 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .k3cap .pill{background:rgba(150,160,255,.2);color:#e4e6ff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .k3cap .pill.on{background:#a996ff;color:#0b0a26}
 @media (min-width:900px){.k3cap{padding-left:30px;padding-right:30px}.k3cap .pills{margin:12px 0 0;padding:2px 0}}
+/* «данные в космосе»: окно в «Сводке», за которым сцена рисует площадки (или склейки площадки) планетами; подписи — кнопки страницы */
+.sysw{display:none}
+:root[data-theme="space"][data-k3d="1"] .sysw{display:block;position:relative;height:276px;margin:0 0 12px;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 .5px var(--line);
+  background:linear-gradient(rgba(8,10,34,.34),rgba(8,10,34,.08) 42%,rgba(8,10,34,.34))}
+.sysh{position:absolute;left:16px;right:16px;top:13px;z-index:1;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;pointer-events:none}
+.sysh b{font:700 11px/1 var(--f);letter-spacing:.14em;text-transform:uppercase;color:#cfc6ff}
+.sysh span{font-size:12px;color:var(--ink3)}
+.sysl{position:absolute;inset:0}
+.sysl button{position:absolute;left:0;top:0;transform:translate(-300px,-300px);display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px 5px;border-radius:12px;white-space:nowrap;color:#fff;text-shadow:0 1px 7px rgba(2,3,12,.95),0 0 2px rgba(2,3,12,.9);will-change:transform}
+.sysl button i{display:block;border-radius:50%}
+.sysl button b{font:650 12.5px/1.2 var(--f)}
+.sysl button small{font:500 11px/1.15 var(--f);color:#d5d8ff}
+@media (min-width:900px){:root[data-theme="space"][data-k3d="1"] .sysw{height:330px}.sysl button b{font-size:13.5px}.sysl button small{font-size:12px}}
 /* «Космос»: звёзды, туманность, строка с посылом */
 #stars{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:none;pointer-events:none}
 :root[data-theme="space"] #stars{display:block}
@@ -1044,7 +1057,7 @@ function vSum(){
   if(g==='d'&&S.mp==='all')notes.push('День — только Озон: у ВБ в панели недели, у ЯМ месяцы.');
   if(g==='w'&&S.mp==='all'&&D.mp.ym)notes.push('Неделя — ВБ и Озон: у ЯМ в панели только месяцы.');
   if(joined())notes.push('Товар, который продаётся на нескольких площадках, идёт одной строкой с суммой по площадкам — разбивка внутри. Отдельной строкой на каждую площадку — «Товары», кнопка «Вместе».');
-  return `<div class="aff" id="aff"></div>
+  return `<div class="aff" id="aff"></div><div class="sysw" id="sysw" hidden><div class="sysh"><b>Система продаж</b><span id="sysc"></span></div><div class="sysl" id="sysl"></div></div>
 <div class="g sg">
 <div class="card hero"><div class="lbl">Продажи · ${plabel(g,k,true)}${S.mp!=='all'?' · '+MPN[S.mp]:''}${S.kab?' · Каб '+S.kab:''}</div>
 <div class="big"><span class="num" id="heroV" data-v="${PS.get('lastHero','')}">${fr(m.sales)}</span>${dS!=null?chip(dS):''}</div>
@@ -1071,6 +1084,24 @@ ${kpi('Эквайринг и хранение',`<span class="num">${fp(sh(m.acq+
 <div class="g g2" style="margin-top:12px">${catc}${sklc}${lead}${drag}${mov}</div>
 ${notes.length?`<div class="note">${notes.join(' ')}</div>`:''}${foot()}`;
 }
+/* «Данные в космосе» (тема «Космос» в 3D): в «Сводке» площадки — планеты на орбитах, в срезе одной площадки — её склейки. Размер — продажи,
+   цвет — маржа (зелёная от 12% продаж, жёлтая около нуля, красная в минусе); у самой большой — кольцо. Планеты рисует сцена (KOSMOS.system),
+   подписи — кнопки страницы: площадка — data-mp (выбрать её), склейка — data-skl (открыть лист). */
+function sysDraw(){
+  if(!K3.live)return;const el=$('#sysw');if(!el||S.tab!=='sum'){KOSMOS.system(null);return}
+  const g=S.g,k=curK(),its=items(g,k),all=S.mp==='all'&&MPS.length>1;
+  let ls=all?MPS.map(mp=>({t:MPN[mp],m:met(vsum(its.filter(x=>x.mp===mp).map(x=>x.v))),a:`data-mp="${mp}"`}))
+    :sklsC(g,k).filter(x=>x.key!=='-').map(x=>({t:x.t,m:x.m,a:`data-skl="${esc(x.key)}"`}));
+  ls=ls.filter(x=>x.m.sales>0).sort((a,b)=>b.m.sales-a.m.sales).slice(0,7);
+  el.hidden=!ls.length;if(!ls.length){KOSMOS.system(null);return}
+  const mx=ls[0].m.sales,G=[.37,.95,.69],Y=[1,.81,.44],B=[1,.53,.59];
+  const colr=q=>{const t=Math.max(-1,Math.min(1,q/.12)),a=t>=0?Y:B,b=t>=0?G:Y,u=t>=0?t:t+1;return a.map((v,i)=>v+(b[i]-v)*u)};
+  const sp=ls.map((x,i)=>{const r=Math.sqrt(x.m.sales/mx),q=x.m.profit/x.m.sales;return {r,q,col:colr(q),ring:i===0&&ls.length>1,d:Math.round(26+54*r)}});
+  $('#sysc').textContent=(all?'площадки':'склейки · '+MPN[S.mp])+' · размер — продажи, цвет — маржа';
+  $('#sysl').innerHTML=ls.map((x,i)=>`<button ${x.a} class="press" aria-label="${esc(x.t)}"><i style="width:${sp[i].d}px;height:${sp[i].d}px"></i><b>${esc(x.t.length>18?x.t.slice(0,17)+'…':x.t)}</b><small class="num">${fm(x.m.sales)} · ${(sp[i].q*100).toFixed(1).replace('.',',')}%</small></button>`).join('');
+  KOSMOS.system({el,items:sp,labels:$$('#sysl button')});
+}
+
 /* по какой день данные каждой площадки: ВБ грузится неделями, Озон — днями, ЯМ — месяцами. Строка под выбором площадки и срока, в каждом разделе */
 const KINDN={wm:'неделями',w:'неделями',d:'по дням',m:'по месяцам'};
 const uptoS=(mp,long)=>{const B=D.mp[mp];if(!B.upto)return '';const d=pd(B.upto);return B.kind==='m'?MONN[d.getUTCMonth()].toLowerCase():(long?DOW[d.getUTCDay()]+', ':'')+dstr(d)};
@@ -1495,6 +1526,7 @@ function render(keep){
   const yw=$('#ytw');if(yw&&!keep)yw.scrollLeft=yw.scrollWidth;
   reopen();
   affDraw();
+  sysDraw();
 }
 function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;K3.call('go',t);
   $$('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));const dt=$('#dtabs');dt.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===t));dt._place&&dt._place();
@@ -1564,7 +1596,7 @@ const K3=(()=>{let st=0,want=false,lz=false,obs=null;const R=document.documentEl
   const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
   const run=()=>{if(!want||!window.KOSMOS)return;const up=lz;lz=false;
     const ok=KOSMOS.start({base:'kosmos/',tab:S.tab,launch:up,
-      onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
+      onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();sysDraw();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
       onFail(){st=3;delete R.dataset.k3d;if(want)stars.start()}});
     if(!ok)return;
     if(shw.classList.contains('on'))KOSMOS.zoom(true);KOSMOS.pause('ori',ORI.isOpen());
@@ -1771,7 +1803,7 @@ $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').val
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>K3.see(false),()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
-window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
+window.PANEL={get D(){return D},K3,fresh,sysDraw,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
