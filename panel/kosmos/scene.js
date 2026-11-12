@@ -54,7 +54,7 @@ let phase=0,phaseT=0,zoom=0,zoomT=0,warp=0,haze=0,hazeCol=[.3,.5,.9],fadeIn=0;
 let off=[0,0,0],offTrail=[0,0,0],par=[0,0],slide=0,slideT=0;
 const inp={mx:0,my:0,tx:0,ty:0,sc:0,scy:0},sm={yaw:0,pitch:0,sc:0,kick:0,roll:0};
 let tiltBase=null,tiltAsk=0,pauses={},launchW=false;
-const look={on:false,y:0,p:0,ty:0,tp:0};   // «Погружение»: человек сам поворачивает взгляд
+const look={on:false,y:0,p:0,ty:0,tp:0};let sys=null,sysN=0;   // «Погружение»: человек сам поворачивает взгляд
 const TEX={},loaded={};
 
 /* ───────── ракурсы: у каждого раздела своё место ───────── */
@@ -170,6 +170,27 @@ void main(){vec2 q=(v_n-u_s)*u_sc;float r=length(q),an=atan(q.y,q.x);
   g+=(pow(.5+.5*sin(an*7.+u_t*.09),7.)*.55+pow(.5+.5*sin(an*11.-u_t*.06+1.3),11.)*.4)*exp(-r*4.6)*.5;
   gl_FragColor=vec4(u_col*g*u_k,0.);}`;
 const FS_HAZE='varying vec2 v_n;uniform vec3 u_col;uniform float u_k;void main(){float a=u_k*(.62+.38*smoothstep(.7,-1.,v_n.y));gl_FragColor=vec4(u_col*a,a);}';
+const FS_SYS=RAY+`uniform vec3 u_o;uniform vec4 u_p[8];uniform vec3 u_k[8];uniform float u_q[8];uniform float u_n,u_ring,u_px,u_t,u_fade;
+void main(){vec3 d=ray();vec3 col=vec3(0.);float al=0.,tmin=1e9;
+  float bs=dot(d,-u_o),hs=sqrt(max(dot(u_o,u_o)-bs*bs,0.));
+  vec3 glow=vec3(1.,.8,.52)*(exp(-hs*hs*110.)*1.5+exp(-hs*8.)*.3+exp(-hs*2.4)*.06);                 // «солнце» в середине
+  float tp=d.y<-1e-4?-u_o.y/d.y:-1.;vec3 qp=u_o+d*tp;float rho=length(qp.xz),lw=max(tp*u_px*1.4,.004);
+  for(int i=0;i<8;i++){if(float(i)>=u_n)break;
+    vec3 c=u_p[i].xyz-u_o;float R=u_p[i].w,b=dot(d,c),h2=dot(c,c)-b*b,hh=sqrt(max(h2,0.));
+    float cov=clamp((R-hh)/(max(b,1e-4)*u_px)+.5,0.,1.)*step(0.,b);
+    if(tp>0.)glow+=vec3(.5,.56,1.)*.2*smoothstep(lw,0.,abs(rho-u_q[i]));                            // линия орбиты
+    glow+=u_k[i]*exp(-max(hh-R,0.)/R*7.)*.28*step(0.,b)*(1.-cov);                                    // свечение атмосферы
+    float ts=b-sqrt(max(R*R-h2,0.));
+    if(cov>0.&&ts<tmin){vec3 n=normalize(d*ts-c),L=normalize(-(u_o+d*ts));float mu=dot(n,L),ndv=max(dot(n,-d),0.);
+      float band=.5+.5*sin(n.y*13.+sin(n.y*5.+float(i)*1.3+u_t*.05)*2.2+float(i)*1.7);
+      vec3 s=u_k[i]*(.5+.5*band)*(.07+1.05*smoothstep(-.2,.65,mu))+u_k[i]*pow(1.-ndv,3.)*.45;
+      col=mix(col,s,cov);al=max(al,cov);tmin=ts;}
+    if(float(i)==u_ring){vec3 N=normalize(vec3(.28,1.,.1));float dn=dot(d,N);                         // кольцо у самой большой
+      if(abs(dn)>1e-4){float tr=dot(c,N)/dn;if(tr>0.){float rr=length(d*tr-c)/R;
+        float ra=smoothstep(1.3,1.42,rr)*smoothstep(2.3,2.12,rr)*(.5+.5*sin(rr*36.))*.62;
+        if(cov>.5&&ts<tr)ra=0.;col=mix(col,u_k[i]*.75+.25,ra);al=max(al,ra);}}}
+  }
+  gl_FragColor=vec4((col+glow*(1.-al))*u_fade,al*u_fade);}`;
 
 function conv300(s,frag){s=s.replace(/\battribute\b/g,'in').replace(/\btexture2D\b/g,'texture');
   return frag?s.replace(/\bvarying\b/g,'in').replace(/\bgl_FragColor\b/g,'o_c'):s.replace(/\bvarying\b/g,'out')}
@@ -191,7 +212,7 @@ function initGL(){
   G.lod=G.v2||!!gl.getExtension('EXT_shader_texture_lod');G.max=gl.getParameter(gl.MAX_TEXTURE_SIZE);
   if(gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT).precision<20)throw new Error('мало точности');
   G.sky=prog(VS_FULL,FS_SKY);G.star=prog(VS_STAR,FS_PT);G.part=prog(VS_PART,FS_PT);G.earth=prog(VS_FULL,FS_EARTH);G.moon=prog(VS_FULL,FS_MOON);
-  G.flare=prog(VS_FULL,FS_FLARE);G.haze=prog(VS_FULL,FS_HAZE);
+  G.flare=prog(VS_FULL,FS_FLARE);G.haze=prog(VS_FULL,FS_HAZE);G.sys=prog(VS_FULL,FS_SYS);
   G.tri=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,G.tri);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   // ближние «пылинки»: случайные точки в кубе вокруг камеры — они смещаются относительно далёких звёзд
   const np=tier==='d'?2600:1500;let sd=20261112;const rnd=()=>(sd=sd*48271%2147483647)/2147483647;
@@ -321,8 +342,28 @@ function draw(){
   const pv=vpRot(B,tn,.1,2*PR),pf=fadeIn*(1-.5*glare)*(1-.6*haze);pts(P,G.pp,G.np,false,pv,pf);
   if(Math.hypot(off[0]-offTrail[0],off[1]-offTrail[1],off[2]-offTrail[2])>.03)pts(P,G.pl,G.np*2,true,pv,pf);
   if(haze>.004){g.blendFunc(g.ONE,g.ONE_MINUS_SRC_ALPHA);P=G.haze;useFull(P);g.uniform3fv(P.U.u_col,hazeCol);g.uniform1f(P.U.u_k,haze);g.drawArrays(g.TRIANGLES,0,3)}
+  sysN=drawSys();
   frames++;
   if(!ready&&(!launchW||T>3||['mw','day','cloud','night'].every(k=>loaded[k]!=null))){ready=true;cv.style.opacity='1';if(launchW){launchW=false;K.launch()}try{opt.onReady&&opt.onReady()}catch(e){}}}
+
+/* ───────── данные в космосе: планеты (площадки или склейки) в окне страницы ─────────
+   Страница даёт KOSMOS.system({el, items:[{r, col, ring, d}], labels}): el — блок-окно, r — размер 0…1, col — цвет, d — высота места под планету в подписи.
+   Планеты рисуются в том месте экрана, где сейчас блок, поверх остальной сцены; подписи страницы ставятся под свои планеты каждый кадр. */
+function drawSys(){
+  const s=sys;if(!s||!s.el||!s.el.isConnected||!s.items||!s.items.length)return 0;
+  const rc=s.el.getBoundingClientRect();if(rc.width<60||rc.height<60||rc.bottom<=0||rc.top>=cssH)return 0;
+  const g=gl,x0=Math.round(rc.left*scale),y0=Math.round((cssH-rc.bottom)*scale),w=Math.round(rc.width*scale),h=Math.round(rc.height*scale);
+  const sx=Math.max(0,x0),sy=Math.max(0,y0),sw=Math.min(W,x0+w)-sx,sh=Math.min(H,y0+h)-sy;if(sw<2||sh<2)return 0;
+  const C=[0,1.25,4.2],f=norm(mul(C,-1)),r=[1,0,0],u=cross(r,f),a=w/h,ty=Math.max(.33,.6/a),tx=ty*a,n=Math.min(8,s.items.length);
+  const P=new Float32Array(32),Kc=new Float32Array(24),Q=new Float32Array(8);let ring=-1;
+  for(let i=0;i<n;i++){const it=s.items[i],R=n>1?.75+1.25*i/(n-1):1.2,an=.6+i*2.4+T*.2/Math.pow(R,1.5),pr=.12+.26*it.r,p=[R*Math.cos(an),0,R*Math.sin(an)];
+    P.set([p[0],p[1],p[2],pr],i*4);Kc.set(it.col,i*3);Q[i]=R;if(it.ring)ring=i;
+    const lb=s.labels&&s.labels[i];if(lb){const rel=sub(p,C),z=dot(f,rel),xn=dot(r,rel)/(z*tx),yn=dot(u,rel)/(z*ty);
+      lb.style.transform='translate(calc('+((xn*.5+.5)*rc.width).toFixed(1)+'px - 50%),'+((1-(yn*.5+.5))*rc.height-(it.d||40)/2-4).toFixed(1)+'px)'}}
+  g.viewport(x0,y0,w,h);g.enable(g.SCISSOR_TEST);g.scissor(sx,sy,sw,sh);g.enable(g.BLEND);g.blendFunc(g.ONE,g.ONE_MINUS_SRC_ALPHA);
+  const Pg=G.sys;useFull(Pg,{r,u,f},[tx,ty]);g.uniform3fv(Pg.U.u_o,C);g.uniform4fv(Pg.U['u_p[0]'],P);g.uniform3fv(Pg.U['u_k[0]'],Kc);g.uniform1fv(Pg.U['u_q[0]'],Q);
+  g.uniform1f(Pg.U.u_n,n);g.uniform1f(Pg.U.u_ring,ring);g.uniform1f(Pg.U.u_px,2*ty/h);g.uniform1f(Pg.U.u_t,T);g.uniform1f(Pg.U.u_fade,fadeIn*(1-.7*haze));
+  g.drawArrays(g.TRIANGLES,0,3);g.disable(g.SCISSOR_TEST);g.viewport(0,0,W,H);return n}
 
 /* ───────── цикл ───────── */
 const paused=()=>Object.keys(pauses).some(k=>pauses[k]);
@@ -388,9 +429,10 @@ const K=window.KOSMOS={
     const f=norm(add(mul(B.f,.82),mul(up,.62)));hazeCol=dot(up,env.S)>.02?[.36,.58,.98]:dot(up,env.S)>-.2?[.5,.34,.42]:[.035,.05,.13];
     tr={kind:'launch',t0:T,dur:1.7,q0:qlook(f,up)};haze=1;kick()},
   pause(why,v){pauses[why||'x']=!!v;if(!v)kick()},
+  system(s){sys=s||null;kick()},                                                              // планеты-данные в окне страницы (см. drawSys)
   see(v){look.on=!!v;kick()},                                                                 // «Погружение»: страница убрана, взгляд свободный
   look(dx,dy){if(!on)return;const s=cam.fov/Math.max(cssW,cssH)*1.15;look.ty+=dx*s;look.tp=clamp(look.tp+dy*s,-1.15,1.15);kick()},   // сдвиг пальца или мыши в точках экрана
-  state(){return {on,ready,failed,frames,tab,calm,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),look:[+look.y.toFixed(3),+look.p.toFixed(3)],
+  state(){return {on,ready,failed,frames,tab,calm,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),look:[+look.y.toFixed(3),+look.p.toFixed(3)],sys:sysN,
     v2:!!(G&&G.v2),lod:!!(G&&G.lod),stars:G&&G.ns||0,loaded:Object.assign({},loaded),t:+T.toFixed(2),
     cam:{p:cam.p.map(x=>+x.toFixed(4)),q:cam.q.map(x=>+x.toFixed(5)),fov:+(cam.fov/DEG).toFixed(2)},
     sun:A?A.sun.map(x=>+x.toFixed(4)):null,moon:A?A.moon.map(x=>+x.toFixed(4)):null,gmst:A?+(A.gmst/DEG).toFixed(3):null}},
