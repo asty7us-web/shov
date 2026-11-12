@@ -555,6 +555,10 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .cbot .pills{pointer-events:auto;margin:0 -16px;padding:2px 16px}
 .cbot .pill{background:rgba(150,160,255,.2);color:#e4e6ff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .cbot .pill.on{background:#a996ff;color:#0b0a26}
+.cosmo .cz{transition:opacity .22s var(--ease)}.cosmo.sw .cz{opacity:0}
+.cbot .pls{margin-bottom:10px}
+.cbot .pill.pl{height:28px;padding:0 11px;font-size:12.5px;background:transparent;box-shadow:0 0 0 1px rgba(170,180,255,.36) inset;color:#c9cdf5}
+.cbot .pill.pl.on{background:rgba(169,150,255,.28);color:#fff;box-shadow:0 0 0 1px #a996ff inset}
 .cbot small{display:block;margin-top:10px;font-size:11px;line-height:1.35;color:#8a8fc4}
 @media (min-width:900px){.ctop,.cbot{padding-left:30px;padding-right:30px}.cbot .pills{margin:0;padding:2px 0}.cbot p{min-height:66px;font-size:16px}.aff .q{margin-right:38%}}
 .aff .q span{display:inline-block;opacity:0;filter:blur(8px);transform:translateY(6px);animation:wd .9s var(--out) forwards}
@@ -1637,60 +1641,92 @@ const stars=(()=>{const cv=$('#stars'),cx=cv.getContext('2d');let st=[],raf=0,on
   document.addEventListener('visibilitychange',()=>{if(!on)return;cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(draw)});
   return {start(){if(on)return;on=true;size();raf=requestAnimationFrame(draw)},stop(){on=false;cancelAnimationFrame(raf)}}})();
 
-/* «Космос»: созвездие Орион и полёт в Туманность Ориона (Андрей 12.11: «не статичный шар, а красивое созвездие… место, которое реально
-   существует; при нажатии попадаешь туда и можешь путешествовать»). Место настоящее: снимок космического телескопа «Хаббл» (NASA, ESA,
-   M. Robberto), звёзды созвездия — по каталожным координатам, масштаб честный: снимок туманности занимает полградуса неба под Поясом Ориона.
-   Мир: снимок — квадрат [0..1], север вверху, восток слева. Камера: центр (x, y) в мире и s — сколько пикселей экрана в единице мира. */
+/* «Космос»: созвездия и полёт к настоящим местам (Андрей 12.11: «не статичный шар, а красивое созвездие… место, которое реально
+   существует; при нажатии попадаешь туда и можешь путешествовать»; потом: «надо больше 1 как то мало же»). Места настоящие — снимки
+   космического телескопа «Хаббл»; звёзды созвездий стоят по карте неба, масштаб честный: снимок Туманности Ориона занимает полградуса
+   неба под Поясом Ориона. Орион описан здесь, остальные места — kosmos/mesta.json (panel_sayt\kosmos_mesta.py), грузится только в «Космосе».
+   Мир места: снимок — квадрат [0..1], север вверху, восток слева. Камера: центр (x, y) в мире и s — сколько пикселей экрана в единице мира. */
 const ORI=(()=>{
-  const FOV=.5,T=[.442,.447],RA0=83.8186,DE0=-5.3897,KD=Math.cos(DE0*Math.PI/180);
-  const st=(n,ra,de,m,c)=>({n,x:T[0]-(ra-RA0)*KD/FOV,y:T[1]-(de-DE0)/FOV,m,c});   // прямое восхождение и склонение в градусах, звёздная величина, цвет
-  const STARS=[st('Бетельгейзе',88.7929,7.4071,.5,'255,176,128'),st('Ригель',78.6345,-8.2017,.1,'188,214,255'),st('Беллатрикс',81.2828,6.3497,1.6,'205,222,255'),
-    st('Минтака',83.0017,-.2992,2.2,'210,225,255'),st('Альнилам',84.0534,-1.2019,1.7,'210,225,255'),st('Альнитак',85.1897,-1.9428,1.8,'210,225,255'),
-    st('Саиф',86.9391,-9.6697,2.1,'205,222,255'),st('Меисса',83.7845,9.9342,3.4,'210,225,255'),st('Хатиса',83.8583,-5.91,2.8,'210,225,255')];
-  const LINES=[[0,2],[0,5],[2,3],[3,4],[4,5],[5,6],[3,1],[6,1],[7,0],[7,2]];
-  let seed=20261112;const rnd=()=>(seed=seed*48271%2147483647)/2147483647;
-  const FIELD=Array.from({length:520},()=>({x:-25+rnd()*51,y:-46+rnd()*72,m:rnd(),p:rnd()*6.28}));   // фоновые звёзды — для глубины, не каталог
-  const DET=[['trap',.442,.447,.11],['bar',.43,.535,.10],['m43',.32,.215,.12]];   // участки снимка крупно: имя, центр, половина стороны (как в kosmos_make.py)
-  const V={const:['Созвездие Орион','зимнее небо над Россией','Плечо Ориона — красный сверхгигант Бетельгейзе, нога — голубой Ригель, посередине три звезды Пояса. Под Поясом висит Меч, и средняя «звезда» в нём — не звезда, а туманность.'],
-    neb:['Туманность Ориона','M42 · около 1 344 световых лет от нас','Облако газа и пыли поперечником примерно в 24 световых года. Здесь прямо сейчас рождаются звёзды и планеты. В ясную ночь его видно без телескопа — это средняя «звезда» в Мече Ориона.'],
-    trap:['Трапеция','сердце туманности','Четыре молодые горячие звезды. Их свет заставляет газ вокруг светиться, а звёздный ветер выдувает в облаке полость — в неё мы и смотрим.'],
-    bar:['Перемычка Ориона','край полости','Плотная стена газа и пыли. Звёзды Трапеции светят на неё сбоку, поэтому она горит яркой полосой.'],
-    m43:['M43','туманность де Мерана','Часть того же облака за тёмной полосой пыли. Её подсвечивает одна-единственная молодая звезда — она в центре.']};
+  const ORION=(()=>{const FOV=.5,T=[.442,.447],RA0=83.8186,DE0=-5.3897,KD=Math.cos(DE0*Math.PI/180);
+    const st=(n,ra,de,m,c)=>[n,T[0]-(ra-RA0)*KD/FOV,T[1]-(de-DE0)/FOV,m,c];   // прямое восхождение и склонение в градусах, звёздная величина, цвет
+    return {id:'ori',name:'Орион',obj:'Туманность Ориона',go:'К Туманности Ориона',img:'orion',T,seed:20261112,
+      stars:[st('Бетельгейзе',88.7929,7.4071,.5,'255,176,128'),st('Ригель',78.6345,-8.2017,.1,'188,214,255'),st('Беллатрикс',81.2828,6.3497,1.6,'205,222,255'),
+        st('Минтака',83.0017,-.2992,2.2,'210,225,255'),st('Альнилам',84.0534,-1.2019,1.7,'210,225,255'),st('Альнитак',85.1897,-1.9428,1.8,'210,225,255'),
+        st('Саиф',86.9391,-9.6697,2.1,'205,222,255'),st('Меисса',83.7845,9.9342,3.4,'210,225,255'),st('Хатиса',83.8583,-5.91,2.8,'210,225,255')],
+      lines:[[0,2],[0,5],[2,3],[3,4],[4,5],[5,6],[3,1],[6,1],[7,0],[7,2]],dash:[4,8],lab:[[0,0,'Бетельгейзе'],[1,1,'Ригель'],[5,-1,'Пояс Ориона']],
+      cst:[.75,-10.4,27,50,0],fld:[-25,51,-46,72],far:[-14,16,-34,12],zmax:9,
+      det:[['trap',.442,.447,.11],['bar',.43,.535,.10],['m43',.32,.215,.12]],   // участки снимка крупно: имя, центр, половина стороны (как в kosmos_make.py)
+      pills:[['const','Созвездие'],['neb','Туманность'],['trap','Трапеция'],['bar','Перемычка'],['m43','M43']],
+      tg:{neb:[.47,.47,1],trap:[.442,.447,3.4],bar:[.43,.53,3],m43:[.32,.215,2.7]},
+      V:{const:['Созвездие Орион','зимнее небо над Россией','Плечо Ориона — красный сверхгигант Бетельгейзе, нога — голубой Ригель, посередине три звезды Пояса. Под Поясом висит Меч, и средняя «звезда» в нём — не звезда, а туманность.'],
+        neb:['Туманность Ориона','M42 · около 1 344 световых лет от нас','Облако газа и пыли поперечником примерно в 24 световых года. Здесь прямо сейчас рождаются звёзды и планеты. В ясную ночь его видно без телескопа — это средняя «звезда» в Мече Ориона.'],
+        trap:['Трапеция','сердце туманности','Четыре молодые горячие звезды. Их свет заставляет газ вокруг светиться, а звёздный ветер выдувает в облаке полость — в неё мы и смотрим.'],
+        bar:['Перемычка Ориона','край полости','Плотная стена газа и пыли. Звёзды Трапеции светят на неё сбоку, поэтому она горит яркой полосой.'],
+        m43:['M43','туманность де Мерана','Часть того же облака за тёмной полосой пыли. Её подсвечивает одна-единственная молодая звезда — она в центре.']},
+      credit:'Снимок: NASA, ESA, M. Robberto (STScI/ESA) и команда проекта «Хаббл».'}})();
+  /* место → всё, что нужно для рисования: звёзды, фоновые звёзды (для глубины, не каталог), границы. У мест мельче Ориона снимок в сотни раз
+     меньше созвездия, поэтому есть ещё «встречные» звёзды W — кольцами вокруг места, чтобы в долгом приближении экран не был пустым */
+  const prep=p=>{const c=p.cst;p.T=p.T||[.5,.5];p.S=p.stars.map(a=>({n:a[0],x:a[1],y:a[2],m:a[3],c:a[4]}));
+    p.fld=p.fld||[c[0]-.95*c[2],1.89*c[2],c[1]-.71*c[3],1.44*c[3]];p.far=p.far||[c[0]-.55*c[2],c[0]+.565*c[2],c[1]-.47*c[3],c[1]+.45*c[3]];
+    let seed=p.seed||(20261113+p.id.charCodeAt(0)*131+p.id.charCodeAt(1)*17);const rnd=()=>(seed=seed*48271%2147483647)/2147483647;
+    p.F=Array.from({length:520},()=>({x:p.fld[0]+rnd()*p.fld[1],y:p.fld[2]+rnd()*p.fld[3],m:rnd(),p:rnd()*6.28}));
+    const R=Math.max(c[2],c[3]);
+    p.W=p.id==='ori'?[]:Array.from({length:300},()=>{const a=rnd()*6.283,r=Math.exp(Math.log(.72)+rnd()*Math.log(R/.72));return {x:p.T[0]+Math.cos(a)*r,y:p.T[1]+Math.sin(a)*r,m:rnd(),p:rnd()*6.28}});
+    return p};
+  const places=[prep(ORION)];
+  let P=places[0],cp=places[0],pinned=false,lp=null;   // P — место в открытом слое, cp — созвездие в карточке посыла
   const cam={x:.47,y:.47,s:800},ptrs=new Map();
-  let w=0,h=0,d=1,box=null,cz,cw,cv,cx,anim=null,cur='',raf=0,isOpen=false,pinch=null,lastTap=0,down=null,cardT=0;
-  const cover=()=>Math.max(w,h),sC=()=>Math.min(w/27,h/50),smin=()=>sC()*.8,smax=()=>cover()*9;
-  const tgt=k=>k==='const'?{x:.75,y:-10.4,s:sC()}:k==='neb'?{x:.47,y:.47,s:cover()}:k==='trap'?{x:T[0],y:T[1],s:cover()*3.4}:k==='bar'?{x:.43,y:.53,s:cover()*3}:{x:.32,y:.215,s:cover()*2.7};
-  /* небо: фоновые звёзды, линии и звёзды созвездия, отметка туманности. c — камера, k — пикселей холста в пикселе экрана, fa — мы ещё «у созвездия» (1 … 0) */
-  function sky(ctx,W,H,c,t,k,fa,mini){
-    ctx.clearRect(0,0,W,H);const X=x=>W/2+(x-c.x)*c.s*k,Y=y=>H/2+(y-c.y)*c.s*k;
-    for(const f of FIELD){const x=X(f.x),y=Y(f.y);if(x<-4||y<-4||x>W+4||y>H+4)continue;const a=(.18+.5*f.m)*(.6+.4*Math.sin(t*.0011+f.p))*(.3+.7*fa);
+  let w=0,h=0,d=1,box=null,cz,cw,cv,cx,anim=null,cur='',raf=0,isOpen=false,pinch=null,lastTap=0,down=null,cardT=0,autoT=0;
+  let fbH=0;const meas=()=>{fbH=P.id!=='ori'&&box?box.querySelector('.cbot').offsetHeight:0},free=()=>fbH?[84,Math.max(160,h-fbH+30-84)]:null;   // у новых мест созвездие вписывается в полосу между заголовком и нижней панелью
+  const cover=()=>Math.max(w,h),sC=()=>{const f=free();return Math.min(w/P.cst[2],f?f[1]/(P.cst[3]*.78):h/P.cst[3])},smin=()=>sC()*.8,smax=()=>cover()*P.zmax;
+  const tgt=k=>{if(k==='const'){const s=sC(),f=free();return {x:P.cst[0],y:P.cst[1]+(f?(h/2-f[0]-f[1]/2)/s:0),s}}const t=P.tg[k]||P.tg.neb;return {x:t[0],y:t[1],s:cover()*t[2]}};
+  const load=()=>lp||(lp=fetch('kosmos/mesta.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).then(a=>{for(const p of a)if(!places.some(q=>q.id===p.id))places.push(prep(p));pls()}).catch(()=>{lp=null}));
+  /* небо: фоновые звёзды, линии и звёзды созвездия, отметка места. c — камера, k — пикселей холста в пикселе экрана, fa — мы ещё «у созвездия» (1 … 0) */
+  function sky(ctx,W,H,c,t,k,fa,mini,p){
+    ctx.clearRect(0,0,W,H);const X=x=>W/2+(x-c.x)*c.s*k,Y=y=>H/2+(y-c.y)*c.s*k,T=p.T,S=p.S,tx0=X(T[0]),ty0=Y(T[1]);
+    for(const f of p.F){const x=X(f.x),y=Y(f.y);if(x<-4||y<-4||x>W+4||y>H+4)continue;const a=(.18+.5*f.m)*(.6+.4*Math.sin(t*.0011+f.p))*(.3+.7*fa);
       ctx.fillStyle='rgba(215,222,255,'+a.toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,(.45+f.m*.75)*k*(mini?.8:1),0,6.283);ctx.fill()}
+    if(!mini)for(const f of p.W){const x=X(f.x),y=Y(f.y);if(x<-4||y<-4||x>W+4||y>H+4)continue;   // встречные звёзды: у самого места не видны, проявляются, разлетаясь к краям
+      const a=(.16+.5*f.m)*(.6+.4*Math.sin(t*.0011+f.p))*Math.min(1,Math.max(0,(Math.hypot(x-tx0,y-ty0)/k-30)/110));if(a<.012)continue;
+      ctx.fillStyle='rgba(215,222,255,'+a.toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,(.45+f.m*.75)*k,0,6.283);ctx.fill()}
     if(fa>.02){ctx.lineWidth=k;ctx.strokeStyle='rgba(170,182,255,'+(.34*fa).toFixed(3)+')';ctx.beginPath();
-      for(const [a,b] of LINES){ctx.moveTo(X(STARS[a].x),Y(STARS[a].y));ctx.lineTo(X(STARS[b].x),Y(STARS[b].y))}ctx.stroke();
-      ctx.setLineDash([2*k,4*k]);ctx.beginPath();ctx.moveTo(X(STARS[4].x),Y(STARS[4].y));ctx.lineTo(X(T[0]),Y(T[1]));ctx.lineTo(X(STARS[8].x),Y(STARS[8].y));ctx.stroke();ctx.setLineDash([])}
-    for(const s of STARS){const x=X(s.x),y=Y(s.y);if(x<-40||y<-40||x>W+40||y>H+40)continue;const r=Math.max(1.1,3.9-s.m*.72)*k*(mini?.72:1),tw=.82+.18*Math.sin(t*.0017+s.x);
+      for(const [a,b] of p.lines){ctx.moveTo(X(S[a].x),Y(S[a].y));ctx.lineTo(X(S[b].x),Y(S[b].y))}ctx.stroke();
+      const q=p.dash;if(q&&q.length){ctx.setLineDash([2*k,4*k]);ctx.beginPath();ctx.moveTo(X(S[q[0]].x),Y(S[q[0]].y));ctx.lineTo(tx0,ty0);if(q[1]!=null)ctx.lineTo(X(S[q[1]].x),Y(S[q[1]].y));ctx.stroke();ctx.setLineDash([])}}
+    for(const s of S){const x=X(s.x),y=Y(s.y);if(x<-40||y<-40||x>W+40||y>H+40)continue;const r=Math.max(1.1,3.9-s.m*.72)*k*(mini?.72:1),tw=.82+.18*Math.sin(t*.0017+s.x);
       const g=ctx.createRadialGradient(x,y,0,x,y,r*4.2);g.addColorStop(0,'rgba('+s.c+','+(.55*tw).toFixed(3)+')');g.addColorStop(1,'rgba('+s.c+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*4.2,0,6.283);ctx.fill();
       ctx.fillStyle='rgba(255,255,255,'+(.95*tw).toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill()}
-    if(fa>.02){const x=X(T[0]),y=Y(T[1]),p=(t%2600)/2600,rr=(mini?5:7)*k;   // туманность издалека — розовая искра в Мече и расходящееся кольцо: туда и летим
-      const g=ctx.createRadialGradient(x,y,0,x,y,rr*2.4);g.addColorStop(0,'rgba(255,150,205,'+(.9*fa).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,205,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rr*2.4,0,6.283);ctx.fill();
-      ctx.strokeStyle='rgba(255,190,225,'+((1-p)*.7*fa).toFixed(3)+')';ctx.lineWidth=1.2*k;ctx.beginPath();ctx.arc(x,y,rr*(1+p*2.6),0,6.283);ctx.stroke()}
-    if(!mini&&fa>.35){ctx.font='500 '+(11.5*k)+'px -apple-system,"Segoe UI",Roboto,sans-serif';ctx.textBaseline='middle';ctx.fillStyle='rgba(200,206,255,'+Math.min(1,(fa-.35)*1.4).toFixed(3)+')';
-      for(const [i,dx,tx] of [[0,0,'Бетельгейзе'],[1,1,'Ригель'],[5,-1,'Пояс Ориона']]){const x=X(STARS[i].x),y=Y(STARS[i].y),tw=ctx.measureText(tx).width;   // подпись не уходит за край экрана
+    const fm=p.id==='ori'||mini?fa:Math.max(fa,1-Math.min(1,Math.max(0,(c.s-18)/60)));   // место издалека — розовая искра и расходящееся кольцо: туда и летим; у мелких мест искра живёт, пока снимок не вырастет
+    if(fm>.02){const ph=(t%2600)/2600,rr=(mini?5:7)*k;
+      const g=ctx.createRadialGradient(tx0,ty0,0,tx0,ty0,rr*2.4);g.addColorStop(0,'rgba(255,150,205,'+(.9*fm).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,205,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(tx0,ty0,rr*2.4,0,6.283);ctx.fill();
+      ctx.strokeStyle='rgba(255,190,225,'+((1-ph)*.7*fm).toFixed(3)+')';ctx.lineWidth=1.2*k;ctx.beginPath();ctx.arc(tx0,ty0,rr*(1+ph*2.6),0,6.283);ctx.stroke()}
+    if(mini||fm<=.35)return;
+    ctx.font='500 '+(11.5*k)+'px -apple-system,"Segoe UI",Roboto,sans-serif';ctx.textBaseline='middle';
+    if(fa>.35){ctx.fillStyle='rgba(200,206,255,'+Math.min(1,(fa-.35)*1.4).toFixed(3)+')';
+      for(const [i,dx,tx] of p.lab){const x=X(S[i].x),y=Y(S[i].y),tw=ctx.measureText(tx).width;   // подпись не уходит за край экрана
         if(dx===0){ctx.textAlign='left';ctx.fillText(tx,Math.max(8*k,Math.min(W-tw-8*k,x-tw/2)),y-17*k)}
-        else if(dx>0&&x+13*k+tw>W-6*k){ctx.textAlign='right';ctx.fillText(tx,x-13*k,y)}
-        else{ctx.textAlign=dx<0?'right':'left';ctx.fillText(tx,x+dx*13*k,y)}}
-      ctx.textAlign='left';ctx.fillStyle='rgba(255,190,225,'+Math.min(1,(fa-.35)*1.6).toFixed(3)+')';ctx.fillText('Туманность Ориона',X(T[0])+17*k,Y(T[1])+k)}
+        else if(dx>0&&x+13*k+tw>W-6*k||dx<0&&x-13*k-tw>6*k){ctx.textAlign='right';ctx.fillText(tx,x-13*k,y)}
+        else{ctx.textAlign='left';ctx.fillText(tx,x+13*k,y)}}}
+    const tx=p.obj,tw=ctx.measureText(tx).width;ctx.fillStyle='rgba(255,190,225,'+Math.min(1,(fm-.35)*1.6).toFixed(3)+')';
+    if(tx0+17*k+tw>W-6*k){ctx.textAlign='right';ctx.fillText(tx,tx0-17*k,ty0+k)}else{ctx.textAlign='left';ctx.fillText(tx,tx0+17*k,ty0+k)}
+    ctx.textAlign='left';
   }
   function card(){   // созвездие в карточке посыла: живое, чуть дышит; нажатие по карточке — полёт
-    cancelAnimationFrame(cardT);let last=0;
+    cancelAnimationFrame(cardT);let last=0;load();
     const loop=t=>{const el=document.querySelector('#aff .cst');if(!el||document.documentElement.dataset.theme!=='space')return;cardT=requestAnimationFrame(loop);if(t-last<60||document.hidden||isOpen)return;last=t;
       const r=el.getBoundingClientRect(),k=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*k),H=Math.round(r.height*k);if(!W||!H)return;if(el.width!==W||el.height!==H){el.width=W;el.height=H}
-      const s=r.height/47;sky(el.getContext('2d'),W,H,{x:.75-r.width*.31/s+Math.sin(t/7000)*.3,y:-10.4+Math.cos(t/9000)*.25,s},t,k,1,true)};
+      const c=cp.cst,s=Math.min(r.height/(c[3]*.94),c[4]?r.width*.4/c[4]:1e9),off=Math.min(.31,.5-(c[4]*s*.5+12)/r.width);   // широкое созвездие сдвигается левее, чтобы не упереться в край
+      sky(el.getContext('2d'),W,H,{x:c[0]-r.width*off/s+Math.sin(t/7000)*.3*c[2]/27,y:c[1]+Math.cos(t/9000)*.25*c[3]/50,s},t,k,1,true,cp)};
     cardT=requestAnimationFrame(loop)}
-  function ui(){if(!box)return;const v=V[cur];if(v){box.querySelector('#ctt').textContent=v[0];box.querySelector('#cts').textContent=v[1];box.querySelector('#cft').textContent=v[2]}
-    box.querySelectorAll('[data-ori]').forEach(b=>b.classList.toggle('on',b.dataset.ori===cur))}
-  function size(){w=innerWidth;h=innerHeight;d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*d);cv.height=Math.round(h*d)}
-  function clamp(){cam.s=Math.max(smin(),Math.min(smax(),cam.s));const far=cam.s<cover()*.5;cam.x=Math.max(far?-14:-.15,Math.min(far?16:1.15,cam.x));cam.y=Math.max(far?-34:-.15,Math.min(far?12:1.15,cam.y))}
+  function ui(){if(!box)return;const v=P.V[cur];if(v){box.querySelector('#ctt').textContent=v[0];box.querySelector('#cts').textContent=v[1];box.querySelector('#cft').textContent=v[2]}
+    box.querySelectorAll('[data-ori]').forEach(b=>b.classList.toggle('on',b.dataset.ori===cur));box.querySelectorAll('[data-pl]').forEach(b=>b.classList.toggle('on',b.dataset.pl===P.id))}
+  function pls(){if(!box)return;const el=box.querySelector('#cpl');el.hidden=places.length<2;el.innerHTML=places.map(p=>`<button class="pill pl" data-pl="${p.id}">${p.name}</button>`).join('');ui()}
+  function fill(){   // снимок, участки крупно, кнопки и подпись автора — для выбранного места
+    if(!box)return;cw.querySelectorAll('.cdt').forEach(i=>i.remove());const im=box.querySelector('#cimg');im.removeAttribute('src');im.src='kosmos/'+P.img+'.webp';
+    cw.insertAdjacentHTML('beforeend',P.det.map(([n,x,y,hf])=>`<img class="cdt" data-n="${n}" alt="" draggable="false" style="left:${((x-hf)*100).toFixed(2)}%;top:${((y-hf)*100).toFixed(2)}%;width:${(hf*200).toFixed(2)}%;height:${(hf*200).toFixed(2)}%">`).join(''));
+    box.querySelector('#cgo').innerHTML=P.pills.map(([k,t])=>`<button class="pill" data-ori="${k}">${t}</button>`).join('');
+    box.querySelector('#ccr').textContent='Двигайте и приближайте сами или выберите место. '+P.credit;pls()}
+  function size(){w=innerWidth;h=innerHeight;d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*d);cv.height=Math.round(h*d);meas()}
+  function clamp(){cam.s=Math.max(smin(),Math.min(smax(),cam.s));const far=cam.s<cover()*.5,f=P.far;cam.x=Math.max(far?f[0]:-.15,Math.min(far?f[1]:1.15,cam.x));cam.y=Math.max(far?f[2]:-.15,Math.min(far?f[3]:1.15,cam.y))}
   function zoomAt(px,py,s){s=Math.max(smin(),Math.min(smax(),s));const wx=cam.x+(px-w/2)/cam.s,wy=cam.y+(py-h/2)/cam.s;cam.s=s;cam.x=wx-(px-w/2)/s;cam.y=wy-(py-h/2)/s}
   function fly(k,ms,to){const a={x:cam.x,y:cam.y,s:cam.s},b=to||tgt(k);if(!to){cur=k;ui()}
     anim={a,b,zin:b.s>=a.s,t0:performance.now(),ms:ms||Math.max(1100,Math.min(3800,600+Math.abs(Math.log(b.s/a.s))*820))}}
@@ -1700,19 +1736,18 @@ const ORI=(()=>{
       else{cam.x=anim.a.x-(anim.a.x-anim.b.x)*anim.b.s*e/s;cam.y=anim.a.y-(anim.a.y-anim.b.y)*anim.b.s*e/s}
       cam.s=s;if(u>=1)anim=null}
     const idle=!anim&&!ptrs.size,s=cam.s*(idle?1+.012*Math.sin(t/6500):1),x=cam.x+(idle?Math.sin(t/11000)*9/s:0),y=cam.y+(idle?Math.cos(t/13000)*7/s:0);   // без рук вид чуть дышит и плывёт
-    cw.style.transform='translate('+(w/2-x*s).toFixed(2)+'px,'+(h/2-y*s).toFixed(2)+'px) scale('+(s/1000).toFixed(5)+')';
-    sky(cx,cv.width,cv.height,{x,y,s},t,d,Math.max(0,Math.min(1,1-Math.log(s/sC())/Math.log(14))),false);
-    if(s>cover()*1.6)for(const im of cw.querySelectorAll('.cdt:not([src])')){const n=DET.find(q=>q[0]===im.dataset.n);   // подлетели близко — подгружается этот участок снимка крупно
-      if(Math.abs(n[1]-x)<n[3]+w/s/2&&Math.abs(n[2]-y)<n[3]+h/s/2){im.onload=()=>im.classList.add('on');im.src='kosmos/orion-'+n[0]+'.webp'}}
+    cw.style.transform='translate('+(w/2-x*s).toFixed(2)+'px,'+(h/2-y*s).toFixed(2)+'px) scale('+(s/1000).toFixed(6)+')';
+    sky(cx,cv.width,cv.height,{x,y,s},t,d,Math.max(0,Math.min(1,1-Math.log(s/sC())/Math.log(14))),false,P);
+    if(s>cover()*1.6)for(const im of cw.querySelectorAll('.cdt:not([src])')){const n=P.det.find(q=>q[0]===im.dataset.n);   // подлетели близко — подгружается этот участок снимка крупно
+      if(n&&Math.abs(n[1]-x)<n[3]+w/s/2&&Math.abs(n[2]-y)<n[3]+h/s/2){im.onload=()=>im.classList.add('on');im.src='kosmos/'+P.img+'-'+n[0]+'.webp'}}
   }
   function build(){
     box=document.createElement('div');box.className='cosmo';box.id='cosmo';box.hidden=true;
-    box.innerHTML=`<div class="cz" id="cz"><div class="cw" id="cw"><img class="cb0" id="cimg" alt="" draggable="false">${DET.map(([n,x,y,hf])=>`<img class="cdt" data-n="${n}" alt="" draggable="false" style="left:${((x-hf)*100).toFixed(2)}%;top:${((y-hf)*100).toFixed(2)}%;width:${(hf*200).toFixed(2)}%;height:${(hf*200).toFixed(2)}%">`).join('')}</div><canvas id="ccv"></canvas></div>
+    box.innerHTML=`<div class="cz" id="cz"><div class="cw" id="cw"><img class="cb0" id="cimg" alt="" draggable="false"></div><canvas id="ccv"></canvas></div>
 <div class="ctop"><div><b id="ctt"></b><small id="cts"></small></div><button class="shx press" id="cxx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-<div class="cbot"><p id="cft"></p><div class="pills" id="cgo">${[['const','Созвездие'],['neb','Туманность'],['trap','Трапеция'],['bar','Перемычка'],['m43','M43']].map(([k,t])=>`<button class="pill" data-ori="${k}">${t}</button>`).join('')}</div><small>Двигайте и приближайте сами или выберите место. Снимок: NASA, ESA, M. Robberto (STScI/ESA) и команда проекта «Хаббл».</small></div>`;
+<div class="cbot"><div class="pills pls" id="cpl" hidden></div><p id="cft"></p><div class="pills" id="cgo"></div><small id="ccr"></small></div>`;
     document.body.appendChild(box);cz=box.querySelector('#cz');cw=box.querySelector('#cw');cv=box.querySelector('#ccv');cx=cv.getContext('2d');
-    box.querySelector('#cimg').src='kosmos/orion.webp';
-    box.addEventListener('click',e=>{const b=e.target.closest('[data-ori]');if(b){fly(b.dataset.ori);return}if(e.target.closest('#cxx'))close()});
+    box.addEventListener('click',e=>{const b=e.target.closest('[data-ori]');if(b){fly(b.dataset.ori);return}const q=e.target.closest('[data-pl]');if(q){go(q.dataset.pl);return}if(e.target.closest('#cxx'))close()});
     cz.addEventListener('pointerdown',e=>{try{cz.setPointerCapture(e.pointerId)}catch(q){}ptrs.set(e.pointerId,[e.clientX,e.clientY]);anim=null;cz.classList.add('drag');down={x:e.clientX,y:e.clientY,t:Date.now(),m:0};
       if(ptrs.size===2){const [p,q]=[...ptrs.values()];pinch={d:Math.hypot(p[0]-q[0],p[1]-q[1])||1,s:cam.s}}});
     cz.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p[0],dy=e.clientY-p[1];p[0]=e.clientX;p[1]=e.clientY;if(down)down.m+=Math.abs(dx)+Math.abs(dy);
@@ -1727,12 +1762,18 @@ const ORI=(()=>{
     addEventListener('resize',()=>{if(isOpen){size();clamp()}});
     document.addEventListener('visibilitychange',()=>{if(!isOpen)return;cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(frame)});
   }
-  function open(){if(isOpen)return;if(!box)build();isOpen=true;box.hidden=false;size();Object.assign(cam,tgt('const'));cur='const';ui();document.documentElement.classList.add('noscroll');
-    requestAnimationFrame(()=>box.classList.add('on'));raf=requestAnimationFrame(frame);
-    setTimeout(()=>{if(isOpen&&cur==='const'&&!ptrs.size&&!anim)fly('neb',3600)},1100)}   // секунду смотрим на созвездие — и летим к туманности
-  function close(){if(!isOpen)return false;isOpen=false;box.classList.remove('on');cancelAnimationFrame(raf);anim=null;ptrs.clear();document.documentElement.classList.remove('noscroll');
+  const pick=id=>places.find(p=>p.id===id)||places[0];
+  /* секунду смотрим на созвездие — и летим к месту; чем мельче место, тем дольше полёт */
+  const arm=()=>{clearTimeout(autoT);autoT=setTimeout(()=>{if(isOpen&&cur==='const'&&!ptrs.size&&!anim)fly('neb',3600+Math.min(1600,Math.max(0,(Math.log(cover()/sC())-4.2)*520)))},1100)};
+  function show(id){P=pick(id);cur='const';fill();meas();Object.assign(cam,tgt('const'));anim=null;ui();arm()}
+  function open(id){if(isOpen)return;if(!box)build();isOpen=true;box.hidden=false;size();show(id||'ori');document.documentElement.classList.add('noscroll');
+    requestAnimationFrame(()=>box.classList.add('on'));raf=requestAnimationFrame(frame);load()}
+  function go(id){if(!isOpen||P.id===id)return;box.classList.add('sw');clearTimeout(autoT);setTimeout(()=>{if(!isOpen)return;show(id);box.classList.remove('sw')},230)}   // другое созвездие, не закрывая слой
+  function close(){if(!isOpen)return false;isOpen=false;box.classList.remove('on','sw');cancelAnimationFrame(raf);clearTimeout(autoT);anim=null;ptrs.clear();document.documentElement.classList.remove('noscroll');
     setTimeout(()=>{if(!isOpen)box.hidden=true},520);return true}
-  return {open,close,card,fly,isOpen:()=>isOpen,state:()=>({cur,x:cam.x,y:cam.y,s:cam.s,cover:cover(),anim:!!anim,img:!!(box&&box.querySelector('#cimg').naturalWidth),det:box?[...box.querySelectorAll('.cdt.on')].map(i=>i.dataset.n):[]})};
+  return {open,close,card,fly,go,isOpen:()=>isOpen,places:()=>places.map(p=>p.id),
+    turn(i){if(!pinned)cp=places[i%places.length]},pin(id){pinned=!!id;if(id)cp=pick(id);affDraw()},cardId:()=>cp.id,goText:()=>cp.go,   // созвездие в карточке меняется вместе с посылом; pin — для проверки
+    state:()=>({pl:P.id,cur,x:cam.x,y:cam.y,s:cam.s,cover:cover(),anim:!!anim,img:!!(box&&box.querySelector('#cimg').naturalWidth),det:box?[...box.querySelectorAll('.cdt.on')].map(i=>i.dataset.n):[]})};
 })();
 
 /* «Космос»: посылы — свои, в духе тех, что в Юнитке; порядок раз в два дня один у всех */
@@ -1742,9 +1783,9 @@ const AFF=['Я вижу всю картину и выбираю лучшее','�
  'Я доверяю своему опыту и проверяю цифрами','Сегодняшний шаг окупится многократно','Я создаю ценность, и она возвращается прибылью','У меня достаточно времени, сил и средств на главное'];
 const aff=(()=>{let i=0,tm=0,on=false,ord=[];
   const mix=()=>{let s=Math.floor(Date.now()/1728e5)%2147483647||7;const r=()=>(s=s*48271%2147483647)/2147483647;ord=AFF.map((_,j)=>j);for(let j=ord.length-1;j>0;j--){const q=Math.floor(r()*(j+1));[ord[j],ord[q]]=[ord[q],ord[j]]}};
-  const draw=()=>{const el=$('#aff');if(!el||!on)return;const t=AFF[ord[i%ord.length]];
-    el.innerHTML=`<canvas class="cst" aria-hidden="true"></canvas><div class="cap">Орбита дня</div><div class="q">${t.split(' ').map((w,j)=>`<span style="animation-delay:${j*70}ms">${esc(w)}</span>`).join(' ')}</div><div class="dots">${ord.slice(0,6).map((_,j)=>`<i class="${j===i%6?'on':''}"></i>`).join('')}</div><span class="go">К Туманности Ориона<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>`;
-    el.onclick=e=>{if(e.target.closest('.dots')){next();return}ORI.open()};ORI.card()};
+  const draw=()=>{const el=$('#aff');if(!el||!on)return;ORI.turn(i);const t=AFF[ord[i%ord.length]];
+    el.innerHTML=`<canvas class="cst" aria-hidden="true"></canvas><div class="cap">Орбита дня</div><div class="q">${t.split(' ').map((w,j)=>`<span style="animation-delay:${j*70}ms">${esc(w)}</span>`).join(' ')}</div><div class="dots">${ord.slice(0,6).map((_,j)=>`<i class="${j===i%6?'on':''}"></i>`).join('')}</div><span class="go">${esc(ORI.goText())}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>`;
+    el.onclick=e=>{if(e.target.closest('.dots')){next();return}ORI.open(ORI.cardId())};ORI.card()};
   const next=()=>{i=(i+1)%ord.length;draw();arm()},arm=()=>{clearTimeout(tm);if(on)tm=setTimeout(next,9000)};
   return {start(){if(!ord.length)mix();on=true;draw();arm()},stop(){on=false;clearTimeout(tm)},draw(){if(on)draw()}}})();
 const affDraw=()=>aff.draw();
