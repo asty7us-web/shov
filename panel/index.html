@@ -666,7 +666,7 @@ window.svcBack=o=>{
 <nav class="tabbar" id="tabbar" aria-label="Разделы"></nav>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div class="shh" id="shh"></div><div class="sbody" id="sbody"></div></section></div>
 <div class="toast" id="toast"></div>
-<div class="lock" id="lock" hidden><div class="card"><div class="lg"><svg viewBox="0 0 32 32" fill="none"><path d="M6 21l5.5-6 4.5 3.5L25 9" stroke="#5ef2c4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="9" r="2.6" fill="#fff59d"/></svg></div><h1>Панель</h1><div class="lbl">Продажи, прибыль и реклама по товарам.<br>Введите пароль.</div><input id="pw" type="password" autocomplete="current-password" aria-label="Пароль"><button class="btn press" id="pwgo">Открыть</button><div id="pwerr"></div></div></div>
+<div class="lock" id="lock" hidden></div>
 <script>
 (()=>{
 'use strict';
@@ -1663,15 +1663,18 @@ function finRole(){   // пароль «только Панель»: други�
 }
 async function boot(pass){
   try{D=await load(pass)}catch(e){
-    if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){const L=$('#lock');L.hidden=false;$('#pwerr').textContent=pass?'Пароль не подошёл':'';$('#pwgo').disabled=false;setTimeout(()=>$('#pw').focus(),60);return}
+    if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){const L=$('#lock');if(!$('#pwf'))L.innerHTML=LOCKF;L.hidden=false;$('#pwerr').textContent=pass?'Пароль не подошёл':'';$('#pwgo').disabled=false;setTimeout(()=>$('#pw').focus(),60);return}
     $('#view').innerHTML=`<div class="empty"><b>Не открылось</b>${e.message==='NO_GZ'?'Этот браузер слишком старый. Обновите его или откройте в другом.':esc(e.message)}<br><br><button class="tbtn press" onclick="location.reload()">Повторить</button></div>`;return}
-  $('#lock').hidden=true;finRole();prep();
+  $('#lock').hidden=true;$('#lock').innerHTML='';finRole();prep();
   const h=location.hash.match(/p=(wb|ozon|ym):(\d+)/);
   sync();render();if(h)openProd(h[1]+':'+h[2]);
   loadSpp();
 }
-$('#pwgo').onclick=()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)};
-$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('#pwgo').click()});
+/* 12.11 Андрей: «выскакивает в поиске пароль постоянно» — поле пароля лежало на странице всегда (спрятанное), и браузер считал поля поиска логином к нему:
+   при тапе в них предлагал сохранённый пароль. Теперь окно пароля — отдельная форма со своим «логином» и есть на странице, только пока спрашиваем пароль
+   (как в «Конкурентах» и «Закупках»); вход — событие submit формы: и кнопка, и Enter */
+const LOCKF="<form class=\"card\" id=\"pwf\"><div class=\"lg\"><svg viewBox=\"0 0 32 32\" fill=\"none\"><path d=\"M6 21l5.5-6 4.5 3.5L25 9\" stroke=\"#5ef2c4\" stroke-width=\"2.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"25\" cy=\"9\" r=\"2.6\" fill=\"#fff59d\"/></svg></div><h1>Панель</h1><div class=\"lbl\">Продажи, прибыль и реклама по товарам.<br>Введите пароль.</div><input type=\"text\" name=\"username\" autocomplete=\"username\" value=\"Сервисы\" readonly tabindex=\"-1\" aria-hidden=\"true\" style=\"position:absolute;left:-9999px;top:0;width:1px;height:1px;min-height:0;padding:0;margin:0;border:0;opacity:0;pointer-events:none\"><input id=\"pw\" name=\"password\" type=\"password\" autocomplete=\"current-password\" aria-label=\"Пароль\"><button class=\"btn press\" id=\"pwgo\" type=\"submit\">Открыть</button><div id=\"pwerr\"></div></form>";
+$('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
