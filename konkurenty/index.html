@@ -513,6 +513,8 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .vt2{display:flex;padding:2px;border-radius:9px;background:var(--fill)}
 .vt2 button{padding:4px 10px;border-radius:7px;font-size:12px;font-weight:600;color:var(--ink2)}
 .vt2 button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mps{flex:0 0 auto}.mps button{padding:7px 9px;font-size:12.5px}
+@media (max-width:759px){.mps button{padding:7px 7px}}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table.ct{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
 .ct th{font-size:10.5px;font-weight:600;color:var(--ink3);text-align:right;padding:9px 6px 6px;line-height:1.15;vertical-align:bottom}
@@ -1093,7 +1095,20 @@ window.svcBack=o=>{
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LS={get(k,d){try{const v=localStorage.getItem('shov.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('shov.'+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem('shov.'+k)}catch(e){}}};
-const KS={get(k,d){try{const v=localStorage.getItem('konk.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('konk.'+k,JSON.stringify(v))}catch(e){}}};
+/* 12.11 Андрей: «конкуренты аналогично надо вб каб1 ям» — площадка выбирается в шапке; данные, выбранный товар и очередь решений у каждой свои */
+const MPL={oz:{n:'Озон',g:'Озона',na:'на Озоне',btn:'на Ozon',f:'data.enc.json'},wb:{n:'ВБ',g:'ВБ',na:'на ВБ',btn:'на WB',f:'data_wb.enc.json'},ym:{n:'ЯМ',g:'Маркета',na:'на Маркете',btn:'на Маркет',f:'data_ym.enc.json'}};
+let MP='oz';try{const hm=(location.hash.match(/mp=(oz|wb|ym)/)||[])[1],v=hm||JSON.parse(localStorage.getItem('konk.mp')||'"oz"');if(MPL[v])MP=v;if(hm)localStorage.setItem('konk.mp',JSON.stringify(hm))}catch(e){}
+const M=MPL[MP],OZ=MP==='oz';
+M.link=OZ?s=>'https://www.ozon.ru/product/'+s+'/':MP==='wb'?s=>'https://www.wildberries.ru/catalog/'+s+'/detail.aspx':s=>'https://market.yandex.ru/search?text='+encodeURIComponent(s);
+M.q=OZ?q=>'https://www.ozon.ru/search/?text='+encodeURIComponent(q):MP==='wb'?q=>'https://www.wildberries.ru/catalog/0/search.aspx?search='+encodeURIComponent(q):q=>'https://market.yandex.ru/search?text='+encodeURIComponent(q);
+const MPK=new Set(['sku','q','kc','refr','tab']),mk=k=>!OZ&&MPK.has(k)?k+'_'+MP:k;
+const KS={get(k,d){try{const v=localStorage.getItem('konk.'+mk(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('konk.'+mk(k),JSON.stringify(v))}catch(e){}}};
+const mpSwitch=()=>`<span class="vt2 mps" id="mps" aria-label="Площадка">${Object.keys(MPL).map(k=>`<button type="button" class="press${k===MP?' on':''}" data-mp="${k}">${MPL[k].n}</button>`).join('')}</span>`;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-mp]');if(!b||b.dataset.mp===MP)return;try{localStorage.setItem('konk.mp',JSON.stringify(b.dataset.mp))}catch(x){}history.replaceState(null,'',location.pathname+location.search);location.reload()});
+const MPNOTE=MP==='wb'?'<b>Откуда цифры.</b> Наши продажи и воронка — кабинет ВБ Каб 1. Цена, рейтинг, отзывы, остаток и срок — витрина ВБ в Москве. <b>Продажи конкурентов ВБ не показывает никому</b> — здесь оценка: новые отзывы конкурента за период × сколько наших заказов приходится на один наш отзыв по этому товару. Порядок цифр верный, точность — нет. Остаток конкурента ВБ показывает не больше 50, ставки рекламы не показывает.'
+ :'<b>Откуда цифры.</b> Наши продажи и остаток — кабинет Маркета. Цена, рейтинг, оценки, «купили» и метка рекламы — плитка товара в выдаче Маркета. «Купили» — счётчик самого Маркета на плитке; за какой срок он считает, Маркет не пишет. Штук за 7 дней у конкурентов — насколько вырос счётчик по нашим замерам, появится через неделю после первого сбора.';
+const ALLNOTE=MP==='wb'?'В сервисе только активные товары ВБ Каб 1: от 30 заказов или от 50 тыс ₽ за 28 дней и есть остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом середина топа (оценка по отзывам). <b>Цена к топу</b> — наша цена на витрине против середины конкурентов. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Доставка</b> — срок в Москву, дней.'
+ :'В сервисе только активные товары Маркета: есть заказы за 28 дней и остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом счётчик «купили» у середины топа. <b>Цена к топу</b> — наша цена против середины конкурентов. <b>Место в поиске</b> — середина наших мест по запросам из названия товара.';
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // base64 → байты: встроенным fromBase64, где он есть, иначе простым циклом (28.10: Uint8Array.from с функцией на каждый знак — секунда на телефоне при открытии)
 const b64u8=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
@@ -1103,7 +1118,7 @@ const S={t:KS.get('tab','konk'),sku:KS.get('sku',null),grp:KS.get('grp','sales')
 /* ---------- данные: ключ общий со Склейками (пароль Юнитки) ---------- */
 async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
 async function load(pass){
-  const res=await fetch('data.enc.json',{cache:'no-cache'});   // сверка по ETag: не изменились — 4,5 МБ не качаются заново (28.10)
+  const res=await fetch(M.f,{cache:'no-cache'});   // сверка по ETag: не изменились — 4,5 МБ не качаются заново (28.10)
   if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
   const enc=await res.json();
   if(!KEY||SALT!==enc.salt){
@@ -1151,7 +1166,8 @@ const IC={
  find:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>',
  x:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".6"/><path d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8" fill="none" style="stroke:var(--card)" stroke-width="2.2" stroke-linecap="round"/></svg>'
 };
-const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Ключи'],['sklad','Склады']];
+const TABS=[['all','Сводка'],['konk','Конкуренты'],['keys','Ключи'],['sklad','Склады']].filter(t=>MP!=='ym'||t[0]!=='sklad');   // у Маркета сроков по городам и кластеров нет
+if(!TABS.some(t=>t[0]===S.t))S.t='konk';
 
 /* ---------- тема ---------- */
 /* ---------- «Космос»: аффирмации Андрея (с магнитов, как в Юнитке), звёзды, метеоры, музыка ---------- */
@@ -1448,7 +1464,7 @@ addEventListener('keydown',e=>{   // «/» или Ctrl+K — поиск това
   if((e.code==='Slash'&&!e.ctrlKey&&!e.metaKey)||((e.ctrlKey||e.metaKey)&&e.code==='KeyK')){e.preventDefault();prodSheet(true)}});
 function renderPicker(){
   const pl=pfList();
-  $('#picker').innerHTML=`<button class="chip pcur press" data-pp="cur" aria-label="Сменить товар">${img(pphoto(P))}<span><b>${esc(P.offer_id)}</b><i>7 дн: ${fi((P.our||{}).cnt7)} шт${skladBad(P)?' · кончается на складе':pendN(P)?' · ждут решения '+pendN(P):''}</i></span>${IC.down}</button>`
+  $('#picker').innerHTML=mpSwitch()+`<button class="chip pcur press" data-pp="cur" aria-label="Сменить товар">${img(pphoto(P))}<span><b>${esc(P.offer_id)}</b><i>7 дн: ${fi((P.our||{}).cnt7)} шт${skladBad(P)?' · кончается на складе':pendN(P)?' · ждут решения '+pendN(P):''}</i></span>${IC.down}</button>`
    +`<button class="chip psr press" data-pp="find" aria-label="Найти товар">${IC.find}<span>Найти товар — название или артикул</span><kbd>/</kbd></button>`
    +pl.slice(1).filter(x=>x[2]).map(([k,n,c,cl])=>`<button class="chip pfb ${cl} press" data-pp="${k}" aria-label="${k==='sklad'?'Кончаются на складе':n}: ${c}" title="${k==='sklad'?'Кончаются на складе':'Ждут решения по конкурентам'}">${'<i></i>'+c}</button>`).join('');
   $('#ctx').innerHTML=`${img(P.photo||(P.our_card||{}).photo)}<b>${esc(P.offer_id)}</b><i>· ${TABS.find(t=>t[0]===S.t)[1]}</i>${IC.down}`;
@@ -1485,7 +1501,7 @@ const AD_NOTE=`<b>Ставка</b> — ставка за клик в выдач�
 const cpoOk=r=>!!(r&&r.cpo&&r.cpo!=='Выключено');
 function adParts(r){if(!r)return null;if(r.promo==='Не продвигается'||(!r.cpc&&!cpoOk(r)))return {none:true};
   const a=[];if(r.cpc)a.push(KIND[r.cpc_kind]||'клик');if(cpoOk(r))a.push((r.cpc?'+':'')+'заказ '+r.cpo);return {cpc:r.cpc,kinds:a}}
-const adTxt=r=>{const x=adParts(r);if(!x)return '';if(x.none)return 'без рекламы';return (x.cpc?'клик '+N1.format(x.cpc)+' ₽ ':'')+x.kinds.join(' ')};
+const adTxt=r=>{if(!OZ)return r&&r.ad?'реклама':'';const x=adParts(r);if(!x)return '';if(x.none)return 'без рекламы';return (x.cpc?'клик '+N1.format(x.cpc)+' ₽ ':'')+x.kinds.join(' ')};
 const adCell=(v,c,p)=>{const x=adParts(c&&c.sku&&p?snapRow(p,c.sku):null);
   if(!x)return ok(v)?N1.format(v)+' ₽':'—';if(x.none)return '<span class="rkv">—<small>нет</small></span>';
   return `<span class="rkv" title="${esc(x.kinds.map(k=>KTIP[k]||k).join('; '))}">${x.cpc?N1.format(x.cpc)+' ₽':'—'}<small>${esc(x.kinds.join(' '))}</small></span>`};
@@ -1503,14 +1519,14 @@ function fastCities(p,sku){const by=(p.regions||{}).by||{};let n=0,t=0,seen=0;fo
 const pphoto=p=>p.photo||(p.our_card||{}).photo;
 /* период таблицы (Андрей 25.10: «за какой период — менять самому»): 7 дней или 28 дней — те же цифры из месячного списка «Товары на Ozon» (c.m28) */
 const PK=['sum7','cnt7','dyn7','price','min_price','redemption','missed','access_days','stock','views','views_search','sessions','cv_view_order','cv_search_cart',
- 'cv_card_cart','discount','promo_share','promo_days','ad_days','drr','avg_orders_day','ad_day'];
+ 'cv_card_cart','discount','promo_share','promo_days','ad_days','drr','avg_orders_day','ad_day','fb7'];
 const per=c=>{if(S.per!==28)return c;const m=c.m28||{},o=Object.assign({},c);PK.forEach(k=>o[k]=ok(m[k])?m[k]:null);return o};
 const PL=s=>S.per!==28?s:String(s).replace(/7 дней/g,'28 дней').replace(/7 дн\b/g,'28 дн').replace(/из 7\b/g,'из 28').replace('к прошлой неделе','к прошлым 28 дням')
  .replace('к прошлой нед.','к пред. 28 дн').replace('÷ 7','÷ 28').replace('на конец недели','на конец периода');
 const rowsOf=ms=>ms.filter(m=>!(S.per===28&&m[0]==='Штук за 28 дней'));
-const perTxt=()=>(S.per===28?'28 дней':'7 дней')+' · данные Озона на '+ddmm(D.full_at||D.updated||'');
+const perTxt=()=>(S.per===28?'28 дней':'7 дней')+' · данные '+M.g+' на '+ddmm(D.full_at||D.updated||'');
 function cols(p){const o=Object.assign({},p.our||{},{us:true,seller:'Мы',photo:pphoto(p),rating:(p.our_card||{}).rating,reviews:(p.our_card||{}).reviews});return [o].concat(p.comps||[]).map(per)}
-const GROUPS=[
+const GROUPS_OZ=[
  ['sales','Продажи',[
   ['Заказано за 7 дней',c=>c.sum7,fk,1],['Штук за 7 дней',c=>c.cnt7,fi,1],['Динамика к прошлой неделе',c=>c.dyn7,v=>ok(v)?(v>0?'+':'')+NF.format(v)+'%':'—',1,'«лестница» Вовы'],
   ['Штук за 28 дней',c=>c.cnt28,fi,1],['Продаж в день, шт',c=>c.avg_orders_day,v=>ok(v)?N1.format(v):'—',1,'когда был в наличии']]],
@@ -1529,6 +1545,37 @@ const GROUPS=[
   ['Остаток на конец недели',c=>c.stock,fi,1],['Дней без остатка из 28',c=>ok(c.access_days)&&c.access_days>=0?c.access_days:null,fi,-1,'меньше — лучше'],
   ['Упущенные продажи',c=>c.missed,fk,-1,'меньше — лучше'],['Городов с доставкой за 1–2 дня',(c,p)=>{const f=fastCities(p,c.sku);return f?f[0]:null},v=>ok(v)?v+' из 9':'—',1]]]
 ];
+const nReg=()=>((D||{}).regions||[]).length||9;
+const dH=c=>ok(c.dlv_h)?Math.max(1,Math.ceil(c.dlv_h/24)):ok(c.dlv)?c.dlv:null;   // срок доставки, дней: ВБ отдаёт часы, Маркет — дату
+const GROUPS_WB=[
+ ['sales','Продажи',[
+  ['Штук за 7 дней',c=>c.cnt7,fi,1,'у конкурентов — оценка по отзывам'],['Заказано за 7 дней',c=>c.sum7,fk,1,'у конкурентов — оценка'],
+  ['Динамика к прошлой неделе',c=>c.dyn7,v=>ok(v)?(v>0?'+':'')+NF.format(v)+'%':'—',1],['Штук за 28 дней',c=>c.cnt28,fi,1,'у конкурентов — оценка по отзывам'],
+  ['Новых отзывов за 7 дней',c=>c.fb7,fi,1]]],
+ ['price','Цена',[['Цена на витрине',c=>c.price,fr,0,'Москва, сейчас'],['Цена до скидки',c=>c.old_price,fr,0]]],
+ ['funnel','Карточка',[
+  ['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Отзывов',c=>c.reviews,fi,1],
+  ['Открытий карточки',c=>c.sessions,fi,1,'только наши — кабинет'],['Карточка → корзина',c=>c.cv_card_cart,fp,1,'только наши'],
+  ['Корзина → заказ',c=>c.cv_cart_order,fp,1,'только наши'],['Доля выкупа',c=>c.redemption,fp,1,'только наши']]],
+ ['ads','Поиск',[
+  ['Позиция по главному ключу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},fi,-1,'Москва, сейчас; меньше — лучше'],
+  ['Ключей в первой сотне',(c,p)=>{const ks=p.keys||[];if(!ks.length)return null;return ks.filter(k=>{const r=snapRow(p,c.sku,k.q);return r&&r.pos<=100}).length},fi,1,'из главных ключей']]],
+ ['stock','Наличие',[
+  ['Остаток',c=>c.stock,(v,c)=>!ok(v)?'—':c&&c.stock_more?'50+':fi(v),0,'у конкурентов ВБ показывает не больше 50'],
+  ['Срок доставки в Москву, дней',c=>dH(c),fi,-1,'меньше — лучше'],
+  ['Городов с доставкой за 1–2 дня',(c,p)=>{const f=fastCities(p,c.sku);return f?f[0]:null},v=>ok(v)?v+' из '+nReg():'—',1]]]
+];
+const GROUPS_YM=[
+ ['sales','Продажи',[
+  ['Купили, счётчик Маркета',c=>c.bought,fi,1,'на плитке товара'],['Штук за 7 дней',c=>c.cnt7,fi,1,'у конкурентов — рост счётчика по нашим замерам'],['Штук за 28 дней',c=>c.cnt28,fi,1,'только наши']]],
+ ['price','Цена',[['Цена на витрине',c=>c.price,fr,0,'сейчас']]],
+ ['funnel','Карточка',[['Рейтинг',c=>c.rating,v=>ok(v)?N1.format(v):'—',1],['Оценок',c=>c.reviews,fi,1]]],
+ ['ads','Поиск',[
+  ['Позиция по главному запросу',(c,p)=>{const r=snapRow(p,c.sku);return r&&r.pos},fi,-1,'сейчас; меньше — лучше'],
+  ['Реклама в выдаче',c=>c.ad==null?null:c.ad?1:0,v=>!ok(v)?'—':v?'да':'нет',0,'метка на плитке']]],
+ ['stock','Наличие',[['Остаток',c=>c.stock,fi,0,'только наши'],['Срок доставки, дней',c=>dH(c),fi,-1,'меньше — лучше']]]
+];
+const GROUPS=OZ?GROUPS_OZ:MP==='wb'?GROUPS_WB:GROUPS_YM;
 function mcard(p,m){
   const [lab,get,fmt,dir,hint]=m;const C=cols(p);
   const vals=C.map(c=>{try{const v=get(c,p);return typeof v==='number'&&isFinite(v)?v:null}catch(e){return null}});
@@ -1542,7 +1589,31 @@ function mcard(p,m){
     return `<div class="br${c.us?' us':''}${c.status==='pending'?' pend':''}${ok(v)&&v===best?' best':''}" data-tip="<b>${esc(c.us?'Мы — '+p.offer_id:cnm(c))}</b>${esc(lab)}: ${esc(String(fmt(v,c,p)).replace(/<[^>]+>/g,''))}">${img(c.photo)}<span class="nm">${esc(c.us?'Мы':cnm(c))}</span><span class="tr"><i style="--w:${w}%"></i></span><span class="vl num">${fmt(v,c,p)}</span></div>`}).join('')}</div>`;
 }
 /* ситуация с шести сторон — одна функция и для товара, и для «Сводки» (Андрей 25.10: «на ладони под разным углом») */
+function anglesMp(p){
+  const o=p.our||{},cs=p.comps||[],A=[],ym=MP==='ym',sv=c=>ym?c.bought:c.cnt7;
+  const mc=med(cs.map(sv));let r=!ym&&ok(o.cnt7)&&ok(mc)&&mc>0?o.cnt7/mc:null;const so=r==null?'mut':r>=0.9?'good':r>=0.5?'warn':'bad';
+  A.push({k:'Заказы',st:so,v:ok(o.cnt7)?fi(o.cnt7)+' шт':'—',c:fi(o.cnt7),s:ym?(ok(mc)?'у топа купили '+fi(mc):''):(ok(mc)?'топ ≈'+fi(mc)+' шт':'')+(ok(o.dyn7)?' · '+(o.dyn7>0?'+':'')+NF.format(o.dyn7)+'%':''),
+   t:`За 7 дней: мы ${fi(o.cnt7)} шт${ym?', у середины топа счётчик «купили» '+fi(mc):', середина топа ≈'+fi(mc)+' шт (оценка по отзывам)'}`});
+  const mp=med(cs.map(c=>c.price)),d=ok(p.price)&&ok(mp)&&mp?p.price/mp-1:null;
+  A.push({k:'Цена',st:d==null?'mut':Math.abs(d)<=0.1?'good':d>0.1&&so==='bad'?'bad':'warn',v:fr(p.price),c:d==null?'—':(d>0?'+':'')+NF.format(d*100)+'%',
+   s:d==null?'':Math.abs(d)<=0.1?'как у топа':(d>0?'дороже':'дешевле')+' на '+NF.format(Math.abs(d)*100)+'%',t:`Мы ${fr(p.price)}, середина топа ${fr(mp)}`});
+  const rt=(p.our_card||{}).rating,mr=med(cs.map(c=>c.rating)),rv=(p.our_card||{}).reviews,mv=med(cs.map(c=>c.reviews));
+  A.push({k:'Рейтинг',st:!ok(rt)||!ok(mr)?'mut':rt>=mr-0.05?'good':rt>=mr-0.3?'warn':'bad',v:ok(rt)?N1.format(rt):'—',c:ok(rt)?N1.format(rt):'—',s:(ok(mr)?'топ '+N1.format(mr):'')+(ok(rv)?' · '+fi(rv)+' отз.':''),
+   t:`Рейтинг: мы ${ok(rt)?N1.format(rt):'—'}, середина топа ${ok(mr)?N1.format(mr):'—'}. Отзывов: мы ${fi(rv)}, топ ${fi(mv)}`});
+  const ks=p.keys||[],pn=med(ks.map(k=>(snapRow(p,p.sku,k.q)||{}).pos)),p28=med(ks.map(k=>k.pos28));
+  A.push({k:'Поиск',st:!ks.length?'mut':!ok(pn)?'bad':pn<=10?'good':pn<=30?'warn':'bad',v:ok(pn)?fi(pn)+' место':ks.length?'нет в выдаче':'—',c:ok(pn)?fi(pn):ks.length?'нет':'—',
+   s:ok(p28)?'по Джему '+fi(p28):'',t:`Середина наших мест по ${ks.length} запросам сейчас: ${fi(pn)}${ok(p28)?'. Средняя позиция за 7 дней по Джему (все показы, с рекламой): '+fi(p28):''}`});
+  const du=dH(o),md=med(cs.map(dH));
+  A.push({k:'Доставка',st:!ok(du)||!ok(md)?'mut':du<=md?'good':du<=md+1?'warn':'bad',v:ok(du)?fi(du)+' дн':'—',c:ok(du)?fi(du)+' д':'—',s:ok(md)?'топ '+fi(md)+' дн':'',
+   t:`Срок доставки${ym?'':' в Москву'}: мы ${fi(du)} дн, середина топа ${fi(md)} дн`});
+  const st=o.stock;
+  A.push({k:'Остаток',st:!ok(st)?'mut':st>0?'good':'bad',v:ok(st)?fi(st)+' шт':'—',c:ok(st)?fi(st):'—',s:!ym&&ok(o.stock_fbo)?'на складах ВБ '+fi(o.stock_fbo):'',
+   t:`Наш остаток: ${fi(st)} шт${ym?'':' (на складах ВБ '+fi(o.stock_fbo)+', на своём '+fi(o.stock_fbs)+')'}`});
+  const NAV=[{h:'Заказы, шт',t:'konk',g:'sales',f:'m:Штук за 7 дней'},{h:'Цена к топу',t:'konk',g:'price',f:'m:Цена на витрине'},{h:'Рейтинг',t:'konk',g:'funnel',f:'m:Рейтинг'},
+   {h:'Место в поиске',t:'keys',f:'heat'},{h:'Доставка, дн',t:'konk',g:'stock',f:ym?'m:Срок доставки, дней':'m:Срок доставки в Москву, дней'},{h:'Остаток',t:'konk',g:'stock',f:'m:Остаток'}];
+  A.forEach((a,i)=>Object.assign(a,NAV[i]));return A}
 function angles(p){
+  if(!OZ)return anglesMp(p);
   const o=p.our||{},cs=p.comps||[],A=[];
   const mc=med(cs.map(c=>c.cnt7));let r=ok(o.cnt7)&&ok(mc)&&mc>0?o.cnt7/mc:null;
   const so=r==null?'mut':r>=0.9?'good':r>=0.5?'warn':'bad';
@@ -1573,8 +1644,8 @@ const goAttr=(p,a)=>`data-go="${p.sku}" data-gt="${a.t}"${a.g?` data-gg="${a.g}"
 const stc=s=>s==='good'?'p1':s==='warn'?'p2':s==='bad'?'p3':'p0';
 function hero(p){
   const o=p.our||{};
-  return `<div class="card hero sm reveal">${img(pphoto(p))}<div style="min-width:0"><h1>${esc(p.offer_id)}</h1><p>${esc(p.type_name||'')}${o.rank?` · ${o.rank}-е место в категории по заказам`:' · ниже 200-го места в категории'}</p>
-   <div class="tags">${pendN(p)?`<span class="tag wait">${IC.clock}${pendN(p)} ${plur(pendN(p),'ждёт','ждут','ждут')} согласования</span>`:''}${skladBad(p)?`<span class="tag bad">${IC.warn}кончается на складе</span>`:''}<a class="tag acc" href="https://www.ozon.ru/product/${p.sku}/" target="_blank" rel="noopener">на Ozon ${IC.ext}</a></div></div></div>
+  return `<div class="card hero sm reveal">${img(pphoto(p))}<div style="min-width:0"><h1>${esc(p.offer_id)}</h1><p>${esc(p.type_name||'')}${!OZ?'':o.rank?` · ${o.rank}-е место в категории по заказам`:' · ниже 200-го места в категории'}</p>
+   <div class="tags">${pendN(p)?`<span class="tag wait">${IC.clock}${pendN(p)} ${plur(pendN(p),'ждёт','ждут','ждут')} согласования</span>`:''}${skladBad(p)?`<span class="tag bad">${IC.warn}кончается на складе</span>`:''}<a class="tag acc" href="${esc(OZ?'https://www.ozon.ru/product/'+p.sku+'/':(p.our||{}).link||M.link(p.sku))}" target="_blank" rel="noopener">${M.btn} ${IC.ext}</a></div></div></div>
   <div class="ang">${angles(p).map(a=>`<button class="card an press ${a.st} reveal" ${goAttr(p,a)} title="${esc(a.t)}"><div class="l"><i></i>${a.k}</div><div class="v">${a.v}</div><div class="s">${esc(a.s)||'&nbsp;'}</div></button>`).join('')}</div>`;
 }
 /* маленькая карточка конкурента: фото, продавец, цена, штуки — не закрывает экран */
@@ -1583,18 +1654,19 @@ function cmini(c,i,p){
   // добавленный вручную (hand / _add) до подбора — без фото и цифр, подпись говорит, что будет дальше
   const sub=c._q?(c._add?'добавлен':'взят')+(c._sent?' · отправлено':' · нажмите «Отправить»')
    :c.hand&&!c.photo&&!ok(c.price)?'добавлен · ждёт цифр'
-   :(ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':c.hand?'добавлен вручную':'из выдачи')+((c.j||{}).v==='almost'?' · почти такой же':'');
+   :(sal7(c)||(c.hand?'добавлен вручную':'из выдачи'))+(!OZ&&c.seg==='dump'?' · дешёвый':'')+((c.j||{}).v==='almost'?' · почти такой же':'');
   return `<button class="card cm press${c.status==='pending'?' pend':''} reveal" data-comp="${c.sku}"><div class="ph">${c.photo?img(c.photo):'<span class="np"></span>'}<span class="n">${i+1}</span>${c.status==='yes'?`<span class="st ok">${IC.check}</span>`:c.status==='pending'?`<span class="st wait">${IC.clock}</span>`:''}</div>
    <div style="min-width:0"><b>${esc(cnm(c))}</b><div class="p num">${fr(c.price)}${d!=null?`<span class="${d<0?'dn':'up'}">${d>0?'+':'−'}${NF.format(Math.abs(d)*100)}%</span>`:''}</div><div class="s">${sub}</div></div></button>`;
 }
+const sal7=c=>MP==='ym'?(ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':ok(c.bought)?'купили '+fi(c.bought):''):ok(c.cnt7)?(OZ?'':'≈ ')+fi(c.cnt7)+' шт за 7 дн':'';   // ВБ — оценка по отзывам, Маркет — счётчик «купили»
 const cnm=c=>c.seller?short(c.seller):c.name?String(c.name).slice(0,22).trim()+'…':'SKU '+c.sku;   // 10.11 Бондарев: без продавца было «—» — теперь начало названия   // у добавленного вручную до подбора продавца ещё нет
 /* таблица «мы против топа»: телефон — строки продавцы, столбцы цифры раздела; компьютер — вся таблица как в первой версии */
 const SH={'Заказано за 7 дней':'₽ за 7 дн','Штук за 7 дней':'шт 7 дн','Динамика к прошлой неделе':'к прошлой нед.','Штук за 28 дней':'шт 28 дн','Продаж в день, шт':'шт в день',
  'Средняя цена продажи':'цена','Скидка от медианной цены':'скидка','Доля заказов по акциям':'по акциям','Дней в акциях из 7':'дн. в акциях',
  'Показы всего':'показы','Показы в поиске':'в поиске','Посещения карточки':'визиты','Показ → заказ':'показ → заказ','Поиск → корзина':'поиск → корз.','Карточка → корзина':'карт. → корз.','Доля выкупа':'выкуп',
  'ДРР':'ДРР','Расход на рекламу в день':'₽ в день','Дней с оплатой за клик из 7':'реклама, дн','Ставка за клик, главный ключ':'ставка','Позиция по главному ключу':'место','Рейтинг':'рейтинг','Отзывов':'отзывы',
- 'Остаток на конец недели':'остаток','Дней без остатка из 28':'дн. без ост.','Упущенные продажи':'упущено','Городов с доставкой за 1–2 дня':'быстрая дост.'};
-const cpt=s=>String(s).replace(/ тыс ₽/,'к').replace(/ млн ₽/,' млн').replace(/ из 9$/,'');   // телефон: «35 тыс ₽» → «35к»
+ 'Остаток на конец недели':'остаток','Цена на витрине':'цена','Цена до скидки':'до скидки','Новых отзывов за 7 дней':'отз. 7 дн','Открытий карточки':'открытий','Корзина → заказ':'корз. → заказ','Ключей в первой сотне':'ключей в 100','Остаток':'остаток','Срок доставки в Москву, дней':'срок, дн','Срок доставки, дней':'срок, дн','Купили, счётчик Маркета':'купили','Оценок':'оценки','Позиция по главному запросу':'место','Реклама в выдаче':'реклама','Дней без остатка из 28':'дн. без ост.','Упущенные продажи':'упущено','Городов с доставкой за 1–2 дня':'быстрая дост.'};
+const cpt=s=>String(s).replace(/ тыс ₽/,'к').replace(/ млн ₽/,' млн').replace(/ из \d+$/,'');   // телефон: «35 тыс ₽» → «35к»
 function mvals(p,m,C){const [,get]=m;return C.map(c=>{try{const v=get(c,p);return typeof v==='number'&&isFinite(v)?v:null}catch(e){return null}})}
 function mmark(vals,dir){   // подсветка: наш столбец лучше/хуже медианы конкурентов на 10%, лучшее значение — подчёркнуто
   const comp=vals.slice(1).filter(ok),m=med(comp),all=vals.filter(ok);let best=null;if(dir&&all.length>1)best=dir>0?Math.max(...all):Math.min(...all);
@@ -1608,7 +1680,7 @@ function cmpPhone(p,g){
 }
 function cmpDesk(p){
   const C=cols(p);
-  const head=`<thead><tr><th></th>${C.map(c=>`<th class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><div class="ph">${img(c.photo)}<b>${esc(c.us?'Мы — '+p.offer_id:cnm(c))}</b><i>${c.us?(c.rank?c.rank+'-е место в категории':'ниже 200-го места'):esc((c.name||'').slice(0,60))}</i>${c.status==='pending'?'<span class="tag wait">ждёт ✅</span>':''}</div></th>`).join('')}</tr></thead>`;
+  const head=`<thead><tr><th></th>${C.map(c=>`<th class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><div class="ph">${img(c.photo)}<b>${esc(c.us?'Мы — '+p.offer_id:cnm(c))}</b><i>${c.us?(!OZ?'':c.rank?c.rank+'-е место в категории':'ниже 200-го места'):esc((c.name||'').slice(0,60))}</i>${c.status==='pending'?'<span class="tag wait">ждёт ✅</span>':''}</div></th>`).join('')}</tr></thead>`;
   const body=GROUPS.map(([,n,ms])=>`<tr class="g"><td colspan="${C.length+1}">${n}</td></tr>`+rowsOf(ms).filter(m=>!m[5]).map(m=>{const vals=mvals(p,m,C);if(!vals.some(ok))return '';const mk=mmark(vals,m[3]);
     return `<tr data-f="m:${esc(m[0])}"><td>${PL(m[0])}${m[4]?`<span class="hint">${PL(m[4])}</span>`:''}</td>${vals.map((v,i)=>`<td class="${C[i].us?'us ':''}${mk[i]}">${m[2](v,C[i],p)}</td>`).join('')}</tr>`}).join('')).join('');
   return `<div class="card tw reveal"><table class="cmpd">${head}<tbody>${body}</tbody></table></div>`;
@@ -1623,10 +1695,10 @@ function cmpBlock(p){
 function cmpBody(p){
   const g=GROUPS.find(x=>x[0]===S.grp)||GROUPS[0];
   if(S.cv==='bars')return `<div class="mgrid">${rowsOf(g[2]).map(m=>mcard(p,m)).join('')}</div>
-   <div class="legend"><span><i class="a"></i>Мы</span><span><i></i>Конкуренты</span><span><i class="g"></i>лучшее значение</span></div>${g[0]==='ads'?`<div class="note">${AD_NOTE}</div>`:''}`;
+   <div class="legend"><span><i class="a"></i>Мы</span><span><i></i>Конкуренты</span><span><i class="g"></i>лучшее значение</span></div>${OZ&&g[0]==='ads'?`<div class="note">${AD_NOTE}</div>`:''}${OZ?'':`<div class="note">${MPNOTE}</div>`}`;
   return `<div class="only-m">${cmpPhone(p,g)}</div><div class="only-d">${cmpDesk(p)}</div>
-   <div class="note${g[0]==='ads'?'':' only-d'}">${AD_NOTE}</div>
-   <div class="note">Голубая строка — мы. Зелёным и красным — где мы лучше или хуже медианы конкурентов больше чем на 10%, подчёркнуто — лучшее в столбце. Нажмите продавца — откроется сравнение один на один и кнопки «взять / убрать».${S.per===28?' За 28 дней Озон отдаёт только тех, кто в месячном топе категории; найденные в выдаче — с прочерками.':''} Две недели Озон по конкурентам не отдаёт — только 7 и 28 дней.</div>`;
+   ${OZ?`<div class="note${g[0]==='ads'?'':' only-d'}">${AD_NOTE}</div>`:`<div class="note">${MPNOTE}</div>`}
+   <div class="note">Голубая строка — мы. Зелёным и красным — где мы лучше или хуже медианы конкурентов больше чем на 10%, подчёркнуто — лучшее в столбце. Нажмите продавца — откроется сравнение один на один и кнопки «взять / убрать».${OZ?(S.per===28?' За 28 дней Озон отдаёт только тех, кто в месячном топе категории; найденные в выдаче — с прочерками.':'')+' Две недели Озон по конкурентам не отдаёт — только 7 и 28 дней.':''}</div>`;
 }
 /* «шторка» под выбранной кнопкой; первый раз — без анимации */
 function thumbs(root){(root||document).querySelectorAll('.sgm').forEach(sg=>{const on=sg.querySelector(':scope>button.on');if(!on||!sg.offsetWidth)return;
@@ -1644,11 +1716,14 @@ function swapIn(el,html){   // мягкая смена: короткое рас�
 /* ---------- решения по конкурентам с сайта (Андрей 25.10: «взять / убрать прямо тут»): копятся здесь → одним сообщением в «К» → «Применить» ---------- */
 let Q=KS.get('q',[]);
 const qKey=(o,c)=>o+':'+c;
+// Озон: …/product/<кандидат>/?ko=<d>-<наш>; ВБ и ЯМ: ссылка товара + ko=<d>-<площадка>.<наш>.<кандидат> (soglas.py watch → konkurenty_mp\soglas_mp.py)
+const koUrl=(d,our,comp,link)=>OZ?`https://www.ozon.ru/product/${comp}/?ko=${d}-${our}`:(u=>u+(u.includes('?')?'&':'?')+`ko=${d}-${MP}.${encodeURIComponent(our)}.${encodeURIComponent(comp)}`)(link||M.link(comp));
+const koKb=mid=>OZ?[[{text:'✅ Применить',callback_data:'ko:b:'+mid+':'},{text:'✖ Отмена',callback_data:'ko:c:'+mid+':'}]]:[[{text:'⏳ Применится само за 10 минут',callback_data:'ko:x:'+mid+':'}]];
 const qOf=(p,c)=>Q.find(x=>x.our===p.sku&&x.comp===c);
 function qSet(p,c,d){
   const i=Q.findIndex(x=>x.our===p.sku&&x.comp===c.sku);
   if(i>=0&&Q[i].d===d&&!Q[i].sent)Q.splice(i,1);
-  else{if(i>=0)Q.splice(i,1);Q.push({d,our:p.sku,comp:c.sku,seller:cnm(c),offer:p.offer_id})}
+  else{if(i>=0)Q.splice(i,1);Q.push({d,our:p.sku,comp:c.sku,seller:cnm(c),offer:p.offer_id,link:c.link})}
   KS.set('q',Q);qbar();
 }
 /* 01.11 Андрей: «нажимаешь убрать — внешне ничего не меняется»: решение видно сразу, ещё до «Отправить» — убранный пропадает
@@ -1663,7 +1738,7 @@ function qView(){D.products.forEach(p=>{
    .concat(p._pm0.filter(c=>tk(q(c))).map(c=>mark(c,q(c))))
    .concat((p.rejected||[]).filter(r=>tk(q(r))&&!p._c0.some(c=>c.sku===r.sku)).map(r=>mark(r,q(r))))
    .concat(Q.filter(x=>x.our===p.sku&&x.d==='a'&&!known.some(c=>c.sku===x.comp))   // добавлен по ссылке, в данных его нет — заглушкой
-     .map(x=>({sku:x.comp,seller:null,link:'https://www.ozon.ru/product/'+x.comp+'/',status:'yes',_q:1,_add:1,_sent:x.sent?1:0})));
+     .map(x=>({sku:x.comp,seller:null,link:x.link||M.link(x.comp),status:'yes',_q:1,_add:1,_sent:x.sent?1:0})));
   p.pend_more=p._pm0.filter(keep).filter(c=>!tk(q(c)))})}
 const cAny=(p,s)=>allC(p).find(x=>x.sku===s)||(p._c0||[]).concat(p._pm0||[],p.rejected||[]).find(x=>x.sku===s);
 let SNK=0;
@@ -1755,26 +1830,26 @@ async function qSend(){
   const T=D.tg||{},items=Q.filter(x=>!x.sent);if(!T.token||!T.chat){toast('Нет связи с ботом');return}if(!items.length)return;
   // ссылки …/product/<кандидат>/?ko=<y|n|a>-<наш sku> — по ним Куратор применяет решения (soglas.py watch; y|n — и k_pult → soglas.py batch);
   // a — «+ Добавить конкурента»: watch берёт его и запускает подбор по товару без модели (soglas.py refresh --light)
-  const line=x=>`${x.d==='y'?'✅ взять':x.d==='a'?'➕ добавить':'✖ убрать'} <a href="https://www.ozon.ru/product/${x.comp}/?ko=${x.d}-${x.our}">${esc(x.seller)}</a>`;
+  const line=x=>`${x.d==='y'?'✅ взять':x.d==='a'?'➕ добавить':'✖ убрать'} <a href="${esc(koUrl(x.d,x.our,x.comp,x.link))}">${esc(x.seller)}</a>`;
   const by={};items.forEach(x=>(by[x.offer]=by[x.offer]||[]).push(x));
   const blocks=Object.entries(by).map(([o,xs])=>`<b>${esc(o)}</b>\n`+xs.map(line).join('\n'));
-  const msgs=[];let cur='🗳 Конкуренты — решения с сайта';
+  const msgs=[];let cur='🗳 Конкуренты — решения с сайта'+(OZ?'':' · '+M.n);
   const vis=s=>s.replace(/<[^>]+>/g,'').length;
-  blocks.forEach(b=>{if(vis(cur+'\n\n'+b)>560){msgs.push(cur);cur='🗳 Конкуренты — решения с сайта (ещё)'}cur+='\n\n'+b});msgs.push(cur);
+  blocks.forEach(b=>{if(vis(cur+'\n\n'+b)>560){msgs.push(cur);cur='🗳 Конкуренты — решения с сайта (ещё)'+(OZ?'':' · '+M.n)}cur+='\n\n'+b});msgs.push(cur);
   try{
     for(const text of msgs){
       const r=await fetch('https://api.telegram.org/bot'+T.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({chat_id:T.chat,text,parse_mode:'HTML',disable_web_page_preview:true,reply_markup:{inline_keyboard:[[{text:'✅ Применить',callback_data:'ko:b::'},{text:'✖ Отмена',callback_data:'ko:c::'}]]}})});
+        body:JSON.stringify({chat_id:T.chat,text,parse_mode:'HTML',disable_web_page_preview:true,reply_markup:{inline_keyboard:koKb('')}})});
       const j=await r.json();if(!j.ok)throw new Error(j.description||'ошибка');
       // 26.10: номер сообщения бота — в кнопку, чтобы сторож применил решения сам и удалил сообщение (soglas.py watch)
       const mid=j.result.message_id;await fetch('https://api.telegram.org/bot'+T.token+'/editMessageReplyMarkup',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({chat_id:T.chat,message_id:mid,reply_markup:{inline_keyboard:[[{text:'✅ Применить',callback_data:'ko:b:'+mid+':'},{text:'✖ Отмена',callback_data:'ko:c:'+mid+':'}]]}})}).catch(()=>{});
+        body:JSON.stringify({chat_id:T.chat,message_id:mid,reply_markup:{inline_keyboard:koKb(mid)}})}).catch(()=>{});
     }
     qDone();
   }catch(e){
     // 09.11: с телефона api.telegram.org часто не открывается — запасной путь через ntfy.sh (soglas.py watch читает и его)
     const R=D.relay||{};
-    if(R.topic){try{const r=await fetch('https://ntfy.sh/'+R.topic,{method:'POST',body:JSON.stringify({items:items.map(x=>[x.d,String(x.our),String(x.comp)])})});
+    if(R.topic){try{const r=await fetch('https://ntfy.sh/'+R.topic,{method:'POST',body:JSON.stringify({items:items.map(x=>[x.d,(OZ?'':MP+':')+String(x.our),String(x.comp)])})});
       if(!r.ok)throw new Error('HTTP '+r.status);qDone();return}catch(e2){}}
     toast('Не отправилось: '+e.message)}
 }
@@ -1794,14 +1869,14 @@ function compSheet(p,sku){
   const oc=(p.our_card||{}).chars||{},cc=c.chars||{},ks=[...new Set([...Object.keys(oc),...Object.keys(cc)])].slice(0,12);
   const isComp=allC(p).some(x=>x.sku===sku);
   const back=SBACK?`<button class="lnk press" data-sback style="display:block;margin:2px 0 10px;font-size:15px">‹ ${SBACK.k==='other'?'Другие из топа':'Ждут решения'}</button>`:'';
-  openSheet(`${back}<div class="csh"><a class="cph" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(cnm(c))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
-   <div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${!isComp?'<span class="tag">не в конкурентах</span>':c._q?`<span class="tag wait">${IC.clock}${c._add?'добавлен':'взят'} · ${c._sent?'отправлено':'нажмите «Отправить»'}</span>`:c.status==='yes'?`<span class="tag ok">${IC.check}согласован${c.at?' '+ddmm(c.at):''}</span>`:`<span class="tag wait">${IC.clock}ждёт решения</span>`}${c.hand?'<span class="tag">добавлен вручную</span>':''}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}<a class="tag acc" href="${esc(c.link||'https://www.ozon.ru/product/'+c.sku+'/')}" target="_blank" rel="noopener">на Ozon ${IC.ext}</a></div></div></div>
+  openSheet(`${back}<div class="csh"><a class="cph" href="${esc(c.link||M.link(c.sku))}" target="_blank" rel="noopener">${img(String(c.photo||'').replace(/\/wc\d+\//,'/wc1000/'))}</a><div style="min-width:0"><div style="font:700 20px/1.2 var(--fd)">${esc(cnm(c))}</div><div class="mut" style="font-size:13px;margin-top:3px">${esc((c.name||'').slice(0,110))}</div>
+   <div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${!isComp?'<span class="tag">не в конкурентах</span>':c._q?`<span class="tag wait">${IC.clock}${c._add?'добавлен':'взят'} · ${c._sent?'отправлено':'нажмите «Отправить»'}</span>`:c.status==='yes'?`<span class="tag ok">${IC.check}согласован${c.at?' '+ddmm(c.at):''}</span>`:`<span class="tag wait">${IC.clock}ждёт решения</span>`}${c.hand?'<span class="tag">добавлен вручную</span>':''}${c.note?`<span class="tag">${esc(c.note)}</span>`:''}<a class="tag acc" href="${esc(c.link||M.link(c.sku))}" target="_blank" rel="noopener">${M.btn} ${IC.ext}</a></div></div></div>
    ${qBtns(p,isComp?c:Object.assign({},c,{status:'other'}))}
    ${j.v?`<div class="card pad" style="margin-top:14px;box-shadow:none;background:var(--fill2)"><b>${j.v==='same'?'Тот же товар':j.v==='almost'?'Почти такой же':'Другой товар'}</b> <span class="mut">· проверено по фото и характеристикам</span><div style="margin-top:6px;font-size:14px">${esc(j.why||'')}</div>${j.diff?`<div style="margin-top:6px;font-size:14px" class="mut">Отличие: ${esc(j.diff)}</div>`:''}</div>`:''}
    <div class="pbar" style="margin-top:12px"><span class="mut">${esc(perTxt())}</span></div>
    <table class="cmp2" style="margin-top:4px"><tr><th></th><th>Мы</th><th>${esc(cnm(c))}</th></tr>${rows}
    ${ks.length?`<tr class="g"><td colspan="3">Характеристики</td></tr>`+ks.map(k=>`<tr class="ch"><td>${esc(k)}</td><td>${esc(oc[k]||'—')}</td><td>${esc(cc[k]||'—')}</td></tr>`).join(''):''}</table>
-   <div class="note">${AD_NOTE}</div>`);
+   <div class="note">${OZ?AD_NOTE:MPNOTE}</div>`);
   $('#sbody').dataset.comp=sku;
 }
 /* ждут решения — все кандидаты товара на одном листе */
@@ -1837,14 +1912,14 @@ function otherSheet(p,keep){
 function pick(p,c){
   const q=qOf(p,c.sku),v=c.v||(c.j||{}).v,why=c.why||((c.j||{}).diff||(c.j||{}).why)||'';
   return `<div class="card pk${q&&q.d==='n'?' gone':''}" data-pk="${c.sku}"><button class="pkm press" data-comp="${c.sku}">${img(c.photo)}<div style="min-width:0"><b>${esc(cnm(c))}</b>
-   <div class="s">${ok(c.cnt7)?fi(c.cnt7)+' шт за 7 дн':ok(c.sum7)?fk(c.sum7)+' за 7 дн':'продажи не видны'}${ok(c.price)?' · '+fr(c.price):''}</div>
+   <div class="s">${sal7(c)||(ok(c.sum7)?fk(c.sum7)+' за 7 дн':'продажи не видны')}${ok(c.price)?' · '+fr(c.price):''}</div>
    <div class="w">${v==='same'?'<b>Тот же.</b> ':v==='almost'?'<b>Почти такой же.</b> ':v==='other'?'<b>Другой.</b> ':''}${esc(why.slice(0,140))}</div></div></button>${qBtns(p,c)}</div>`;
 }
 function zakup(p){
   const z=p.zakup||{};if(!(z.donors28||[]).length)return '';
   const all=[...(z.donors28||[]),z.our28||0,...(z.target||[])],mx=Math.max(...all,1);
   const bar=(lab,v,cls,tip)=>`<div class="br${cls?' '+cls:''}" data-tip="${esc(tip||lab+': '+fi(v)+' шт')}"><span></span><span class="nm">${lab}</span><span class="tr"><i style="--w:${Math.max(2,v/mx*100)}%"></i></span><span class="vl num">${fi(v)}</span></div>`;
-  return `<div class="card mc reveal"><h3>Закупка по методу Вовы<em>штук за 28 дней</em></h3><div class="verdict mut">Ориентир — те, кто продаёт много по нашей цене</div>
+  return `<div class="card mc reveal"><h3>Закупка по методу Вовы<em>штук за 28 дней${z.est?' · оценка':''}</em></h3><div class="verdict mut">Ориентир — те, кто продаёт много по нашей цене</div>
    ${z.donors28.map((v,i)=>bar('Донор '+(i+1),v)).join('')}${bar('Мы',z.our28||0,'us')}
    ${z.target?`<div class="ad" style="padding:10px 0 4px"><div class="do" style="margin:0">Чтобы встать вровень — держать на складах <b>${fi(z.target[0])}–${fi(z.target[1])} шт</b> на месяц (их продажи + 25–50%), сразу на все склады и рекламу без лимита.</div></div>`:''}</div>`;
 }
@@ -1873,7 +1948,7 @@ async function refSend(p){
   const api=(m,b)=>fetch('https://api.telegram.org/bot'+T.token+'/'+m,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
   try{
     const j=await api('sendMessage',{chat_id:T.chat,parse_mode:'HTML',disable_web_page_preview:true,
-      text:`🔄 Конкуренты — найти заново\n<a href="https://www.ozon.ru/product/${p.sku}/?ko=r-${p.sku}">${esc(p.offer_id)}</a>`});
+      text:`🔄 Конкуренты — найти заново${OZ?'':' · '+M.n}\n<a href="${esc(koUrl('r',p.sku,p.sku,(p.our||{}).link))}">${esc(p.offer_id)}</a>`});
     if(!j.ok)throw new Error(j.description||'ошибка');
     // номер сообщения бота — в кнопку: Куратор запустит подбор и удалит сообщение (soglas.py watch)
     await api('editMessageReplyMarkup',{chat_id:T.chat,message_id:j.result.message_id,reply_markup:{inline_keyboard:[[{text:'🔄 Ищу заново…',callback_data:'ko:x:'+j.result.message_id+':'}]]}}).catch(()=>{});
@@ -1883,7 +1958,19 @@ async function refSend(p){
 }
 /* «+ Добавить конкурента» (Андрей 01.11: «возможность добавить самому конкурента»): ссылка на товар Озона или SKU → в очередь решений
    (d:'a', как «Взять») → «Отправить» → Куратор раз в 10 минут берёт его (soglas.py watch, ссылка ko=a-<наш sku>) и подтягивает фото и цифры */
+function skuOfMp(v){
+  const s=String(v||'').trim(),url=(s.match(/https?:\/\/\S+/i)||[])[0],d=s.replace(/[\s ]/g,'');
+  if(!s)return {e:'Вставьте ссылку на товар '+M.na};
+  if(MP==='wb'&&!url&&/^\d+$/.test(d))return d.length>=6&&d.length<=12?{s:d}:{e:`Артикул ВБ — это номер из 6–12 цифр, а здесь ${d.length}`};
+  let u;try{u=new URL(url||(/^[a-z]+:\/\//i.test(s)?s:'https://'+s))}catch(e){return {e:'Это не ссылка. Нужна ссылка на карточку товара '+M.na}}
+  if(MP==='wb'){if(!/(^|\.)(wildberries|wb)\.ru$/i.test(u.hostname))return {e:`Это ссылка не на ВБ (${u.hostname}). Нужна ссылка вида wildberries.ru/catalog/…/detail.aspx`};
+    const m=u.pathname.match(/\/catalog\/(\d{6,12})(?:\/|$)/);return m?{s:m[1]}:{e:'В ссылке нет артикула. Нужна ссылка на карточку: wildberries.ru/catalog/…/detail.aspx'}}
+  if(!/(^|\.)market\.yandex\.ru$/i.test(u.hostname))return {e:`Это ссылка не на Маркет (${u.hostname}). Нужна ссылка на карточку: market.yandex.ru/card/…`};
+  const m=u.pathname.match(/\/(?:card|product--)[^/]*\/(\d{6,20})(?:\/|$)/)||u.pathname.match(/\/(\d{6,20})\/?$/);
+  return m?{s:u.searchParams.get('sku')||m[1],u:u.origin+u.pathname}:{e:'В ссылке нет номера товара. Нужна ссылка на карточку: market.yandex.ru/card/…'};
+}
 function skuOf(v){
+  if(!OZ)return skuOfMp(v);
   const s=String(v||'').trim(),url=(s.match(/https?:\/\/\S+/i)||[])[0],d=s.replace(/[\s ]/g,'');
   if(!s)return {e:'Вставьте ссылку на товар Озона или его SKU'};
   if(!url&&/^\d+$/.test(d))return d.length>=6&&d.length<=12?{s:d}:{e:`SKU — это номер товара из 6–12 цифр, а здесь ${d.length}`};
@@ -1901,15 +1988,15 @@ function addComp(p,v){   // ошибка текстом или пусто — д
   const c=allC(p).find(x=>x.sku===s);
   if(c&&c.status==='yes')return `Уже в конкурентах: ${cnm(c)}${c._q?' — в очереди, нажмите «Отправить»':''}`;
   const k=cAny(p,s)||{},i=Q.findIndex(x=>x.our===p.sku&&x.comp===s);if(i>=0)Q.splice(i,1);
-  Q.push({d:'a',our:p.sku,comp:s,seller:k.seller?cnm(k):'SKU '+s,offer:p.offer_id});KS.set('q',Q);qbar();
+  Q.push({d:'a',our:p.sku,comp:s,seller:k.seller?cnm(k):'SKU '+s,offer:p.offer_id,link:r.u||k.link});KS.set('q',Q);qbar();
   closeSheet();qView();const y=scrollY;render(false);window.scrollTo(0,y);
   snack(`➕ Добавлен: <b>${esc(k.seller?cnm(k):'SKU '+s)}</b> · нажмите «Отправить»`,()=>{const j=Q.findIndex(x=>x.our===p.sku&&x.comp===s&&x.d==='a'&&!x.sent);if(j>=0){Q.splice(j,1);KS.set('q',Q);qbar()}qView();const y2=scrollY;render(false);window.scrollTo(0,y2)});
   const el=$(`#view .rail2 [data-comp="${s}"]`);if(el){el.classList.add('hl');el.scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'})}
   return '';
 }
 function addSheet(p){
-  openSheet(`<div class="note" style="margin:0 0 10px"><b>${esc(p.offer_id)}</b>. Знаете конкурента, которого нет в топе, — вставьте ссылку на его товар на Озоне или SKU (номер в конце ссылки). Он сразу встанет в топ. После «Отправить» Куратор за 10 минут возьмёт его, фото и цифры подтянутся за 15–40 минут.</div>
-   <form id="addf" novalidate><div class="sf">${IC.ext}<input id="addin" type="text" inputmode="url" placeholder="ozon.ru/product/… или SKU" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Ссылка на товар Озона или SKU" aria-describedby="adderr"></div>
+  openSheet(`<div class="note" style="margin:0 0 10px"><b>${esc(p.offer_id)}</b>. Знаете конкурента, которого нет в топе, — вставьте ссылку на его товар ${M.na}${OZ?' или SKU (номер в конце ссылки)':MP==='wb'?' или артикул ВБ':''}. Он сразу встанет в топ. После «Отправить» Куратор за 10 минут возьмёт его, фото и цифры подтянутся за 15–40 минут.</div>
+   <form id="addf" novalidate><div class="sf">${IC.ext}<input id="addin" type="text" inputmode="url" placeholder="${OZ?'ozon.ru/product/… или SKU':MP==='wb'?'wildberries.ru/catalog/… или артикул':'market.yandex.ru/card/…'}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Ссылка на товар Озона или SKU" aria-describedby="adderr"></div>
    <div class="adderr" id="adderr" role="alert"></div>
    <button class="btn press" type="submit" style="width:100%;margin-top:10px">Добавить в топ</button></form>`,
    `<div class="sec" style="margin:4px 2px 10px"><h2>Добавить конкурента</h2><span></span></div>`);
@@ -1990,7 +2077,7 @@ function vKonk(p){
   <div class="sec"><h2>Топ-${cs.length||5} конкурентов</h2><button class="lnk addc press" id="addc" type="button">+ Добавить конкурента</button></div>
   ${refRow(p)}
   ${cs.length||rj?`<div class="rail2" style="--n:${Math.max(5,cs.length+(rj?1:0))}">${cs.map((c,i)=>cmini(c,i,p)).join('')}${rj?`<button class="card cm more press reveal" id="rej"><div class="ph">+${rj}</div><div style="min-width:0"><b>Другие из топа</b><div class="s">взять или убрать</div></div></button>`:''}</div>`:''}
-  ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор по топу категории, поиску по названию и выдаче по ключам, с проверкой фото.</div>'}
+  ${cs.length?'':'<div class="card pad mut reveal">Похожих конкурентов пока нет. «Найти заново» — подбор ${OZ?'по топу категории, поиску по названию и выдаче по ключам':'по выдаче по ключам и поиску по названию'}, с проверкой фото.</div>'}
   ${resNote(p)}
   <div class="sec"><h2>Мы против топа</h2><span class="vt2 sgm" id="cv"><button class="${S.cv!=='bars'?'on':''}" data-cv="tab">Таблица</button><button class="${S.cv==='bars'?'on':''}" data-cv="bars">Полоски</button></span></div>
   <div id="cmpbox">${cmpBlock(p)}</div>
@@ -1998,7 +2085,7 @@ function vKonk(p){
   <div class="duo"><div class="main">
   ${!adv.length&&rgBlock(p)?`<div class="sec"><h2>Что доделать до топа</h2></div>${rgBlock(p)}`:''}${adv.length?`<div class="sec"><h2>Что доделать до топа</h2><button class="lnk" id="howadv">как считаются</button></div>${rgBlock(p)}<div class="adv advl">${adv.map((x,i)=>`<button class="card ad press reveal${i===0?' open':''}"><div class="h"><span class="k">${i+1}</span><div style="min-width:0;flex:1">${x.area?`<span class="ar">${esc(x.area)}</span>`:''}${x.since?`<span class="dt">от ${esc(x.since.slice(0,5))}</span>`:''}<b>${esc(x.title)}</b><div class="w">${esc(x.why||'')}</div></div>${IC.chev}</div><div class="more"><div>${x.do?`<div class="do"><b style="font-size:13px;display:inline">Что сделать: </b>${esc(x.do)}</div>`:''}${x.id&&(D.zadachi||{}).topic?stBtn(p,x):''}${x.area?rgAreaBtn(p,x.area):''}</div></div></button>`).join('')}</div><div class="note">Разбор ${esc((p.advice||{}).at||'')}. Это предложения — в кабинете ничего не меняется без вашего «да».</div>`:''}
   </div><div class="side">
-  <div class="sec"><h2>Реклама, закупка, рынок</h2><span></span></div>${ourRk(p)}${zakup(p)}${others(p)}
+  <div class="sec"><h2>${OZ?'Реклама, закупка, рынок':'Закупка и рынок'}</h2><span></span></div>${OZ?ourRk(p):''}${zakup(p)}${others(p)}${OZ?'':`<div class="card pad reveal"><div class="note" style="margin:0">${MPNOTE}</div></div>`}
   </div></div>`;
 }
 
@@ -2028,7 +2115,7 @@ function spark(pts,cls,p28,none){
     return `<i class="${c}" style="--h:${H(x.pos).toFixed(0)}%" data-tip="<b>${ddmm(x.d)} — ${NF.format(x.pos)}-е место</b>${was!=null?(x.pos<was?'лучше на '+NF.format(was-x.pos):x.pos>was?'хуже на '+NF.format(x.pos-was):'без изменений'):''}${ok(x.seen)?' · увидели '+fi(x.seen):''}${x.o?' · заказов '+fi(x.o):''}${x.live?' · по замерам выдачи':''}"></i>`}).join('')}</div>`;
 }
 /* выбор, чьи места смотреть: мы и конкуренты по старшинству (заказы за 7 дней) */
-const byRank=p=>(p.comps||[]).slice().sort((a,b)=>(b.cnt7||0)-(a.cnt7||0));
+const byRank=p=>(p.comps||[]).slice().sort((a,b)=>(b.cnt7||b.bought||0)-(a.cnt7||a.bought||0));
 const kwOf=p=>{if(S.kwP!==p.sku){S.kwP=p.sku;S.kw='us'}return S.kw};
 // с кем сравнивать в «По каждому ключу» — свой выбор по товару (до 3), по умолчанию два главных по продажам
 const kcOf=p=>{const m=KS.get('kc',{}),all=byRank(p).map(c=>c.sku);let v=(m[p.sku]||[]).filter(s=>all.includes(s));if(!v.length)v=all.slice(0,2);return v};
@@ -2044,42 +2131,42 @@ function heat(p,ks){
   const avgD=i=>{const a=ks.map(k=>S0[k.q][i].pos).filter(ok);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};
   const who=w==='us'?'Мы':cnm(c);
   const mob=`<div class="card hm reveal only-m" data-f="heat"><div class="hwho">${w==='us'?'Наши места':'Места: <b>'+esc(who)+'</b>'}</div><div class="hr hh"><div class="cells" style="--n:${n}">${days.map(d=>`<span>${+d.slice(8,10)}</span>`).join('')}</div><span class="nw0">сейчас</span></div>
-   ${ks.map((k,i)=>{const nw=nowPos(p,k.q,sku);return `<button class="hr" data-key="${i}"><div class="hq"><b>${esc(k.q)}</b><small>${fi(k.searched)} поиск. · ${fi(k.orders)} зак.</small></div><div class="cells" style="--n:${n}">${S0[k.q].map(x=>`<span class="${pc(x.pos)}">${pshort(x.pos)}</span>`).join('')}</div><span class="pc nw ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></button>`}).join('')}
+   ${ks.map((k,i)=>{const nw=nowPos(p,k.q,sku);return `<button class="hr" data-key="${i}"><div class="hq"><b>${esc(k.q)}</b><small>${ok(k.searched)?fi(k.searched)+' поиск. · '+fi(k.orders)+' зак.':'по названию'}</small></div><div class="cells" style="--n:${n}">${S0[k.q].map(x=>`<span class="${pc(x.pos)}">${pshort(x.pos)}</span>`).join('')}</div><span class="pc nw ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></button>`}).join('')}
    <div class="hr avg"><div class="hq"><b>В среднем по ключам</b></div><div class="cells" style="--n:${n}">${days.map((d,i)=>{const v=avgD(i);return `<span class="${pc(v)}">${pshort(v)}</span>`}).join('')}</div><span></span></div></div>`;
-  const desk=`<div class="only-d"><div class="card tw reveal" data-f="heat"><table class="cmpd"><thead><tr><th>Запрос · ${esc(who)}</th><th>Позиция<br>за 28 дн</th>${days.map(d=>`<th>${ddmm(d)}</th>`).join('')}<th>Сейчас</th></tr></thead><tbody>
-   ${ks.map((k,i)=>{const nw=nowPos(p,k.q,sku);return `<tr data-key="${i}"><td><b>${esc(k.q)}</b>${k.pinned?' <span class="tag acc">закреплён</span>':''}<span class="hint">искали ${fi(k.searched)} · заказов ${fi(k.orders)} за 28 дн</span></td><td>${w==='us'&&k.pos28?fi(k.pos28):'—'}${w==='us'&&k.pos28&&k.pos28_d?`<span class="hint">${k.pos28_d<0?'лучше на '+NF.format(-k.pos28_d):'хуже на '+NF.format(k.pos28_d)}</span>`:''}</td>${S0[k.q].map(x=>`<td class="c ${pc(x.pos)}">${ok(x.pos)?NF.format(x.pos):'·'}</td>`).join('')}<td class="c ${pc(nw)}">${ok(nw)?NF.format(nw):'—'}</td></tr>`}).join('')}
+  const desk=`<div class="only-d"><div class="card tw reveal" data-f="heat"><table class="cmpd"><thead><tr><th>Запрос · ${esc(who)}</th><th>Позиция<br>${OZ?'за 28 дн':'по Джему'}</th>${days.map(d=>`<th>${ddmm(d)}</th>`).join('')}<th>Сейчас</th></tr></thead><tbody>
+   ${ks.map((k,i)=>{const nw=nowPos(p,k.q,sku);return `<tr data-key="${i}"><td><b>${esc(k.q)}</b>${k.pinned?' <span class="tag acc">закреплён</span>':''}<span class="hint">${ok(k.searched)?'искали '+fi(k.searched)+' · заказов '+fi(k.orders)+(OZ?' за 28 дн':' за 7 дн'):'запрос из названия товара'}</span></td><td>${w==='us'&&k.pos28?fi(k.pos28):'—'}${w==='us'&&k.pos28&&k.pos28_d?`<span class="hint">${k.pos28_d<0?'лучше на '+NF.format(-k.pos28_d):'хуже на '+NF.format(k.pos28_d)}</span>`:''}</td>${S0[k.q].map(x=>`<td class="c ${pc(x.pos)}">${ok(x.pos)?NF.format(x.pos):'·'}</td>`).join('')}<td class="c ${pc(nw)}">${ok(nw)?NF.format(nw):'—'}</td></tr>`}).join('')}
    <tr><td class="mut">Средняя позиция</td><td></td>${days.map((d,i)=>{const v=avgD(i);return `<td class="c ${pc(v)}">${ok(v)?NF.format(v):'·'}</td>`}).join('')}<td></td></tr></tbody></table></div></div>`;
-  return mob+desk+`<div class="note">${w==='us'?'Наши места по дням — средняя позиция за день из аналитики Озона, сегодня — по нашим замерам выдачи.':'Места конкурента — средняя за день по нашим замерам выдачи в Москве (4 раза в день, с 25.10): по чужим товарам Озон историю не отдаёт, дни будут добавляться.'} Точка — нет в выдаче или нет замера. «Сейчас» — последний замер, ${esc((p.snap||{}).at||'')}. Зелёный — топ-10, жёлтый — до 30, красный — ниже. Нажмите ключ — откроется сравнение.</div>`;
+  return mob+desk+`<div class="note">${OZ?(w==='us'?'Наши места по дням — средняя позиция за день из аналитики Озона, сегодня — по нашим замерам выдачи.':'Места конкурента — средняя за день по нашим замерам выдачи в Москве (4 раза в день, с 25.10): по чужим товарам Озон историю не отдаёт, дни будут добавляться.'):MP==='wb'?(w==='us'?'Наши места по дням — средняя позиция за день из Джема: по всем показам, с рекламой. «Сейчас» — где карточка стоит в выдаче Москвы в момент замера; без рекламы это бывает намного ниже.':'Места конкурента — по нашим замерам выдачи в Москве, дни будут добавляться.'):'Места — по нашим замерам выдачи Маркета, дни будут добавляться.'} Точка — нет в выдаче или нет замера. «Сейчас» — последний замер, ${esc((p.snap||{}).at||'')}. Зелёный — топ-10, жёлтый — до 30, красный — ниже. Нажмите ключ — откроется сравнение.</div>`;
 }
 function vKeys(p){
   const ks=p.keys||[];if(!ks.length)return '<div class="empty">Ключей пока нет.</div>';
   const nowAvg=med(ks.map(k=>nowPos(p,k.q,p.sku)));
   const junk=p.junk||[],w=kwOf(p),rk=byRank(p);
   const KC=kcOf(p),TS=KC.map(s=>rk.find(c=>c.sku===s)).filter(Boolean);   // с кем сравнивать в ключах: свой выбор, до 3 (по умолчанию два главных по продажам)
-  return `<h1 class="lt reveal">Ключи</h1><p class="sub reveal">${ks.length} главных запросов по заказам за 28 дней — как Sellium у Вовы. Место — чем меньше, тем выше в выдаче.</p>
-  <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">Середина наших мест сейчас</div><div class="v">${ok(nowAvg)?`<span data-count="${Math.round(nowAvg)}">${fi(nowAvg)}</span>`:'—'}</div><div class="s">по ${ks.length} ключам, Москва</div></div>
+  return `<h1 class="lt reveal">Ключи</h1><p class="sub reveal">${OZ?ks.length+' главных запросов по заказам за 28 дней — как Sellium у Вовы.':MP==='wb'?ks.length+' главных запросов по заказам за 7 дней — из Джема ВБ.':'Запросы взяты из названия товара: своих поисковых запросов Маркет не отдаёт.'} Место — чем меньше, тем выше в выдаче.</p>
+  <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">Середина наших мест сейчас</div><div class="v">${ok(nowAvg)?`<span data-count="${Math.round(nowAvg)}">${fi(nowAvg)}</span>`:'—'}</div><div class="s">по ${ks.length} ключам${MP==='ym'?'':', Москва'}</div></div>
   <div class="card tile reveal"><div class="l">Замер</div><div class="v" style="font-size:20px">${esc(((p.snap||{}).at||'').slice(11))}</div><div class="s">${esc(ddmm((p.snap||{}).at||''))}, обновляется 4 раза в день</div></div></div>
   <div class="sec"><h2>Средняя позиция по дням</h2><span>чьи места — выберите</span></div>
   ${whoSel(p)}
   ${heat(p,ks)}
   <div class="sec"><h2>По каждому ключу</h2><span>сравнить — до 3</span></div>
   <div class="wsel multi" id="kc">${rk.map((c,i)=>`<button class="press${KC.includes(c.sku)?' on':''}" data-kc="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(cnm(c))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span><em>${KC.includes(c.sku)?IC.check:''}</em></button>`).join('')}</div>
-  <div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся с 25.10 по нашим замерам выдачи (4 раза в день) — каждый день добавляется столбик. Историю за прошлые дни по чужим товарам Озон даёт только в Premium Pro.</div>
+  ${OZ?`<div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся с 25.10 по нашим замерам выдачи (4 раза в день) — каждый день добавляется столбик. Историю за прошлые дни по чужим товарам Озон даёт только в Premium Pro.</div>`:`<div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся по нашим замерам выдачи — каждый день добавляется столбик.</div>`}
   ${ks.map((k,i)=>{const now=nowPos(p,k.q,p.sku),sk=((p.snap||{}).keys||{})[k.q]||{};
    const row=(lab,ph,pts,nw,p28,us,none)=>`<div class="kr${us?' us':''}"><span class="kn">${ph}<b>${lab}</b></span>${spark(pts,'s',p28,none)}<span class="pc ${pc(nw)}">${ok(nw)?pshort(nw):'—'}</span></div>`;
-   return `<div class="card kc reveal" id="k${i}"><div class="hd"><div style="min-width:0"><div class="q">${ozq(k.q)}</div><div class="meta"><span class="tag">искали ${fi(k.searched)}</span><span class="tag">заказов ${fi(k.orders)}</span>${k.pinned?'<span class="tag acc">закреплён</span>':''}</div></div>
+   return `<div class="card kc reveal" id="k${i}"><div class="hd"><div style="min-width:0"><div class="q">${ozq(k.q)}</div><div class="meta">${ok(k.searched)?`<span class="tag">искали ${fi(k.searched)}</span><span class="tag">заказов ${fi(k.orders)}</span>`:'<span class="tag">по названию</span>'}${k.pinned?'<span class="tag acc">закреплён</span>':''}</div></div>
     <div class="now"><b style="color:${!ok(now)?'var(--ink3)':now<=10?'var(--good)':now<=30?'var(--warn)':'var(--bad)'}">${ok(now)?now:'—'}</b><span class="pc ${pc(now)}" style="height:20px;min-width:0;font-size:11px;margin-top:4px">${!ok(now)?'нет в выдаче':now<=10?'топ-10':now<=30?'до 30':'ниже 30'}</span></div></div>
     <div class="kd"><div class="kl"><span>место по дням</span><span>${ddmm(kdays(p)[0]||'')} — ${ddmm(kdays(p).slice(-1)[0]||'')} · сейчас</span></div>
      ${row('Мы',img(pphoto(p)),series(p,k.q,p.sku),now,k.pos28,true)}
-     ${TS.map(T=>{const tr=snapRow(p,T.sku,k.q)||{};return row(esc(cnm(T)),img(T.photo),series(p,k.q,T.sku),tr.pos,null,false,'в замерах не попадал в первые ~140 мест')
-       +(tr.pos||tr.cpc||tr.price?`<div class="kx">${tr.pos?tr.pos+'-е место':'нет в выдаче'}${tr.pos?' · '+esc(adTxt(tr)):''}${tr.price?' · '+fr(tr.price):''}</div>`:'')}).join('')}</div>
-    ${(sk.top3||[]).length?`<div class="top3"><span class="mut" style="font-size:12px;align-self:center">топ-3 сейчас:</span>${sk.top3.map(t=>`<span class="tag" data-tip="<b>${esc(cnm(t))}</b>${esc(adTxt(t)||(t.cpc?'ставка '+N1.format(t.cpc)+' ₽':'без рекламы'))}${t.price?' · '+fr(t.price):''}">${t.pos}. ${esc(cnm(t))}${t.mine?' (мы)':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
+     ${TS.map(T=>{const tr=snapRow(p,T.sku,k.q)||{};return row(esc(cnm(T)),img(T.photo),series(p,k.q,T.sku),tr.pos,null,false,OZ?'в замерах не попадал в первые ~140 мест':MP==='wb'?'в замерах не попадал в первые 300 мест':'в замерах не попадал на первую страницу')
+       +(tr.pos||tr.cpc||tr.price?`<div class="kx">${tr.pos?tr.pos+'-е место':'нет в выдаче'}${tr.pos&&adTxt(tr)?' · '+esc(adTxt(tr)):''}${tr.price?' · '+fr(tr.price):''}</div>`:'')}).join('')}</div>
+    ${(sk.top3||[]).length?`<div class="top3"><span class="mut" style="font-size:12px;align-self:center">топ-3 сейчас:</span>${sk.top3.map(t=>`<span class="tag" data-tip="<b>${esc(cnm(t))}</b>${esc(adTxt(t)||(t.cpc?'ставка '+N1.format(t.cpc)+' ₽':OZ?'без рекламы':''))}${t.price?' · '+fr(t.price):''}">${t.pos}. ${esc(cnm(t))}${t.mine?' (мы)':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
   ${junk.length?`<div class="sec"><h2>Показы есть, заказов нет</h2><span>топ-${junk.length} за 28 дней</span></div>
    <div class="card pad reveal"><div class="note" style="margin:0 0 6px">Чужие запросы (как «унитаз» у сиденья) — убрать из названия и описания. Свои — поднимать позицию. Столбики — место по дням за 14 дней: выше столбик — выше в выдаче, зелёный — лучше прошлого дня, красный — хуже.</div>
-   ${junk.map(j=>`<div class="jr"><div class="q">${ozq(j.q)}<small>увидели ${fi(j.seen)} · в карточку ${fp(j.ctr)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
+   ${junk.map(j=>`<div class="jr"><div class="q">${ozq(j.q)}<small>${OZ?'увидели '+fi(j.seen)+' · в карточку '+fp(j.ctr):'открыли карточку '+fi(j.seen)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
 }
 // 11.11 Андрей: запрос — ссылка на поиск Озона с этим запросом
-const ozq=q=>`<a class="ozq" href="https://www.ozon.ru/search/?text=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(q)} ↗</a>`;
+const ozq=q=>`<a class="ozq" href="${esc(M.q(q))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(q)} ↗</a>`;
 /* ---------- раздел «Сводка»: все товары на одном экране ---------- */
 function vAll(){
   const ps=D.products,H=angles(ps[0]).map(a=>a.h);
@@ -2089,7 +2176,7 @@ function vAll(){
   <div class="svq reveal">${sfBox('svq','Найти товар в сводке',SQ.q)}<div id="svf">${sfChips('data-sf',SQ.f,pfList())}</div><div class="sfn" id="svn"></div></div>
   <div class="card sv reveal"><table><thead><tr><th>Товар</th>${H.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}<tr class="svnone" hidden><td colspan="${H.length+1}" class="mut" style="padding:22px 10px;text-align:center">Ничего не нашли</td></tr></tbody></table></div>
   <div class="legend"><span><i style="background:var(--good)"></i>как топ или лучше</span><span><i style="background:var(--warn)"></i>отстаём</span><span><i style="background:var(--bad)"></i>сильно хуже</span><span><i style="background:var(--warn);border-radius:50%"></i>ждут решения по конкурентам</span></div>
-  <div class="note"><b>Заказы</b> — штук за 7 дней. <b>Цена к топу</b> — на сколько наша средняя цена продажи выше (+) или ниже (−) середины конкурентов. <b>ДРР</b> — доля рекламы от заказов. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Склады</b> — на сколько дней хватит остатка. <b>Карточка → корзина</b> — из открывших карточку сколько положили в корзину: оценка самой карточки (фото, слайды, отзывы, цена), реклама и показы на неё не влияют.<br>В сервисе товары с выручкой на Озоне от 20 тыс ₽ за 28 дней.</div>
+  ${OZ?`<div class="note"><b>Заказы</b> — штук за 7 дней. <b>Цена к топу</b> — на сколько наша средняя цена продажи выше (+) или ниже (−) середины конкурентов. <b>ДРР</b> — доля рекламы от заказов. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Склады</b> — на сколько дней хватит остатка. <b>Карточка → корзина</b> — из открывших карточку сколько положили в корзину: оценка самой карточки (фото, слайды, отзывы, цена), реклама и показы на неё не влияют.<br>В сервисе товары с выручкой на Озоне от 20 тыс ₽ за 28 дней.</div>`:`<div class="note">${ALLNOTE}</div>`}
   ${first.length?`<div class="sec"><h2>Первый шаг по каждому</h2><span>из разбора</span></div><div class="card reveal" style="padding:2px 0">${first.map(x=>`<button class="st1 press" data-go="${x.p.sku}">${img(pphoto(x.p))}<div style="min-width:0"><b>${esc(x.p.offer_id)}${x.a.area?` · <span class="mut" style="display:inline;font-weight:500">${esc(x.a.area)}</span>`:''}</b><span>${esc(x.a.title)}</span></div></button>`).join('')}</div>`:''}`;
 }
 
@@ -2112,7 +2199,7 @@ function regView(p){
   const reg=(p.regions||{}).by||{},cities=Object.keys(reg),who=[{sku:p.sku,seller:'Мы',photo:pphoto(p),us:true}].concat(byRank(p));
   const day=(c,ct)=>dlv((reg[ct]||{})[c.sku]),nm=c=>c.us?'Мы':cnm(c);
   const foot=`<div class="legend"><span><i style="background:var(--good)"></i>0–1 день — лежит в этом кластере</span><span><i style="background:var(--warn)"></i>2–3 дня</span><span><i style="background:var(--bad)"></i>4+ — везут издалека</span><span><i style="background:var(--fill)"></i>не нашли в выдаче</span></div>
-   <div class="note">Срок доставки по запросу «${esc((p.regions||{}).q||'')}» в 9 городах, ${ddmm((p.regions||{}).at||'')}. Конкуренты — по старшинству продаж; нажмите — сравнение один на один.</div>`;
+   <div class="note">${OZ?`Срок доставки по запросу «${esc((p.regions||{}).q||'')}» в 9 городах`:`Срок доставки с витрины ВБ в ${cities.length} городах`}, ${ddmm((p.regions||{}).at||'')}. Конкуренты — по старшинству продаж; нажмите — сравнение один на один.</div>`;
   if(S.rv==='city')return `<div class="card reveal" style="padding:4px 0">${cities.map(ct=>{const us=day(who[0],ct),near=who.slice(1).filter(c=>{const d=day(c,ct);return d!=null&&d<=1});
     return `<div class="rc"><div class="rcn"><b>${esc(ct)}</b><span class="dd ${dcls(us)}">мы ${us==null?'—':us+' дн'}</span></div><div class="rca">${who.slice(1).map(c=>{const d=day(c,ct);return `<span class="av1" data-comp="${c.sku}" title="${esc(nm(c)+': '+(d==null?'не нашли':d+' дн'))}" style="--rc:${d==null?'var(--fill)':d<=1?'var(--good)':d<=3?'var(--warn)':'var(--bad)'}">${img(c.photo)}${d!=null?`<em>${d}</em>`:''}</span>`}).join('')}</div>
      <div class="rcs">${near.length?`рядом у ${near.length} из ${who.length-1}`:'рядом ни у кого'}${us!=null&&us>1&&near.length?' — <b class="dn">нам туда везти</b>':''}</div></div>`}).join('')}</div>`+foot;
@@ -2122,7 +2209,17 @@ function regView(p){
    ${who.map(c=>`<tr class="${c.us?'us':''}"${c.us?'':` data-comp="${c.sku}"`}><td><div class="who">${img(c.photo)}<span>${esc(nm(c))}</span></div></td>${cities.map(ct=>{const v=(reg[ct]||{})[c.sku],d=dlv(v);
      return `<td><span class="dd ${dcls(d)}" title="${esc(nm(c)+' · '+ct+': '+(v||'не нашли в выдаче города'))}">${d==null?'—':d}</span></td>`}).join('')}</tr>`).join('')}</tbody></table></div>`+foot;
 }
+function vSkladMp(p){
+  const o=p.our||{},reg=(p.regions||{}).by||{};
+  const cities=Object.keys(reg).some(ct=>Object.keys(reg[ct]||{}).length)?Object.keys(reg):[];
+  return `<h1 class="lt reveal">Склады</h1><p class="sub reveal">Где товар лежит ближе к покупателю: срок доставки по городам у нас и у конкурентов, витрина ВБ.</p>
+  <div class="tiles" style="grid-template-columns:repeat(2,1fr)"><div class="card tile reveal"><div class="l">На складах ВБ</div><div class="v">${fi(o.stock_fbo)}</div><div class="s">шт, везёт ВБ</div></div>
+  <div class="card tile reveal"><div class="l">На своём складе</div><div class="v">${fi(o.stock_fbs)}</div><div class="s">шт, отгружаем сами</div></div></div>
+  ${cities.length?`<div class="sec" style="margin-top:14px"><h2>Где лежат конкуренты</h2><span>срок доставки, дней</span></div><div class="pbar"><span class="vt2 sgm" id="rv">${[['tab','Таблица'],['city','По городам'],['bars','Полоски']].map(([k,n])=>`<button class="${S.rv===k?'on':''}" data-rv="${k}">${n}</button>`).join('')}</span></div><div id="rgbox">${regView(p)}</div>`
+   :'<div class="card pad mut reveal">Сроки по городам ещё не сняты — появятся после полного сбора.</div>'}`;
+}
 function vSklad(p){
+  if(!OZ)return vSkladMp(p);
   const cl=(p.clusters||[]).filter(c=>c.stock||c.ads||c.transit);
   const tot=cl.reduce((s,c)=>s+(c.stock||0),0),ads=cl.reduce((s,c)=>s+(c.ads||0),0),days=ads>0?tot/ads:null;
   const urg=c=>{const s=stState(c)[1];return {'Пусто':0,'Кончается':1,'Скоро':2,'Норма':3,'Избыток':4,'Без продаж':5}[s]};
@@ -2287,13 +2384,13 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('.ad');if(a&&!a.dataset.pick)a.classList.toggle('open')});
 function render(anim){
   P=prod();S.sku=P.sku;KS.set('sku',S.sku);KS.set('tab',S.t);
-  const tu=$('#toUnitka');if(tu)tu.href='../../unitka/#spp=ozon:'+encodeURIComponent(P.offer_id||'');   // в Юнитку — СПП этого же товара
+  const tu=$('#toUnitka');if(tu)tu.href=OZ?'../../unitka/#spp=ozon:'+encodeURIComponent(P.offer_id||''):'../../unitka/';   // в Юнитку — СПП этого же товара
   renderTabs();renderPicker();if(anim)mini=false,$('#top').classList.remove('mini');sizeTop();
   const v=$('#view');const html=S.t==='all'?vAll():S.t==='keys'?vKeys(P):S.t==='sklad'?vSklad(P):vKonk(P);
   const swap=()=>{v.innerHTML=html;if(anim){v.classList.remove('view-in');void v.offsetWidth;v.classList.add('view-in');window.scrollTo({top:0})}after()};
   if(anim&&document.startViewTransition&&!RM){const vt=document.startViewTransition(swap);vt.ready.catch(()=>{});vt.finished.catch(()=>{})}else swap();   // поворот экрана обрывает переход — не ошибка
 }
-function start(d){D=d;PHO=d.pho||{};if(Object.keys(rgGet()).length)setTimeout(rgLoop,300);if(!D.products||!D.products.length){$('#view').innerHTML='<div class="empty">Данных пока нет.</div>';return}qClean();qbar();qView();
+function start(d){D=d;PHO=d.pho||{};if(Object.keys(rgGet()).length)setTimeout(rgLoop,300);if(!D.products||!D.products.length){$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">Данных '+(OZ?'':'по '+M.n+' ')+'пока нет.</div>';return}qClean();qbar();qView();
   // ссылка из «К»: #pend — сразу товар с ждущими решения и лист «Ждут решения»; #sku=<sku> — этот товар;
   // из Юнитки (красная «Топ не добавлен», 26.10): #sku=<sku>&pick — этот товар и сразу выбор: «Ждут решения», а если ждущих нет — «Другие из топа»
   const hs=location.hash.slice(1);let pend=false,pick=false;
@@ -2310,7 +2407,7 @@ document.addEventListener('touchstart',()=>{},{passive:true});   // без эт�
 const saveY=()=>{try{sessionStorage.setItem('konk.y',JSON.stringify({y:Math.round(scrollY),t:S.t,s:S.sku}))}catch(e){}};
 addEventListener('pagehide',saveY);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveY()});
 function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('#pw').focus(),50)}
-(async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else $('#view').innerHTML='<div class="empty">Не удалось открыть данные: '+esc(e.message)+'</div>'}})();
+(async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else{$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">'+(OZ?'Не удалось открыть данные: '+esc(e.message):'Данных по '+M.n+' пока нет — сбор ещё не выложен.')+'</div>'}}})();
 })();
 </script>
 </body>
