@@ -767,7 +767,7 @@ async function loadTops(){
     const sb=$('#sbody');if(shw.classList.contains('on')&&sb.dataset.key==='niche'&&sb.dataset.n&&BY[sb.dataset.n]){const y=sb.scrollTop;openSheet(nicheSheet(BY[sb.dataset.n]),'niche',sb.dataset.n);sb.scrollTop=y}}catch(e){}
 }
 async function loadChecks(){
-  try{const r=await fetch('checks.enc.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const d=await dec(await r.json());const sig=k=>JSON.stringify([k.checks.map(c=>[c.id,c.state,c.step,c.upd]),(k.trash||[]).map(c=>c.id)]),was=sig(CK);CK=d;
+  try{const r=await fetch('checks.enc.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const d=await dec(await r.json());const sig=k=>JSON.stringify([k.checks.map(c=>[c.id,c.state,c.step,c.upd,(c.cheap||{}).state,(c.cheap||{}).step,(c.opt||{}).state]),(k.trash||[]).map(c=>c.id)]),was=sig(CK);CK=d;
     return was!==sig(CK)}catch(e){return false}
 }
 
@@ -1227,6 +1227,38 @@ async function optCheck(id){
   try{await relaySend({k:'opt',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
   OPTS[id]=1;toast('Ищу — список появится здесь');render(false);poll(true);
 }
+/* 13.11 Андрей: «надо чтобы умел» — такой же товар дешевле, с доставкой не дольше N дней, на трёх площадках (только по кнопке) */
+const CHEAPS={};
+function cheapBusy(){const now=Date.now();return Object.keys(CHEAPS).some(id=>{const c=CK.checks.find(x=>x.id===id),st=((c||{}).cheap||{}).state;
+  if(st==='work'){CHEAPS[id]='w';return true}if(CHEAPS[id]==='w'||now-CHEAPS[id]>25*60e3){delete CHEAPS[id];return false}return true})}
+function cheapBlock(c){
+  const o=c.cheap||{},p=c.product||{};
+  if(o.state==='work'||(CHEAPS[c.id]&&o.state!=='work'&&CHEAPS[c.id]!=='w'))return `<div class="card pad" style="margin-top:12px"><b>🔎 Ищу такой же дешевле…</b><div class="note">${esc(o.step||'Жду очереди')}. Обычно 3–8 минут, можно закрыть страницу.</div></div>`;
+  const dp=o.price||(p.price?Math.round(p.price)-1:''),dd=o.days!=null?o.days:2,dq=o.q||c.query||'';
+  const form=`<div class="card pad" style="margin-top:12px"><div class="k">🔎 Найти такой же дешевле</div>
+   <div style="display:flex;gap:8px;margin-top:8px"><label style="flex:1;font-size:13px" class="mut">Цена до, ₽<input id="chp" type="number" inputmode="numeric" value="${esc(dp)}" style="width:100%;height:44px;border:0;border-radius:12px;background:var(--fill);padding:0 12px;font-size:16px;color:var(--ink);margin-top:4px"></label>
+   <label style="flex:1;font-size:13px" class="mut">Доставка до, дней<input id="chd" type="number" inputmode="numeric" min="0" value="${esc(dd)}" style="width:100%;height:44px;border:0;border-radius:12px;background:var(--fill);padding:0 12px;font-size:16px;color:var(--ink);margin-top:4px"></label></div>
+   <label style="display:block;font-size:13px;margin-top:8px" class="mut">Что искать<input id="chq" value="${esc(dq)}" style="width:100%;height:44px;border:0;border-radius:12px;background:var(--fill);padding:0 12px;font-size:16px;color:var(--ink);margin-top:4px"></label>
+   <button class="btn press" data-ckcheap="${esc(c.id)}" style="width:100%;margin-top:10px">🔎 ${o.state==='done'?'Искать заново':'Найти дешевле'}</button>
+   <div class="note">Озон, WB и Маркет: от дешёвых к дорогим, срок — как площадка показывает для Москвы. Самые дешёвые сверяет по фото модель.</div></div>`;
+  if(o.state==='err')return `<div class="card pad" style="margin-top:12px"><b>Поиск дешевле не вышел</b><div class="note">${esc(o.err||'')}</div></div>${form}`;
+  if(o.state!=='done')return form;
+  const W={0:'сегодня',1:'завтра',2:'послезавтра'},wh=d=>d==null?'срок не указан':(W[d]||'через '+d+' дн');
+  const VB={same:'тот же',almost:'почти такой же'};
+  const row=x=>`<li style="margin:8px 0"><b>${fr(x.price)}</b> · ${esc(wh(x.days))}${x.v?` · <span class="tag ${x.v==='same'?'ok':'maybe'}">${VB[x.v]||''}</span>`:' · <span class="mut">не сверял</span>'}<br><a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name||x.link)}</a>${x.seller||x.rating||x.reviews?`<div class="mut" style="font-size:13px">${[x.seller,x.rating?('★ '+x.rating):'',x.reviews?(x.reviews+' отз.'):''].filter(Boolean).map(esc).join(' · ')}</div>`:''}${x.diff?`<div class="mut" style="font-size:13px">Отличие: ${esc(x.diff)}</div>`:''}</li>`;
+  const mp=o.mp||{},n=['oz','wb','ym'].reduce((a,k)=>a+((mp[k]||{}).list||[]).length,0);
+  const sec=k=>{const q=mp[k]||{},l=q.list||[];return `<div style="margin-top:10px"><b>${MPN[k]}</b>${l.length?`<ul style="padding-left:18px;margin:4px 0">${l.slice(0,5).map(row).join('')}</ul>${l.length>5?`<details><summary class="mut" style="cursor:pointer;font-size:14px">Ещё ${l.length-5}</summary><ul style="padding-left:18px;margin:4px 0">${l.slice(5).map(row).join('')}</ul></details>`:''}`:`<div class="mut" style="font-size:14px">${q.err?esc(q.err):'Подходящих нет'+(q.min_any?' · самый дешёвый в выдаче '+fr(q.min_any)+', но дольше по сроку или другой товар':'')}</div>`}</div>`};
+  return `<div class="card pad" style="margin-top:12px"><div class="k">🔎 Дешевле ${o.price?'до '+fr(o.price):''}, доставка до ${esc(wh(o.days))} · ${esc(o.at||'')}</div>
+   <div style="margin:6px 0">${n?'Нашёл '+n+'. Сначала самые дешёвые.':'Такого же дешевле с таким сроком не нашёл.'}</div>${['oz','wb','ym'].map(sec).join('')}
+   <div class="note">Цены и сроки меняются быстро — перед покупкой откройте карточку.${o.judged?'':' Фото нашего товара нет — по фото не сверял.'}</div></div>${form}`;
+}
+async function cheapCheck(id){
+  if(CHEAPS[id])return;
+  const price=+($('#chp')||{}).value||0,days=($('#chd')||{}).value===''?2:+$('#chd').value,q=(($('#chq')||{}).value||'').trim();
+  if(!confirm(`Найти такой же${price?' до '+price+' ₽':''} с доставкой до ${days} дн на трёх площадках? Сверка по фото — платная, займёт 3–8 минут.`))return;
+  try{await relaySend({k:'cheap',id,price,days,q})}catch(e){toast('Не отправилось: '+esc(e.message));return}
+  CHEAPS[id]=Date.now();toast('Ищу — список появится здесь');render(false);poll(true);
+}
 async function stopCheck(id){
   if(STOPS[id])return;
   try{await relaySend({k:'stop',id})}catch(e){toast('Не отправилось: '+esc(e.message));return}
@@ -1317,7 +1349,7 @@ function vResult(c){
   <div class="card mpb reveal" id="mpb">${['oz','wb','ym'].map(k=>{const p=(c.mp||{})[k]||{},vd=p.verdict||{},v=vd.v||'na',why=(v==='ok'?(vd.plus||[])[0]:(vd.why||[])[0])||(vd.plus||[])[0]||p.err||'';
     return `<button class="mprow press${k===m?' on':''}" data-mp="${k}" style="--mpc:${MPC[k]}"><span class="mpn"><i></i>${MPN[k]}</span><span class="vp ${v}">${VI[v]} ${VL[v]}</span><span class="w1">${esc(why)}</span>${IC.chev}</button>`}).join('')}</div>
   <div id="mppanel">${mpPanel(c,m)}</div>
-  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>${niche?'':optBlock(c)}${bin}`;
+  <div class="note">Проверено ${esc(c.upd||c.at||'')}${c.secs?' за '+Math.ceil(c.secs/60)+' мин':''}.${niche?'':' «Тот же / почти» — сверка фото и характеристик моделью.'} У WB продаж конкурентов нет без Джема «Премиум», поэтому там — отзывы.</div>${niche?'':cheapBlock(c)+optBlock(c)}${bin}`;
 }
 function cmSheet(c,m,sku){
   const p=c.mp[m],x=(p.cands||[]).find(z=>z.sku===sku),niche=c.kind==='niche';if(!x)return;
@@ -1348,7 +1380,7 @@ async function qSend(){
 
 /* ---------- опрос проверок ---------- */
 let PT=0;
-function poll(now){clearTimeout(PT);const busy=pendLocal().length||CK.checks.some(c=>c.state==='work');
+function poll(now){clearTimeout(PT);const busy=pendLocal().length||CK.checks.some(c=>c.state==='work')||cheapBusy();
   if(!now&&!busy)return;PT=setTimeout(async()=>{const ch=await loadChecks();if(ch&&(S.t==='check')){const y=scrollY;if(!shw.classList.contains('on'))render(false);window.scrollTo(0,y)}else if(ch)renderTabs();poll(false)},now?1500:15000)}
 
 /* ---------- наши товары ---------- */
@@ -1491,6 +1523,7 @@ document.addEventListener('click',e=>{
   const cn=t.closest('[data-ckniche]');if(cn&&BY[cn.dataset.ckniche]){startNiche(BY[cn.dataset.ckniche]);return}
   const cs=t.closest('[data-ckstop]');if(cs){stopCheck(cs.dataset.ckstop);return}
   const co=t.closest('[data-ckopt]');if(co){optCheck(co.dataset.ckopt);return}
+  const ch=t.closest('[data-ckcheap]');if(ch){cheapCheck(ch.dataset.ckcheap);return}
   const tb=t.closest('[data-trash]');if(tb){trashCheck(tb.dataset.trash);return}
   const ub=t.closest('[data-unhide]');if(ub){trashCheck(ub.dataset.unhide,true);return}
   if(t.closest('[data-trtog]')){S.trOpen=!S.trOpen;render(false);return}
