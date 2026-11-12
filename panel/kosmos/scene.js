@@ -54,6 +54,7 @@ let phase=0,phaseT=0,zoom=0,zoomT=0,warp=0,haze=0,hazeCol=[.3,.5,.9],fadeIn=0;
 let off=[0,0,0],offTrail=[0,0,0],par=[0,0],slide=0,slideT=0;
 const inp={mx:0,my:0,tx:0,ty:0,sc:0,scy:0},sm={yaw:0,pitch:0,sc:0,kick:0,roll:0};
 let tiltBase=null,tiltAsk=0,pauses={},launchW=false;
+const look={on:false,y:0,p:0,ty:0,tp:0};   // «Погружение»: человек сам поворачивает взгляд
 const TEX={},loaded={};
 
 /* ───────── ракурсы: у каждого раздела своё место ───────── */
@@ -242,6 +243,7 @@ function step(dt){
   T+=dt;const k=a=>1-Math.exp(-dt*a);
   sm.sc+=(inp.sc-sm.sc)*k(5);phase+=(phaseT-phase)*k(3.2);zoom+=(zoomT-zoom)*k(5.5);sm.kick*=Math.exp(-dt*3.4);
   const ty=-(inp.mx*2.4+inp.tx*7)*DEG+sm.kick,tp=(inp.my*1.7+inp.ty*6)*DEG;sm.yaw+=(ty-sm.yaw)*k(4);sm.pitch+=(tp-sm.pitch)*k(4);
+  if(!look.on){look.ty*=Math.exp(-dt*3.2);look.tp*=Math.exp(-dt*3.2)}look.y+=(look.ty-look.y)*k(10);look.p+=(look.tp-look.p)*k(10);
   env=envNow();let c=rig(tab,T,env),w=0,shake=0;const dl=[0,0,-dt*.16];
   if(tr){const u=clamp((T-tr.t0)/tr.dur,0,1),e=ease(u);
     if(tr.kind==='launch'){   // взлёт: с поверхности на орбиту
@@ -255,7 +257,7 @@ function step(dt){
   warp=w;
   if(Math.abs(zoom)>.001)c.fov*=1-.17*zoom;
   let q=c.q;if(shake)q=qmul(q,qaxis(norm([Math.sin(T*71),Math.cos(T*53),.3]),shake*Math.sin(T*97)));
-  q=qmul(qmul(q,qaxis([0,1,0],sm.yaw)),qaxis([1,0,0],sm.pitch));
+  q=qmul(qmul(q,qaxis([0,1,0],sm.yaw+look.y)),qaxis([1,0,0],sm.pitch+look.p));
   cam.p=c.p;cam.q=q;cam.fov=c.fov;cam.tan=tans(c.fov,W/H);
   const lag=warp>.02?.07:.012;trail.q=qslerp(trail.q,q,1-Math.exp(-dt/lag));
   // ближние пылинки: медленный полёт вперёд; прокрутка, мышь и наклон сдвигают их заметнее, чем далёкие звёзды
@@ -331,7 +333,7 @@ function frame(now){raf=0;if(!on||paused()||manual)return;
   if(!opt.fixed){fpsA+=(dt-fpsA)*.05;fps=1/Math.max(fpsA,.001);
     if(dt>.027){fastN=0;if(++slowN>50&&scale>.7){scale=Math.max(.7,scale*.82);fit();slowN=0}}
     else if(dt<.019){slowN=Math.max(0,slowN-1);if(++fastN>900&&scale<scaleMax){scale=Math.min(scaleMax,scale*1.12);fit();fastN=0}}}
-  if(calm&&!tr&&Math.abs(zoom-zoomT)<.004&&Math.abs(phase-phaseT)<.002&&Math.abs(inp.sc-sm.sc)<.004&&fadeIn>=1&&texDone())return;   // спокойный вариант: кадр по событию, без полёта
+  if(calm&&!tr&&Math.abs(zoom-zoomT)<.004&&Math.abs(phase-phaseT)<.002&&Math.abs(inp.sc-sm.sc)<.004&&fadeIn>=1&&Math.abs(look.ty-look.y)+Math.abs(look.tp-look.p)<.003&&texDone())return;   // спокойный вариант: кадр по событию, без полёта
   raf=requestAnimationFrame(frame)}
 const texDone=()=>Object.keys(TEX).every(k=>!TEX[k].tex||T-TEX[k].t0>1.5);
 function kick(){if(on&&!raf&&!paused()&&!manual){last=performance.now()-16;raf=requestAnimationFrame(frame)}}
@@ -375,10 +377,10 @@ const K=window.KOSMOS={
     kick();return true},
   stop(){if(!cv)return;on=false;cancelAnimationFrame(raf);raf=0;cv.style.opacity='0';const c=cv;setTimeout(()=>{if(!on)c.style.display='none'},700);
     removeEventListener('scroll',onScroll);removeEventListener('pointermove',onMove);removeEventListener('pointerup',onTouch);removeEventListener('resize',onResize);
-    removeEventListener('deviceorientation',onTilt);document.removeEventListener('visibilitychange',onVis);tiltAsk=0;tiltBase=null;inp.tx=inp.ty=0},
+    removeEventListener('deviceorientation',onTilt);document.removeEventListener('visibilitychange',onVis);tiltAsk=0;tiltBase=null;inp.tx=inp.ty=0;look.on=false;look.ty=look.tp=0},
   go(t){if(!on||TABS.indexOf(t)<0||t===tab)return;   // смена раздела — прыжок к другому месту
     if(calm){tab=t;fadeIn=.25;kick();return}
-    tr={kind:'jump',t0:T,dur:.62,p0:cam.p,q0:qmul(qmul(cam.q,qaxis([1,0,0],-sm.pitch)),qaxis([0,1,0],-sm.yaw)),fov0:cam.fov};tab=t;kick()},
+    tr={kind:'jump',t0:T,dur:.62,p0:cam.p,q0:qmul(qmul(cam.q,qaxis([1,0,0],-sm.pitch-look.p)),qaxis([0,1,0],-sm.yaw-look.y)),fov0:cam.fov};tab=t;kick()},
   shift(d){if(!on)return;phaseT+=(d>0?1:-1)*.085;if(!calm){sm.kick+=(d>0?-1:1)*5*DEG;slideT+=(d>0?1:-1)*2.4}kick()},   // смена периода — сдвиг вдоль орбиты
   zoom(z){if(!on)return;zoomT=z?1:0;clearTimeout(K._zt);
     if(z)K._zt=setTimeout(()=>{if(zoomT===1)pauses.sheet=true},900);else{pauses.sheet=false}kick()},                     // лист открыт — приблизились и замерли
@@ -386,7 +388,9 @@ const K=window.KOSMOS={
     const f=norm(add(mul(B.f,.82),mul(up,.62)));hazeCol=dot(up,env.S)>.02?[.36,.58,.98]:dot(up,env.S)>-.2?[.5,.34,.42]:[.035,.05,.13];
     tr={kind:'launch',t0:T,dur:1.7,q0:qlook(f,up)};haze=1;kick()},
   pause(why,v){pauses[why||'x']=!!v;if(!v)kick()},
-  state(){return {on,ready,failed,frames,tab,calm,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),
+  see(v){look.on=!!v;kick()},                                                                 // «Погружение»: страница убрана, взгляд свободный
+  look(dx,dy){if(!on)return;const s=cam.fov/Math.max(cssW,cssH)*1.15;look.ty+=dx*s;look.tp=clamp(look.tp+dy*s,-1.15,1.15);kick()},   // сдвиг пальца или мыши в точках экрана
+  state(){return {on,ready,failed,frames,tab,calm,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),look:[+look.y.toFixed(3),+look.p.toFixed(3)],
     v2:!!(G&&G.v2),lod:!!(G&&G.lod),stars:G&&G.ns||0,loaded:Object.assign({},loaded),t:+T.toFixed(2),
     cam:{p:cam.p.map(x=>+x.toFixed(4)),q:cam.q.map(x=>+x.toFixed(5)),fov:+(cam.fov/DEG).toFixed(2)},
     sun:A?A.sun.map(x=>+x.toFixed(4)):null,moon:A?A.moon.map(x=>+x.toFixed(4)):null,gmst:A?+(A.gmst/DEG).toFixed(3):null}},
