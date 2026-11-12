@@ -782,8 +782,11 @@ function tovPrep(){   // товар → его карточки; названи�
   TOV={};
   for(const mp of MPS){const B=D.mp[mp],ys=new Float64Array(B.rows.length);for(const r of B.data)ys[r[1]]+=(r[4]||0)-(r[5]||0);
     B.rows.forEach((r,i)=>{if(B.dupS.has(i))return;const key=r.p?'ms:'+r.p:mp+':'+i;r._k=key;(TOV[key]||(TOV[key]={key,rows:[]})).rows.push({mp,i,ys:ys[i]})})}
+  const nrm=s=>String(s).trim().toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' '),caps=s=>{let n=0;for(const ch of s)if(ch!==ch.toLowerCase())n++;return n};
   for(const key in TOV){const P=TOV[key];P.rows.sort((a,b)=>b.ys-a.ys);const h=P.rows[0],r=D.mp[h.mp].rows[h.i];
-    P.t=r.a;P.ms=(r.p&&(D.tov||{})[r.p])||'';P.mps=MPS.filter(mp=>P.rows.some(x=>x.mp===mp))}
+    P.t=r.a;P.ms=(r.p&&(D.tov||{})[r.p])||'';P.mps=MPS.filter(mp=>P.rows.some(x=>x.mp===mp));
+    // на листе ВБ артикулы в нижнем регистре: тот же артикул у карточки другой площадки берём в написании кабинета
+    const k0=nrm(r.a);for(const x of P.rows){const a=D.mp[x.mp].rows[x.i].a;if(nrm(a)===k0&&caps(a)>caps(P.t))P.t=a}}
 }
 function merge(its){   // строки площадок → товары: карточки одного товара — одной строкой, цифры — суммой
   const by=new Map();for(const it of its){const a=by.get(it.r._k);if(a)a.push(it);else by.set(it.r._k,[it])}
