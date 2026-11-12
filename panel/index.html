@@ -196,6 +196,15 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .mpd{width:8px;height:8px;border-radius:50%;flex:none}
 .mpd.wb{background:var(--wb)}.mpd.ozon{background:var(--oz)}.mpd.ym{background:var(--ym)}
 
+/* по какой день данные площадок: сразу под выбором площадки и срока, в каждом разделе; строка не прилипает (шапку не раздувает) */
+.dfr{max-width:1320px;margin:0 auto;padding:9px 14px 0;display:flex;flex-wrap:wrap;gap:3px 12px;align-items:center;font:500 12.5px/1.35 var(--f);color:var(--ink2)}
+.dfr.wide{max-width:1900px}
+.dfr:empty{display:none}
+.dfr .i{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.dfr b{font-weight:650;color:var(--ink)}
+.dfr .m{color:var(--ink3)}
+.dfr .w{color:var(--warn)}
+
 main.wide{max-width:1900px}
 main{max-width:1320px;margin:0 auto;padding:12px 12px calc(var(--tabh) + 34px + env(safe-area-inset-bottom,0px))}
 .fresh{font-size:12.5px;color:var(--ink3);padding:2px 4px 10px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
@@ -465,6 +474,16 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:rgba(28,28,30,.92);color:#fff;padding:10px 16px;border-radius:14px;font-size:14px;z-index:90;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s var(--out);max-width:calc(100vw - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* «Космос» в 3D: сцена — отдельный файл kosmos/scene.js, её холст #kosmos3d лежит под страницей. Пока сцена не готова или WebGL нет — прежние звёзды #stars */
+:root[data-theme="space"][data-k3d="1"] #stars{display:none}
+:root[data-theme="space"][data-k3d="1"] body{background:#02030c}
+:root[data-theme="space"][data-k3d="1"]{--card:rgba(20,23,60,.59);--card2:rgba(30,34,84,.68);--hdr:rgba(7,9,32,.58)}
+@media (prefers-reduced-motion:no-preference){
+  :root[data-k3d="1"] #view>.vin{animation:k3in .72s var(--out) both}                 /* смена раздела: сцена прыгает, страница «приземляется» снизу */
+  :root.k3up[data-k3d="1"] #view>div{animation:k3up 1.9s var(--out) both}             /* включение темы: сначала взлёт во весь экран */
+}
+@keyframes k3in{from{transform:translateY(44vh) scale(.965)}}
+@keyframes k3up{0%,30%{transform:translateY(78vh)}}
 /* «Космос»: звёзды, туманность, строка с посылом */
 #stars{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:none;pointer-events:none}
 :root[data-theme="space"] #stars{display:block}
@@ -662,6 +681,7 @@ window.svcBack=o=>{
   <div class="seg" id="segG" role="tablist" aria-label="Срок"></div>
   <div class="stp"><button class="ar press" id="pPrev" aria-label="Раньше"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 6-6 6 6 6"/></svg></button><button id="pLab" class="press" aria-label="Выбрать период"></button><button class="ar press" id="pNext" aria-label="Позже"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 6 6 6-6 6"/></svg></button></div>
 </div></div>
+<div class="dfr" id="dfr"></div>
 <main id="view"><div class="skel" style="height:190px"></div><div class="skel"></div><div class="skel"></div></main>
 <nav class="tabbar" id="tabbar" aria-label="Разделы"></nav>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div class="shh" id="shh"></div><div class="sbody" id="sbody"></div></section></div>
@@ -1034,6 +1054,22 @@ ${kpi('Эквайринг и хранение',`<span class="num">${fp(sh(m.acq+
 <div class="g g2" style="margin-top:12px">${catc}${sklc}${lead}${drag}${mov}</div>
 ${notes.length?`<div class="note">${notes.join(' ')}</div>`:''}${foot()}`;
 }
+/* по какой день данные каждой площадки: ВБ грузится неделями, Озон — днями, ЯМ — месяцами. Строка под выбором площадки и срока, в каждом разделе */
+const KINDN={wm:'неделями',w:'неделями',d:'по дням',m:'по месяцам'};
+const uptoS=(mp,long)=>{const B=D.mp[mp];if(!B.upto)return '';const d=pd(B.upto);return B.kind==='m'?MONN[d.getUTCMonth()].toLowerCase():(long?DOW[d.getUTCDay()]+', ':'')+dstr(d)};
+const atS=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
+function fresh(){
+  const el=$('#dfr');if(!el||!D)return;const g=S.g,k=curK(),days=c=>c.n?c.n+' из '+c.full+' дн':'нет';
+  const it=(mp,long)=>`<span class="i" data-mp="${mp}"><i class="mpd ${mp}"></i>${MPN[mp]} по <b>${uptoS(mp,long)}</b></span>`;
+  let h='';
+  if(S.mp==='all'){const ms=MPS.filter(mp=>D.mp[mp].upto);h=ms.map(mp=>it(mp)).join('');
+    const cs=ms.map(mp=>cover(mp,g,k));
+    if(g!=='d'&&cs.some(c=>c.n!==cs[0].n))h+=`<span class="i w" data-dif="1">в периоде: ${ms.map((mp,j)=>MPN[mp]+' '+days(cs[j])).join(' · ')}</span>`}   // период закрыт у площадок на разную глубину
+  else if(D.mp[S.mp]&&D.mp[S.mp].upto){const B=D.mp[S.mp],c=cover(S.mp,g,k);
+    h=it(S.mp,true)+`<span class="i m">грузится ${KINDN[B.kind]||''}</span><span class="i m">обновлено ${atS(B.at||D.at)} МСК</span>`;
+    if(c.n&&c.n<c.full)h+=`<span class="i w" data-dif="1">в периоде ${days(c)}</span>`}
+  el.innerHTML=h}
+
 function foot(){
   const w=[];for(const mp of MPS){const B=D.mp[mp],c=B.check||{};if(B.stale)w.push(`${MPN[mp]}: свежие данные не собрались, показаны прошлые`);
     else if(c.bad||(c.week&&c.week.bad))w.push(`${MPN[mp]}: расчёт расходится с листом SKU у ${(c.bad||0)+((c.week&&c.week.bad)||0)} товаров`)}
@@ -1354,9 +1390,9 @@ ${how}`};
 
 /* ───────── листы ───────── */
 const shw=$('#shw'),sheet=$('#sheet');let SHK=null,SHB=[];   // SHK — что открыто, SHB — откуда пришли (кнопка «назад» в листе)
-function openSheet(h,b,key){$('#shh').innerHTML=(SHB.length?'<button class="shx press" id="shb" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 6-6 6 6 6"/></svg></button>':'')+h+'<button class="shx press" id="shx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+function openSheet(h,b,key){K3.call('zoom',true);$('#shh').innerHTML=(SHB.length?'<button class="shx press" id="shb" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 6-6 6 6 6"/></svg></button>':'')+h+'<button class="shx press" id="shx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
   const sb=$('#sbody');sb.innerHTML=b;if(SHK!==key)sb.scrollTop=0;SHK=key;sheet.style.transform='';shw.classList.add('on');document.documentElement.classList.add('noscroll')}
-function closeSheet(){if(!shw.classList.contains('on'))return false;shw.classList.remove('on');sheet.style.transform='';document.documentElement.classList.remove('noscroll');SHK=null;SHB=[];return true}
+function closeSheet(){if(!shw.classList.contains('on'))return false;shw.classList.remove('on');sheet.style.transform='';document.documentElement.classList.remove('noscroll');SHK=null;SHB=[];K3.call('zoom',false);return true}
 /* лист по ключу: 'p:wb:12' — карточка площадки, 'p:ms:00010' — товар на всех площадках, 's:u3' / 's:wb.12' / 's:-' — склейка */
 function openSh(key){let s=null;const id=key.slice(2);
   if(key[0]==='s')s=sklBody(id);
@@ -1428,12 +1464,13 @@ function sync(){
   const tb=t=>`<button data-tab="${t[0]}" class="${S.tab===t[0]?'on':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${t[2]}</svg>${t[1]}</button>`;
   $('#tabbar').innerHTML=TABS.map(tb).join('');
   seg($('#dtabs'),TABS.map(t=>[t[0],t[1]]),S.tab,go);
+  fresh();
 }
-function step(d){const g=S.g,l=plist(g),i=l.indexOf(curK())+d;if(i<0||i>=l.length)return;S.k[g]=l[i];sync();render(true)}
+function step(d){const g=S.g,l=plist(g),i=l.indexOf(curK())+d;if(i<0||i>=l.length)return;S.k[g]=l[i];sync();render(true);K3.call('shift',d)}
 let SCR={};
 function render(keep){
   const v=$('#view'),y=scrollY;
-  v.classList.toggle('wide',(S.tab==='prod'||S.tab==='skl')&&tblOn());
+  v.classList.toggle('wide',(S.tab==='prod'||S.tab==='skl')&&tblOn());$('#dfr').classList.toggle('wide',v.classList.contains('wide'));
   v.innerHTML=`<div class="${keep?'':'vin'}">${VIEW[S.tab]()}</div>`;
   if(keep)scrollTo(0,y);
   const hv=$('#heroV');if(hv&&S.tab==='sum'){const to=met(totals(S.g,curK()).v).sales;if(keep&&isFinite(+hv.dataset.v)&&hv.dataset.v!==''){tween(hv,to,fr)}else hv.dataset.v=to;PS.set('lastHero',to)}
@@ -1442,10 +1479,10 @@ function render(keep){
   reopen();
   affDraw();
 }
-function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;
+function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;K3.call('go',t);
   $$('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));const dt=$('#dtabs');dt.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===t));dt._place&&dt._place();
   const doit=()=>{render();scrollTo(0,Math.min(SCR[t]||0,$('#ctx').offsetTop))};
-  if(document.startViewTransition&&!matchMedia('(prefers-reduced-motion:reduce)').matches){try{const tr=document.startViewTransition(doit);for(const q of [tr.ready,tr.finished,tr.updateCallbackDone])q&&q.catch(()=>{})}catch(e){doit()}}else doit()}
+  if(document.startViewTransition&&!K3.live&&!matchMedia('(prefers-reduced-motion:reduce)').matches){try{const tr=document.startViewTransition(doit);for(const q of [tr.ready,tr.finished,tr.updateCallbackDone])q&&q.catch(()=>{})}catch(e){doit()}}else doit()}
 $('#tabbar').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)go(b.dataset.tab)};
 $('#pPrev').onclick=()=>step(-1);$('#pNext').onclick=()=>step(1);$('#pLab').onclick=periodSheet;
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Escape'){if(!ORI.close())closeSheet()}else if(ORI.isOpen())return;else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
@@ -1494,7 +1531,7 @@ function applyTheme(t,user){
   const dark=t==='dark'||t==='space'||(t==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);
   $('#tc').content=t==='space'?'#060822':dark?'#000000':'#f2f2f7';
   $('#sndBtn').hidden=t!=='space';
-  if(t==='space'){stars.start();aff.start();if(user)AMB.want();setTimeout(()=>{if(document.documentElement.dataset.theme==='space'){const i=new Image();i.src='kosmos/orion.webp'}},2600)}else{stars.stop();aff.stop();AMB.stop();ORI.close()}
+  if(t==='space'){if(!r.dataset.k3d)stars.start();K3.on(user);aff.start();if(user)AMB.want();setTimeout(()=>{if(document.documentElement.dataset.theme==='space'){const i=new Image();i.src='kosmos/orion.webp'}},2600)}else{stars.stop();K3.off();aff.stop();AMB.stop();ORI.close()}
   $$('.seg').forEach(s=>s._place&&s._place());
 }
 function themeInit(){
@@ -1503,6 +1540,25 @@ function themeInit(){
   applyTheme(cur,false);
   matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>applyTheme(PS.get('theme','auto'),false));
 }
+
+/* «Космос» в 3D: сцена «Орбита» (kosmos/scene.js — настоящие Земля, Луна и небо по картам NASA). Файл и снимки грузятся только при
+   включённой теме и после первой отрисовки страницы; остальные темы их не трогают. Нет WebGL или файл не пришёл — остаются звёзды #stars. */
+const K3=(()=>{let st=0,want=false,lz=false,obs=null;const R=document.documentElement;   // st: 0 не грузили, 1 грузится, 2 есть, 3 не вышло
+  const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
+  const run=()=>{if(!want||!window.KOSMOS)return;const up=lz;lz=false;
+    const ok=KOSMOS.start({base:'kosmos/',tab:S.tab,launch:up,
+      onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
+      onFail(){st=3;delete R.dataset.k3d;if(want)stars.start()}});
+    if(!ok)return;
+    if(shw.classList.contains('on'))KOSMOS.zoom(true);KOSMOS.pause('ori',ORI.isOpen());
+    if(!obs){obs=new MutationObserver(()=>{if(live())KOSMOS.pause('ori',ORI.isOpen())});obs.observe(R,{attributes:true,attributeFilter:['class']})}};   // полёт к Ориону закрывает страницу — сцена ждёт
+  const load=()=>{if(st===2)return run();if(st)return;st=1;const s=document.createElement('script');s.src='kosmos/scene.js';s.async=true;
+    s.onload=()=>{st=window.KOSMOS?2:3;run()};s.onerror=()=>{st=3};document.head.appendChild(s)};
+  return {on(user){want=true;if(user)lz=true;if(st===3)return;if(D)setTimeout(load,user?0:300)},
+    boot(){if(want&&!st)setTimeout(load,300)},
+    off(){want=false;lz=false;delete R.dataset.k3d;R.classList.remove('k3up');if(window.KOSMOS)KOSMOS.stop()},
+    call(fn,a,b){if(live())try{KOSMOS[fn](a,b)}catch(e){}},
+    get live(){return live()},get st(){return st}}})();
 
 /* «Космос»: звёзды */
 const stars=(()=>{const cv=$('#stars'),cx=cv.getContext('2d');let st=[],raf=0,on=false,w=0,h=0,last=0;
@@ -1668,6 +1724,7 @@ async function boot(pass){
   $('#lock').hidden=true;$('#lock').innerHTML='';finRole();prep();
   const h=location.hash.match(/p=(wb|ozon|ym):(\d+)/);
   sync();render();if(h)openProd(h[1]+':'+h[2]);
+  K3.boot();
   loadSpp();
 }
 /* 12.11 Андрей: «выскакивает в поиске пароль постоянно» — поле пароля лежало на странице всегда (спрятанное), и браузер считал поля поиска логином к нему:
@@ -1678,7 +1735,7 @@ $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').val
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
-window.PANEL={get D(){return D},S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
+window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
