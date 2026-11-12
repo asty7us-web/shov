@@ -1089,7 +1089,7 @@ window.svcBack=o=>{
 <nav class="tabbar" id="tabbar"></nav>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><button class="ico sx press" id="sx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="shd" id="shd"></div><div class="sbody" id="sbody"></div></section></div>
 <div class="tip" id="tip"></div>
-<div class="lock" id="lock" hidden><div class="card"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input id="pw" type="password" autocomplete="current-password"><button class="btn press" id="pwgo" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></div></div>
+<div class="lock" id="lock" hidden></div>
 <script>
 (()=>{
 'use strict';
@@ -2407,7 +2407,10 @@ try{history.scrollRestoration='manual'}catch(e){}
 document.addEventListener('touchstart',()=>{},{passive:true});   // без этого Safari на iPhone не показывает нажатие (:active)
 const saveY=()=>{try{sessionStorage.setItem('konk.y',JSON.stringify({y:Math.round(scrollY),t:S.t,s:S.sku}))}catch(e){}};
 addEventListener('pagehide',saveY);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveY()});
-function lock(msg){const l=$('#lock');l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwgo').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('#pw').focus(),50)}
+/* 12.11 Андрей: «выскакивает в поиске пароль постоянно» — поле пароля лежало на странице всегда (спрятанное), и браузер считал строку поиска логином к нему:
+   при каждом тапе в поиск предлагал сохранённый пароль. Теперь окно пароля — отдельная форма со своим «логином» и есть на странице, только пока спрашиваем пароль */
+const LOCKF='<form class="card" id="pwf" style="margin:0"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input type="text" name="username" autocomplete="username" value="Сервисы" readonly tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;min-height:0;padding:0;margin:0;border:0;opacity:0;pointer-events:none"><input id="pw" name="password" type="password" autocomplete="current-password" aria-label="Пароль"><button class="btn press" id="pwgo" type="submit" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></form>';
+function lock(msg){const l=$('#lock');l.innerHTML=LOCKF;l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;l.innerHTML='';start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwf').onsubmit=e=>{e.preventDefault();go()};setTimeout(()=>$('#pw').focus(),50)}
 (async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else{$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">'+(OZ?'Не удалось открыть данные: '+esc(e.message):'Данных по '+M.n+' пока нет — сбор ещё не выложен.')+'</div>'}}})();
 })();
 </script>
