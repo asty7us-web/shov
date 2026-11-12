@@ -1,0 +1,50 @@
+{
+ "id": "/shov/panel/",
+ "name": "Панель",
+ "short_name": "Панель",
+ "description": "Продажи, прибыль и реклама по товарам",
+ "start_url": "/shov/panel/",
+ "scope": "/",
+ "display": "standalone",
+ "background_color": "#f2f2f7",
+ "theme_color": "#1d2029",
+ "lang": "ru",
+ "icons": [
+  {
+   "src": "pwa/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "pwa/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "pwa/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "Юнитка",
+   "url": "/unitka/"
+  },
+  {
+   "name": "Склейки",
+   "url": "/shov/"
+  },
+  {
+   "name": "Конкуренты",
+   "url": "/shov/konkurenty/"
+  },
+  {
+   "name": "Закупки",
+   "url": "/shov/zakupki/"
+  }
+ ]
+}
