@@ -15,6 +15,17 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d2029'/%3E%3Cpath d='M6 21l5.5-6 4.5 3.5L25 9' fill='none' stroke='%235ef2c4' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='25' cy='9' r='2.6' fill='%23fff59d'/%3E%3C/svg%3E">
 <script>(function(){try{var t=JSON.parse(localStorage.getItem('pan.theme')||'"auto"');if(['light','dark','space'].indexOf(t)>=0)document.documentElement.dataset.theme=t;
 var k=JSON.parse(localStorage.getItem('pan.dk')||'null');if(k&&k.r==='fin'){document.documentElement.dataset.role='fin';document.getElementById('mf').href='manifest-fin.webmanifest'}}catch(e){}})()</script>
+<script>/* Компьютер без видеокарты (страницу рисует процессор): лёгкий режим — без размытых подложек и плавных переходов, «Космос» стоит кадром.
+   Узнаём по тому, кто рисует WebGL; проверка раз в три дня. Вручную: ?lite=1 — включить, ?lite=0 — выключить, ?lite=auto — снова сам. */
+(function(){try{var L=localStorage,q=/[?&]lite=(1|0|auto)\b/.exec(location.search),f,o,c,g,x,r='';
+if(q){if(q[1]==='auto'){L.removeItem('pan.liteF');L.removeItem('pan.lite')}else L.setItem('pan.liteF',q[1])}
+f=L.getItem('pan.liteF');
+if(f!=='1'&&f!=='0'){o=JSON.parse(L.getItem('pan.lite')||'null');
+ if(o&&(o.v==='1'||o.v==='0')&&Date.now()-o.t<2592e5)f=o.v;
+ else{c=document.createElement('canvas');g=c.getContext('webgl')||c.getContext('experimental-webgl');
+  if(g){x=g.getExtension('WEBGL_debug_renderer_info');r=String(x?g.getParameter(x.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER));x=g.getExtension('WEBGL_lose_context');if(x)x.loseContext()}
+  f=(!g||/swiftshader|llvmpipe|softpipe|basic render|software rasterizer|software adapter/i.test(r))?'1':'0';L.setItem('pan.lite',JSON.stringify({v:f,t:Date.now(),r:r.slice(0,90)}))}}
+if(f==='1')document.documentElement.dataset.lite='1'}catch(e){}})()</script>
 <style>
 /* «Панель» — дашборд панелей ВБ / Озон / ЯМ (Андрей 12.11.2026: «идеально всё видеть, с мобильного не хуже десктопа, всё плавное, уровень Эпл»).
    Данные — panel_sayt\sbor.py (расчёт по сырым листам панелей, сверка с листом SKU). Шапка сервисов — servisy\svc.py. */
@@ -615,6 +626,91 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 @media (hover:hover){.spr:hover{background:var(--fill2)}}
 @media (min-width:900px){.spl{grid-template-columns:repeat(2,minmax(0,1fr))}.spl .sph{grid-column:1/-1;display:none}}
 @media (min-width:1240px){.spl{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* ═════ 13.11.2026, вечер — по словам Андрея: главное крупно и светофором, столбцы листа SKU на выбор, фото в склейках, подтверждение скачивания, быстрый компьютер ═════ */
+/* светофор: зелёный — норма, жёлтый — на границе, красный — плохо (пороги — NORM в скрипте; «до 10% ДРР норм») */
+.sg1{--lc:var(--good)}.sg2{--lc:var(--warn)}.sg3{--lc:var(--bad)}
+.z1{color:var(--good)}.z2{color:var(--warn)}.z3{color:var(--bad)}
+.lt{display:inline-flex;gap:3px;padding:3px 5px;border-radius:9px;background:var(--fill);flex:none}
+.lt i{width:7px;height:7px;border-radius:50%;background:var(--ink3);opacity:.28}
+.sg3 .lt i:nth-child(1),.sg2 .lt i:nth-child(2),.sg1 .lt i:nth-child(3){opacity:1;background:var(--lc);box-shadow:0 0 5px var(--lc)}
+/* главные показатели над таблицей: продажи, до ДРР, ДРР, маржа — крупно, цветом светофора */
+.sem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.st{position:relative;background:var(--card);border-radius:16px;box-shadow:var(--sh1);padding:10px 11px 9px 15px;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.st::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--lc,var(--bar))}
+.st .sl{display:flex;align-items:center;gap:7px;font:600 12.5px/1.2 var(--f);color:var(--ink2);white-space:nowrap}
+.st>b{font:720 21px/1.14 var(--fd);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--lc,var(--ink))}
+.st>small{font-size:12.5px;line-height:1.3;color:var(--ink2);display:flex;flex-wrap:wrap;gap:2px 7px;align-items:center;min-height:21px}
+.st>small b{color:var(--ink);font-weight:650;font-size:13.5px}
+.st .chip{height:20px;padding:0 6px;font-size:11.5px}
+.st .sl .chip{margin-left:auto}
+:root[data-theme="space"] .st{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--sh1),0 0 0 .5px var(--line)}
+:root[data-theme="space"][data-k3d="1"] .st{backdrop-filter:blur(9px) brightness(.68) saturate(1.2);-webkit-backdrop-filter:blur(9px) brightness(.68) saturate(1.2)}
+.tb td.w1{font-weight:inherit}
+/* «Категории»: продажи направления крупно, три главных показателя — плашками со светофором, числа категорий — ровными столбиками */
+.cgh{display:flex;align-items:baseline;gap:10px}
+.cgh .ct{flex:1;min-width:0;margin:0;flex-wrap:wrap}
+.cgs{font:720 21px/1.2 var(--fd);letter-spacing:-.02em;white-space:nowrap}
+.cgm{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 2px}
+.mc{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 9px;border-radius:9px;background:var(--fill2);font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.mc b{font:700 14px/1 var(--f);color:var(--lc,var(--ink))}
+.mc .dot{width:8px;height:8px;border-radius:50%;background:var(--lc,var(--bar2));flex:none}
+.cth{display:flex;align-items:flex-end;gap:10px;margin-top:12px;padding-bottom:2px;font:650 10.5px/1.2 var(--f);letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.cth>span{flex:1;min-width:0}
+.cn{display:grid;grid-template-columns:64px 46px 54px;gap:0 5px;align-items:start;text-align:right;flex:none}
+.row .cn>b,.row .cn .cm b{display:block;font:650 14.5px/1.3 var(--f);white-space:nowrap}
+.cn .cm{display:block;min-width:0}
+.cn .cm small{display:block;font-size:12px;line-height:1.3;color:var(--ink2);margin-top:1px;white-space:nowrap}
+.cn .cm small.dn{color:var(--bad)}
+.chs{width:16px;flex:none}
+.cg .rows{margin-top:2px}
+/* фото карточек: в «Склейках» — справа от названия, в листе склейки — справа в строке товара */
+.ph{position:relative;width:34px;height:45px;border-radius:7px;object-fit:cover;background:var(--fill2);flex:none;display:block}
+.phs{display:flex;flex:none;align-items:center}
+.phs .ph+.ph{margin-left:-21px}
+.phs .ph{box-shadow:0 0 0 1.5px var(--card)}
+.tn{display:flex;align-items:center;gap:8px}.tn .tx{flex:1;min-width:0}
+.tb.m .ph{width:22px;height:29px;border-radius:5px}.tb.m .tn{gap:4px}
+.pc .h .ph{width:36px;height:48px}
+.row>.ph{width:30px;height:40px}
+/* выбор столбцов и подтверждение скачивания */
+.tg{flex:none;width:44px;height:27px;border-radius:14px;background:var(--bar);position:relative;transition:background-color .25s var(--ease)}
+.tg::after{content:"";position:absolute;left:2px;top:2px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.28);transition:transform .32s var(--out)}
+.tg.on{background:var(--good)}.tg.on::after{transform:translateX(17px)}
+.row[data-col] .nm small{white-space:normal;line-height:1.3}
+.cpp{margin:0 0 4px!important;padding:2px 0!important;flex-wrap:wrap}
+.cfb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:14px}
+.cfb .tbtn{height:46px;border-radius:13px;padding:0 18px}
+/* телефон: значки вместо подписей у кнопок таблицы; столбцы чуть плотнее — шесть главных на экране (продажи, прошлые продажи, до ДРР, ДРР, маржа % и ₽) */
+@media (max-width:899px){
+  .tpr #colBtn{order:2;width:38px;padding:0;justify-content:center;flex:none}.tpr #colBtn span{display:none}
+  .tsk{flex-wrap:nowrap}.tsk #joinBtn{flex:0 1 auto;min-width:0;margin-right:auto}
+  .tsk #colBtn,.tsk #viewBtn,.tsk #csvBtn{width:38px;padding:0;justify-content:center;flex:none}
+  .tsk #colBtn span,.tsk #viewBtn span,.tsk #csvBtn span{display:none}
+}
+.tb.m th,.tb.m td{padding:8px 3px}
+.tb.m th{min-width:36px}
+.tb.m td:first-child,.tb.m th:first-child{min-width:92px;max-width:92px;width:92px;padding-left:9px;padding-right:5px}
+@media (max-width:899px){.tw{margin-left:-4px;margin-right:-4px}}
+.tb.m.sk td:first-child,.tb.m.sk th:first-child{min-width:124px;max-width:124px;width:124px}
+@media (min-width:900px){
+  .sem{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+  .st{padding:13px 16px 12px 19px;border-radius:18px;gap:4px}.st .sl{font-size:13.5px}.st>b{font-size:28px}.st>small{font-size:13px}.st>small b{font-size:14.5px}
+  .cgs{font-size:24px}.mc{font-size:13px;height:30px}.mc b{font-size:15px}
+  .cn{grid-template-columns:112px 68px 104px;gap:0 10px}.row .cn>b,.row .cn .cm b{font-size:15px}.cn .cm small{font-size:12.5px}
+  .tn{gap:10px}
+}
+/* лёгкий режим (компьютер без видеокарты, data-lite ставит скрипт в шапке): размытие подложек считается процессором на каждый кадр прокрутки —
+   вместо него плотная подложка; переходы мгновенные. На телефоне и на компьютере с видеокартой ничего не меняется. */
+:root{--hdr2:rgba(246,246,250,.97)}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--hdr2:rgba(16,16,18,.96)}}
+:root[data-theme="dark"]{--hdr2:rgba(16,16,18,.96)}
+:root[data-theme="space"]{--hdr2:rgba(7,9,32,.94)}
+:root[data-lite] .top,:root[data-lite] .ctx,:root[data-lite] .tabbar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--hdr2)}
+:root[data-lite] .card,:root[data-lite] .k,:root[data-lite] .pc,:root[data-lite] .tw,:root[data-lite] .spl,:root[data-lite] .st,:root[data-lite] .pill,:root[data-lite] .shx,:root[data-lite] .aff .go{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+:root[data-lite][data-theme="space"]{--card:rgba(22,25,64,.9);--card2:rgba(32,36,88,.94)}
+:root[data-lite][data-theme="space"][data-k3d="1"]{--card:rgba(15,18,52,.86);--card2:rgba(27,31,82,.93);--hdr:rgba(7,9,32,.92)}
+:root[data-lite][data-theme="space"][data-k3d="1"] .tw{background:rgba(13,16,48,.88)}
+:root[data-lite] *,:root[data-lite] *::before,:root[data-lite] *::after{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important;transition-delay:0s!important}
 </style>
 </head>
 <body>
@@ -745,6 +841,7 @@ window.svcBack=o=>{
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const LS=p=>({get(k,d){try{const v=localStorage.getItem(p+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(p+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(p+k)}catch(e){}}});
 const PS=LS('pan.'),SH=LS('shov.');
+const LITE=document.documentElement.dataset.lite==='1';   // компьютер без видеокарты — лёгкий режим (ставит скрипт в шапке страницы)
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const b64u8=s=>{const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)};
@@ -824,6 +921,7 @@ const mps=()=>S.mp==='all'?MPS:[S.mp];
 function prep(){
   MPS=MPS_ALL.filter(k=>D.mp[k]);C={};SP={};
   for(const mp of MPS){const B=D.mp[mp];B.used=new Uint8Array(B.atoms.length);for(const r of B.data)B.used[r[0]]=1;B.dupS=new Set(B.dup||[]);
+    if(mp==='wb'&&!B.fz){B.fz=1;for(const r of B.data)if(r.length>16&&B.atoms[r[0]].m<7)r[16]=0}   // штрафы ВБ — как на листе «SKU» (AC): считаются с июля, до июля столбец на листе пустой
     B.t0=null;B.t1=null;B.atoms.forEach((a,i)=>{if(!B.used[i])return;const x=pd(a.d0).getTime(),y=pd(a.d1).getTime();if(B.t0==null||x<B.t0)B.t0=x;if(B.t1==null||y>B.t1)B.t1=y})}
   if(S.mp!=='all'&&!D.mp[S.mp])S.mp='all';
   tovPrep();
@@ -890,9 +988,13 @@ function aggrS(mp,g,k){
 const approxMp=(g,k)=>mps().filter(mp=>{const c=cover(mp,g,k);return c.n>0&&c.open&&D.mp[mp].kind!=='d'});
 function met(v){
   v=v||Z;const units=v[0]-v[1],sales=v[2]-v[3],cost=v[4]-v[5],nodrr=sales-cost-v[7]-v[6]-v[8]-v[9]-v[11]-v[12]-v[13],profit=nodrr-v[10],pos=sales>0;
-  return {units,sales,cost,nodrr,profit,ads:v[10],comm:v[6],logi:v[7],acq:v[8],stor:v[9],ff:v[11],dop:v[12],tax:v[13],fines:v[14],qs:v[0],qr:v[1],cs:v[4],cr:v[5],
+  /* столбцы листа «SKU» панели ВБ: маржинальный доход (I) = продажи − себестоимость − логистика − комиссия (у Озона и ЯМ ещё эквайринг — как SKU!R панели ЯМ);
+     валовая прибыль до налога (K) = I − реклама − ФФ − доукомплектовка; прибыль без хранения, с рекламой (V) = I − налог − ФФ − доукомплектовка − реклама */
+  const marg=sales-cost-v[7]-v[6]-v[8],vpdn=marg-v[10]-v[11]-v[12],bezHr=marg-v[13]-v[11]-v[12]-v[10];
+  return {units,sales,cost,nodrr,profit,marg,vpdn,bezHr,ads:v[10],comm:v[6],logi:v[7],acq:v[8],stor:v[9],ff:v[11],dop:v[12],tax:v[13],fines:v[14],qs:v[0],qr:v[1],cs:v[4],cr:v[5],
     avg:units?(sales-v[15])/units:(v[0]?v[2]/v[0]:null),cost1:units?cost/units:null,logi1:units?v[7]/units:null,p1:units?profit/units:null,
     drr:pos?v[10]/sales:null,mNodrr:pos?nodrr/sales:null,mProfit:pos?profit/sales:null,roi:cost>0?profit/cost:null,
+    pMarg:pos?marg/sales:null,pVpdn:pos?vpdn/sales:null,pBezHr:pos?bezHr/sales:null,pFines:pos?v[14]/sales:null,
     pComm:pos?v[6]/sales:null,pLogi:pos?v[7]/sales:null,pCost:pos?cost/sales:null,ret:v[0]?v[1]/v[0]:null};
 }
 const act=v=>{if(!v)return false;for(let j=0;j<NV;j++)if(Math.abs(v[j])>.004)return true;return false};
@@ -1021,6 +1123,23 @@ document.addEventListener('click',e=>{
   box.querySelectorAll('.c').forEach(x=>x.classList.toggle('sel',x===c));if(h)h.innerHTML=`<b>${c.dataset.t}</b><span>${c.dataset.l}${box.dataset.nav?' · нажмите ещё раз, чтобы открыть':''}</span>`;
 });
 
+/* ───────── светофор: главные показатели крупно и цветом (Андрей 13.11.2026: «над таблицей самое важное и мелко — надо крупнее и цветом заметно
+   + отображение светофора показателей этих; до 10% ДРР норм»). NORM: [норма, граница, «меньше — лучше»]. Зелёный — норма, жёлтый — между нормой
+   и границей, красный — за границей. ДРР: до 10% / до 15% / выше. Маржа: от 10% / от 0 / минус. До ДРР: от 20% / от 10% / ниже. ───────── */
+const NORM={drr:[.10,.15,1],mProfit:[.10,0],mNodrr:[.20,.10]};
+function zone(key,v){const n=NORM[key];if(!n||!ok(v))return 0;return n[2]?(v<=n[0]?1:v<=n[1]?2:3):(v>=n[0]?1:v>=n[1]?2:3)}
+const ZS=['','sg1','sg2','sg3'],ZT=['','z1','z2','z3'],LT='<i class="lt"><i></i><i></i><i></i></i>';
+function sem(rows,T,g,k){   // rows — строки площадок отбора (по ним сравнение «на тот же день»), T — их сумма
+  const m=met(T),pk=prevK(g,k),part=g!=='y'&&partial(g,k),pc=pk!=null?paces(rows,g,k,fS):null,d=pc&&pc[1]?(pc[0]-pc[1])/Math.abs(pc[1]):null;
+  const pm=pk!=null?met(vsum(rows.map(x=>x.p))):null,zs=d==null?0:d>=0?1:d>=-.1?2:3;   // продажи: не ниже прошлого периода — зелёный, до −10% — жёлтый
+  const t=(z,key,l,v,s,x)=>`<div class="st ${ZS[z]}" data-sem="${key}"><span class="sl">${LT}${l}${x||''}</span><b class="num">${v}</b><small class="num">${s}</small></div>`;
+  return `<div class="sem" id="sem">${t(zs,'sales','Продажи',fm(m.sales),(pm?`<span>${GP[g]} <b>${fm(pm.sales)}</b></span>`:'')+(part&&pc?`<span>на тот же день <b>${fm(pc[1])}</b></span>`:''),d!=null?chip(d):'')}
+${t(zone('mNodrr',m.mNodrr),'nodrr','До ДРР',fm(m.nodrr),`<span><b>${fp(m.mNodrr)}</b> от продаж</span>`)}
+${t(zone('drr',m.drr),'drr','ДРР',fp(m.drr),`<span>реклама <b>${fm(m.ads)}</b></span>`)}
+${t(zone('mProfit',m.mProfit),'profit','Маржа',fm(m.profit),`<span><b>${fp(m.mProfit)}</b> от продаж</span>`)}</div>`;
+}
+const pcm=m=>`<div><span>Маржа</span><b class="num ${m.profit<0?'dn':''}">${fm(m.profit)}</b></div><div><span>Маржа %</span><b class="num ${ZT[zone('mProfit',m.mProfit)]}">${fp(m.mProfit)}</b></div><div><span>До ДРР</span><b class="num ${m.mNodrr<0?'dn':''}">${fp(m.mNodrr)}</b></div><div><span>ДРР</span><b class="num ${ZT[zone('drr',m.drr)]}">${fp(m.drr)}</b></div>`;
+
 /* ───────── Сводка ───────── */
 const PART=[['cost','Себестоимость','--c1'],['comm','Комиссия','--c2'],['logi','Логистика','--c3'],['ads','Реклама','--c4'],['tax','Налог','--c5'],['ffd','ФФ и доукомплектовка','--c7'],['oth','Эквайринг, хранение','--bar2']];
 function kpi(l,val,sub,go,bad){return `<button class="k press${bad?' bad':''}"${go?` data-sortgo="${go}"`:''}><div class="lbl">${l}</div><div class="kv">${val}</div><div class="ks">${sub||''}</div></button>`}
@@ -1138,13 +1257,17 @@ function vCat(){
   const grs=Object.values(gr);for(const x of grs){x.v=vsum(x.cs.map(c=>c.v));x.m=met(x.v);x.cs.sort((a,b)=>b.m.sales-a.m.sales)}
   grs.sort((a,b)=>b.m.sales-a.m.sales);
   if(!grs.length)return empty();
-  const T=totals(g,k),tm=met(T.v);
-  return `<div class="fresh"><span>${plabel(g,k,true)} · продажи <b class="num">${fm(tm.sales)}</b> · валовая прибыль <b class="num">${fm(tm.profit)}</b> (${fp(tm.mProfit)}) · ДРР <b class="num">${fp(tm.drr)}</b></span></div>
-<div class="g g2">${grs.map(x=>`<div class="card"><h3 class="ct">${esc(x.n)} <small class="num">${fp(Math.max(0,x.m.sales)/tot)}</small><span class="more num" style="color:var(--ink)">${fm(x.m.sales)}</span></h3>
-<div class="lbl num">прибыль <b class="${x.m.profit<0?'dn':''}">${fm(x.m.profit)}</b> · ${fp(x.m.mProfit)} · без ДРР ${fp(x.m.mNodrr)} · ДРР ${fp(x.m.drr)}</div>
+  const T=totals(g,k),fs=mob()?fk:fm,zt=(key,v)=>ZT[zone(key,v)];
+  // числа ровными столбиками: продажи · ДРР · маржа (% и под ним ₽); цвет — светофор
+  const cn=m=>`<div class="cn"><b class="num">${fs(m.sales)}</b><b class="num ${zt('drr',m.drr)}">${fp(m.drr)}</b><span class="cm"><b class="num ${zt('mProfit',m.mProfit)}">${fp(m.mProfit)}</b><small class="num${m.profit<0?' dn':''}">${fs(m.profit)}</small></span></div>`;
+  const mc=(z,l,v)=>`<span class="mc ${ZS[z]}"><i class="dot"></i>${l} <b class="num">${v}</b></span>`;
+  return `${sem(its,T.v,g,k)}
+<div class="g g2">${grs.map(x=>`<div class="card cg"><div class="cgh"><h3 class="ct">${esc(x.n)} <small class="num">${fp(Math.max(0,x.m.sales)/tot)} продаж</small></h3><b class="num cgs">${fm(x.m.sales)}</b></div>
+<div class="cgm">${mc(zone('mNodrr',x.m.mNodrr),'До ДРР',fp(x.m.mNodrr))}${mc(zone('drr',x.m.drr),'ДРР',fp(x.m.drr))}${mc(zone('mProfit',x.m.mProfit),'Маржа',fm(x.m.profit)+' · '+fp(x.m.mProfit))}</div>
+<div class="cth"><span>Категория</span><div class="cn"><span>Продажи</span><span>ДРР</span><span>Маржа</span></div><i class="chs"></i></div>
 <div class="rows">${x.cs.map(c=>{const op=S.open[c.n];const list=c.pr.filter(i=>act(i.v)).sort((a,b)=>b.m.sales-a.m.sales);
-  return `<div class="acc${op?' open':''}" data-acc="${esc(c.n)}"><button class="row" data-acct="${esc(c.n)}"><div class="nm"><b>${esc(c.n)}</b><small class="num">${list.length} тов. · ${fq(c.m.units)} шт · ДРР ${fp(c.m.drr)}</small></div><div class="rv"><b class="num">${fm(c.m.sales)}</b><small class="num ${c.m.profit<0?'dn':''}">${fm(c.m.profit)} · ${fp(c.m.mProfit)}</small></div>${CHEV}<i class="shr" style="width:calc(${Math.max(0,c.m.sales)/tot*100}% - 32px)"></i></button>
-<div class="accb"><div><div class="subl">${list.slice(0,40).map(it=>`<button class="row" data-open="${pid(it)}"><div class="nm"><b>${ico(it)}${esc(it.r.a)}</b><small class="num">${fq(it.m.units)} шт · без ДРР ${fp(it.m.mNodrr)} · ДРР ${fp(it.m.drr)}</small></div><div class="rv"><b class="num">${fm(it.m.sales)}</b><small class="num ${it.m.profit<0?'dn':''}">${fm(it.m.profit)} · ${fp(it.m.mProfit)}</small></div></button>`).join('')}
+  return `<div class="acc${op?' open':''}" data-acc="${esc(c.n)}"><button class="row" data-acct="${esc(c.n)}"><div class="nm"><b>${esc(c.n)}</b><small class="num">${list.length} тов. · до ДРР ${fp(c.m.mNodrr)}</small></div>${cn(c.m)}${CHEV}<i class="shr" style="width:calc(${Math.max(0,c.m.sales)/tot*100}% - 32px)"></i></button>
+<div class="accb"><div><div class="subl">${list.slice(0,40).map(it=>`<button class="row" data-open="${pid(it)}"><div class="nm"><b>${ico(it)}${esc(it.r.a)}</b><small class="num">до ДРР ${fp(it.m.mNodrr)}</small></div>${cn(it.m)}<i class="chs"></i></button>`).join('')}
 <button class="row" data-catgo="${esc(c.n)}"><div class="nm"><b style="color:var(--acc);font-weight:600">Открыть в «Товарах»</b></div>${CHEV}</button></div></div></div></div>`}).join('')}</div></div>`).join('')}</div>${foot()}`;
 }
 const empty=()=>`<div class="empty"><b>За этот период данных нет</b>Выберите другой период или площадку.</div>`;
@@ -1158,24 +1281,24 @@ function sklSort(arr){const key=S.gs,dir=S.gd;
 function sklRows(g,k){   // склейки периода в выбранном порядке, «Без склейки» — последней
   const live=sklsC(g,k).filter(sklLive);return sklSort(live.filter(s=>s.key!=='-')).concat(live.filter(s=>s.key==='-'))}
 function sklTable(rows,g,k,T){
-  const pk=prevK(g,k),pl=pk!=null?GP[g]:'',cols=colsNow(pl),tm=met(T.v),tp=met(T.p),mb=mob();
-  const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:tm[key];
+  const pk=prevK(g,k),pl=pk!=null?GP[g]:'',cols=colsNow(pl),tm=met(T.v),tp=met(T.p),mb=mob(),all=items(g,k);
+  const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:key==='buy'?buyP(all):tm[key];
   return `<div class="tw" id="tw"><table class="tb sk${mb?' m':''}"><thead><tr><th>Склейка</th>${cols.map(c=>`<th data-gs="${c[0]}" class="${S.gs===c[0]?'on':''}">${c[1].replace('#',pl)}${S.gs===c[0]?`<span class="a">${S.gd<0?'▼':'▲'}</span>`:''}</th>`).join('')}</tr></thead>
 <tbody><tr class="tot"><td>Итого · ${plr(rows.filter(s=>s.key!=='-').length,W_SKL)}</td>${cols.map(c=>tcell(tv(c[0]),c)).join('')}</tr>
-${rows.map(s=>{const why=s.key==='-'?'':reason(s,g,k,mb),ic=S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):'';return `<tr data-skl="${esc(s.key)}"${s.m.profit<0?' class="neg"':''}><td><span class="nm2">${mb?'':ic}${esc(s.t)}</span><small>${mb?ic:''}${[nTov(s),s.k?'Каб '+s.k:''].filter(Boolean).join(' · ')}</small>${why?`<small class="why">${esc(why)}</small>`:''}</td>${cols.map(c=>tcell(gv(s,c[0]),c,s)).join('')}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
+${rows.map(s=>{const why=s.key==='-'?'':reason(s,g,k,mb),ic=S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):'';return `<tr data-skl="${esc(s.key)}"${s.m.profit<0?' class="neg"':''}><td><div class="tn"><div class="tx"><span class="nm2">${mb?'':ic}${esc(s.t)}</span><small>${mb?ic:''}${[nTov(s),s.k?'Каб '+s.k:''].filter(Boolean).join(' · ')}</small>${why?`<small class="why">${esc(why)}</small>`:''}</div>${phs(s,mb?1:3)}</div></td>${cols.map(c=>tcell(gv(s,c[0]),c,s)).join('')}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
 }
 function vSkl(){
-  const g=S.g,k=curK(),all=sklsC(g,k),T=totals(g,k),tm=met(T.v),tbl=tblOn();
+  const g=S.g,k=curK(),all=sklsC(g,k),T=totals(g,k),tbl=tblOn();
   if(!(D.skl&&D.skl.length)&&!MPS.some(mp=>(D.mp[mp].skl||[]).length))return `<div class="empty"><b>Состав склеек ещё не загружен</b>Он берётся из сервиса «Склейки» и появится с ближайшим обновлением данных.</div>`+foot();
   const rows=sklRows(g,k);
   if(!rows.length)return empty();
   const gs=rows.filter(s=>s.key!=='-'),no=rows.find(s=>s.key==='-');
   const tot=all.reduce((a,s)=>a+Math.max(0,s.m.sales),0)||1,inS=gs.reduce((a,s)=>a+Math.max(0,s.m.sales),0),nAct=gs.reduce((a,s)=>a+s.act,0);
   const card=s=>{const m=s.m;
-    return `<button class="pc press" data-skl="${esc(s.key)}"><div class="h"><div class="n"><b>${S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):''}${esc(s.t)}</b><small class="num">${[nTov(s),s.k?'Каб '+s.k:'',fp(Math.max(0,m.sales)/tot)+' продаж'].filter(Boolean).join(' · ')}</small></div><div class="s"><b class="num">${fr(m.sales)}</b><small>${chip(setDelta(s.its,g,k,fS))}</small></div></div>
-<div class="m"><div><span>Маржа</span><b class="num ${m.profit<0?'dn':''}">${fm(m.profit)}</b></div><div><span>Маржа %</span><b class="num ${m.mProfit<0?'dn':m.mProfit>=.2?'up':''}">${fp(m.mProfit)}</b></div><div><span>До ДРР</span><b class="num">${fp(m.mNodrr)}</b></div><div><span>ДРР</span><b class="num">${fp(m.drr)}</b></div></div></button>`};
-  return `<div class="fresh"><span>${plabel(g,k,true)} · продажи <b class="num">${fm(tm.sales)}</b> · валовая прибыль <b class="num">${fm(tm.profit)}</b> (${fp(tm.mProfit)}) · ДРР <b class="num">${fp(tm.drr)}</b></span></div>
-<div class="tools">${joinBtn()}${viewBtnH(tbl)}${CSVB}</div>
+    return `<button class="pc press" data-skl="${esc(s.key)}"><div class="h"><div class="n"><b>${S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):''}${esc(s.t)}</b><small class="num">${[nTov(s),s.k?'Каб '+s.k:'',fp(Math.max(0,m.sales)/tot)+' продаж'].filter(Boolean).join(' · ')}</small></div><div class="s"><b class="num">${fr(m.sales)}</b><small>${chip(setDelta(s.its,g,k,fS))}</small></div>${phs(s,1)}</div>
+<div class="m">${pcm(m)}</div></button>`};
+  return `${sem(items(g,k),T.v,g,k)}
+<div class="tools tsk">${joinBtn()}${tbl?COLB:''}${viewBtnH(tbl)}${CSVB}</div>
 ${tbl?'':`<div class="pills" id="gsorts">${GSORT.map(([x,t])=>`<button class="pill${S.gs===x?' on':''}" data-gs="${x}">${t}${S.gs===x?(S.gd<0?' ↓':' ↑'):''}</button>`).join('')}</div>`}
 <div class="cnt">${plr(gs.length,W_SKL)} · в них ${plr(nAct,W_TOV)} и ${fp(inS/tot)} продаж${no&&no.act?' · без склейки '+plr(no.act,W_TOV):''}</div>
 ${tbl?sklTable(rows,g,k,T):`<div class="pcs">${rows.map(card).join('')}</div>`}
@@ -1183,18 +1306,40 @@ ${tbl?sklTable(rows,g,k,T):`<div class="pcs">${rows.map(card).join('')}</div>`}
 }
 
 /* ───────── Товары ───────── */
-const COLS=[['cost1','Себестоимость 1 ед.','r'],['sales','Продажи, ₽','r'],['salesP','Продажи, ₽, #','r'],['units','Продажи, шт','n'],['avg','Средний чек','r'],
-  ['cs','Себест. доставленных','r'],['cr','Себест. возвратов','r'],['avgP','Средний чек, #','r'],['nodrr','Прибыль без ДРР','r',1],['mNodrr','% без ДРР','p'],['drr','ДРР','p',0,1],
-  ['drrP','ДРР, #','p'],['ads','Реклама','r'],['profit','Валовая прибыль','r',1],['mProfit','% с налогом','p'],['roi','ROI','x'],['pComm','% комиссии','p'],['pLogi','% логистики','p'],
-  ['ff','Услуги ФФ','r'],['dop','Доукомпл.','r'],['cost','Себестоимость, ₽','r']];
+/* Столбцы таблиц «Товары» и «Склейки» (Андрей 13.11.2026: список столбцов G…AG листа «SKU» панели ВБ, «кастомизация, лёгкий выбор, что показывается,
+   что нет, а по умолчанию как стоит оставь»). CD: ключ → [название как на листе, короткое для телефона, вид числа на компьютере, на телефоне, минус красным];
+   «#» в названии — прошлый период. ORD_* — общий порядок (новый столбец встаёт на своё место), DEF_* — что показано, пока человек не выбирал:
+   на компьютере — как было; на телефоне в «Товарах» прошлые продажи стоят сразу за продажами («справа от продаж столбик надо продажи прошл. мес»),
+   в «Склейках» — прежний порядок (там место занято фото). PAN_L — лист «SKU» панели ВБ, столбцы G…AG по порядку. */
+const CD={cost1:['Себестоимость 1 ед.','Себест.<br>1 ед.','r','k'],sales:['Продажи, ₽','Продажи<br>₽','r','k'],salesP:['Продажи, ₽, #','Продажи<br>#','r','k'],
+  marg:['Маржинальный доход','Марж.<br>доход ₽','r','k',1],pMarg:['% рентабельности','Рентаб.<br>%','p','q'],vpdn:['Валовая прибыль до налога','ВП до<br>налога ₽','r','k',1],pVpdn:['% ВП до налога','ВП до<br>налога %','p','q'],
+  qs:['Продажа, шт','Продажа<br>шт','n','n'],qr:['Возврат, шт','Возврат<br>шт','n','n'],buy:['% выкупа','Выкуп<br>%','p','q'],units:['Продажи, шт','Штук','n','n'],avg:['Средний чек','Ср. чек<br>₽','r','k'],
+  cs:['Себест. доставленных','Себест.<br>достав.','r','k'],cr:['Себест. возвратов','Себест.<br>возвр.','r','k'],avgP:['Средний чек, #','Ср. чек<br>#','r','k'],
+  nodrr:['Прибыль без ДРР','До ДРР<br>₽','r','k',1],mNodrr:['% без ДРР','До ДРР<br>%','p','q'],drr:['ДРР','ДРР<br>%','p','q'],drrP:['ДРР, #','ДРР %<br>#','p','q'],ads:['Реклама','Реклама<br>₽','r','k'],
+  bezHr:['Прибыль без хранения, с рекламой','Без хран.<br>₽','r','k',1],pBezHr:['% без хранения, с рекламой','Без хран.<br>%','p','q'],
+  profit:['Валовая прибыль','Маржа<br>₽','r','k',1],mProfit:['% с налогом','Маржа<br>%','p','q'],roi:['ROI','ROI<br>%','x','q'],pComm:['% комиссии','Комис.<br>%','p','q'],pLogi:['% логистики','Логист.<br>%','p','q'],
+  pCost:['% себестоимости','Себест.<br>%','p','q'],fines:['Штрафы, ₽','Штрафы<br>₽','r','k'],pFines:['Штрафы, % от продаж','Штрафы<br>%','p','q'],stor:['Хранение ВБ, ₽','Хран.<br>₽','r','k'],
+  ff:['Услуги ФФ','ФФ<br>₽','r','k'],dop:['Доукомпл.','Доукомпл.<br>₽','r','k'],cost:['Себестоимость, ₽','Себест.<br>₽','r','k']};
+const CDN={marg:'продажи − себестоимость − логистика − комиссия (у Озона и ЯМ ещё эквайринг)',pMarg:'маржинальный доход к продажам',vpdn:'маржинальный доход − реклама − ФФ − доукомплектовка',
+  qs:'продано, до вычета возвратов',units:'продано минус возвраты',buy:'считается по месяцам',nodrr:'после налога, хранения, ФФ и доукомплектовки, без рекламы',
+  bezHr:'после налога и рекламы, без хранения',profit:'итог: после налога, рекламы, хранения, ФФ и доукомплектовки',mProfit:'валовая прибыль к продажам — маржа',roi:'валовая прибыль к себестоимости',
+  fines:'в прибыль не входят; у ВБ считаются с июля, как на листе',stor:'хранение на складах ВБ'};
+const ORD_D=['cost1','sales','salesP','marg','pMarg','vpdn','pVpdn','qs','qr','buy','units','avg','cs','cr','avgP','nodrr','mNodrr','drr','drrP','ads','bezHr','pBezHr','profit','mProfit','roi','pComm','pLogi','pCost','fines','pFines','stor','ff','dop','cost'];
+const ORD_M=['sales','salesP','mNodrr','drr','mProfit','profit','pComm','pLogi','pCost','nodrr','ads','units','avg','cost1','roi','drrP','ff','dop','cost','marg','pMarg','vpdn','pVpdn','qs','qr','buy','avgP','bezHr','pBezHr','fines','pFines','stor','cs','cr'];
+const DEF_D=['cost1','sales','salesP','units','avg','cs','cr','avgP','nodrr','mNodrr','drr','drrP','ads','profit','mProfit','roi','pComm','pLogi','ff','dop','cost'];
+const DEF_M=['sales','salesP','mNodrr','drr','mProfit','profit','pComm','pLogi','pCost','nodrr','ads','units','avg','cost1','roi','drrP','ff','dop','cost'];
+const DEF_MS=['sales','mNodrr','drr','mProfit','profit','pComm','pLogi','pCost','nodrr','ads','units','avg','cost1','roi','salesP','drrP','ff','dop','cost'];
+const PAN_L=['sales','salesP','marg','pMarg','vpdn','pVpdn','qs','qr','buy','avg','avgP','nodrr','mNodrr','drr','drrP','bezHr','pBezHr','profit','mProfit','roi','pLogi','pComm','fines','pFines','stor','ff','dop'];
 const SORTS=[['sales','Продажи'],['mProfit','Маржа %'],['profit','Маржа ₽'],['mNodrr','До ДРР %'],['drr','ДРР'],['pComm','Комиссия'],['ads','Реклама'],['roi','ROI']];
 const tblOn=()=>(S.view||'t')==='t';   // таблица (как лист SKU) или карточки — один выбор для «Товаров» и «Склеек»; по умолчанию таблица и на телефоне
 const mob=()=>innerWidth<900;
 /* телефон: те же показатели листа SKU, но главные пять — первыми и узко, чтобы помещались на экран сразу: продажи, до ДРР, ДРР, маржа % и ₽
    (Андрей 12.11: «привык в панели в SKU видеть всё… отсортировать по марже, понимать, кто минусовой, за счёт чего — хочу и с телефона») */
-const COLM=[['sales','Продажи<br>₽','k'],['mNodrr','До ДРР<br>%','q'],['drr','ДРР<br>%','q',0,1],['mProfit','Маржа<br>%','q'],['profit','Маржа<br>₽','k',1],['pComm','Комис.<br>%','q'],['pLogi','Логист.<br>%','q'],['pCost','Себест.<br>%','q'],
-  ['nodrr','До ДРР<br>₽','k',1],['ads','Реклама<br>₽','k'],['units','Штук','n'],['avg','Ср. чек<br>₽','k'],['cost1','Себест.<br>1 ед.','k'],['roi','ROI<br>%','q'],['salesP','Продажи<br>#','k'],['drrP','ДРР %<br>#','q'],['ff','ФФ<br>₽','k'],['dop','Доукомпл.<br>₽','k'],['cost','Себест.<br>₽','k']];
-const colsNow=pl=>(mob()?COLM:COLS).filter(c=>pl||!/P$/.test(c[0]));
+/* порядок столбцов телефона — ORD_M / DEF_M выше */
+const colKey=()=>mob()?'colsM':'colsD';
+function colSel(){   // выбранные столбцы по порядку; человек не выбирал — набор по умолчанию
+  const a=PS.get(colKey(),null),s=Array.isArray(a)?a.filter(x=>CD[x]):null;return s&&s.length?s:(mob()?(S.tab==='skl'?DEF_MS:DEF_M):DEF_D)}
+const colsNow=pl=>{const m=mob();return colSel().filter(x=>pl||!/P$/.test(x)).map(x=>{const d=CD[x];return [x,m?d[1]:d[0],m?d[3]:d[2],d[4]||0]})};
 /* за счёт чего минус: доли расходов в продажах товара против среднего по срезу; ▲ — доля выросла к прошлому периоду на 2 п.п. и больше */
 const SHN=[['cost','себестоимость','Себестоимость','--c1'],['comm','комиссия','Комиссия','--c2'],['logi','логистика','Логистика','--c3'],['ads','ДРР','Реклама (ДРР)','--c4'],
   ['tax','налог','Налог','--c5'],['ffd','ФФ','ФФ и доукомплектовка','--c7'],['oth','хранение','Эквайринг, хранение','--bar2']];
@@ -1209,14 +1354,22 @@ function reason(it,g,k,one){   // one — только главная причи
   return arr.map(x=>x.name+' '+fp(x.s)+(x.up!=null&&x.up>=.02?' ▲':'')).join(' · ')}
 const viewBtnH=tbl=>`<button class="tbtn press" id="viewBtn" aria-label="${tbl?'Показать карточками':'Показать таблицей'}">${tbl?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/></svg><span>Карточки</span>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M9.5 4.5v15"/></svg><span>Таблица</span>'}</button>`;
 const CSVB='<button class="tbtn press" id="csvBtn" aria-label="Скачать таблицу для Excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg><span>Excel</span></button>';
-const tcell=(v,c,it)=>{   // ячейка: минус красным, маржа от 20% зелёным, ДРР от 30% заметным; ▲ — доля выросла к прошлому периоду (ДРР на 3 п.п., комиссия и логистика на 2)
-  const key=c[0];let cl='',ex='';if(c[3]&&ok(v))cl=v<0?'b1':'';
-  if(key==='mProfit'||key==='mNodrr'||key==='roi')cl=ok(v)?(v<0?'b1':v>=.2?'g1':''):'';
-  if(key==='drr'&&ok(v)&&v>=.3)cl=v>=.5?'b1':'w1';
+const tcell=(v,c,it)=>{   // ячейка: минус красным; ДРР и маржа % — светофором (NORM); ▲ — доля выросла к прошлому периоду (ДРР на 3 п.п., комиссия и логистика на 2)
+  const key=c[0],z=key==='drr'||key==='mProfit'?zone(key,v):0;let cl='',ex='';if(c[3]&&ok(v))cl=v<0?'b1':'';   // Андрей 13.11: «в самой таблице светофор только у ДРР и чистой маржи»
+  if(z)cl=z===1?'g1':z===2?'w1':'b1';
+  else if(key==='mNodrr'||key==='roi'||key==='pMarg'||key==='pVpdn'||key==='pBezHr')cl=ok(v)&&v<0?'b1':'';   // у остальных долей — только минус красным
   if(it&&it.p&&ok(v)&&(key==='drr'||key==='pComm'||key==='pLogi')){const pv=it.pm[key];if(ok(pv)&&v-pv>=(key==='drr'?.03:.02))ex='<i class="gr">▲</i>'}
   return `<td${cl?` class="${cl}"`:''}>${FMT[c[2]](v)}${ex}</td>`};
-const TNOTE='<div class="note" style="margin-top:8px">▲ у ДРР, комиссии и логистики — доля в продажах выросла к прошлому периоду. Красная строка под названием — за счёт чего товар в минусе: какие расходы у него выше среднего.</div>';
-const gv=(it,key)=>key==='salesP'?(it.p?it.pm.sales:null):key==='avgP'?(it.p?it.pm.avg:null):key==='drrP'?(it.p?it.pm.drr:null):it.m[key];
+const TNOTE='<div class="note" style="margin-top:8px">▲ у ДРР, комиссии и логистики — доля в продажах выросла к прошлому периоду. Красная строка под названием — за счёт чего товар в минусе: какие расходы у него выше среднего. Цвет у ДРР и маржи % — светофор: зелёный — норма (ДРР до 10%, маржа от 10%), жёлтый — на границе (ДРР до 15%, маржа выше нуля), красный — хуже.</div>';
+const buyP=rows=>{const b=buyOf(rows,S.g,curK());return b?b[0]/(b[0]+b[1]):null};   // % выкупа — как на листе «SKU»: считается по месяцам
+const gv=(it,key)=>key==='salesP'?(it.p?it.pm.sales:null):key==='avgP'?(it.p?it.pm.avg:null):key==='drrP'?(it.p?it.pm.drr:null):key==='buy'?buyP(it.its||crd(it)):it.m[key];
+/* фото карточек (rows[].im ставит sostav.py из данных сервиса «Склейки»): маленькая копия с сервера площадки; не открылась — исходная, не открылась и она — место остаётся пустым */
+const imS=u=>u.indexOf('wbbasket.ru')>0?u.replace('/c246x328/','/tm/'):u.indexOf('ozone.ru')>0?u.replace(/\/wc\d+\//,'/wc100/'):u.indexOf('avatars.mds.yandex.net')>0?u.replace(/\/\d+x\d+$/,'/100x100'):u;
+const pic=(u,st)=>u?`<img class="ph" src="${esc(imS(u))}" data-f="${esc(u)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"${st?` style="${st}"`:''}>`:'';
+const imOf=it=>{for(const x of crd(it))if(x.r&&x.r.im)return x.r.im;return ''};
+function sklIms(s,n){const out=[];for(const x of s.its.slice().sort((a,b)=>b.m.sales-a.m.sales))if(x.r.im&&out.indexOf(x.r.im)<0){out.push(x.r.im);if(out.length>=n)break}return out}   // фото склейки — её самые продаваемые карточки
+const phs=(s,n)=>{if(s.key==='-')return '';const a=sklIms(s,n);return a.length?`<span class="phs">${a.map((u,i)=>pic(u,'z-index:'+(9-i))).join('')}</span>`:''};
+document.addEventListener('error',e=>{const t=e.target;if(!t||t.tagName!=='IMG'||!t.classList||!t.classList.contains('ph'))return;const f=t.dataset.f;if(f&&t.getAttribute('src')!==f){t.dataset.f='';t.src=f}else t.style.visibility='hidden'},true);
 const hay=it=>{let s=it.r.a+'\n'+(it.r.ms||'')+'\n'+it.r.c+'\n'+it.r.id+'\n'+sklT(it);if(it.parts)for(const x of it.parts)s+='\n'+x.r.a+'\n'+x.r.id;return s.toLowerCase()};
 function filt(){   // категория и склейка — признаки строк площадок: сначала отбор по ним, потом объединение в товары — суммы те же, что в «Категориях» и «Склейках»
   const g=S.g,k=curK();let its=items(g,k);
@@ -1237,34 +1390,34 @@ function vProd(){
 <button class="tbtn press${S.cat?' on':''}" id="catBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>${S.cat?(S.cat==='<0'?'В минусе':esc(S.cat)):'Категория'}</span></button>
 <button class="tbtn press${S.skl?' on':''}" id="sklBtn">${LINK}<span>${S.skl?esc(sklInfo(S.skl).t):'Склейка'}</span></button>
 <button class="tbtn press${S.only?' on':''}" id="onlyBtn"><span>С продажами</span></button></div>
-${viewBtnH(tbl)}${CSVB}</div>
+${tbl?COLB:''}${viewBtnH(tbl)}${CSVB}</div>
 ${tbl?'':`<div class="pills" id="sorts">${SORTS.map(([key,t])=>`<button class="pill${S.sort===key?' on':''}" data-sort="${key}">${t}${S.sort===key?(S.dir<0?' ↓':' ↑'):''}</button>`).join('')}</div>`}
 <div id="list">${list(tbl)}</div>${foot()}`;
 }
 function list(tbl){
   const g=S.g,k=curK(),its=filt(),q=S.q.trim(),all=prods(g,k).length,mb=mob();
-  const T=vsum(its.map(x=>x.v)),TP=vsum(its.map(x=>x.p)),tm=met(T),tp=met(TP),pk=prevK(g,k);
-  const head=`<div class="cnt">${q||S.cat||S.skl||S.only?`Найдено ${its.length} из ${all}`:`Товаров ${its.length}`} · продажи <b class="num">${fm(tm.sales)}</b> · прибыль <b class="num ${tm.profit<0?'dn':''}">${fm(tm.profit)}</b> (${fp(tm.mProfit)}) · ДРР <b class="num">${fp(tm.drr)}</b></div>`;
+  const T=vsum(its.map(x=>x.v)),TP=vsum(its.map(x=>x.p)),tm=met(T),tp=met(TP),pk=prevK(g,k),cards=[];for(const it of its)for(const x of crd(it))cards.push(x);
+  const head=sem(cards,T,g,k)+`<div class="cnt">${q||S.cat||S.skl||S.only?`Найдено ${its.length} из ${all}`:`Товаров ${its.length}`}</div>`;
   if(!its.length)return head+`<div class="empty"><b>Ничего не нашлось</b>${S.only?'Снимите «С продажами», чтобы увидеть товары без продаж за период.':'Измените запрос, категорию или склейку.'}</div>`;
   if(tbl){
     const pl=pk!=null?GP[g]:'',cols=colsNow(pl);
-    const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:tm[key];
+    const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:key==='buy'?buyP(cards):tm[key];
     return head+`<div class="tw" id="tw"><table class="tb${mb?' m':''}"><thead><tr><th data-sort="name" class="${S.sort==='name'?'on':''}">Товар</th>${cols.map(c=>`<th data-sort="${c[0]}" class="${S.sort===c[0]?'on':''}">${c[1].replace('#',pl)}${S.sort===c[0]?`<span class="a">${S.dir<0?'▼':'▲'}</span>`:''}</th>`).join('')}${mb?'':'<th class="tl">Категория</th><th class="tl">Склейка</th>'}</tr></thead>
 <tbody><tr class="tot"><td>Итого · ${its.length}</td>${cols.map(c=>tcell(tv(c[0]),c)).join('')}${mb?'':'<td></td><td></td>'}</tr>
-${its.map(it=>{const why=reason(it,g,k,mb);return `<tr data-open="${pid(it)}"${it.m.profit<0?' class="neg"':''}><td>${mb?`<span class="nm2">${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${ico(it)}${why?esc(why):(it.parts?plr(it.parts.length,W_KAR):kabT(it.r,it.mp))}</small>`:`<span class="nm2">${ico(it)}${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${why?esc(why):subT(it)}</small>`}</td>${cols.map(c=>tcell(gv(it,c[0]),c,it)).join('')}${mb?'':`<td class="tl">${esc(it.r.c)}</td><td class="tl">${esc(sklT(it))}</td>`}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
+${its.map(it=>{const why=reason(it,g,k,mb);return `<tr data-open="${pid(it)}"${it.m.profit<0?' class="neg"':''}><td>${mb?`<span class="nm2">${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${ico(it)}${why?esc(why):(it.parts?it.parts.length+' карт.':kabT(it.r,it.mp))}</small>`:`<span class="nm2">${ico(it)}${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${why?esc(why):subT(it)}</small>`}</td>${cols.map(c=>tcell(gv(it,c[0]),c,it)).join('')}${mb?'':`<td class="tl">${esc(it.r.c)}</td><td class="tl">${esc(sklT(it))}</td>`}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
   }
   const n=list.n||60;
   return head+`<div class="pcs">${its.slice(0,n).map(it=>{const m=it.m,d=itDelta(it,g,k,fS),why=reason(it,g,k);
     return `<button class="pc press" data-open="${pid(it)}"><div class="h"><div class="n"><b>${ico(it)}${hl(it.r.a,q)}</b><small class="num">${[esc(it.r.c),it.parts?plr(it.parts.length,W_KAR):kabT(it.r,it.mp),fq(m.units)+' шт'].filter(Boolean).join(' · ')}</small>${why?`<small class="why">минус за счёт: ${esc(why)}</small>`:''}</div><div class="s"><b class="num">${fr(m.sales)}</b><small>${chip(d)}</small></div></div>
-<div class="m"><div><span>Маржа</span><b class="num ${m.profit<0?'dn':''}">${fm(m.profit)}</b></div><div><span>Маржа %</span><b class="num ${m.mProfit<0?'dn':m.mProfit>=.2?'up':''}">${fp(m.mProfit)}</b></div><div><span>До ДРР</span><b class="num">${fp(m.mNodrr)}</b></div><div><span>ДРР</span><b class="num">${fp(m.drr)}</b></div></div></button>`}).join('')}</div>
+<div class="m">${pcm(m)}</div></button>`}).join('')}</div>
 ${its.length>n?`<button class="tbtn press" id="moreBtn" style="width:100%;justify-content:center;margin-top:4px">Показать ещё ${Math.min(60,its.length-n)} из ${its.length-n}</button>`:''}`;
 }
 
 /* таблица текущего отбора — файлом для Excel (разделитель «;», запятая в дробях) */
 function csv(){
-  const g=S.g,k=curK(),pk=prevK(g,k),pl=pk!=null?GP[g]:'',cols=COLS.filter(c=>pl||!/P$/.test(c[0]));
+  const g=S.g,k=curK(),pk=prevK(g,k),pl=pk!=null?GP[g]:'',cols=colSel().filter(x=>pl||!/P$/.test(x)).map(x=>[x,CD[x][0],CD[x][2]]);
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',nv=(v,c)=>!ok(v)?'':String(c[2]==='p'||c[2]==='x'?Math.round(v*10000)/100:Math.round(v*100)/100).replace('.',',');
-  const hd=cols.map(c=>c[1].replace('#',pl)+(c[2]==='p'||c[2]==='x'?', %':'')),nums=x=>cols.map(c=>nv(gv(x,c[0]),c));   // в файл — всегда столбцы листа SKU в его порядке
+  const hd=cols.map(c=>c[1].replace('#',pl)+(c[2]==='p'||c[2]==='x'?', %':'')),nums=x=>cols.map(c=>nv(gv(x,c[0]),c));   // в файл — те столбцы, что выбраны в таблице, с полными названиями листа SKU
   const save=(rows,what,msg)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}));
     a.download='Панель_'+what+(S.mp==='all'?'все':MPN[S.mp])+'_'+plabel(g,k).replace(/[^0-9A-Za-zА-Яа-яёЁ]+/g,'-')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast(msg)};
   if(S.tab==='skl'){const arr=sklRows(g,k),rows=[['Склейка','Площадки','Кабинет','Товаров с продажами','Товаров всего'].concat(hd).map(q).join(';')];
@@ -1273,6 +1426,33 @@ function csv(){
   const its=filt(),rows=[['Площадка','Кабинет','Товар','Категория','Направление','Склейка'].concat(hd).map(q).join(';')];
   for(const it of its)rows.push([it.parts?it.mps.map(x=>MPN[x]).join(' + '):MPN[it.mp],it.parts?'':kabT(it.r,it.mp),it.r.a,it.r.c,naprOf(it.r.c),sklT(it)].map(q).concat(nums(it)).join(';'));
   save(rows,'','Таблица сохранена: '+plr(its.length,W_TOV));
+}
+
+/* скачивание — только после подтверждения (Андрей 13.11.2026: «скачать — подтверждение просить»): кнопка стоит рядом с переключателем вида, её легко задеть */
+const W_COL=['столбец','столбца','столбцов'];
+function csvAsk(){
+  SHB=[];const g=S.g,k=curK(),skl=S.tab==='skl',n=skl?sklRows(g,k).filter(s=>s.key!=='-').length:filt().length,nc=colSel().filter(x=>prevK(g,k)!=null||!/P$/.test(x)).length;
+  openSheet(`<h2>Скачать таблицу?<small>${skl?'Склейки':'Товары'} · ${plabel(g,k,true)} · ${S.mp==='all'?'все площадки':MPN[S.mp]}${S.kab?' · Каб '+S.kab:''}</small></h2>`,
+   `<div class="card"><div class="lbl" style="line-height:1.5">Файл для Excel: ${skl?plr(n,W_SKL):plr(n,W_TOV)}, ${plr(nc,W_COL)} — те, что сейчас выбраны в таблице. Сохранится в загрузки этого устройства.</div>
+<div class="cfb"><button class="btn press" id="csvGo">Скачать</button><button class="tbtn press" id="csvNo">Не надо</button></div></div>`,'csv');
+}
+/* выбор столбцов таблицы: отметить, что показывать; запоминается на устройстве (телефон и компьютер — отдельно), один выбор на «Товары» и «Склейки» */
+const COLB='<button class="tbtn press" id="colBtn" aria-label="Выбрать столбцы"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.2 4.5v15M14.8 4.5v15"/></svg><span>Столбцы</span></button>';
+const colCustom=()=>Array.isArray(PS.get(colKey(),null));
+function colApply(){if(S.tab==='prod'||S.tab==='skl')render(true);colSheet()}
+function colTog(key){
+  if(!CD[key])return;const ord=mob()?ORD_M:ORD_D,a=colSel().slice(),i=a.indexOf(key);
+  if(i>=0){if(a.length<2){toast('Хотя бы один столбец должен остаться');return}a.splice(i,1)}
+  else{let at=0;for(let j=ord.indexOf(key)-1;j>=0;j--){const q=a.indexOf(ord[j]);if(q>=0){at=q+1;break}}a.splice(at,0,key)}   // новый столбец встаёт на своё место по общему порядку
+  PS.set(colKey(),a);colApply()}
+function colPre(p){if(p==='def')PS.del(colKey());else PS.set(colKey(),(p==='pan'?PAN_L:mob()?ORD_M:ORD_D).slice());colApply()}
+function colSheet(){
+  SHB=[];const sel=colSel(),cust=colCustom(),same=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]),pl=prevK(S.g,curK())!=null&&GP[S.g]?GP[S.g]:'прошлый период';
+  const pre=!cust?'def':same(sel,PAN_L)?'pan':sel.length===ORD_D.length?'all':'';
+  openSheet('<h2>Столбцы таблицы<small>Отметьте, что показывать в «Товарах» и «Склейках». Выбор запоминается на этом устройстве: у телефона и у компьютера — свой.</small></h2>',
+   `<div class="pills cpp">${[['def','Как было'],['pan','Как в панели'],['all','Все']].map(([x,t])=>`<button class="pill${pre===x?' on':''}" data-colpre="${x}">${t}</button>`).join('')}</div>
+<div class="cnt">Показано ${sel.length} из ${ORD_D.length}. Названия — как на листе «SKU» панели.</div>
+<div class="card"><div class="rows" style="margin-top:-8px">${ORD_D.map(x=>{const on=sel.indexOf(x)>=0;return `<button class="row" data-col="${x}" aria-pressed="${on}"><div class="nm"><b>${CD[x][0].replace('#',pl)}</b>${CDN[x]?`<small>${CDN[x]}</small>`:''}</div><i class="tg${on?' on':''}"></i></button>`}).join('')}</div></div>`,'cols');
 }
 
 /* ───────── СПП ───────── */
@@ -1422,7 +1602,7 @@ function sklBody(key){
   const g=S.g,k=curK(),pk=prevK(g,k),s=sklsC(g,k).find(x=>x.key===key);if(!s)return null;
   const m=s.m,pm=s.pm,rows=s.its,none=key==='-',cnt=s.pr.length;
   const pr=s.pr.filter(x=>act(x.v)||act(x.p)).sort((a,b)=>b.m.sales-a.m.sales),tot=pr.reduce((a,x)=>a+Math.max(0,x.m.sales),0)||1;
-  const prow=it=>`<button class="row" data-open="${pid(it)}"><div class="nm"><b>${ico(it)}${esc(it.r.a)}</b><small class="num">${fq(it.m.units)} шт · без ДРР ${fp(it.m.mNodrr)} · ДРР ${fp(it.m.drr)}</small></div><div class="rv"><b class="num">${fm(it.m.sales)}</b><small class="num ${it.m.profit<0?'dn':''}">${fm(it.m.profit)} · ${fp(it.m.mProfit)}</small></div>${CHEV}<i class="shr" style="width:calc(${Math.max(0,it.m.sales)/tot*100}% - 32px)"></i></button>`;
+  const prow=it=>`<button class="row" data-open="${pid(it)}"><div class="nm"><b>${ico(it)}${esc(it.r.a)}</b><small class="num">${fq(it.m.units)} шт · без ДРР ${fp(it.m.mNodrr)} · ДРР ${fp(it.m.drr)}</small></div><div class="rv"><b class="num">${fm(it.m.sales)}</b><small class="num ${it.m.profit<0?'dn':''}">${fm(it.m.profit)} · ${fp(it.m.mProfit)}</small></div>${pic(imOf(it))||CHEV}<i class="shr" style="width:calc(${Math.max(0,it.m.sales)/tot*100}% - 32px)"></i></button>`;
   const bym=s.mps.length>1?`<div class="card"><h3 class="ct">По площадкам</h3><div class="rows">${s.mps.map(mp=>{const mm=met(vsum(rows.filter(x=>x.mp===mp).map(x=>x.v))),has=cover(mp,g,k).n>0;
     return `<div class="row sum"><div class="nm"><b>${mpi(mp)}${MPN[mp]}</b><small>${has?fp(Math.max(0,mm.sales)/(Math.max(0,m.sales)||1))+' продаж · ДРР '+fp(mm.drr):'за этот период в панели пусто'}</small></div><div class="rv"><b class="num">${has?fm(mm.sales):'—'}</b><small class="num ${mm.profit<0?'dn':''}">${has?fm(mm.profit)+' · '+fp(mm.mProfit):''}</small></div></div>`}).join('')}</div></div>`:'';
   const how=s.gs&&s.gs.length?`<div class="card"><h3 class="ct">Как склеено на площадках</h3><div class="rows">${s.gs.map(([mp,gi])=>{const x=((D.mp[mp]||{}).skl||[])[gi];
@@ -1528,10 +1708,10 @@ function render(keep){
   reopen();
   affDraw();
 }
-function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;K3.call('go',t);
+function go(t){if(S.tab===t){scrollTo({top:0,behavior:LITE?'auto':'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;K3.call('go',t);
   $$('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));const dt=$('#dtabs');dt.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===t));dt._place&&dt._place();
   const doit=()=>{render();scrollTo(0,Math.min(SCR[t]||0,$('#ctx').offsetTop))};
-  if(document.startViewTransition&&!K3.live&&!matchMedia('(prefers-reduced-motion:reduce)').matches){try{const tr=document.startViewTransition(doit);for(const q of [tr.ready,tr.finished,tr.updateCallbackDone])q&&q.catch(()=>{})}catch(e){doit()}}else doit()}
+  if(document.startViewTransition&&!K3.live&&!LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){try{const tr=document.startViewTransition(doit);for(const q of [tr.ready,tr.finished,tr.updateCallbackDone])q&&q.catch(()=>{})}catch(e){doit()}}else doit()}
 $('#tabbar').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)go(b.dataset.tab)};
 $('#pPrev').onclick=()=>step(-1);$('#pNext').onclick=()=>step(1);$('#pLab').onclick=periodSheet;
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Escape'){if(!K3.see(false)&&!ORI.close())closeSheet()}else if(ORI.isOpen())return;else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
@@ -1554,7 +1734,7 @@ document.addEventListener('click',e=>{
   if((b=t.closest('[data-lossgo]'))){S.cat='<0';S.skl='';S.sort='profit';S.dir=1;list.n=60;go('prod');return}
   if((b=t.closest('[data-acct]'))){const n=b.dataset.acct;S.open[n]=!S.open[n];b.parentNode.classList.toggle('open',!!S.open[n]);return}
   if((b=t.closest('[data-go]'))){go(b.dataset.go);return}
-  if((b=t.closest('[data-mp]'))){S.mp=b.dataset.mp;PS.set('mp',S.mp);S.kab=0;S.skl='';C={};sync();render();scrollTo({top:0,behavior:'smooth'});return}
+  if((b=t.closest('[data-mp]'))){S.mp=b.dataset.mp;PS.set('mp',S.mp);S.kab=0;S.skl='';C={};sync();render();scrollTo({top:0,behavior:LITE?'auto':'smooth'});return}
   if((b=t.closest('[data-cm]'))){S.cm=b.dataset.cm;PS.set('cm',S.cm);render(true);return}
   if((b=t.closest('[data-pm]'))){S.pm=b.dataset.pm;reopen();return}
   if((b=t.closest('[data-ym]'))){S.ym=b.dataset.ym;render(true);return}
@@ -1563,7 +1743,12 @@ document.addEventListener('click',e=>{
   if(t.closest('#catBtn')){catSheet();return}
   if(t.closest('#onlyBtn')){S.only=!S.only;PS.set('only',S.only);list.n=60;render(true);return}
   if(t.closest('#viewBtn')){const tbl=tblOn();S.view=tbl?'c':'t';PS.set('view',S.view);render(true);return}
-  if(t.closest('#csvBtn')){csv();return}
+  if(t.closest('#csvBtn')){csvAsk();return}
+  if(t.closest('#csvGo')){closeSheet();csv();return}
+  if(t.closest('#csvNo')){closeSheet();return}
+  if(t.closest('#colBtn')){colSheet();return}
+  if((b=t.closest('[data-colpre]'))){colPre(b.dataset.colpre);return}
+  if((b=t.closest('[data-col]'))){colTog(b.dataset.col);return}
   if(t.closest('#moreBtn')){list.n=(list.n||60)+60;$('#list').innerHTML=list(false);return}
   if(t.closest('#qx')){S.q='';const i=$('#q');i.value='';$('#srch').classList.remove('has');relist();i.focus();return}
   if(t.closest('[data-refresh]')){refresh();return}
@@ -1595,7 +1780,7 @@ function themeInit(){
 const K3=(()=>{let st=0,want=false,lz=false,obs=null;const R=document.documentElement;   // st: 0 не грузили, 1 грузится, 2 есть, 3 не вышло
   const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
   const run=()=>{if(!want||!window.KOSMOS)return;const up=lz;lz=false;
-    const ok=KOSMOS.start({base:'kosmos/',tab:S.tab,launch:up,
+    const ok=KOSMOS.start({base:'kosmos/',tab:S.tab,launch:up,still:LITE,
       onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
       onFail(){st=3;delete R.dataset.k3d;if(want)stars.start()}});
     if(!ok)return;
@@ -1632,8 +1817,8 @@ $('#k3Btn').onclick=()=>K3.see(true);
 const stars=(()=>{const cv=$('#stars'),cx=cv.getContext('2d');let st=[],raf=0,on=false,w=0,h=0,last=0;
   const size=()=>{const d=Math.min(2,devicePixelRatio||1);w=cv.width=innerWidth*d;h=cv.height=innerHeight*d;const n=Math.round(Math.min(260,innerWidth*innerHeight/5200));
     st=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.25+.25)*d,a:Math.random()*.7+.2,s:Math.random()*.0016+.0004,p:Math.random()*6.28,c:Math.random()<.14?'255,226,170':Math.random()<.3?'190,200,255':'255,255,255'}))};
-  const draw=t=>{raf=requestAnimationFrame(draw);if(t-last<70)return;last=t;cx.clearRect(0,0,w,h);for(const s of st){const a=s.a*(.55+.45*Math.sin(t*s.s+s.p));cx.fillStyle='rgba('+s.c+','+a.toFixed(3)+')';cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.283);cx.fill()}};
-  addEventListener('resize',()=>{if(on)size()});
+  const draw=t=>{if(!LITE){raf=requestAnimationFrame(draw);if(t-last<70)return}last=t;cx.clearRect(0,0,w,h);for(const s of st){const a=s.a*(.55+.45*Math.sin(t*s.s+s.p));cx.fillStyle='rgba('+s.c+','+a.toFixed(3)+')';cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.283);cx.fill()}};
+  addEventListener('resize',()=>{if(on){size();if(LITE)requestAnimationFrame(draw)}});
   document.addEventListener('visibilitychange',()=>{if(!on)return;cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(draw)});
   return {start(){if(on)return;on=true;size();raf=requestAnimationFrame(draw)},stop(){on=false;cancelAnimationFrame(raf)}}})();
 
@@ -1710,7 +1895,7 @@ $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').val
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>K3.see(false),()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
-window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
+window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},lite:LITE,zone,NORM,colSel,
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
