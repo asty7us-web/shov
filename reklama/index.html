@@ -176,31 +176,33 @@ input,textarea,select{font:inherit;color:inherit}
 .srch{flex:1;min-width:120px;height:34px;border:0;border-radius:11px;background:var(--fill);padding:0 12px 0 34px;outline:0;font-size:14.5px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e96' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m16 16 4 4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:9px 50%;background-size:17px}
 .srch:focus{box-shadow:0 0 0 2px var(--acc-soft)}
-/* ── поиск на телефоне (14.11 Андрей: «расположение кнопки там высоко, нам надо лучше»): верхнее поле убрано, круглая кнопка — внизу справа под большим
-   пальцем, строка ввода встаёт над клавиатурой; на время поиска плитки и график на «Товарах» прячутся — найденные товары сразу сверху ── */
+/* ── поиск «как в Конкурентах» (14.11 Андрей: «у сайта „Конкуренты“ нашего поиск после нажатия красиво ищет, там пример как надо… только расположение кнопки
+   там высоко, нам надо лучше»): лист с полем и списком с картинками (openFind в d_views.js); на телефоне кнопка-лупа стоит внизу справа, под большим пальцем ── */
+.sf{display:flex;align-items:center;gap:8px;height:44px;padding:0 5px 0 12px;border-radius:13px;background:var(--fill);transition:box-shadow .25s}
+.sf:focus-within{box-shadow:0 0 0 2px var(--acc)}
+.sf>svg{width:18px;height:18px;color:var(--ink3);flex:none}
+.sf input{flex:1;min-width:0;height:100%;border:0;background:none;outline:none;color:var(--ink);font:inherit;font-size:16px;-webkit-appearance:none;appearance:none}   /* 16px — iPhone не приближает страницу при вводе */
+.sf input::placeholder{color:var(--ink3)}
+.sf input::-webkit-search-cancel-button{display:none}
+.sfx{width:32px;height:32px;border:0;background:none;border-radius:50%;display:grid;place-items:center;color:var(--ink3);flex:none;cursor:pointer}
+.sfx[hidden]{display:none}
+.sfx svg{width:16px;height:16px}
+.sfn{font-size:12.5px;color:var(--ink3);margin:8px 2px 0}
+.sfn:empty{display:none}
+mark.hit{background:var(--acc-soft);color:inherit;border-radius:4px;padding:0 1px}
+.fql{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pc.fq1{box-shadow:none;background:var(--fill2);grid-template-columns:46px 1fr;padding:10px 12px;align-items:center}
+.pc.fq1 .ph{width:46px;height:60px;border-radius:10px}
+.fq1 .sb{font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.35}
+.fq1 .sb b{color:var(--ink2);font-weight:600;white-space:nowrap}
 .fs{display:none}
 @media (max-width:899px){
   .fs{display:block}.fs[hidden]{display:none}
-  .sub .srch{display:none}
-  .fsp{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 66px);z-index:66;display:flex;align-items:center;height:50px;border-radius:25px;max-width:calc(100vw - 28px);
-    background:var(--hdr);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border:.5px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.10)}
-  .fsb{display:flex;align-items:center;gap:8px;min-width:50px;height:50px;padding:0 13px;border:0;background:none;color:var(--acc);font:inherit;font-size:15.5px;font-weight:600;cursor:pointer;border-radius:25px}
-  .fsb svg{width:24px;height:24px;flex:none}
-  .fsb span{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
-  .fsb span:empty{display:none}
-  .fsx{display:none;align-items:center;justify-content:center;width:40px;height:50px;margin-left:-8px;border:0;background:none;color:var(--ink3);cursor:pointer;border-radius:25px}
-  .fsx svg{width:17px;height:17px}
-  .fs.has .fsx{display:flex}
-  .fs.on .fsp{display:none}
-  .fsw{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;align-items:center;gap:6px;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px) 12px;
-    background:var(--hdr);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-top:.5px solid var(--line)}
-  .fs.on .fsw{display:flex}
-  html.fson .tabs{visibility:hidden}   /* строка поиска встаёт на место нижних разделов — подписи сквозь неё не просвечивают */
-  .fsi{flex:1;min-width:0;height:44px;border:0;border-radius:13px;background-color:var(--fill);padding:0 12px 0 38px;outline:0;font:inherit;font-size:16px;color:var(--ink);-webkit-appearance:none;appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e96' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m16 16 4 4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px 50%;background-size:19px}
-  .fsd{flex:none;height:44px;padding:0 8px;border:0;background:none;color:var(--acc);font:inherit;font-size:16px;font-weight:600;cursor:pointer}
-  html.srq .view>.fresh,html.srq .view>.tiles,html.srq .view>.card{display:none}
-  /* запас под кнопку поиска: конец страницы и последние строки таблицы можно вывести из-под неё */
+  .sub[data-tab="tov"] .srch,.sub[data-tab="rk"] .srch{display:none}   /* на «Товарах» и «Кампаниях» верхнее поле не помещалось в полосу — там ищем лупой */
+  .fsb{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 66px);z-index:66;width:50px;height:50px;border-radius:25px;display:grid;place-items:center;cursor:pointer;
+    color:var(--acc);background:var(--hdr);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border:.5px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.10)}
+  .fsb svg{width:24px;height:24px}
+  /* запас под кнопку: конец страницы и последние строки таблицы можно вывести из-под неё */
   main#view{padding-bottom:78px}
   #view .tws::after{content:"";display:block;height:60px}
 }
@@ -646,11 +648,8 @@ td.t1 small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   <button type="button" data-tab="ak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><span>Акции</span></button>
   <button type="button" data-tab="esh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="8" cy="17" r="2" fill="var(--bg)"/></svg><span>Ещё</span></button>
 </nav>
-<!-- поиск на телефоне: кнопка под большим пальцем, строка ввода встаёт над клавиатурой (14.11) -->
-<div class="fs" id="fs" hidden>
-  <div class="fsp"><button class="fsb press" id="fsb" type="button" aria-label="Поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span id="fst"></span></button><button class="fsx press" id="fsx" type="button" aria-label="Сбросить поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>
-  <div class="fsw" id="fsw"><input class="fsi" id="fq" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Поиск"><button class="fsd press" id="fsd" type="button">Готово</button></div>
-</div>
+<!-- поиск «как в Конкурентах»: на телефоне кнопка-лупа под большим пальцем, по нажатию — лист с полем и списком с картинками (openFind, 14.11) -->
+<div class="fs" id="fs" hidden><button class="fsb press" id="fsb" type="button" aria-label="Найти товар или кампанию"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button></div>
 <main id="view"><div class="sk"></div></main>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div class="shh" id="shh"></div><div class="sbody" id="sbody"></div></section></div>
 <div class="toast" id="toast" role="status"></div>
@@ -921,19 +920,51 @@ const WIDE=()=>matchMedia('(min-width:900px)').matches;
 const ICV={cards:'<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" style="display:block"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',table:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="display:block"><path d="M4 6h16M4 12h16M4 18h16"/></svg>'};
 const viewSeg=(id,cur)=>seg(id,[['table',ICV.table+'<span class="wd">&nbsp;Таблица</span>'],['cards',ICV.cards+'<span class="wd">&nbsp;Карточки</span>']],cur,'sm');
 const srch=ph=>`<input class="srch" id="q" type="search" placeholder="${ph}" value="${esc(S.q)}" autocomplete="off">`;
-/* поиск на телефоне (14.11 Андрей: «сам поиск красиво сделано… только расположение кнопки там высоко, нам надо лучше»): верхнее поле на узком экране
-   спрятано, внизу справа — кнопка под большим пальцем (#fs в b_body.html); строка ввода встаёт над клавиатурой, запрос остаётся на кнопке, крестик сбрасывает */
-const FSPH={tov:'Товар',rk:'Кампания или товар',skl:'Товар склейки',bl:'Товар или акция',ak:'Товар'};
-function fsSync(){const f=$('#fs');if(!f)return;const ph=S.tab==='bl'&&!K.bally?'':FSPH[S.tab]||'';f.hidden=!ph;if(!ph){f.classList.remove('on');document.documentElement.classList.remove('fson');return}
-  const i=$('#fq');i.placeholder=ph;if(document.activeElement!==i)i.value=S.q;$('#fst').textContent=S.q;f.classList.toggle('has',!!S.q);$('#fsb').setAttribute('aria-label','Поиск: '+(S.q||ph.toLowerCase()))}
-function fsPos(){const v=window.visualViewport,w=$('#fsw');if(v&&w)w.style.bottom=Math.max(0,Math.round(innerHeight-v.height-v.offsetTop))+'px'}   // над клавиатурой
-function fsOpen(){const f=$('#fs'),i=$('#fq');f.classList.add('on');document.documentElement.classList.add('fson');i.value=S.q;i.focus({preventScroll:true});fsPos();try{i.setSelectionRange(S.q.length,S.q.length)}catch(e){}}
-function fsClose(){const f=$('#fs');document.documentElement.classList.remove('fson');if(!f||!f.classList.contains('on'))return;f.classList.remove('on');$('#fq').blur();fsSync()}
-(()=>{const b=$('#fsb'),i=$('#fq');if(!b||!i)return;
-  b.onclick=fsOpen;$('#fsd').onclick=fsClose;$('#fsx').onclick=()=>{S.q='';unfz();sync();render(true)};
-  i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fsClose()}});
-  i.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==i)fsClose()},150));
-  if(window.visualViewport){visualViewport.addEventListener('resize',fsPos);visualViewport.addEventListener('scroll',fsPos)}})();
+/* поиск «как в Конкурентах» (14.11 Андрей: «это надо смотреть у сайта „Конкуренты“ нашего: там поиск после нажатия красиво ищет, там пример как надо»; про кнопку —
+   «расположение кнопки там высоко, нам надо лучше»). На телефоне кнопка-лупа стоит внизу справа (#fs в b_body.html); по нажатию — лист: поле «Название или артикул»,
+   сразу список с картинками, совпадение подсвечено, английская раскладка исправляется сама; нажал на строку — открылся лист товара или кампании, «назад» возвращает
+   к найденному. sNorm, kbSwap, sFind, hl — те же, что в konkurenty_ozon\app.html (менять в обоих местах). */
+// без регистра, ё = е, «_-*/.,» = пробел, 10*10 = 10х10 = 10x10; длина строки та же — подсветка ложится на те же буквы
+const sNorm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/(\d)[*×хx](?=\d)/g,'$1x').replace(/[_\-–—*×\/\\.,;:()«»"'+#№]/g,' ');
+const KB_EN="`qwertyuiop[]asdfghjkl;'zxcvbnm,.",KB_RU='ёйцукенгшщзхъфывапролджэячсмитьбю';
+const kbSwap=s=>s.replace(/[a-z`\[\];',.]/gi,ch=>{const i=KB_EN.indexOf(ch.toLowerCase());return i<0?ch:KB_RU[i]});   // набрал в английской раскладке
+// hay(x) → [главное, остальное]: все слова запроса в главном — выше, в остальном — ниже; ничего — пробуем русскую раскладку
+function sFind(list,q,hay){
+  const words=q=>sNorm(q).split(/\s+/).filter(Boolean);
+  const run=t=>{const r=[];list.forEach(x=>{const [m,o]=hay(x),nm=sNorm(m),no=sNorm(o);
+    if(t.every(w=>nm.includes(w)))r.push({x,main:1});else if(t.every(w=>nm.includes(w)||no.includes(w)))r.push({x,main:0})});return r.sort((a,b)=>b.main-a.main)};
+  const t=words(q);if(!t.length)return {t,r:list.map(x=>({x,main:1}))};
+  const r=run(t);if(!r.length&&/[a-z]/i.test(q)){const t2=words(kbSwap(q)),r2=run(t2);if(r2.length)return {t:t2,r:r2,kb:kbSwap(q)}}
+  return {t,r}}
+function hl(s,t){s=String(s||'');if(!t||!t.length)return esc(s);const n=sNorm(s),m=new Uint8Array(s.length);
+  t.forEach(w=>{let i=n.indexOf(w);while(i>=0){m.fill(1,i,i+w.length);i=n.indexOf(w,i+w.length)}});
+  let h='',on=0;for(let i=0;i<s.length;i++){if(m[i]!==on){h+=m[i]?'<mark class="hit">':'</mark>';on=m[i]}h+=esc(s[i])}return h+(on?'</mark>':'')}
+const FQ={q:'',f:'tov'};   // запрос и что ищем: товары | кампании
+const fqBase=()=>FQ.f==='rk'
+  ?K.rk.flatMap(r=>Object.keys(r.nm).map(nm=>({r,nm,t:TOV[nm],a:rkAgg(r,nm,PI()),w:rkSt(r).w}))).sort((x,y)=>(y.w>0)-(x.w>0)||y.a.s-x.a.s)
+  :K.tov.map(t=>({t,a:pAgg(t,PI()),w:wrk(t).length})).sort((x,y)=>(y.w>0)-(x.w>0)||y.a.s-x.a.s);
+const fqHay=x=>x.r?[x.r.name,[x.t?x.t.art:'',x.r.id,x.nm].join(' ')]:[x.t.art,[x.t.subj||'',x.t.nm].join(' ')];
+function fqList(){const L=$('#fql'),n=$('#fqn');if(!L)return;const base=fqBase(),R=sFind(base,FQ.q,fqHay),on=FQ.q.trim()!=='';
+  L.innerHTML=R.r.length?R.r.slice(0,150).map(({x,main})=>x.r
+     ?`<button class="pc fq1 press" type="button" data-fqr="${x.r.id}|${x.nm}"><div class="ph"${x.t?foto(x.t):''}></div><div style="min-width:0"><div class="nm">${hl(x.r.name,R.t)}</div><div class="sb">${x.t?hl(x.t.art,R.t)+' · ':''}${rkSt(x.r).t} · ${S.per} дн: реклама <b class="num">${rub(x.a.s)}</b>, заказы с рекламы <b class="num">${f0(x.a.q)}</b></div></div></button>`
+     :`<button class="pc fq1 press" type="button" data-nm="${x.t.nm}"><div class="ph"${foto(x.t)}></div><div style="min-width:0"><div class="nm">${hl(x.t.art,R.t)}</div><div class="sb">${main||!x.t.subj?'':hl(x.t.subj,R.t)+' · '}${x.w?x.w+' РК работа'+(x.w===1?'ет':'ют'):'реклама на паузе'} · ${S.per} дн: реклама <b class="num">${rub(x.a.s)}</b>, заказы <b class="num">${f0(x.a.oq)} шт</b>, ДРР <b class="num ${dcls(x.a.drr)}">${drrT(x.a.drr)}</b></div></div></button>`).join('')
+    :'<div class="empty"><b>Ничего не нашлось</b><br>Проверьте название или артикул.</div>';
+  n.innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:on?`Найдено ${R.r.length} из ${base.length}`:''}
+function openFind(){FQ.f=S.tab==='rk'?'rk':'tov';
+  sheet(()=>({t:'Поиск',s:esc(K.name)+' · название или артикул',
+    h:`<div class="sf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="fq" type="search" placeholder="Название или артикул" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" value="${esc(FQ.q)}"><button class="sfx press" type="button" id="fqx" aria-label="Очистить"${FQ.q?'':' hidden'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>
+      <div class="chips"><button class="chip press" type="button" data-fqf="tov" aria-pressed="${FQ.f==='tov'}">Товары · ${K.tov.length}</button><button class="chip press" type="button" data-fqf="rk" aria-pressed="${FQ.f==='rk'}">Кампании · ${K.rk.reduce((z,r)=>z+Object.keys(r.nm).length,0)}</button></div>
+      <div class="sfn" id="fqn"></div><div class="fql" id="fql"></div>`,
+    after:()=>{const i=$('#fq'),x=$('#fqx'),L=$('#fql');fqList();
+      i.oninput=()=>{FQ.q=i.value;x.hidden=!i.value;fqList();$('#sbody').scrollTop=0};
+      x.onclick=()=>{i.value='';FQ.q='';x.hidden=true;fqList();i.focus()};
+      i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();i.blur()}};
+      $$('[data-fqf]').forEach(b=>b.onclick=()=>{FQ.f=b.dataset.fqf;$$('[data-fqf]').forEach(z=>z.setAttribute('aria-pressed',z.dataset.fqf===FQ.f));fqList();$('#sbody').scrollTop=0});
+      L.onclick=e=>{const b=e.target.closest('[data-fqr]');if(b){const k=b.dataset.fqr.split('|');openRk(+k[0],+k[1])}};
+      L.addEventListener('touchstart',()=>{if(document.activeElement===i)i.blur()},{passive:true})}}));   // потянул список — клавиатура убирается, список виден целиком
+  const i=$('#fq');if(i){i.focus({preventScroll:true});try{i.setSelectionRange(0,i.value.length)}catch(e){}}}   // нажали лупу — сразу можно печатать (как «Найти товар» в «Конкурентах»)
+function fsSync(){const f=$('#fs');if(f)f.hidden=false;const s=$('#sub');if(s)s.dataset.tab=S.tab}
+(()=>{const b=$('#fsb');if(b)b.onclick=openFind})();
 function sync(){
   $('#kabSeg').innerHTML=Object.keys(D.kab).map(k=>`<button type="button" data-kab="${k}" aria-pressed="${k===S.kab}">${esc(D.kab[k].name)}</button>`).join('');
   $$('#tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab));
@@ -949,8 +980,7 @@ function sync(){
   $('#refT').textContent=D.at.slice(11,16);$('#refBtn').classList.toggle('old',old);$('#refBtn').title='Данные собраны в '+D.at.slice(11,16)+' МСК — обновить';
   $('#refBtn').querySelectorAll('.dot').forEach(e=>e.remove());if(warnN)$('#refBtn').insertAdjacentHTML('beforeend','<i class="dot"></i>');
 }
-function render(keep){document.documentElement.classList.toggle('srq',!!S.q&&S.tab==='tov');   // телефон: на время поиска плитки и график прячутся
-  const y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
+function render(keep){const y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
   $('#view').innerHTML=`<div class="view"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`
     +({tov:vTov,rk:vRk,skl:vSkl,bl:vBl,ak:vAk,esh:vEsh})[S.tab]()+'</div>';twFit();
   if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
@@ -2027,7 +2057,7 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
 document.addEventListener('change',e=>{const x=e.target;if(!x||x.type!=='checkbox')return;
   if(x.dataset.frc!=null){if(x.checked)FR.sel.add(x.dataset.frc);else FR.sel.delete(x.dataset.frc);redraw()}
   else if(x.id==='frall'){const k=FR.key.split('|'),z=frShown(k[0],k[1]);if(x.checked)for(const r of z.show)FR.sel.add(r.t);else FR.sel=new Set();redraw()}});
-document.addEventListener('input',e=>{if(e.target.id==='q'||e.target.id==='fq'){S.q=e.target.value;unfz();render(true);if(e.target.id==='fq'){fsSync();scrollTo(0,0)}}else if(e.target.dataset&&e.target.dataset.nstv){const b=$('#nstBtn');if(b)b.disabled=false}});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;unfz();render(true)}else if(e.target.dataset&&e.target.dataset.nstv){const b=$('#nstBtn');if(b)b.disabled=false}});
 document.addEventListener('submit',e=>{if(e.target.id==='uf'){e.preventDefault();const p=$('#up').value.trim();if(!p)return;$('#ugo').disabled=true;$('#uerr').textContent='';
   unlockDo(p).then(()=>{const pd=PEND;PEND=null;back();render(true);redraw();toast('Управление включено');if(pd&&pd[0]!=='unlock'&&pd[0]!=='nstsave')setTimeout(()=>{INACT=true;try{doAct(pd[0],pd[1])}finally{INACT=false}},430)}).catch(()=>{$('#ugo').disabled=false;$('#uerr').textContent='Пароль не подошёл'})}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&SHS.length)back()});
