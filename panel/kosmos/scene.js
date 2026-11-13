@@ -350,7 +350,7 @@ function draw(){
    Страница даёт KOSMOS.system({el, items:[{r, col, ring, d}], labels}): el — блок-окно, r — размер 0…1, col — цвет, d — высота места под планету в подписи.
    Планеты рисуются в том месте экрана, где сейчас блок, поверх остальной сцены; подписи страницы ставятся под свои планеты каждый кадр. */
 function drawSys(){
-  const s=sys;if(!s||!s.el||!s.el.isConnected||!s.items||!s.items.length)return 0;
+  const s=sys;if(!s||look.on||!s.el||!s.el.isConnected||!s.items||!s.items.length)return 0;   // в «Погружении» страницы нет — и планет-данных нет
   const rc=s.el.getBoundingClientRect();if(rc.width<60||rc.height<60||rc.bottom<=0||rc.top>=cssH)return 0;
   const g=gl,x0=Math.round(rc.left*scale),y0=Math.round((cssH-rc.bottom)*scale),w=Math.round(rc.width*scale),h=Math.round(rc.height*scale);
   const sx=Math.max(0,x0),sy=Math.max(0,y0),sw=Math.min(W,x0+w)-sx,sh=Math.min(H,y0+h)-sy;if(sw<2||sh<2)return 0;
