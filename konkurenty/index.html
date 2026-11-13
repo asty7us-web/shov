@@ -245,6 +245,11 @@ mark.hit{background:var(--acc-soft);color:inherit;border-radius:4px;padding:0 1p
 .tb svg{width:25px;height:25px;transition:transform .45s var(--spring)}
 .tb.on{color:var(--acc)}
 .tb.on svg{transform:scale(1.08)}
+/* 13.11 Андрей: «разделы — что выбрано, не очень заметно»: у выбранного раздела подложка под значком, черта сверху и жирная подпись */
+.tb svg,.tb span{position:relative}
+.tb.on::before{content:'';position:absolute;top:1px;left:50%;width:58px;height:30px;margin-left:-29px;border-radius:15px;background:currentColor;opacity:.15;pointer-events:none}
+.tb.on::after{content:'';position:absolute;top:-6px;left:50%;width:30px;height:3px;margin-left:-15px;border-radius:0 0 3px 3px;background:currentColor;pointer-events:none}
+.tb.on span{font-weight:750}
 .badge{position:absolute;top:0;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)}
 main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-inset-bottom,0px))}
 @media (min-width:960px){
@@ -252,7 +257,7 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
   main{padding-bottom:60px}
   .dtabs{display:flex;padding:2px;border-radius:11px;background:var(--fill);margin-left:auto}
   .dtabs button{padding:6px 16px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink2);position:relative}
-  .dtabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .dtabs button.on{background:var(--acc);color:var(--on-acc);box-shadow:0 1px 4px rgba(0,0,0,.2)}   /* 13.11: выбранный раздел — заливкой, видно сразу */
   .dtabs .badge{top:-6px;left:auto;right:-6px}
   .sp{display:none}
 }
@@ -461,6 +466,9 @@ main{max-width:1240px;margin:0 auto;padding:6px 14px calc(96px + env(safe-area-i
 .btn.ghost{background:var(--fill);color:var(--ink)}
 .skel{height:120px;border-radius:var(--r);margin:12px 0;background:linear-gradient(90deg,var(--fill2),var(--fill),var(--fill2));background-size:200% 100%;animation:sk 1.4s infinite}
 @keyframes sk{to{background-position:-200% 0}}
+.chip.skc{flex:1 1 auto;min-width:0;box-shadow:none;background:linear-gradient(90deg,var(--fill2),var(--fill),var(--fill2));background-size:200% 100%;animation:sk 1.4s infinite}
+@media (min-width:760px){.chip.skc{flex:0 1 400px}}
+.mpgo #view,.mpgo .pcur,.mpgo .psr,.mpgo .pfb{opacity:.45;transition:opacity .15s var(--ease)}   /* нажали другую площадку: старое гаснет сразу, пока открывается новое */
 .view-in{animation:vin .45s var(--out) both}
 @keyframes vin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .note{font-size:12.5px;color:var(--ink3);margin:10px 2px 0;line-height:1.45}
@@ -980,6 +988,7 @@ table.rg2{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){:root:not([data-theme="space"]):not([data-igra]) *,:root:not([data-theme="space"]):not([data-igra]) *::before,:root:not([data-theme="space"]):not([data-igra]) *::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}   /* «Космос» и игровые темы двигаются всегда, как в Юнитке и Отклике */
 .ozq{color:inherit;text-decoration:none;border-bottom:1px dashed var(--ink3)}.ozq:hover{color:var(--acc,#4ea1ff)}
 </style>
+<script>/* 13.11: данные выбранной площадки запрашиваем сразу, не дожидаясь разбора страницы */try{(function(){var m=(location.hash.match(/mp=(oz|wb|ym)/)||[])[1];if(!m)try{m=JSON.parse(localStorage.getItem('konk.mp')||'"oz"')}catch(e){}var f={oz:'data.enc.json',wb:'data_wb.enc.json',ym:'data_ym.enc.json'}[m]||'data.enc.json';window.__kd={f:f,p:fetch(f,{cache:'no-cache'})};window.__kd.p.catch(function(){})})()}catch(e){}</script>
 </head>
 <body>
 <header class="top svc-hdr" id="top">
@@ -1117,7 +1126,17 @@ const MPK=new Set(['sku','q','kc','refr','tab','rg']),mk=k=>!OZ&&MPK.has(k)?k+'_
 const KS={get(k,d){try{const v=localStorage.getItem('konk.'+mk(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('konk.'+mk(k),JSON.stringify(v))}catch(e){}}};
 const mpi=(k,c)=>`<span class="mpi ${k||MP}${c?' '+c:''}" role="img" aria-label="${MPL[k||MP].full}"></span>`;   // значок площадки (12.11 вечер)
 const mpSwitch=()=>`<span class="vt2 mps" id="mps" role="group" aria-label="Площадка">${Object.keys(MPL).map(k=>`<button type="button" class="press${k===MP?' on':''}" data-mp="${k}" title="${MPL[k].full}" aria-pressed="${k===MP}">${mpi(k)}<span class="t">${MPL[k].n}</span></button>`).join('')}</span>`;
-document.addEventListener('click',e=>{const b=e.target.closest('[data-mp]');if(!b||b.dataset.mp===MP)return;try{localStorage.setItem('konk.mp',JSON.stringify(b.dataset.mp))}catch(x){}history.replaceState(null,'',location.pathname+location.search);location.reload()});
+/* 13.11 Андрей: «при смене мп перегруз долго, смещается» — раздел и товар (по артикулу продавца) остаются те же, нажатая площадка подсвечивается сразу;
+   страница берётся из памяти браузера (replace, а не обновление с перепроверкой у сервера), данные других площадок подкачаны заранее (mpWarm) */
+let MPGO=false;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-mp]');if(!b||b.dataset.mp===MP||MPGO)return;const to=b.dataset.mp;MPGO=true;
+  try{localStorage.setItem('konk.mp',JSON.stringify(to));
+    if(D&&S.t)localStorage.setItem('konk.'+(to==='oz'?'tab':'tab_'+to),JSON.stringify(S.t));
+    if(P&&P.offer_id)sessionStorage.setItem('konk.art',JSON.stringify({a:P.offer_id,t:Date.now()}))}catch(x){}
+  $$('[data-mp]').forEach(x=>{const on=x.dataset.mp===to;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});document.documentElement.classList.add('mpgo');
+  setTimeout(()=>{MPGO=false;document.documentElement.classList.remove('mpgo')},8000);   // переход не случился — не оставляем страницу погашенной
+  history.replaceState(null,'',location.pathname+location.search);location.replace(location.pathname+location.search)});
+addEventListener('pageswap',e=>{if(MPGO&&e.viewTransition)e.viewTransition.skipTransition()});   // плавный переход между сервисами тут лишний: страница та же
 const MPNOTE=MP==='wb'?'<b>Откуда цифры.</b> Наши продажи, воронка, реклама и остатки — кабинет ВБ Каб 1. Цена, рейтинг, отзывы, фото, акция, склад и срок — витрина ВБ в Москве. <b>Продажи конкурентов ВБ не показывает никому</b> — здесь оценка: новые отзывы конкурента за период × сколько наших заказов приходится на один наш отзыв по этому товару. Порядок цифр верный, точность — нет. Остаток конкурента ВБ показывает не полностью: число с «+» значит «не меньше». Ставки и расход на рекламу конкурентов ВБ не показывает.'
  :'<b>Откуда цифры.</b> Наши продажи и остатки по магазинам — кабинет Маркета. Цена, рейтинг, оценки, «купили», метка рекламы и срок — плитка товара в выдаче Маркета. «Купили» — счётчик самого Маркета на плитке; за какой срок он считает, Маркет не пишет. Штук за 7 дней у конкурентов — насколько вырос счётчик по нашим замерам, появится через неделю после первого сбора.';
 const ALLNOTE=MP==='wb'?'В сервисе все товары ВБ Каб 1, у которых есть остаток. <b>Заказы</b> — наши штуки за 7 дней, рядом середина топа (оценка по отзывам). <b>Цена к топу</b> — наша цена на витрине против середины конкурентов. <b>Реклама</b> — наша доля рекламы от заказов за 7 дней (до 15% — норма); у конкурентов ВБ её не показывает. <b>Место в поиске</b> — середина наших мест по главным ключам сейчас, Москва. <b>Склады</b> — срок доставки в Москву, дней, против середины топа. <b>Карточка</b> — наш рейтинг против середины топа, с поправкой на число отзывов и фото.'
@@ -1131,7 +1150,8 @@ const S={t:KS.get('tab','konk'),sku:KS.get('sku',null),grp:KS.get('grp','sales')
 /* ---------- данные: ключ общий со Склейками (пароль Юнитки) ---------- */
 async function deriveKey(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
 async function load(pass){
-  const res=await fetch(M.f,{cache:'no-cache'});   // сверка по ETag: не изменились — 4,5 МБ не качаются заново (28.10)
+  const pre=window.__kd;window.__kd=null;   // 13.11: запрос уже ушёл из шапки страницы — берём его, а не шлём второй
+  const res=await(pre&&pre.f===M.f?pre.p.catch(()=>fetch(M.f,{cache:'no-cache'})):fetch(M.f,{cache:'no-cache'}));   // сверка по ETag: не изменились — 4,5 МБ не качаются заново (28.10)
   if(!res.ok)throw new Error('Данные не загрузились ('+res.status+')');
   const enc=await res.json();
   if(!KEY||SALT!==enc.salt){
@@ -1495,7 +1515,7 @@ $('#ctx').onclick=()=>prodSheet(FINE);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(b){S.sku=b.dataset.pick;closeSheet();render(true)}});
 $('#picker').addEventListener('click',e=>{const b=e.target.closest('[data-pp]');if(!b)return;const k=b.dataset.pp;
   if(k==='find')prodSheet(true);else if(k==='cur')prodSheet(FINE);else prodSheet(FINE,k)});
-function go(t){if(t===S.t)return window.scrollTo({top:0,behavior:RM?'auto':'smooth'});S.t=t;render(true)}
+function go(t){if(!D){S.t=t;KS.set('tab',t);skel();return}if(t===S.t)return window.scrollTo({top:0,behavior:RM?'auto':'smooth'});S.t=t;render(true)}
 $('#tabbar').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)go(b.dataset.t)});
 $('#dtabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)go(b.dataset.t)});
 
@@ -2478,9 +2498,14 @@ function render(anim){
   const swap=()=>{v.innerHTML=html;if(anim){v.classList.remove('view-in');void v.offsetWidth;v.classList.add('view-in');window.scrollTo({top:0})}after()};
   if(anim&&document.startViewTransition&&!RM){const vt=document.startViewTransition(swap);vt.ready.catch(()=>{});vt.finished.catch(()=>{})}else swap();   // поворот экрана обрывает переход — не ошибка
 }
-function start(d){D=d;PHO=d.pho||{};if(Object.keys(rgGet()).length)setTimeout(rgLoop,300);if(!D.products||!D.products.length){$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">Данных '+(OZ?'':'по '+M.n+' ')+'пока нет.</div>';return}qClean();qbar();qView();
+let WARM=false;function mpWarm(){if(WARM)return;WARM=true;const c=navigator.connection;if(c&&(c.saveData||/2g/.test(c.effectiveType||'')))return;
+  // данные других площадок — в память браузера, пока смотрят эту: смена площадки потом не ждёт загрузку (Озон последним — он самый тяжёлый)
+  setTimeout(()=>Object.keys(MPL).filter(k=>k!==MP).sort((a,b)=>(a==='oz')-(b==='oz')).reduce((q,k)=>q.then(()=>fetch(MPL[k].f,{cache:'no-cache'}).then(r=>r.ok?r.arrayBuffer():0).catch(()=>0)),Promise.resolve()),2500)}
+function start(d){D=d;PHO=d.pho||{};mpWarm();if(Object.keys(rgGet()).length)setTimeout(rgLoop,300);if(!D.products||!D.products.length){$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">Данных '+(OZ?'':'по '+M.n+' ')+'пока нет.</div>';return}qClean();qbar();qView();
   // ссылка из «К»: #pend — сразу товар с ждущими решения и лист «Ждут решения»; #sku=<sku> — этот товар;
   // из Юнитки (красная «Топ не добавлен», 26.10): #sku=<sku>&pick — этот товар и сразу выбор: «Ждут решения», а если ждущих нет — «Другие из топа»
+  try{const c=JSON.parse(sessionStorage.getItem('konk.art')||'null');sessionStorage.removeItem('konk.art');   // сменили площадку — тот же товар по артикулу продавца, если он здесь есть
+    if(c&&c.a&&Date.now()-c.t<60000){const n=s=>String(s||'').trim().toLowerCase(),p=D.products.find(x=>x.offer_id===c.a)||D.products.find(x=>n(x.offer_id)===n(c.a));if(p)S.sku=p.sku}}catch(e){}
   const hs=location.hash.slice(1);let pend=false,pick=false;
   if(hs.startsWith('sku=')){const [s,...f]=hs.slice(4).split('&');S.sku=s;S.t='konk';pick=f.includes('pick')}else if(hs==='pend'){const p=D.products.find(x=>pendN(x));if(p){S.sku=p.sku;S.t='konk';pend=true}}
   if(hs==='pend'||hs.startsWith('sku='))history.replaceState(null,'',location.pathname+location.search);
@@ -2498,7 +2523,12 @@ addEventListener('pagehide',saveY);document.addEventListener('visibilitychange',
    при каждом тапе в поиск предлагал сохранённый пароль. Теперь окно пароля — отдельная форма со своим «логином» и есть на странице, только пока спрашиваем пароль */
 const LOCKF='<form class="card" id="pwf" style="margin:0"><b style="font-size:17px">Пароль</b><div class="note" style="margin:4px 0 0">Тот же, что у Юнитки и Склеек.</div><input type="text" name="username" autocomplete="username" value="Сервисы" readonly tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;min-height:0;padding:0;margin:0;border:0;opacity:0;pointer-events:none"><input id="pw" name="password" type="password" autocomplete="current-password" aria-label="Пароль"><button class="btn press" id="pwgo" type="submit" style="width:100%">Открыть</button><div class="note" id="pwerr"></div></form>';
 function lock(msg){const l=$('#lock');l.innerHTML=LOCKF;l.hidden=false;$('#pwerr').textContent=msg==='BAD_PASS'?'Пароль не подошёл':'';const go=async()=>{const p=$('#pw').value.trim();if(!p)return;$('#pwerr').textContent='Открываю…';try{const d=await load(p);l.hidden=true;l.innerHTML='';start(d)}catch(e){$('#pwerr').textContent=e.message==='BAD_PASS'?'Пароль не подошёл':e.message}};$('#pwf').onsubmit=e=>{e.preventDefault();go()};setTimeout(()=>$('#pw').focus(),50)}
-(async()=>{try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS')lock(e.message);else{$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">'+(OZ?'Не удалось открыть данные: '+esc(e.message):'Данных по '+M.n+' пока нет — сбор ещё не выложен.')+'</div>'}}})();
+function skel(){   // 13.11: до расшифровки данных шапка сразу в полный рост — площадка и раздел уже выбраны, на месте товара заглушка
+  $('#picker').innerHTML=mpSwitch()+'<span class="chip skc" aria-hidden="true"></span>';
+  $('#tabbar').innerHTML=TABS.map(([k,n])=>`<button class="tb${S.t===k?' on':''}" data-t="${k}">${IC[k]}<span>${n}</span></button>`).join('');
+  $('#dtabs').innerHTML=TABS.map(([k,n])=>`<button class="press${S.t===k?' on':''}" data-t="${k}">${n}</button>`).join('');
+  sizeTop()}
+(async()=>{skel();try{start(await load())}catch(e){if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){$('#picker').innerHTML=mpSwitch();lock(e.message)}else{$('#picker').innerHTML=mpSwitch();$('#view').innerHTML='<div class="empty">'+(OZ?'Не удалось открыть данные: '+esc(e.message):'Данных по '+M.n+' пока нет — сбор ещё не выложен.')+'</div>'}}})();
 })();
 </script>
 </body>
