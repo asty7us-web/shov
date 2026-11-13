@@ -66,14 +66,14 @@ function orbit(o){   // полёт по орбите вокруг Земли, в
   return (t,e)=>{const S=e.S,Wv=norm(cross(S,[0,1,0])),Q=cross(Wv,S),ci=Math.cos(o.inc),si=Math.sin(o.inc);
     const N=norm(add(mul(Q,ci),mul(S,si))),B=cross(N,Wv),dip=Math.acos(1/o.r);
     const rise=Math.asin(clamp(-Math.sin(dip)/ci,-1,1));                       // здесь впереди из-за края Земли встаёт Солнце
-    const ph=rise+o.lead+t/o.T*TAU+e.phase;
+    const ph=o.lib?o.c+o.lib*Math.sin(t*TAU/o.T)+e.phase:rise+o.lead+t/o.T*TAU+e.phase;   // lib — не облёт, а медленное покачивание у точки c
     const up=add(mul(Wv,Math.cos(ph)),mul(B,Math.sin(ph))),vel=add(mul(Wv,-Math.sin(ph)),mul(B,Math.cos(ph)));
     const tn=tans(o.fov,e.asp),hy=o.hy+e.sc*o.hys,pitch=-dip-Math.atan(hy*tn[1]);
     let f=add(mul(vel,Math.cos(pitch)),mul(up,Math.sin(pitch)));f=rotAx(f,up,o.yaw);
     return {p:mul(up,o.r),f,up,fov:o.fov}}}
 const RIG={
-  sum:orbit({r:1.32,T:480,inc:-10*DEG,lead:-14/480*TAU,hy:-.40,hys:.34,yaw:-5*DEG,fov:FOV}),          // «Сводка»: орбита, впереди рассвет
-  prod:orbit({r:1.13,T:400,inc:38*DEG,lead:-2.2,hy:.22,hys:.25,yaw:0,fov:FOV}),                      // «Товары»: низко над ночной стороной
+  sum:orbit({r:1.5,T:900,inc:-10*DEG,lead:-16/900*TAU,hy:-.42,hys:.3,yaw:-5*DEG,fov:FOV}),          // «Сводка»: орбита, впереди рассвет
+  prod:orbit({r:1.8,T:700,inc:30*DEG,c:-PI/2,lib:.42,hy:.02,hys:.25,yaw:0,fov:FOV}),                      // «Товары»: низко над ночной стороной
   cat:(t,e)=>{const S=e.S,Wv=norm(cross(S,[0,1,0])),Q=cross(Wv,S),ang=1.2+.22*Math.sin(t*TAU/420)+e.phase*.6;   // «Категории»: весь шар, день и ночь пополам
     const dir=norm(add(add(mul(S,Math.cos(ang)),mul(Wv,Math.sin(ang))),mul(Q,.3))),tn=tans(FOV,e.asp),r=1/Math.sin(Math.atan(Math.min(tn[0],tn[1])*.8));
     const p=mul(dir,r),land=e.asp>=1;
@@ -131,7 +131,7 @@ void main(){vec3 d=ray();float b,h2;float cover=hitSphere(d,b,h2);float h=sqrt(m
   vec3 col=vec3(0.);
   if(cover>0.){float t=b-sqrt(max(u_R*u_R-h2,0.));vec3 n=normalize(d*t-u_c);float mu=dot(n,u_sun),ndv=max(dot(n,-d),0.);
     float lat=asin(clamp(n.y,-1.,1.)),lon=atan(-n.z,n.x)-u_gmst;vec2 uv=vec2(.5+lon*ITAU,clamp(.5-lat*IPI,.001,.999));
-    float lod=log2(max(u_tw*ITAU*u_px*t/(u_R*max(ndv,.1)),1.));
+    float lod=max(log2(u_tw*ITAU*u_px*t/(u_R*max(ndv,.42)))-.3,0.);   // у горизонта не мылим: берём резче, чем по наклону
     vec3 dg=mix(vec3(.05,.12,.3),TEXLOD(u_day,uv,lod).rgb,u_dayOn);
     float water=smoothstep(.03,.12,dg.b-dg.r)*step(dg.g,dg.b+.03);vec3 day=pow(dg,vec3(2.2));
     float cl=TEXLOD(u_cloud,vec2(uv.x+u_cl,uv.y),lod).r*u_cloudOn,ca=smoothstep(.1,.8,cl);
@@ -153,7 +153,7 @@ float SL(vec2 uv,float l){float v=2.*TEXLOD(u_nrm,uv,l).r-1.;return .25*v/max(1.
 void main(){vec3 d=ray();float b,h2;float cover=hitSphere(d,b,h2);vec3 col=vec3(0.);
   if(cover>0.){float t=b-sqrt(max(u_R*u_R-h2,0.));vec3 n=normalize(d*t-u_c);float ndv=max(dot(n,-d),0.);
     vec3 nm=u_mrot*n;float lat=asin(clamp(nm.y,-1.,1.)),lon=atan(-nm.z,nm.x);vec2 uv=vec2(.5+lon*ITAU,clamp(.5-lat*IPI,.004,.996));
-    float fp=ITAU*u_px*t/(u_R*max(ndv,.1)),lod=log2(max(u_tw*fp,1.)),ln=log2(max(u_nw*fp,1.));
+    float fp=ITAU*u_px*t/(u_R*max(ndv,.42)),lod=log2(max(u_tw*fp,1.)),ln=log2(max(u_nw*fp,1.));
     float alb=mix(.42,TEXLOD(u_alb,uv,lod).r,u_albOn);
     float se=SL(vec2(uv.x,uv.y*.5),ln),sn=SL(vec2(uv.x,.5+uv.y*.5),ln);                    // рельеф: наклон к востоку и к северу
     float sl=sin(lon),cl=cos(lon),sa=sin(lat),ca=cos(lat);
@@ -237,8 +237,8 @@ function upload(k){const t=TEX[k],g=gl;if(!t.img||!gl)return;const tex=g.createT
   g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_S,g.REPEAT);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE);
   t.tex=tex;t.w=t.img.naturalWidth||t.img.width;t.t0=T}
 function loadAll(){   // по очереди, от главного к второстепенному; сцена видна сразу и «проявляется» по мере загрузки
-  const base=opt.base||'',big=tier==='d'&&G.max>=4096,a=big?'4k':'2k';
-  const list=[['mw','mw-'+a+'.webp',0,0],['day','earth-'+a+'.webp',0,1],['cloud','cloud-'+a+'.webp',1,1],['night','night-'+a+'.webp',1,1],['alb','moon-'+a+'.webp',1,1],['nrm','moonn-'+(big?'2k':'1k')+'.webp',1,1]];
+  const base=opt.base||'',big=tier==='d'&&G.max>=4096,a=big?'4k':'2k',e=G.max>=4096&&(big||(navigator.deviceMemory||8)>=4)?'4k':'2k';   // Земля крупно — и на телефоне с памятью от 4 ГБ: вблизи 2048 мутно
+  const list=[['mw','mw-'+a+'.webp',0,0],['day','earth-'+e+'.webp',0,1],['cloud','cloud-'+e+'.webp',1,1],['night','night-'+e+'.webp',1,1],['alb','moon-'+a+'.webp',1,1],['nrm','moonn-'+(big?'2k':'1k')+'.webp',1,1]];
   fetch(base+(tier==='d'?'stars-d.bin':'stars.bin')).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status)).then(b=>{if(on&&gl){stars(b);loaded.stars=1;kick()}}).catch(()=>{loaded.stars=0});
   let i=0;const next=()=>{if(!on||i>=list.length)return;const [k,fn,gray,mip]=list[i++],im=new Image();TEX[k]=TEX[k]||{};Object.assign(TEX[k],{gray,mip});
     im.onload=()=>{if(!on)return;TEX[k].img=im;try{upload(k);loaded[k]=1}catch(e){loaded[k]=0}kick();next()};im.onerror=()=>{loaded[k]=0;next()};im.decoding='async';im.src=base+fn};
