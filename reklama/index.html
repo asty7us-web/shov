@@ -765,7 +765,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const b64u8=s=>{const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)};
 let D=null,KL=null,DKC=null,UPR=RS.get('upr',null),K=null,TOV={},RK={},N=0,T=0,UPASS=null;
-const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),
+const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),off:RS.get('off',0),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),
   chm:RS.get('chm','drr'),kw:{nm:RS.get('kwnm',0),cid:0,sort:'s',dir:-1,src:'rk',x:false},ak:{f:RS.get('akf','can')},ist:{f:'all',avto:false,nm:0}};
 const NORMA=15;   // доля рекламы от заказов, % — как в отчётах маркетолога
 
@@ -833,10 +833,18 @@ const dlab=i=>{const s=D.days[i],d=new Date(s+'T12:00:00');return dm(s)+' '+WD[d
 const sum=(a,ix)=>{let s=0;if(a)for(const i of ix)s+=a[i]||0;return s};
 const delta=(a,b,inv)=>{if(b==null||!isFinite(b)||!b||a==null||!isFinite(a))return '';const p=100*(a-b)/Math.abs(b);if(Math.abs(p)<1)return '<span class="muted">≈ как было</span>';
   const up=p>0,good=inv?!up:up;return `<span class="${good?'up':'dn'}">${up?'▲':'▼'} ${f0(Math.abs(p))}%</span>`};
-/* период: N полных дней до вчера; сегодня — отдельно (день ещё идёт) */
-const PI=(n=S.per)=>{const a=[];for(let i=Math.max(0,T-n);i<T;i++)a.push(i);return a};
-const PP=(n=S.per)=>{const a=[];for(let i=T-2*n;i<T-n;i++)if(i>=0)a.push(i);return a.length===n?a:null};
-const perLab=()=>dm(D.days[Math.max(0,T-S.per)])+'–'+dm(D.days[T-1]);
+/* период: N полных дней до вчера; сегодня — отдельно (день ещё идёт). 14.11 Андрей «ещё период вчера, позавчера сделай кнопки»: один день — S.per=1,
+   S.off — на сколько дней он отступает от вчера (0 — вчера, 1 — позавчера). PI(n) и PP(n) с явным n отступ не учитывают («последние 30 дней») */
+const PI=n=>{const o=n==null?(S.off||0):0;if(n==null)n=S.per;const a=[];for(let i=Math.max(0,T-o-n);i<T-o;i++)a.push(i);return a};
+const PP=n=>{const o=n==null?(S.off||0):0;if(n==null)n=S.per;const a=[];for(let i=T-o-2*n;i<T-o-n;i++)if(i>=0)a.push(i);return a.length===n?a:null};
+const PIc=()=>(S.per<7?PI(7):PI()).concat([T]);                                      // дни для графиков по дням: не меньше недели и сегодня
+const perLab=()=>S.per===1?dm(D.days[Math.max(0,T-1-(S.off||0))]):dm(D.days[Math.max(0,T-S.per)])+'–'+dm(D.days[T-1]);
+const perKey=()=>S.per===1?(S.off?'v2':'v1'):S.per;                                  // значение нажатой кнопки периода
+const perTx=()=>S.per===1?(S.off?'позавчера':'вчера'):S.per+' дн';                   // «7 дн» | «вчера»
+const perZa=()=>S.per===1?(S.off?'за позавчера':'за вчера'):'за '+S.per+' дн.';      // «за 7 дн.» | «за вчера»
+const perDn=()=>S.per===1?(S.off?'позавчера':'вчера'):S.per+' дней';                 // «ДРР 7 дней» | «ДРР вчера»
+const perPr=()=>S.per===1?'днём раньше':'прошлые '+S.per+' дн.';                     // с чем сравниваем
+const PERS=l=>[['v1','Вчера'],['v2','Позавчера'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
 
 function prep(){
   if(!D.kab[S.kab])S.kab=Object.keys(D.kab)[0];
@@ -946,8 +954,8 @@ const fqBase=()=>FQ.f==='rk'
 const fqHay=x=>x.r?[x.r.name,[x.t?x.t.art:'',x.r.id,x.nm].join(' ')]:[x.t.art,[x.t.subj||'',x.t.nm].join(' ')];
 function fqList(){const L=$('#fql'),n=$('#fqn');if(!L)return;const base=fqBase(),R=sFind(base,FQ.q,fqHay),on=FQ.q.trim()!=='';
   L.innerHTML=R.r.length?R.r.slice(0,150).map(({x,main})=>x.r
-     ?`<button class="pc fq1 press" type="button" data-fqr="${x.r.id}|${x.nm}"><div class="ph"${x.t?foto(x.t):''}></div><div style="min-width:0"><div class="nm">${hl(x.r.name,R.t)}</div><div class="sb">${x.t?hl(x.t.art,R.t)+' · ':''}${rkSt(x.r).t} · ${S.per} дн: реклама <b class="num">${rub(x.a.s)}</b>, заказы с рекламы <b class="num">${f0(x.a.q)}</b></div></div></button>`
-     :`<button class="pc fq1 press" type="button" data-nm="${x.t.nm}"><div class="ph"${foto(x.t)}></div><div style="min-width:0"><div class="nm">${hl(x.t.art,R.t)}</div><div class="sb">${main||!x.t.subj?'':hl(x.t.subj,R.t)+' · '}${x.w?x.w+' РК работа'+(x.w===1?'ет':'ют'):'реклама на паузе'} · ${S.per} дн: реклама <b class="num">${rub(x.a.s)}</b>, заказы <b class="num">${f0(x.a.oq)} шт</b>, ДРР <b class="num ${dcls(x.a.drr)}">${drrT(x.a.drr)}</b></div></div></button>`).join('')
+     ?`<button class="pc fq1 press" type="button" data-fqr="${x.r.id}|${x.nm}"><div class="ph"${x.t?foto(x.t):''}></div><div style="min-width:0"><div class="nm">${hl(x.r.name,R.t)}</div><div class="sb">${x.t?hl(x.t.art,R.t)+' · ':''}${rkSt(x.r).t} · ${perTx()}: реклама <b class="num">${rub(x.a.s)}</b>, заказы с рекламы <b class="num">${f0(x.a.q)}</b></div></div></button>`
+     :`<button class="pc fq1 press" type="button" data-nm="${x.t.nm}"><div class="ph"${foto(x.t)}></div><div style="min-width:0"><div class="nm">${hl(x.t.art,R.t)}</div><div class="sb">${main||!x.t.subj?'':hl(x.t.subj,R.t)+' · '}${x.w?x.w+' РК работа'+(x.w===1?'ет':'ют'):'реклама на паузе'} · ${perTx()}: реклама <b class="num">${rub(x.a.s)}</b>, заказы <b class="num">${f0(x.a.oq)} шт</b>, ДРР <b class="num ${dcls(x.a.drr)}">${drrT(x.a.drr)}</b></div></div></button>`).join('')
     :'<div class="empty"><b>Ничего не нашлось</b><br>Проверьте название или артикул.</div>';
   n.innerHTML=R.kb?`Искали «${esc(R.kb)}» — была английская раскладка`:on?`Найдено ${R.r.length} из ${base.length}`:''}
 function openFind(){FQ.f=S.tab==='rk'?'rk':'tov';
@@ -968,8 +976,8 @@ function fsSync(){const f=$('#fs');if(f)f.hidden=false;const s=$('#sub');if(s)s.
 function sync(){
   $('#kabSeg').innerHTML=Object.keys(D.kab).map(k=>`<button type="button" data-kab="${k}" aria-pressed="${k===S.kab}">${esc(D.kab[k].name)}</button>`).join('');
   $$('#tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab));
-  const per=seg('per',[[7,'7 дн'],[14,'14 дн'],[30,'30 дн']],S.per,'sm');let h='';
-  if(S.tab==='tov')h=per+viewSeg('view',S.view)+srch('Товар');
+  const per=seg('per',PERS(),perKey(),'sm');let h='';
+  if(S.tab==='tov')h=per+srch('Товар');   // вид «таблица / карточки» — в шапке самого списка (vTov), как в «Кампаниях»: 14.11 Андрей «когда меняешь вид сверху, не видишь, что меняешь ниже»
   else if(S.tab==='rk')h=per+seg('rkf',[['w','Работают'],['p','На паузе'],['all','Все']],S.rkf.f,'sm')+srch('Кампания или товар');
   else if(S.tab==='skl')h=per+srch('Товар склейки');
   else if(S.tab==='bl')h=K.bally?seg('blf',[['on','Идут'],['no','Товары без акции']],S.blf,'sm')+srch('Товар или акция'):'';
@@ -1015,7 +1023,7 @@ function drrChart(ix,get,o){o=o||{};let mxS=0,mxD=NORMA/3;const cap=o.cap||60;
     read:i=>{const g=get(i);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · реклама ${rub(g.s)} · заказы ${f0(g.oq)} шт на ${rub(g.or)} · ДРР <b class="${noz(g)?'bad':dcls(g.drr)}">${noz(g)?'заказов нет':pc(g.drr)}</b>${g.q?' · из них с рекламы '+f0(g.q)+' шт':''}${o.dot&&o.dot(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})}
 const CHLG='<div class="lg" style="margin-top:6px"><span><i style="background:var(--good)"></i>до '+NORMA+'%</span><span><i style="background:var(--warn)"></i>'+NORMA+'–25%</span><span><i style="background:var(--bad)"></i>выше 25% или без заказов</span><span>в столбике — заказы, шт</span></div>';
 function dayChart(get,mode){   // get(i)→{s,or,oq,q,c,v,cpo,drr}
-  const ix=PI().concat([T]);if(mode==='drr')return drrChart(ix,get,{h:136})+CHLG;
+  const ix=PIc();if(mode==='drr')return drrChart(ix,get,{h:136})+CHLG;
   const M={s:{val:i=>get(i).s,col:()=>'var(--wb)',top:i=>get(i).s?kr(get(i).s):''},
     or:{val:i=>get(i).or,col:()=>'var(--acc)',top:i=>get(i).or?kr(get(i).or):'',inn:i=>get(i).oq||''}}[mode];
   return chart(Object.assign({ix,read:i=>{const g=get(i);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · реклама ${rub(g.s)} · заказы ${f0(g.oq)} шт на ${rub(g.or)} · ДРР <b class="${dcls(g.drr)}">${pc(g.drr)}</b>${g.q!=null?' · с рекламы '+f0(g.q)+' шт':''}`}},M))}
@@ -1033,7 +1041,7 @@ function vTov(){
    <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт / ${kr(td.or)} ₽ · работает ${nW} РК</div></div></div>`;
   const memo={};const gm=i=>memo[i]||(memo[i]=kabAgg([i])),cm=['drr','s','or'].includes(S.chm)?S.chm:'drr';
   h+=`<div class="card" style="margin-top:10px"><div class="hrw" style="margin:0 0 8px"><h3>${esc(K.name)} по дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],cm,'sm')}</div>${dayChart(gm,cm)}</div>`;
-  h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
+  h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}${viewSeg('view',S.view)}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
       ${S.view==='cards'?seg('sort',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],S.sort,'sm'):tblBtn('tov')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или покажите все товары.</div>';
   if(S.view==='table')return h+tblHtml('tov',rows,x=>`data-nm="${x.t.nm}"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка. «Столбцы» — скрыть лишние, вернуть, переставить. ${ostAt()}</div>`;
@@ -1268,7 +1276,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
 function openSkl(imt){sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===String(imt));if(!g)return {t:'Склейка',s:'',h:'<div class="empty">Склейки нет в данных.</div>'};
   const L=g.L.map(x=>x.t),ix=PI(),pp=PP(),a=g.a,b=pp?sklAgg(L,pp):null,y=T>0?sklAgg(L,[T-1]):null,y2=T>1?sklAgg(L,[T-2]):null,td=sklAgg(L,[T]),memo={},gm=i=>memo[i]||(memo[i]=sklAgg(L,[i]));
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
-  let h=perSeg()+`<div class="dbxs">${y?drrBox('ДРР склейки вчера · '+dm(D.days[T-1]),y.drr,y2&&y2.drr,y2?dm(D.days[T-2]):'','реклама '+rub(y.s)+' · заказы '+f0(y.oq)+' шт'):''}${drrBox('ДРР склейки '+S.per+' дней',a.drr,b&&b.drr,'прошлые '+S.per+' дн.','реклама '+kr(a.s)+' ₽ · заказы '+f0(a.oq)+' шт')}</div>`;
+  let h=perSeg()+`<div class="dbxs">${y?drrBox('ДРР склейки вчера · '+dm(D.days[T-1]),y.drr,y2&&y2.drr,y2?dm(D.days[T-2]):'','реклама '+rub(y.s)+' · заказы '+f0(y.oq)+' шт'):''}${drrBox('ДРР склейки '+perDn(),a.drr,b&&b.drr,perPr(),'реклама '+kr(a.s)+' ₽ · заказы '+f0(a.oq)+' шт')}</div>`;
   h+=`<div class="tiles t3" style="margin-top:10px"><div class="tile"><div class="l">Реклама на 1 заказ</div><div class="v num">${a.cpa==null?'—':rub(a.cpa)}</div><div class="d">реклама ÷ все заказы</div></div>
     <div class="tile"><div class="l">Заказы без рекламы</div><div class="v num">${f0(g.bez)} <small>шт</small></div><div class="d">товары, на которые не тратились</div></div>
     <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт</div></div></div>`;
@@ -1349,7 +1357,7 @@ function applyTheme(t,user){const R=document.documentElement;if(!THL.some(x=>x[0
 /* ── кусочки листов ── */
 const MG=()=>((D.mst||{}).glub)||300;
 const ksh=v=>v>=1000?f1(v/1000)+'к':f0(v);   // короткая сумма над столбиком: на телефоне 14 столбиков по 24 точки
-const perSeg=()=>`<div class="pseg">${seg('per',[[7,'7 дней'],[14,'14 дней'],[30,'30 дней']],S.per,'sm')}<span class="muted num">${perLab()} · сегодня отдельно</span></div>`;
+const perSeg=()=>`<div class="pseg">${seg('per',PERS(1),perKey(),'sm')}<span class="muted num">${perLab()} · сегодня отдельно</span></div>`;
 function drrBox(title,cur,prev,prevLab,sub){const ok=v=>v!=null&&isFinite(v),d=ok(cur)&&ok(prev)?cur-prev:null,cls=d==null||Math.abs(d)<0.5?'':d>0?' b':' g';
   return `<div class="dbx${cls}"><div class="l">${title}</div><div class="r"><b class="num${cls?'':' '+dcls(cur)}${cur!=null&&!isFinite(cur)?' tx':''}">${cur!=null&&!isFinite(cur)?'нет заказов':pc(cur)}</b>${d==null?'':Math.abs(d)<0.5?'<span class="tr muted">как было</span>':`<span class="tr">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</span>`}</div><div class="d num">${prev!=null&&prevLab?prevLab+': '+(isFinite(prev)?pc(prev):'нет заказов')+'<br>':''}${sub}</div></div>`}
 function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
@@ -1532,8 +1540,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   if(ostNet(t)&&W.length)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.</div>';
   const pl=panl(pn.w,D.pan&&D.pan.wl)+panl(pn.m,D.pan&&D.pan.ml);if(pl)h+=`<div class="panl">${pl}</div>`;
   h+=perSeg();
-  h+=`<div class="dbxs">${y?drrBox('ДРР вчера · '+dm(D.days[T-1]),y.drr,y2&&y2.drr,y2?dm(D.days[T-2]):'','реклама '+rub(y.s)+' · заказы '+f0(y.oq)+' шт'):''}${drrBox('ДРР '+S.per+' дней',a.drr,b&&b.drr,'прошлые '+S.per+' дн.','реклама '+kr(a.s)+' ₽ · заказы '+f0(a.oq)+' шт')}</div>`;
-  h+=`<div class="tdl num">Сегодня: реклама <b>${rub(td.s)}</b> · заказы <b>${f0(td.oq)} шт</b> на ${kr(td.or)} ₽ · за ${S.per} дн. заказов с рекламы <b>${f0(a.q)}</b> из ${f0(a.oq)}, цена такого заказа <b>${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет заказов'}</b></div>`;
+  h+=`<div class="dbxs">${y?drrBox('ДРР вчера · '+dm(D.days[T-1]),y.drr,y2&&y2.drr,y2?dm(D.days[T-2]):'','реклама '+rub(y.s)+' · заказы '+f0(y.oq)+' шт'):''}${drrBox('ДРР '+perDn(),a.drr,b&&b.drr,perPr(),'реклама '+kr(a.s)+' ₽ · заказы '+f0(a.oq)+' шт')}</div>`;
+  h+=`<div class="tdl num">Сегодня: реклама <b>${rub(td.s)}</b> · заказы <b>${f0(td.oq)} шт</b> на ${kr(td.or)} ₽ · ${perZa()} заказов с рекламы <b>${f0(a.q)}</b> из ${f0(a.oq)}, цена такого заказа <b>${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет заказов'}</b></div>`;
   const cd=chgDays(nm,0);
   h+='<div class="hrw"><h3>По дням: ДРР и заказы</h3></div>'+drrChart(cx,gm,{dot:i=>cd.has(i)})+CHLG;
   h+=chgBlock(nm,0);
@@ -1544,7 +1552,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
     h+=`<div class="hrw"><h3>На паузе · ${P.length}</h3>${old.length&&S.openP!==nm?`<button class="lnk" type="button" data-act="allp" data-nm="${nm}">показать все</button>`:''}</div>`+(show.length?`<div class="rows" data-rctx="${rctx}">`+show.map(r=>rkRow(r,nm,ix)).join('')+'</div>':'<div class="note" style="margin-top:0">За 30 дней расхода по ним не было.</div>')}
   if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+=`<div class="hrw"><h3>Места по фразам, 7 дней</h3></div><div id="pmx">${prodMx(nm)}</div>`+(KL?MXLG:'');
   const sk=t.imt?K.tov.filter(z=>z.imt===t.imt):[];
-  if(sk.length>1){const sa=sklAgg(sk,ix);h+=`<div class="hrw"><h3>Склейка</h3></div><button class="akr press" type="button" data-skl="${t.imt}" style="width:100%;border:0;background:var(--card2);border-radius:14px;padding:11px 13px;text-align:left;cursor:pointer"><div><b>${sk.length} товаров в склейке</b><span class="num">реклама ${kr(sa.s)} ₽ · заказы ${f0(sa.oq)} шт за ${S.per} дн.</span></div><div class="pr num ${dcls(sa.drr)}">${pc(sa.drr)}<small>ДРР склейки</small></div></button>`}
+  if(sk.length>1){const sa=sklAgg(sk,ix);h+=`<div class="hrw"><h3>Склейка</h3></div><button class="akr press" type="button" data-skl="${t.imt}" style="width:100%;border:0;background:var(--card2);border-radius:14px;padding:11px 13px;text-align:left;cursor:pointer"><div><b>${sk.length} товаров в склейке</b><span class="num">реклама ${kr(sa.s)} ₽ · заказы ${f0(sa.oq)} шт ${perZa()}</span></div><div class="pr num ${dcls(sa.drr)}">${pc(sa.drr)}<small>ДРР склейки</small></div></button>`}
   const pdm={};for(const x of t.pd||[])pdm[x[0]]=x;
   if(cx.filter(i=>pdm[i]).length>1){const prv=i=>{for(let j=i-1;j>=cx[0];j--)if(pdm[j])return pdm[j];return null};
     h+=`<div class="hrw"><h3>Скидка ВБ (СПП), %</h3><div class="lg" style="margin:0"><span><i style="background:var(--good)"></i>поднял</span><span><i style="background:var(--bad)"></i>урезал</span><span><i style="background:var(--warn)"></i>так же</span></div></div>`
@@ -1592,7 +1600,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(ostNet(t)&&st.w)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.</div>';
   h+=perSeg();
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
-  h+=`<div class="dbxs">${bx('ДРР вчера · '+dm(D.days[T-1]),zy,zy2,zy2?dm(D.days[T-2]):'')}${bx('ДРР '+S.per+' дней',zp,zpp,'прошлые '+S.per+' дн.')}</div>`;
+  h+=`<div class="dbxs">${bx('ДРР вчера · '+dm(D.days[T-1]),zy,zy2,zy2?dm(D.days[T-2]):'')}${bx('ДРР '+perDn(),zp,zpp,perPr())}</div>`;
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
@@ -1613,7 +1621,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<div class="hrw"><h3>Настройки сейчас</h3><span class="muted" style="font-size:12.5px">нажмите, чтобы изменить</span></div>`+rkSet(r,nm);
   h+=notesBlock(nm,id);
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
-  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — за ${S.per} дн.</span></div><div id="rkkw">${frBlock(id,nm)}</div>`;
+  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div><div id="rkkw">${frBlock(id,nm)}</div>`;
   const mn=e.min||{},rc=e.rec||{},RL={range1To2:'места 1–2',range3To10:'места 3–10',range11To34:'места 11–34',competitiveBid:'конкурентная',leadersBid:'лидеры',top2:'топ'};
   h+=`<div class="hrw"><h3>Ставка</h3></div><div class="kv">${Object.entries(e.b||{}).map(([p,v])=>`<span>Сейчас · ${PLN[p]||p}</span><b class="num">${kop(v)} ${r.pay==='cpm'?'за 1000 показов':'за клик'}</b>`).join('')}
     ${Object.keys(mn).length?(r.pl||[]).map(p=>{const k=p==='recommendations'?'recommendation':p;return mn[k]!=null?`<span>Минимум ВБ · ${PLN[p]||p}</span><b class="num">${kop(mn[k])}</b>`:''}).join(''):''}
@@ -1625,7 +1633,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
 /* ── фраза: места по дням и все замеры, ставка фразы, минус ── */
 function openKw(nm,cid,q){sheet(()=>{const t=TOV[nm],e=kwData(t,cid).find(x=>x.t===q);
   if(!e)return {t:esc(q),s:'',h:'<div class="empty">За этот период данных по фразе нет.</div>'};
-  const ix=PI().concat([T]),r=cid&&RK[cid],man=r&&r.pay==='cpm'&&r.bt==='manual',lk=UPR?'':' nolk',c=e.cur,busy=FR.busy.has(e.t);
+  const ix=PIc(),r=cid&&RK[cid],man=r&&r.pay==='cpm'&&r.bt==='manual',lk=UPR?'':' nolk',c=e.cur,busy=FR.busy.has(e.t);
   let h=`<div class="tiles"><div class="tile"><div class="l">Место сейчас</div><div class="v num">${c?cellTx(c)+(c.o?` <small>← ${plTx(c.o)}</small>`:c.od?` <small>← ${plTx(c.od)}+</small>`:''):'—'}</div><div class="d">${c?(c.src==='s'?'наш замер'+(c.hm?' в '+c.hm:'')+(c.ad?' · в рекламе':' · без рекламы'):c.src==='m'?'замер Марплы'+(c.hm?' в '+c.hm:''):'среднее за день по ВБ'):'замера нет'}</div></div>
    <div class="tile"><div class="l">Частота кластера</div><div class="v num">${e.f?kr(e.f):'—'}</div><div class="d">${jn(e.f?'запросов в месяц':'нет данных',e.fw?'сама фраза — '+kr(e.fw)+' в неделю':'')}</div></div>
    <div class="tile"><div class="l">Затраты · ${perLab()}</div><div class="v num">${rub2(e.a.s)}</div><div class="d">${f0(e.a.c)} кликов${e.a.v?' · '+f0(e.a.v)+' показов':''}</div></div>
@@ -1734,7 +1742,7 @@ function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},mb=r.mar&&r.ma
    <div class="k kpi"><div><b class="num">${rub(a.s)}</b><span>расход</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div><div><b class="num">${f0(a.c)}</b><span>клики · ${pc(a.ctr)}</span></div></div></button>`}
 
 /* листы товара, кампании и фразы — в d_novoe.js */
-function pickProd(){sheet(()=>{const L=kwProds();return {t:'Товар',s:'у кого есть реклама в поиске',h:'<div>'+L.map(({t,s,w})=>`<button class="akr press" type="button" data-pick="${t.nm}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(t.art)}</b><span>${w?w+' РК работает':'на паузе'}</span></div><div class="pr num">${rub(s)}<small>реклама за ${S.per} дн.</small></div></button>`).join('')+'</div>'}})}
+function pickProd(){sheet(()=>{const L=kwProds();return {t:'Товар',s:'у кого есть реклама в поиске',h:'<div>'+L.map(({t,s,w})=>`<button class="akr press" type="button" data-pick="${t.nm}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(t.art)}</b><span>${w?w+' РК работает':'на паузе'}</span></div><div class="pr num">${rub(s)}<small>реклама ${perZa()}</small></div></button>`).join('')+'</div>'}})}
 
 /* ───────── команды сторожу: шифруем ключом управления, шлём через ntfy, ответ ждём там же ───────── */
 const WAIT={},SEEN=new Set();let ES=null;
@@ -2017,7 +2025,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 const SEGCB={};
 function onSeg(id,v){smooth('fade',()=>onSeg0(id,v))}
 function onSeg0(id,v){
-  if(id==='per'){if(+v===S.per)return;freeze();S.per=+v;RS.set('per',S.per);sync();render(true);redraw()}   // строки остаются на своих местах (freeze)
+  if(id==='per'){const n=v==='v1'||v==='v2'?1:+v,o=v==='v2'?1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze)
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
   else if(id==='skls'){S.skls=v;RS.set('skls',v);unfz();render(true)}
