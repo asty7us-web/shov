@@ -605,11 +605,11 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .aff .q{margin-right:0!important;min-height:0}
 /* СПП — общая цифра и товары одной строкой */
 .spl{display:grid;grid-template-columns:minmax(0,1fr);margin-top:12px;border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:var(--sh1)}
-.spr,.sph{display:grid;grid-template-columns:minmax(0,1fr) 54px 124px;gap:8px;align-items:center;padding:9px 14px;text-align:left;border-bottom:.5px solid var(--line2);width:100%}
+.spr,.sph{display:grid;grid-template-columns:minmax(0,1fr) 50px 112px;gap:8px;align-items:center;padding:9px 14px;text-align:left;border-bottom:.5px solid var(--line2);width:100%}
 .sph{font:600 11.5px/1.2 var(--f);color:var(--ink3);border-bottom-color:var(--line)}
 .sph span:nth-child(n+2),.spr .p,.spr .c{text-align:right}
 .spr{font-size:14px}
-.spr .n{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.spr .n{min-width:0;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .spr .p{font:700 15px/1 var(--fd)}
 .spr .c{font-size:12px;color:var(--ink2);white-space:nowrap}
 @media (hover:hover){.spr:hover{background:var(--fill2)}}
