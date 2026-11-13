@@ -1023,9 +1023,46 @@ function vRk(){const rows=rkRows(),nW=K.rk.filter(r=>rkSt(r).w).length,tot=rows.
     <div class="tile"><div class="l">Расход · ${perLab()}</div><div class="v num">${kr(tot.s)} <small>₽</small></div><div class="d">по показанным</div></div>
     <div class="tile"><div class="l">Заказы с рекламы</div><div class="v num">${f0(tot.q)}</div><div class="d">как их относит ВБ</div></div>
     <div class="tile"><div class="l">Цена заказа</div><div class="v num">${tot.q?rub(tot.s/tot.q):'—'}</div><div class="d">расход ÷ заказы</div></div></div>`;
+  const MP=marPer();if(MP.length){const nl=MP.filter(x=>x.L).length,ng=MP.filter(x=>x.H).length;
+    h+=`<button class="note w press" type="button" data-act="perenos" style="display:block;width:100%;text-align:left;cursor:pointer;font:inherit">Марпла ещё ведёт ${nl?'лимит дня у '+nl:''}${nl&&ng?' и ':''}${ng?'график у '+ng:''} ${(Math.max(nl,ng)%10===1&&Math.max(nl,ng)%100!==11)?'кампании':'кампаний'}. <b>Перенести к себе ›</b></button>`}
   h+=`<div class="hrw"><h3>Кампании · ${rows.length}</h3>${seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или выберите «Все».</div>';
   return h+'<div class="list">'+rows.slice(0,150).map(rkCard).join('')+'</div>'+(rows.length>150?`<div class="muted" style="margin:8px 4px;font-size:13px">Показаны первые 150 из ${rows.length} — уточните поиском.</div>`:'')}
+
+/* ── перенос из Марплы (13.11 Андрей «нам нужно отказаться от их подписки»): её лимит дня и график → свои, тем же значением.
+   Марпла остаётся включённой: пока её настройки не сняты, оба делают одно и то же. Сторож сверяет каждую строку с Марплой «сейчас». ── */
+function marPer(){if(S.kab!=='kab1'||!K)return [];
+  return K.rk.filter(r=>r.mar&&(r.st===9||r.st===11)).map(r=>{const m=r.mar,ol=ourLim(r),og=ourGr(r);
+    const L=m.lim&&m.lim.max>=50&&!(ol&&ol.on&&Math.abs(ol.sum-m.lim.max)<0.5)?m.lim.max:0;
+    const H=m.gr&&m.gr.w&&m.gr.w.length===7&&!(og&&og.on&&og.h&&og.h.join()===m.gr.w.join())?m.gr.w:null;
+    return {r,L,H,ol,og}}).filter(x=>x.L||x.H).sort((a,b)=>(b.r.st===9)-(a.r.st===9)||(!!b.H)-(!!a.H)||String(a.r.name).localeCompare(b.r.name,'ru'))}
+const grHex=w=>w.map(s=>parseInt(s,2).toString(16).padStart(6,'0')).join('');
+function actPerenos(){if(!need())return;const L=marPer();if(!L.length){toast('Переносить нечего');return}
+  const sel=new Set(L.map(x=>x.r.id));
+  sheet(()=>{const n=L.filter(x=>sel.has(x.r.id)).length;
+    const row=x=>{const r=x.r,m=r.mar,on=sel.has(r.id);
+      const l=x.L?`<div class="s2 num" style="font-size:13.5px;margin-top:3px">Лимит дня: Марпла ${f0(x.L)} ₽ → свой ${f0(x.L)} ₽${x.ol&&x.ol.on?' (свой был '+f0(x.ol.sum)+' ₽)':''}</div>`:'';
+      const g=x.H?`<div class="s2" style="font-size:13.5px;margin-top:3px">График «${esc(m.gr.name)}», ${grHours({h:x.H})} ч в неделю: ${esc(grText({h:x.H}))} → свой, те же часы${x.og&&x.og.on?' (свой был '+grHours(x.og)+' ч в неделю)':''}</div>`:'';
+      return `<div class="opt" style="align-items:flex-start"><div style="min-width:0"><div style="font-weight:600">${esc(r.name)}</div><div class="muted" style="font-size:12.5px">${r.st===9?'идёт':'на паузе'}</div>${l}${g}</div><button class="sw" type="button" role="switch" data-per="${r.id}" aria-checked="${on}"></button></div>`};
+    return {t:'Из Марплы к себе',s:'Каб 1 · '+L.length+' '+(L.length%10===1&&L.length%100!==11?'кампания':'кампаний'),h:`<div class="note">Лимит дня и график показа каждой кампании станут своими, с теми же суммами и часами. Ведёт их наш сторож раз в 10 минут.
+      Сама Марпла остаётся включённой и делает то же самое, поэтому два набора не спорят. Выключить её лимиты и графики — следующий шаг, только по вашему слову.
+      Перед записью сторож сверяет каждую строку с Марплой: если там что-то поменялось, строку он пропустит.</div>
+      <div class="note w">Свой график, как и график Марплы, в час показа включает кампанию, даже если её поставили на паузу вручную. Кампанию, которую нужно держать на паузе, выключите здесь.</div>
+      ${L.map(row).join('')}<div id="perr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Перенести · '+n)}`,
+      after:()=>{document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{const id=+b.dataset.per;if(sel.has(id))sel.delete(id);else sel.add(id);redraw()});
+        $('#okBtn').disabled=!n;$('#okBtn').onclick=()=>perenosRun(L.filter(x=>sel.has(x.r.id)))}}},true)}
+async function perenosRun(L){const box=$('#runbox');if(!box)return;const it=L.map(x=>{const o={c:x.r.id,n:+Object.keys(x.r.nm||{})[0]||0};if(x.L)o.l=x.L;if(x.H)o.h=grHex(x.H);return o});
+  const parts=[];for(let i=0;i<it.length;i+=30)parts.push(it.slice(i,i+30));   // ntfy пропускает ~4 КБ — шлём частями
+  const ok=[],bad=[];listen();
+  for(let i=0;i<parts.length;i++){box.innerHTML=`<div class="prog"><span class="sp"></span><span>Часть ${i+1} из ${parts.length}: жду сторожа…</span></div>`;
+    try{const cmd={k:'perenos',items:parts[i]},id=await send(cmd);
+      const r=await new Promise((res,rej)=>{const pl=setInterval(pollRes,3500),to=setTimeout(()=>{clearInterval(pl);delete WAIT[id];rej(new Error('сторож не ответил за 3 минуты'))},180000);
+        WAIT[id]=m=>{if(m.st==='work')return;clearTimeout(to);clearInterval(pl);delete WAIT[id];res(m)}});
+      (r.st==='done'?ok:bad).push(r.msg||'')}catch(e){bad.push(e.message)}}
+  box.innerHTML=(ok.length?`<div class="note g">✓ ${ok.map(esc).join('<br>')}</div>`:'')+(bad.length?`<div class="note b">${bad.map(esc).join('<br>')}</div>`:'')+
+    '<div class="acts" style="grid-template-columns:1fr"><button class="btn gray press" type="button" id="perOk">Закрыть</button></div>';
+  if(ok.length)toast('Перенесено');
+  $('#perOk').onclick=()=>{closeAll();if(ok.length)reload().catch(()=>{})}}   // данные перечитываем после закрытия: ответ сторожа без подробностей (длинный)
 
 /* ── товар: порядок как на листе маркетолога — ДРР вчера и за период, дни, что меняли, кампании, скидка ВБ, цена, акции, заказы ── */
 function openProd(nm,ctx){if(!TOV[nm])return;const i=ctx?ctx.indexOf(+nm):-1;
@@ -1168,7 +1205,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|');
   else if(a==='st')actStatus(+rk[0],rk[1]);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
   else if(a==='price')actPrice(+ds.nm);else if(a==='note'||a==='notes')openNotes(+ds.nm||0,+ds.cid||0);else if(a==='create')actCreate(+ds.nm);
   else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
-  else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='gr')actGr(+rk[0],rk[1]);else if(a==='bidall')openBidAll();
+  else if(a==='perenos')actPerenos();else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='gr')actGr(+rk[0],rk[1]);else if(a==='bidall')openBidAll();
   else if(a==='bally'){const t=TOV[ds.nm];if(t&&t.bl)openBally(t.bl.id);else actBally(+ds.nm)}else if(a==='ballystop')actBallyStop(+ds.id);
   else if(a==='unlock')unlock();else if(a==='lockupr'){UPR=null;RS.del('upr');if(ES){ES.close();ES=null}render(true);toast('Управление на этом устройстве выключено')}
   else if(a==='ref-fast')actRefresh('fast');else if(a==='ref-full')actRefresh('full');
@@ -1558,7 +1595,7 @@ async function boot(pass){
   const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1])}
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
-window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,bdAll,openBidAll,openNotes,rkRows,navBack,applyTheme,get NAV(){return NAV}};
+window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,bdAll,openBidAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,get NAV(){return NAV}};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
