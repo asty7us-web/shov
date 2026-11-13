@@ -1096,13 +1096,13 @@ function sysDraw(){
   const g=S.g,k=curK(),its=items(g,k),all=S.mp==='all'&&MPS.length>1;
   let ls=all?MPS.map(mp=>({t:MPN[mp],m:met(vsum(its.filter(x=>x.mp===mp).map(x=>x.v))),a:`data-mp="${mp}"`}))
     :sklsC(g,k).filter(x=>x.key!=='-').map(x=>({t:x.t,m:x.m,a:`data-skl="${esc(x.key)}"`}));
-  ls=ls.filter(x=>x.m.sales>0).sort((a,b)=>b.m.sales-a.m.sales).slice(0,7);
+  const nar=innerWidth<900;ls=ls.filter(x=>x.m.sales>0).sort((a,b)=>b.m.sales-a.m.sales).slice(0,all||!nar?7:5);   // на телефоне склеек пять: семь подписей не помещаются
   el.hidden=!ls.length;if(!ls.length){KOSMOS.system(null);return}
   const mx=ls[0].m.sales,G=[.37,.95,.69],Y=[1,.81,.44],B=[1,.53,.59];
   const colr=q=>{const t=Math.max(-1,Math.min(1,q/.12)),a=t>=0?Y:B,b=t>=0?G:Y,u=t>=0?t:t+1;return a.map((v,i)=>v+(b[i]-v)*u)};
   const sp=ls.map((x,i)=>{const r=Math.sqrt(x.m.sales/mx),q=x.m.profit/x.m.sales;return {r,q,col:colr(q),ring:i===0&&ls.length>1,d:Math.round(26+54*r)}});
   $('#sysc').textContent=(all?'площадки':'склейки · '+MPN[S.mp])+' · размер — продажи, цвет — маржа';
-  $('#sysl').innerHTML=ls.map((x,i)=>`<button ${x.a} class="press" aria-label="${esc(x.t)}"><i style="width:${sp[i].d}px;height:${sp[i].d}px"></i><b>${esc(x.t.length>18?x.t.slice(0,17)+'…':x.t)}</b><small class="num">${fm(x.m.sales)} · ${(sp[i].q*100).toFixed(1).replace('.',',')}%</small></button>`).join('');
+  $('#sysl').innerHTML=ls.map((x,i)=>`<button ${x.a} class="press" aria-label="${esc(x.t)}"><i style="width:${sp[i].d}px;height:${sp[i].d}px"></i><b>${esc(x.t.length>18?x.t.slice(0,17)+'…':x.t)}</b>${nar&&!all&&i>2?'':`<small class="num">${fm(x.m.sales)} · ${(sp[i].q*100).toFixed(1).replace('.',',')}%</small>`}</button>`).join('');
   KOSMOS.system({el,items:sp,labels:$$('#sysl button')});
 }
 
