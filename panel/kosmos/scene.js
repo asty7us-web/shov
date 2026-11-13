@@ -48,6 +48,7 @@ const TABS=['sum','cat','skl','prod','spp','year'];
 const PR=10;                               // половина куба ближних «пылинок»
 
 let cv=null,gl=null,G=null,opt={},on=false,raf=0,last=0,T=0,frames=0,ready=false,failed='',calm=false,manual=false;
+let still=false,lowAt=0,stT=0,rfT=0;   // still — лёгкий режим (компьютер без видеокарты): один кадр на событие, без полёта и без отклика на прокрутку и мышь
 let W=0,H=0,cssW=0,cssH=0,scale=1,scaleMax=1,tier='m',slowN=0,fastN=0,fps=0,fpsA=0;
 let A=null,aAt=0,env=null,tab='sum',tr=null,cam={p:[0,0,3],q:[0,0,0,1],tan:[1,1],fov:FOV},trail={q:[0,0,0,1]};
 let phase=0,phaseT=0,zoom=0,zoomT=0,warp=0,haze=0,hazeCol=[.3,.5,.9],fadeIn=0;
@@ -239,18 +240,18 @@ function upload(k){const t=TEX[k],g=gl;if(!t.img||!gl)return;const tex=g.createT
 function loadAll(){   // по очереди, от главного к второстепенному; сцена видна сразу и «проявляется» по мере загрузки
   const base=opt.base||'',big=tier==='d'&&G.max>=4096,a=big?'4k':'2k',e=G.max>=4096&&(big||(navigator.deviceMemory||8)>=4)?'4k':'2k';   // Земля крупно — и на телефоне с памятью от 4 ГБ: вблизи 2048 мутно
   const list=[['mw','mw-'+a+'.webp',0,0],['day','earth-'+e+'.webp',0,1],['cloud','cloud-'+e+'.webp',1,1],['night','night-'+e+'.webp',1,1],['alb','moon-'+a+'.webp',1,1],['nrm','moonn-'+(big?'2k':'1k')+'.webp',1,1]];
-  fetch(base+(tier==='d'?'stars-d.bin':'stars.bin')).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status)).then(b=>{if(on&&gl){stars(b);loaded.stars=1;kick()}}).catch(()=>{loaded.stars=0});
+  fetch(base+(tier==='d'?'stars-d.bin':'stars.bin')).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status)).then(b=>{if(on&&gl){stars(b);loaded.stars=1;kickS()}}).catch(()=>{loaded.stars=0});
   let i=0;const next=()=>{if(!on||i>=list.length)return;const [k,fn,gray,mip]=list[i++],im=new Image();TEX[k]=TEX[k]||{};Object.assign(TEX[k],{gray,mip});
-    im.onload=()=>{if(!on)return;TEX[k].img=im;try{upload(k);loaded[k]=1}catch(e){loaded[k]=0}kick();next()};im.onerror=()=>{loaded[k]=0;next()};im.decoding='async';im.src=base+fn};
+    im.onload=()=>{if(!on)return;TEX[k].img=im;try{upload(k);loaded[k]=1}catch(e){loaded[k]=0}kickS();next()};im.onerror=()=>{loaded[k]=0;next()};im.decoding='async';im.src=base+fn};
   next();next()}
-const texOn=k=>{const t=TEX[k];return t&&t.tex?clamp((T-t.t0)/1.4,0,1):0};
+const texOn=k=>{const t=TEX[k];return t&&t.tex?(still?1:clamp((T-t.t0)/1.4,0,1)):0};
 
 /* ───────── размер холста ───────── */
 function resize(force){
   const w=innerWidth,h=Math.max(innerHeight,cv.clientHeight||0);
   if(!force&&w===cssW&&Math.abs(h-cssH)<140)return;      // полоска адреса на телефоне прячется и выезжает — холст из-за этого не дёргаем
   cssW=w;cssH=h;tier=(w>=900&&matchMedia('(hover:hover)').matches)?'d':'m';
-  const dpr=devicePixelRatio||1;scaleMax=Math.min(dpr,tier==='d'?2:1.6,Math.sqrt(3.2e6/(w*h)));if(scale>scaleMax||force)scale=scaleMax;
+  const dpr=devicePixelRatio||1;scaleMax=Math.min(dpr,tier==='d'?2:1.6,Math.sqrt((still&&!look.on?2.2e6:3.2e6)/(w*h)));   // лёгкий режим: под страницей кадр чуть мельче, в «Погружении» — полныйif(scale>scaleMax||force)scale=scaleMax;
   fit()}
 function fit(){W=Math.max(2,Math.round(cssW*scale));H=Math.max(2,Math.round(cssH*scale));if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}}
 
@@ -262,6 +263,7 @@ function envNow(){
 function rig(name,t,e){const r=(RIG[name]||RIG.sum)(t,e);return {p:r.p,q:qlook(norm(r.f),r.up),fov:r.fov}}
 function step(dt){
   T+=dt;const k=a=>1-Math.exp(-dt*a);
+  if(still){sm.sc=inp.sc;phase=phaseT;zoom=zoomT;fadeIn=1;if(!look.on)look.ty=look.tp=0;look.y=look.ty;look.p=look.tp}   // лёгкий режим: всё встаёт на место сразу, одним кадром
   sm.sc+=(inp.sc-sm.sc)*k(5);phase+=(phaseT-phase)*k(3.2);zoom+=(zoomT-zoom)*k(5.5);sm.kick*=Math.exp(-dt*3.4);
   const ty=-(inp.mx*2.4+inp.tx*7)*DEG+sm.kick,tp=(inp.my*1.7+inp.ty*6)*DEG;sm.yaw+=(ty-sm.yaw)*k(4);sm.pitch+=(tp-sm.pitch)*k(4);
   if(!look.on){look.ty*=Math.exp(-dt*3.2);look.tp*=Math.exp(-dt*3.2)}look.y+=(look.ty-look.y)*k(10);look.p+=(look.tp-look.p)*k(10);
@@ -369,6 +371,10 @@ function drawSys(){
 const paused=()=>Object.keys(pauses).some(k=>pauses[k]);
 function frame(now){raf=0;if(!on||paused()||manual)return;
   const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;
+  if(still){   // лёгкий режим: кадр по событию; пока взгляд двигают («Погружение») — кадр мельче, остановился — тот же кадр начисто
+    const low=look.on&&now-lowAt<240,s0=scale;if(low)scale=Math.min(scale,Math.sqrt(.42e6/(cssW*cssH)));fit();
+    try{step(dt);draw()}catch(e){scale=s0;fail(e);return}
+    scale=s0;clearTimeout(rfT);if(low)rfT=setTimeout(kick,260);return}
   try{step(dt);draw()}catch(e){fail(e);return}
   // холст мельче, если телефон не успевает; возвращаем, когда снова легко
   if(!opt.fixed){fpsA+=(dt-fpsA)*.05;fps=1/Math.max(fpsA,.001);
@@ -378,11 +384,12 @@ function frame(now){raf=0;if(!on||paused()||manual)return;
   raf=requestAnimationFrame(frame)}
 const texDone=()=>Object.keys(TEX).every(k=>!TEX[k].tex||T-TEX[k].t0>1.5);
 function kick(){if(on&&!raf&&!paused()&&!manual){last=performance.now()-16;raf=requestAnimationFrame(frame)}}
+function kickS(){if(!still){kick();return}clearTimeout(stT);stT=setTimeout(kick,160)}   // лёгкий режим: кадр чуть погодя — сначала страница, потом фон; частые события сливаются в один кадр
 function fail(e){failed=String(e&&e.message||e).slice(0,300);on=false;cancelAnimationFrame(raf);raf=0;if(cv)cv.style.opacity='0';try{opt.onFail&&opt.onFail(failed)}catch(q){}}
 
 /* ───────── человек: прокрутка, мышь, наклон телефона ───────── */
-const onScroll=()=>{inp.scy=Math.max(0,scrollY);inp.sc=1-Math.exp(-inp.scy/820);if(calm)kick()};
-const onMove=e=>{if(e.pointerType==='mouse'){inp.mx=clamp(e.clientX/innerWidth*2-1,-1,1);inp.my=clamp(1-e.clientY/innerHeight*2,-1,1)}};
+const onScroll=()=>{if(still)return;inp.scy=Math.max(0,scrollY);inp.sc=1-Math.exp(-inp.scy/820);if(calm)kick()};
+const onMove=e=>{if(still)return;if(e.pointerType==='mouse'){inp.mx=clamp(e.clientX/innerWidth*2-1,-1,1);inp.my=clamp(1-e.clientY/innerHeight*2,-1,1)}};
 const onTilt=e=>{if(e.beta==null||e.gamma==null)return;const land=Math.abs((screen.orientation&&screen.orientation.angle)||0)===90,b=land?e.gamma:e.beta,gm=land?e.beta:e.gamma;
   if(!tiltBase)tiltBase=[b,gm];tiltBase[0]+=(b-tiltBase[0])*.012;tiltBase[1]+=(gm-tiltBase[1])*.012;                       // как человек держит телефон — это «ровно»
   inp.tx=clamp((gm-tiltBase[1])/22,-1,1);inp.ty=clamp(-(b-tiltBase[0])/22,-1,1)};
@@ -392,7 +399,7 @@ function tiltOn(){   // на iPhone наклон даётся только с р
   else{tiltAsk=1;addEventListener('deviceorientation',onTilt,{passive:true})}}
 const onTouch=()=>tiltOn();
 const onVis=()=>{pauses.hidden=document.hidden;if(!document.hidden)kick()};
-const onResize=()=>{if(!on)return;resize(false);kick()};
+const onResize=()=>{if(!on)return;if(still){clearTimeout(stT);stT=setTimeout(()=>{if(on){resize(false);kick()}},220);return}resize(false);kick()};
 const onLost=e=>{e.preventDefault();cancelAnimationFrame(raf);raf=0;pauses.lost=true};
 const onBack=()=>{try{for(const k in TEX)TEX[k].tex=null;G.sp=null;const raw=G.starRaw;initGL();if(raw)stars(raw);blank();pauses.lost=false;kick()}catch(e){fail(e)}};
 function blank(){G.blank=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.blank);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,1,1,0,gl.RGB,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0]))}
@@ -401,7 +408,7 @@ function blank(){G.blank=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.blank
 const K=window.KOSMOS={
   start(o){
     if(on)return true;opt=o||{};failed='';ready=false;
-    calm=opt.calm!=null?!!opt.calm:matchMedia('(prefers-reduced-motion:reduce)').matches;
+    calm=opt.calm!=null?!!opt.calm:matchMedia('(prefers-reduced-motion:reduce)').matches;still=!!opt.still;if(still)calm=true;
     try{
       if(!cv){cv=document.createElement('canvas');cv.id='kosmos3d';cv.setAttribute('aria-hidden','true');
         cv.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;height:100lvh;z-index:-1;pointer-events:none;opacity:0;transition:opacity 1.3s ease;display:block;background:#02030c';
@@ -416,23 +423,23 @@ const K=window.KOSMOS={
     if(!K._loaded){K._loaded=1;loadAll()}
     launchW=!!(opt.launch&&!calm);cv.style.transition='opacity '+(launchW?'.4s':'1.3s')+' ease';
     kick();return true},
-  stop(){if(!cv)return;on=false;cancelAnimationFrame(raf);raf=0;cv.style.opacity='0';const c=cv;setTimeout(()=>{if(!on)c.style.display='none'},700);
+  stop(){if(!cv)return;on=false;cancelAnimationFrame(raf);raf=0;clearTimeout(stT);clearTimeout(rfT);cv.style.opacity='0';const c=cv;setTimeout(()=>{if(!on)c.style.display='none'},700);
     removeEventListener('scroll',onScroll);removeEventListener('pointermove',onMove);removeEventListener('pointerup',onTouch);removeEventListener('resize',onResize);
     removeEventListener('deviceorientation',onTilt);document.removeEventListener('visibilitychange',onVis);tiltAsk=0;tiltBase=null;inp.tx=inp.ty=0;look.on=false;look.ty=look.tp=0},
   go(t){if(!on||TABS.indexOf(t)<0||t===tab)return;   // смена раздела — прыжок к другому месту
-    if(calm){tab=t;fadeIn=.25;kick();return}
+    if(calm){tab=t;fadeIn=still?1:.25;kickS();return}
     tr={kind:'jump',t0:T,dur:.62,p0:cam.p,q0:qmul(qmul(cam.q,qaxis([1,0,0],-sm.pitch-look.p)),qaxis([0,1,0],-sm.yaw-look.y)),fov0:cam.fov};tab=t;kick()},
-  shift(d){if(!on)return;phaseT+=(d>0?1:-1)*.085;if(!calm){sm.kick+=(d>0?-1:1)*5*DEG;slideT+=(d>0?1:-1)*2.4}kick()},   // смена периода — сдвиг вдоль орбиты
-  zoom(z){if(!on)return;zoomT=z?1:0;clearTimeout(K._zt);
+  shift(d){if(!on)return;phaseT+=(d>0?1:-1)*.085;if(!calm){sm.kick+=(d>0?-1:1)*5*DEG;slideT+=(d>0?1:-1)*2.4}kickS()},   // смена периода — сдвиг вдоль орбиты
+  zoom(z){if(!on||still)return;zoomT=z?1:0;clearTimeout(K._zt);
     if(z)K._zt=setTimeout(()=>{if(zoomT===1)pauses.sheet=true},900);else{pauses.sheet=false}kick()},                     // лист открыт — приблизились и замерли
   launch(){if(!on||calm)return;env=envNow();const c=rig(tab,T,env),up=norm(c.p),B=basis(c.q);
     const f=norm(add(mul(B.f,.82),mul(up,.62)));hazeCol=dot(up,env.S)>.02?[.36,.58,.98]:dot(up,env.S)>-.2?[.5,.34,.42]:[.035,.05,.13];
     tr={kind:'launch',t0:T,dur:1.7,q0:qlook(f,up)};haze=1;kick()},
-  pause(why,v){pauses[why||'x']=!!v;if(!v)kick()},
+  pause(why,v){const k=why||'x',was=!!pauses[k];pauses[k]=!!v;if(was&&!v)kick()},   // кадр нужен, только когда пауза действительно снята
   system(s){sys=s||null;kick()},                                                              // планеты-данные в окне страницы (см. drawSys)
-  see(v){look.on=!!v;kick()},                                                                 // «Погружение»: страница убрана, взгляд свободный
-  look(dx,dy){if(!on)return;const s=cam.fov/Math.max(cssW,cssH)*1.15;look.ty+=dx*s;look.tp=clamp(look.tp+dy*s,-1.15,1.15);kick()},   // сдвиг пальца или мыши в точках экрана
-  state(){return {on,ready,failed,frames,tab,calm,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),look:[+look.y.toFixed(3),+look.p.toFixed(3)],sys:sysN,
+  see(v){look.on=!!v;if(still&&on)resize(true);kick()},                                                                 // «Погружение»: страница убрана, взгляд свободный
+  look(dx,dy){if(!on)return;const s=cam.fov/Math.max(cssW,cssH)*1.15;look.ty+=dx*s;look.tp=clamp(look.tp+dy*s,-1.15,1.15);if(still)lowAt=performance.now();kick()},   // сдвиг пальца или мыши в точках экрана
+  state(){return {on,ready,failed,frames,tab,calm,still,tier,scale:+scale.toFixed(3),w:W,h:H,fps:Math.round(fps),paused:paused(),jump:!!tr,warp:+warp.toFixed(3),zoom:+zoom.toFixed(3),phase:+phase.toFixed(4),look:[+look.y.toFixed(3),+look.p.toFixed(3)],sys:sysN,
     v2:!!(G&&G.v2),lod:!!(G&&G.lod),stars:G&&G.ns||0,loaded:Object.assign({},loaded),t:+T.toFixed(2),
     cam:{p:cam.p.map(x=>+x.toFixed(4)),q:cam.q.map(x=>+x.toFixed(5)),fov:+(cam.fov/DEG).toFixed(2)},
     sun:A?A.sun.map(x=>+x.toFixed(4)):null,moon:A?A.moon.map(x=>+x.toFixed(4)):null,gmst:A?+(A.gmst/DEG).toFixed(3):null}},
