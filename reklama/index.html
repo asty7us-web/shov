@@ -701,6 +701,8 @@ function vTov(){
    <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт / ${kr(td.or)} ₽ · работает ${nW} РК</div></div></div>`;
   const get=i=>{const g=kabAgg([i]);return g};const memo={};const gm=i=>memo[i]||(memo[i]=get(i));
   h+=`<div class="card" style="margin-top:10px"><div class="hrw" style="margin:0 0 8px"><h3>${esc(K.name)} по дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],['drr','s','or'].includes(S.chm)?S.chm:'drr','sm')}</div>${dayChart(gm,['drr','s','or'].includes(S.chm)?S.chm:'drr')}</div>`;
+  const BL=bdAll();if(BL.length){const nc=BL.filter(x=>x.ch).length,ns=BL.filter(x=>x.b.mode==='sam').length;
+    h+=`<button class="pc press" type="button" data-act="bidall" style="grid-template-columns:1fr auto;align-items:center;margin-top:10px"><div style="min-width:0"><div class="nm">Биддер</div><div class="muted" style="font-size:12.5px;margin-top:2px">${jn('цель по месту у '+BL.length+' кампаний',nc?'поменял бы ставку у '+nc:'ставки менять не нужно',ns?'сам ведёт '+ns:'')}</div></div><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink3)"><path d="m9 6 6 6-6 6"/></svg></button>`}
   h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3><button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
       ${S.view==='cards'?seg('sort',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],S.sort,'sm'):''}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или покажите все товары.</div>';
@@ -849,7 +851,7 @@ function limPill(r){const ol=ourLim(r);
   if(r.mar&&r.mar.lim)return `<span class="pill num">лимит Марплы ${f0(r.mar.lim.max)} ₽/день</span>`;return ''}
 function rkRow(r,nm,ix){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},mb=r.mar&&r.mar.bid&&r.mar.bid.length;
   return `<button class="rk press" type="button" data-rk="${r.id}|${nm}"><div class="t"><b>${esc(r.name)}</b>${stHtml(r)}</div>
-   <div class="m"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${r.bud!=null?`<span class="pill num ${r.bud<300&&rkSt(r).w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${mb?'<span class="pill">биддер Марплы</span>':''}</div>
+   <div class="m"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${r.bud!=null?`<span class="pill num ${r.bud<300&&rkSt(r).w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${mb?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}</div>
    <div class="k kpi"><div><b class="num">${rub(a.s)}</b><span>расход</span></div><div><b class="num">${f0(a.q)}</b><span>заказы</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div><div><b class="num">${f0(a.c)}</b><span>клики · ${pc(a.ctr)}</span></div></div></button>`}
 
 /* ───────── товар ───────── */
@@ -917,6 +919,7 @@ function openRk(id,nm){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r
   h+=`<div class="hrw"><h3>Ставка</h3></div><div class="kv">${Object.entries(e.b||{}).map(([p,v])=>`<span>Сейчас · ${PLN[p]||p}</span><b class="num">${kop(v)} ${r.pay==='cpm'?'за 1000 показов':'за клик'}</b>`).join('')}
     ${Object.keys(mn).length?(r.pl||[]).map(p=>{const k=p==='recommendations'?'recommendation':p;return mn[k]!=null?`<span>Минимум ВБ · ${PLN[p]||p}</span><b class="num">${kop(mn[k])}</b>`:''}).join(''):''}
     ${Object.entries(rc).filter(([k,v])=>v).map(([k,v])=>`<span>ВБ советует · ${RL[k]||k}</span><b class="num">${kop(v)}</b>`).join('')}${e.mn?`<span>Минус-фраз</span><b class="num">${e.mn}</b>`:''}</div>`;
+  h+=bdBlock(r,nm);
   h+=`<div class="hrw"><h3>Запросы</h3><button class="lnk" type="button" data-act="tokw" data-rk="${id}|${nm}">все запросы</button></div><div id="rkkw">${KL?rkKw(id,nm):'<div class="sk" style="height:70px"></div>'}</div>`;
   h+=`<div class="hrw"><h3>Таблица по дням</h3></div><div class="tw" style="box-shadow:none;background:var(--card2)"><table><thead><tr>${['День','Расход','Клики','Показы','Клик из показа','В корзину','Заказы','Цена заказа','Место'].map(x=>`<th style="background:var(--card2)">${x}</th>`).join('')}</tr></thead><tbody>`
     +ix.concat([T]).reverse().map(i=>{const x=g(i);return `<tr style="cursor:default"><td style="background:var(--card2)">${dlab(i)}</td><td class="num"><b>${f0(x.s)}</b></td><td class="num">${f0(x.c)}</td><td class="num">${x.v?f0(x.v):'—'}</td><td class="num">${pc(x.ctr)}</td><td class="num">${f0(x.a)}</td><td class="num">${f0(x.q)}</td><td class="num">${x.cpo==null?'—':isFinite(x.cpo)?f0(x.cpo):'нет'}</td><td class="num">${e.pos&&e.pos[i]?e.pos[i]:'—'}</td></tr>`}).join('')+'</tbody></table></div>';
@@ -1090,6 +1093,58 @@ function actRefresh(mode){if(!UPR){reload().then(()=>toast('Показаны п�
   sheet(()=>({t:mode==='full'?'Обновить всё':'Обновить быстро',s:esc(D.kab.kab1?'оба кабинета':K.name),h:`<div class="note">${mode==='full'?'Полный сбор: 31 день статистики, запросы с местами, минус-фразы, воронка, акции, остатки. Идёт 15–30 минут — страницу можно закрыть.':'Быстрый сбор: статусы, ставки, бюджеты, лимиты, цены, статистика и запросы за 3 дня. Около двух минут.'} Заодно в «Историю» попадёт то, что меняли в кабинете ВБ.</div>${RUNBOX('Запустить сбор')}`,
     after:()=>{$('#okBtn').onclick=()=>{$('#refBtn').classList.add('spin');run({k:'refresh',mode},()=>{$('#refBtn').classList.remove('spin');reload().then(()=>{closeAll();toast('Данные обновлены')}).catch(()=>{closeAll()})})}}}),true)}
 
+/* ───────── биддер: совет считает сборщик (bidder.py), в режиме «сам» ставку ставит страж ───────── */
+const BDK={segodnya:' сегодня',posle:' после смены ставки',vchera:' вчера',malo:' сегодня'};
+const bdOn=b=>!!(b&&b.mode&&b.mode!=='off');
+const bdCh=b=>bdOn(b)&&b.new!=null&&b.cur!=null&&b.new!==b.cur;
+const bdName=b=>!bdOn(b)||b.src==='marpla'?'выключен':(b.mode==='sam'?'сам':'совет')+' · цель '+b.cel+' · до '+kop(b.max);
+const bdPill=e=>{const b=e.bd;if(!bdOn(b))return '';const ch=bdCh(b);if(b.src==='marpla'&&!ch)return '';
+  return `<span class="pill ${b.mode==='sam'?'a':''} num">${b.src==='marpla'?'наш биддер поставил бы':b.mode==='sam'?'биддер: сам':'биддер: совет'}${ch?' '+(b.new>b.cur?'↑':'↓')+' '+kop(b.new):''}</span>`};
+function bdBlock(r,nm){const e=r.nm[nm]||{},b=e.bd;if(!e.b||(e.b.search==null&&e.b.combined==null))return '';
+  const on=bdOn(b),ch=bdCh(b);
+  let h=`<div class="hrw"><h3>Биддер</h3><button class="lnk" type="button" data-act="bidder" data-rk="${r.id}|${nm}">${on&&b.src==='svoi'?'настроить':'включить'}</button></div>`;
+  if(!on)return h+'<div class="note" style="margin-top:0">Не включён. Задайте цель — место в поиске — и потолок ставки. В режиме «Совет» сервис покажет, какую ставку поставил бы; в режиме «Сам» будет ставить её сам, не выше потолка.</div>';
+  h+=`<div class="kv"><span>Режим</span><b>${b.mode==='sam'?'сам ставит ставку':'совет'}${b.src==='marpla'?' · по настройкам Марплы':''}</b>
+    <span>Цель</span><b class="num">${b.cel} место</b>${b.q?`<span>Запрос</span><b>${esc(b.q)}</b>`:''}<span>Потолок ставки</span><b class="num">${kop(b.max)}</b>
+    ${b.kod&&b.cur!=null&&b.pk?`<span>Место${BDK[b.pk]||''}</span><b class="num">${b.p==null?'—':f1(b.p)}${b.oc?' <span class="muted">по расчёту</span>':''}</b>`:''}
+    ${b.kod&&b.cur!=null?`<span>${b.mode==='sam'?'Поставит':'Поставил бы'}</span><b class="num">${ch?kop(b.cur)+' → '+kop(b.new):(b.mode==='sam'?'оставит ':'оставил бы ')+kop(b.cur)}</b>`:''}</div>
+    <div class="note${b.kod==='potolok'||b.kod==='min_potolok'?' w':''}">${esc(b.why||'')}${b.t&&b.kod?` <span class="muted">Посчитано в ${esc(b.t)} МСК.</span>`:''}</div>`;
+  return h}
+function bdAll(){const L=[];for(const r of K.rk)for(const nm in r.nm){const b=r.nm[nm].bd;if(bdOn(b)&&b.kod&&b.kod!=='pauza')L.push({r,nm,b,ch:bdCh(b)})}   // кампании на паузе в общий список не идут
+  return L.sort((x,y)=>(y.b.mode==='sam')-(x.b.mode==='sam')||y.ch-x.ch||(y.b.kod==='potolok')-(x.b.kod==='potolok')||(y.b.p||0)-(x.b.p||0))}
+function openBidAll(){sheet(()=>{const L=bdAll(),n=f=>L.filter(f).length;
+  let h=`<div class="note" style="margin-top:0">Биддер держит ставку под нужное место в поиске. Место — среднее за день по данным ВБ: «места прямо сейчас» ВБ не отдаёт. «Совет» только показывает ставку, «Сам» — ставит её, не выше потолка. У кампаний с биддером Марплы совет посчитан по её цели и потолку — для сравнения.</div>
+   <div class="tiles" style="margin-top:10px"><div class="tile"><div class="l">Поднял бы</div><div class="v num">${n(x=>x.ch&&x.b.new>x.b.cur)}</div><div class="d">место хуже цели</div></div>
+   <div class="tile"><div class="l">Снизил бы</div><div class="v num">${n(x=>x.ch&&x.b.new<x.b.cur)}</div><div class="d">место лучше цели</div></div>
+   <div class="tile"><div class="l">На потолке</div><div class="v num">${n(x=>x.b.kod==='potolok')}</div><div class="d">цель не достигается</div></div>
+   <div class="tile"><div class="l">Ведёт сам</div><div class="v num">${n(x=>x.b.mode==='sam')}</div><div class="d">из ${L.length}</div></div></div><div style="margin-top:8px">`;
+  for(const {r,nm,b,ch} of L){const t=TOV[nm];
+    h+=`<button class="akr press" type="button" data-bdr="${r.id}|${nm}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(t?t.art:r.name)}</b><span class="num">${jn('цель '+b.cel,'место '+(b.p==null?'—':f1(b.p)),b.mode==='sam'?'сам':b.src==='marpla'?'как в Марпле':'совет',b.q?'«'+esc(b.q.length>26?b.q.slice(0,25)+'…':b.q)+'»':'')}</span></div>
+      <div class="pr num">${kop(ch?b.new:b.cur)}<small>${ch?(b.new>b.cur?'поднять с ':'снизить с ')+kop(b.cur):b.kod==='potolok'?'на потолке':b.kod==='derzhu'?'держит':b.kod==='zhdu'||b.kod==='malo'?'ждёт данных':b.kod==='pauza'?'кампания стоит':'без изменений'}</small></div></button>`}
+  return {t:'Биддер',s:esc(K.name)+' · кампаний с целью: '+L.length,h:h+'</div>'+(L.length?'':'<div class="empty"><b>Биддер нигде не включён</b>Откройте кампанию и нажмите «включить» в блоке «Биддер».</div>')}})}
+function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd||{},cpm=r.pay==='cpm',pl=e.b&&e.b.search!=null?'search':'combined',cur=(e.b||{})[pl];
+  const mb=!!(r.mar&&(r.mar.bid||[]).some(z=>z.zona==='search')),mn=(e.min||{})[pl],top=cpm?(K.cfg.cpmMaxBid||2999900):(K.cfg.cpcMaxBid||15000),svoi=bdOn(b)&&b.src==='svoi',T=TOV[nm];
+  const o={mode:svoi?b.mode:'sovet',cel:String(b.cel||3),max:b.max?f2(b.max/100).replace(/\s/g,''):(cur?f2(cur/100).replace(/\s/g,''):''),q:svoi?(b.qs||''):''};
+  let qs=[];if(KL&&T&&((KL.kab[S.kab]||{}).k||{})[id+'|'+nm]){const sv={sort:S.kw.sort,dir:S.kw.dir};S.kw.sort='s';S.kw.dir=-1;qs=kwData(T,id).filter(x=>!x.xall).slice(0,12).map(x=>x.t);Object.assign(S.kw,sv)}
+  if(o.q&&!qs.includes(o.q))qs.unshift(o.q);
+  sheet(()=>({t:'Биддер',s:esc(r.name),h:`${seg('bdm',[['off','Выключен'],['sovet','Совет'],['sam','Сам']],o.mode,'sm')}
+     <div class="note">${o.mode==='off'?'Сервис не считает совет и не трогает ставку этой кампании.':o.mode==='sovet'?'Сервис только показывает, какую ставку поставил бы. Саму ставку не трогает.':'Сервис сам меняет ставку: не выше потолка, не больше 30% за раз, не чаще раза в час и не больше 10 раз в день. Каждая правка видна в «Истории» под кнопкой «Автоматика».'}</div>
+     ${o.mode==='off'?'':`<label class="fld"><span>Цель — место в поиске</span><input class="inp num" id="bdc" inputmode="numeric" value="${esc(o.cel)}"></label>
+     <label class="fld"><span>Потолок ставки, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ставка ${kop(cur)}${mn!=null?' · минимум ВБ '+kop(mn):''}</span><input class="inp num" id="bdx" inputmode="decimal" value="${esc(o.max)}"></label>
+     <label class="fld"><span>По какому запросу смотреть место</span><select class="inp" id="bdq" style="width:100%;font-size:16px"><option value="">Главный запрос кампании</option>${qs.map(q=>`<option value="${esc(q)}"${q===o.q?' selected':''}>${esc(q)}</option>`).join('')}</select></label>`}
+     <div class="cmp"><div><small>Сейчас</small><b style="font-size:15px;white-space:normal">${bdName(b)}</b></div><div class="ar">→</div><div><small>Станет</small><b style="font-size:15px;white-space:normal" id="bdnew">—</b></div></div>
+     ${mb&&o.mode==='sam'?'<div class="note b">У кампании включён биддер Марплы. Два биддера будут перебивать ставку друг у друга, поэтому сторож откажет, пока биддер Марплы для этой кампании не выключен.</div>':mb&&o.mode==='sovet'?'<div class="note">Ставку этой кампании сейчас ведёт биддер Марплы. Совет покажет, что поставил бы наш биддер при этих цели и потолке.</div>':''}
+     ${o.mode==='sam'?'<div class="note w">Место ВБ отдаёт средним за день, а не «прямо сейчас», поэтому ставка меняется несколько раз в день, а не каждые минуты. На живом кабинете режим «Сам» ещё не проверялся — первый раз включайте на одной кампании.</div>':''}
+     <div id="bderr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить')}`,
+     after:()=>{const up=()=>{if(o.mode==='off'){$('#bdnew').textContent='выключен';$('#okBtn').disabled=!bdOn(b);return}
+        const c=numv('bdc'),x=numv('bdx'),k=Math.round(x*100),okc=isFinite(c)&&c>=1&&c<=50&&c===Math.round(c),okx=isFinite(x)&&k>0&&k<=top&&(mn==null||k>=mn)&&(!cpm||k%100===0);
+        $('#bdnew').textContent=okc&&okx?(o.mode==='sam'?'сам':'совет')+' · цель '+c+' · до '+kop(k):'—';
+        $('#bderr').textContent=!isFinite(c)||!isFinite(x)?'':!okc?'Цель — целое место от 1 до 50.':mn!=null&&k<mn?'Потолок ниже минимальной ставки ВБ ('+kop(mn)+').':cpm&&k%100?'У кампаний за показы ставка — целым числом рублей.':!okx?'Потолок вне границ ВБ.':cur&&k<cur?'Потолок ниже нынешней ставки — биддер опустит её до потолка.':'';
+        $('#okBtn').disabled=!(okc&&okx)};
+       const c0=$('#bdc'),x0=$('#bdx');if(c0)c0.oninput=up;if(x0)x0.oninput=up;up();
+       $('#okBtn').onclick=()=>run(o.mode==='off'?{k:'bidder',cid:id,nm:+nm,mode:'off'}:{k:'bidder',cid:id,nm:+nm,mode:o.mode,cel:Math.round(numv('bdc')),max:Math.round(numv('bdx')*100),q:$('#bdq').value})}}),true);
+  SEGCB.bdm=v=>{const c=$('#bdc'),x=$('#bdx'),q=$('#bdq');if(c)o.cel=c.value;if(x)o.max=x.value;if(q)o.q=q.value;o.mode=v;redraw()}}
+
 /* ───────── события ───────── */
 const SEGCB={};
 function onSeg(id,v){
@@ -1129,12 +1184,14 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
     else if(a==='st')actStatus(+rk[0],rk[1]);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
     else if(a==='price')actPrice(+x.dataset.nm);else if(a==='note')actNote(x.dataset.nm||0);else if(a==='create')actCreate(+x.dataset.nm);
     else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
+    else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='bidall')openBidAll();
     else if(a==='unlock')unlock();else if(a==='lockupr'){UPR=null;RS.del('upr');if(ES){ES.close();ES=null}render(true);toast('Управление на этом устройстве выключено')}
     else if(a==='ref-fast')actRefresh('fast');else if(a==='ref-full')actRefresh('full');
     else if(a==='nstsave'){if(!need())return;const n=nst();$$('[data-nst]').forEach(b=>{const k=b.dataset.nst,v=b.getAttribute('aria-checked')==='true';if(k==='on')n.on=v;else n[k].on=v});
       $$('[data-nstv]').forEach(i=>{const [k,f]=i.dataset.nstv.split('.'),v=parseFloat(i.value);if(isFinite(v))n[k][f]=v});
       sheet(()=>({t:'Сохранить настройки уведомлений?',s:'',h:`<div class="note">Сторож начнёт присылать по новым правилам со следующей проверки.</div>${RUNBOX('Сохранить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'nst',nst:n})}}),true)}
     return}
+  if(x=c('[data-bdr]')){const [id,nm]=x.dataset.bdr.split('|');openRk(+id,nm);return}
   if(x=c('.rk[data-rk]')){const [id,nm]=x.dataset.rk.split('|');openRk(+id,nm);return}
   if(x=c('.pc[data-nm], tr[data-nm]')){openProd(+x.dataset.nm);return}
 });
@@ -1160,7 +1217,7 @@ async function boot(pass){
   const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1])}
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>{if(SHS.length){back();return true}return false}],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
-window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch};
+window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,bdAll,openBidAll};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
