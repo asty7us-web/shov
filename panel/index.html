@@ -105,10 +105,11 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .svc-ic.k{--svc-glow:rgba(255,160,70,.5);background:linear-gradient(145deg,#80603f 0%,#3b2b1c 52%,#170f08 100%)}
 .svc-ic.z{--svc-glow:rgba(100,185,255,.5);background:linear-gradient(145deg,#456690 0%,#1d2d47 52%,#0a111d 100%)}
 .svc-ic.p{--svc-glow:rgba(30,34,48,.6);background:linear-gradient(145deg,#5b6275 0%,#262a36 52%,#0c0d12 100%)}
+.svc-ic.r{--svc-glow:rgba(255,120,160,.5);background:linear-gradient(145deg,#8a4a63 0%,#3e1c2b 52%,#190a11 100%)}
 @media (hover:hover){.svc-btn:hover .svc-ic,.svc-it:hover .svc-ic{transform:rotate(-8deg) scale(1.06)}}
 .svc-btn[aria-expanded="true"] .svc-ic{transform:rotate(-8deg) scale(1.06)}
 .svc-menu.on .svc-it .svc-ic{animation:svc-ico .6s cubic-bezier(.34,1.56,.64,1) both}
-.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}.svc-menu.on .svc-it:nth-child(5) .svc-ic{animation-delay:.15s}.svc-menu.on .svc-it:nth-child(6) .svc-ic{animation-delay:.2s}
+.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}.svc-menu.on .svc-it:nth-child(5) .svc-ic{animation-delay:.15s}.svc-menu.on .svc-it:nth-child(6) .svc-ic{animation-delay:.2s}.svc-menu.on .svc-it:nth-child(7) .svc-ic{animation-delay:.25s}
 @keyframes svc-ico{from{transform:scale(.6) rotate(-20deg);opacity:0}}
 .svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
   background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
@@ -132,7 +133,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .svc-it.go .svc-sp{opacity:1;animation:svc-spin .7s linear infinite}
 @keyframes svc-spin{to{transform:rotate(360deg)}}
 .svc-menu.on .svc-it{animation:svc-row .5s cubic-bezier(.22,1.2,.36,1) both}
-.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}.svc-menu.on .svc-it:nth-child(5){animation-delay:.105s}.svc-menu.on .svc-it:nth-child(6){animation-delay:.14s}
+.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}.svc-menu.on .svc-it:nth-child(5){animation-delay:.105s}.svc-menu.on .svc-it:nth-child(6){animation-delay:.14s}.svc-menu.on .svc-it:nth-child(7){animation-delay:.175s}
 @keyframes svc-row{from{opacity:0;transform:translateY(-6px)}}
 /* выбор темы — как в Юнитке (Андрей 29.10: «как в юнитке выбор везде тем формат»): кнопка «значок + название темы», под ней список
    с кружками и группами «Весёлые» / «Спокойные». Юнитка рисует свой (он образец), Склейки и Конкуренты — svcPicker() отсюда */
@@ -500,19 +501,6 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .k3cap .pill{background:rgba(150,160,255,.2);color:#e4e6ff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .k3cap .pill.on{background:#a996ff;color:#0b0a26}
 @media (min-width:900px){.k3cap{padding-left:30px;padding-right:30px}.k3cap .pills{margin:12px 0 0;padding:2px 0}}
-/* «данные в космосе»: окно в «Сводке», за которым сцена рисует площадки (или склейки площадки) планетами; подписи — кнопки страницы */
-.sysw{display:none}
-:root[data-theme="space"][data-k3d="1"] .sysw{display:block;position:relative;height:276px;margin:0 0 12px;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 .5px var(--line);
-  background:linear-gradient(rgba(8,10,34,.34),rgba(8,10,34,.08) 42%,rgba(8,10,34,.34))}
-.sysh{position:absolute;left:16px;right:16px;top:13px;z-index:1;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;pointer-events:none}
-.sysh b{font:700 11px/1 var(--f);letter-spacing:.14em;text-transform:uppercase;color:#cfc6ff}
-.sysh span{font-size:12px;color:var(--ink3)}
-.sysl{position:absolute;inset:0}
-.sysl button{position:absolute;left:0;top:0;transform:translate(-300px,-300px);display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px 5px;border-radius:12px;white-space:nowrap;color:#fff;text-shadow:0 1px 7px rgba(2,3,12,.95),0 0 2px rgba(2,3,12,.9);will-change:transform}
-.sysl button i{display:block;border-radius:50%}
-.sysl button b{font:650 12.5px/1.2 var(--f)}
-.sysl button small{font:500 11px/1.15 var(--f);color:#d5d8ff}
-@media (min-width:900px){:root[data-theme="space"][data-k3d="1"] .sysw{height:330px}.sysl button b{font-size:13.5px}.sysl button small{font-size:12px}}
 /* «Космос»: звёзды, туманность, строка с посылом */
 #stars{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:none;pointer-events:none}
 :root[data-theme="space"] #stars{display:block}
@@ -597,13 +585,43 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 }
 @media (min-width:1240px){.pcs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){:root:not([data-theme="space"]) *,:root:not([data-theme="space"]) *::before,:root:not([data-theme="space"]) *::after{animation-duration:.01s!important;transition-duration:.01s!important}}
+/* 13.11.2026 — правки по словам Андрея */
+/* значки площадок — настоящие, как в «Конкурентах» и «Склейках» (skleyki\icons.json) */
+.mpi.wb,.mpd.wb{background:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzgwMTBfNzc2KSI+CjxtYXNrIGlkPSJtYXNrMF84MDEwXzc3NiIgc3R5bGU9Im1hc2stdHlwZTphbHBoYSIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iMCIgeT0iMCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4Ij4KPHBhdGggZD0iTTAgMTMuNjUzM0MwIDguODc0MjIgMCA2LjQ4NDY2IDAuOTMwMDc4IDQuNjU5MjhDMS43NDgyIDMuMDUzNjMgMy4wNTM2MyAxLjc0ODIgNC42NTkyOCAwLjkzMDA3OEM2LjQ4NDY2IDAgOC44NzQyMiAwIDEzLjY1MzMgMEgzNC4zNDY3QzM5LjEyNTggMCA0MS41MTUzIDAgNDMuMzQwNyAwLjkzMDA3OEM0NC45NDY0IDEuNzQ4MiA0Ni4yNTE4IDMuMDUzNjMgNDcuMDY5OSA0LjY1OTI4QzQ4IDYuNDg0NjYgNDggOC44NzQyMiA0OCAxMy42NTMzVjM0LjM0NjdDNDggMzkuMTI1OCA0OCA0MS41MTUzIDQ3LjA2OTkgNDMuMzQwN0M0Ni4yNTE4IDQ0Ljk0NjQgNDQuOTQ2NCA0Ni4yNTE4IDQzLjM0MDcgNDcuMDY5OUM0MS41MTUzIDQ4IDM5LjEyNTggNDggMzQuMzQ2NyA0OEgxMy42NTMzQzguODc0MjIgNDggNi40ODQ2NiA0OCA0LjY1OTI4IDQ3LjA2OTlDMy4wNTM2MyA0Ni4yNTE4IDEuNzQ4MiA0NC45NDY0IDAuOTMwMDc4IDQzLjM0MDdDMCA0MS41MTUzIDAgMzkuMTI1OCAwIDM0LjM0NjdWMTMuNjUzM1oiIGZpbGw9IiNGRjAwMDAiIHN0eWxlPSJmaWxsOiNGRjAwMDA7ZmlsbDpjb2xvcihkaXNwbGF5LXAzIDEuMDAwMCAwLjAwMDAgMC4wMDAwKTtmaWxsLW9wYWNpdHk6MTsiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzgwMTBfNzc2KSI+CjxyZWN0IHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgZmlsbD0iI0ZGMDBGRiIgc3R5bGU9ImZpbGw6I0ZGMDBGRjtmaWxsOmNvbG9yKGRpc3BsYXktcDMgMS4wMDAwIDAuMDAwMCAxLjAwMDApO2ZpbGwtb3BhY2l0eToxOyIvPgo8cGF0aCBkPSJNMzUuNjU4NyAxNy43NDI2QzM0LjA1ODcgMTcuNzQyNiAzMi42MTM3IDE4LjIyMzcgMzEuMzggMTkuMDQ3MVYxMS41MzIySDI3Ljk2NjlWMjUuMzkxM0MyNy45NjY5IDI5LjYwNzggMzEuNDE3NSAzMy4wMDEgMzUuNjQgMzMuMDAxQzM5Ljg2MjQgMzMuMDAxIDQzLjM1MjIgMjkuNjI4MSA0My4zNTIyIDI1LjM1MjNDNDMuMzUyMiAyMS4wNzY1IDM5LjkzOTEgMTcuNzQyNiAzNS42NTg3IDE3Ljc0MjZaTTIwLjE2OTUgMjYuMzcwNEwxNy4wNDYxIDE4LjI4MTNIMTQuNjU1NEwxMS41MTMzIDI2LjM3MDRMOC4zNzExNSAxOC4yODEzSDQuNjQ3OTVMMTAuMTQzMyAzMi41MDQ2SDEyLjUzNEwxNS44MzEyIDI0LjAzMjdMMTkuMTQ3MSAzMi41MDQ2SDIxLjUzNzhMMjcuMDE0NCAxOC4yODEzSDIzLjMxMTdMMjAuMTY5NSAyNi4zNzA0Wk0zNS42NDE3IDI5LjYwOTVDMzMuMzI3NyAyOS42MDk1IDMxLjM4IDI3Ljc2OTcgMzEuMzggMjUuMzcyN0MzMS4zOCAyMi45NzU2IDMzLjIxMTggMjEuMTU2MSAzNS42NjA0IDIxLjE1NjFDMzguMTA5IDIxLjE1NjEgMzkuOTQwOCAyMy4wNTM1IDM5Ljk0MDggMjUuMzcyN0MzOS45NDA4IDI3LjY5MTggMzcuOTkzMiAyOS42MDk1IDM1LjY0MTcgMjkuNjA5NVoiIGZpbGw9IndoaXRlIiBzdHlsZT0iZmlsbDp3aGl0ZTtmaWxsLW9wYWNpdHk6MTsiLz4KPC9nPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzgwMTBfNzc2Ij4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZpbGw6d2hpdGU7ZmlsbC1vcGFjaXR5OjE7Ii8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==") center/cover no-repeat}
+.mpi.ozon,.mpd.ozon{background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAARVElEQVR42u2deXQcxZ3HP1XdGh0jWRKWsI2NDwQ2hhhMsDlDMBBuCISQTfwMARzCFd4C2fCWhGwSQ0jYTdZACNdyk4MrweEMkGdOGx+wYGwMGORrET6wJdk65+iu2j+qWz0SM/b0aCRryNR74xk99zW/b/3O+v5qBLO0pjh22ZBFERQBKAJQHEUAigAURxGAIgDFUQSgCEBxFAEoAlAcRQCKABRHEYB/imEX8sMLASLlMwR/pw6/3u4X3nXK5yIAIYXdI3QBjgvaBZT30t775072dF16n22wLXO8BpQOPhcBSJWZNO+OMoLWLuC/AFEJu+8GVWVQWQaVpRAtNeeRMuu7EtARg844tHXD5u3gtKUAYwOWOU8KcPXgaYg9VGe5q8Dt9GZ0OVRVwIR6mLYXTBoJDSNgVC2MGGYAiJYZ4Wca3YneAGxohcbN8O4nsORj83esG1QCKAOrxIAw0OZKDIUlSX+mu0nAMUIvrYKjJsK0Bjh4AhzSAGOH7/xarsp8/UzDcWFlEyz4yLzmr4Qtmz3tKAG7xFx3ICS1ywAQwqi70qBjRuj19TB9bzjrYDhyEkwcZY7p5VC1dw6BtvQ4X7EDJ6x7O2P/fCmCa/hj/VZY3Ah/WACvrITO7Z5W2N69dQED4Nt21wESZoYdMQm+dSh8YxqMq+99fNI1QkonqHwO5QHr38sfb62BPy6EPy6A5i0BEOk0bUgD4M941wW6YVgNnHEIXHKcMTGldiAIf3qmzvDBHD3PQODQP2mGuc/BvfOhvR1k1NMkXQAASAnKBWJQVQvnfwVmHwNTx/W2w34UMpSGUgYLywPi7XVwwxPwxCKjvdI2xwxJAPyoRnVDSTlcMAP+/TTYa0TgMMUunOlhhu97fCDung/XPAwt28Eqz90kDRgAlgQ3YZzrSQfDz86Cw/fpreKyAAshrgr80comuPB/YPFKsKK5gZB3AHpmfRfsMQJ+PRO+e9TnH77Qh+OabLqlE867A55ZZPxCWHOUVwAsP7pJwjePhN/MMslTX/X9ogxXme/kuHDJfXDvC2BVhNMEO6/Cj0N5GfzmAvjB8b1niiX4wg1LmollW3DnbJNlP/4qWJVetDdYAFgS3C4YOxoeuBiO2c+z83hFr8H2lpls40BEeCIA4YGLobkdXloGsjw7cyTzIvxOOHYqLPy5Eb5v6wckpNQpIYlS5uWqQO+FSP9S2hzjn5PHlFYKc8mKUvjDZbDnCNCJ7IIM2W/hd8CZX4F5P4IxuwV2cUCyI8c1CPhZnZTmZcmem+r2LnRzO3pTK/qzbejtneiEY463ZHCOHw34APYTCynNZfaohbnn7aA0ni8nbEtwOuGc4+DeiyBi51n4PWnm51VJN7ehN7SgP2qCDz9FN25Ab2yB9i6IJcyDOF6SUWJBiQ2VZYjdaxANoxBTxiP2H4sYUwc1lX1SYPqlur4MzrsLHnpx5/4gJwBsCU4HzPoaPHhJ4IzyZnLSIKnebkS/+h76nUbUe+vg4w2mUJRaXUstGokUc+WbrNSqXcRGTN4TMW0i4pgDsE78sql59zNeVspoQ+MmOOha6OgGITMrWGgALMvY/BOnw7yroCwCWuUhqUoTq+pla1DPLEU9uxS9bhNsaTPHVZRCpCQQpv+mUxcg+5YA09wvnoSuGETLEWPrkf9yFPKcYxENozJOhGytpRRwxUPwuyd3nKSFAkBKU1Y4aCK8+GOoq8zTzFcpCMaTuPPeQD3yKnrh+9DaAaUlgSnxV2vy4UB9P+IqSCShKw6jh2NdeBLyqm8gqspzAsH1vs6qjXDItdARN9423SNnDYAUoJJQOwwWzYFJo/Jg81PR64zhPvwK6u4X0CvWGodbWW5uMChLU56TjiehI4aYvg/WTRchD58cepalPu7X58Jzb4Bd5cUQ/YqCNNx2QR6Er1PsrNa4j75G8vhrcS+7Df3eOmNiqqPeMpnK/ypIJqn5WePwKvSyNThfn4P7+AKvjq5CYelb01MPNNlWppzADhPrX3oazDy8v8L3IhtLolesw73+YdRTi4ynqo6mOEy968qejgtV5ZBwcL93M7LMRpx+WChN8OVzylSoqIKuDM5YZmV6EtAwFq472zxDzkmlUj0nu3c+S/Kkn6KeXGRMTbQsmO1DpdATsZHKpePK+2hdtw0E6CyfzxfRuDoYU+vlBCIXEyQMHeQXZ0NdlZkgOTldz9Hqlnac2XNxr7jLcEWGRYOsdghW21RFGaVrm1h/22u0CYFAZW0NtTdZvzzeUGlkWAAsacrKxx9sTE/OEY8XFujGDThnXod6aD4MqzD2Ntuq1S4aytVEKm2cp5bQsjEB0grl6gD2HxNwmbIGQAgT31sR+LdTgmQrtPnxHIZ6u5Hk6XPQS1bB8OqB43nku9imFYlIBVPXLqf+jWVGNlqFqgvWRoMKSigAVBwO3RdOmGIuZsschb9sNc63b4T1m6G6Ahyn4ErPyrIob1yX07nDyjPHFDsV6ZUnBmFV6Bjfkug1m3DP/S00bTH8QUdRkENrtAofbYPH2AsDgJQm8hk32pSXQ9enfO/TGcP5/i3oVU0mrCtU4fvS270mp7PbuslIzZOZQk/icNz+JvJxVUjb78Xxzpw/o19ZbiqOBSv8YFaKKeNCk9AAtrSn1qp2AoDABCayHE4+sI8uhbH7L7+Luv0ZI/whHunsNBGKJRCTxyAnjQm1uuYftrXNqwVlpQFe9FNRAUdO7J3VZf3A8STuDY+ajFKIXZbU5o1V1p1AnDTNZOohzIF/2HtNhv6eFQACE7NOqIdRNZmruRlnvxC4Ty9BL/rAOF1VwKZHCFMlHVmLdc6x4WThHRpPwjvrPQB0lhqAC9P3Cm99kKZtRT32GiQdU/wo5GEJaO9Gnn88YvKevcvmWeYAKz+F5o4QTlhg6hbj6nZMMkjreIVAN21FL3jf1HeUW9ick844TBmPdcUZXmAhQrlCgH+sgESHYVRnpQHC89bDK0MC4OmKXrEOmtu8On4Bmx6PLWzPvQixe43HpRRZS8KSxgi8sCJzFpw5EdMm/CSHorBu3ODdTRR262VnDOuX30Uee2CwxBUmDQI+2gRLVmnEDsi7ckfmPKfRFS9spysFbOvEuvJMY3rcHBe8BTz0mqKrU2BJndGSyEwnb+8K7fTNqI4WbrwP0NqBvPx0rBtnB7X3HJJQNn7Gcb+7hVo6cIRAZkBAZsq622M5TqIDJnhfRheWw3UUdHQjr/kW9tzvf74DPMS6hxSC5J8XcMLSp7n/g9spdZIomR4EmVb+EppaQpoi70HlQQ3wpfGmL7QQGgBsy5hNAdatl2L/8rzguUML35BEddNW9B3P0l1VxxlNr3PPstuxcdECRJ+JKdPGrxa8tTbkM/h0kapyrMtONRmIHOKzXghobkfsOwZ73n9gXXRysE6Ry7qrN8PdXz8G6zZjRSy67SjnfPIPbllxH0iBRPeyaOk1wIIPNwT+VIfka1uzjkHMPBq2ths+z1BztJaE9m5wXOTFJ2M/dz1yxgEB2yAX4ffUwJaj/vSSWfdQLlJrYiVRLlvzJL96/0+4lkSkgJDeB1jQ0g5LV/emTGadf5fY2DddjDjhIFOJyvVL5bum4/N+tnUipk/EfuQa7Nt/gBhRY7LcXKke2uu3am7H/dE9hjLp1cAEGqE13XaUaz56hB+vegJlC6S3uJBWAyzLcD+f+t+wyVhAihF1w7Af/Qli5gzDbnPcwQfCZ75ZEjpjsL0TsfceWHdcjv3365EnTwu4o7n6K+2zPSB59T3o5WvNCkzKrPUbwmN2Bb/64EEub/w7bkRiazc9M05KUDGYPAGWzDF7MYQ2iyknuHc+a+zip82GdFUWCTj6A9UJDoYpnXBMz/H0ichzv4b17aOCUFnlgdTqkbnc3z+N+8O7zfqjTr/1ikYg0NgqyeypV/DghBmZqYk+CH+9Gs6aniMZS+meHlT9f1twb5qH+tsbsH6LAaGsJGAh91APs9w3pm9/q0/ocpUh3Gpg/AjkEZORM49GfnWK4R7ls1vQE756YiHO7JuDnGEHz6+EwFIKV1rMPvDynQMwfV/T+WLJfvTzpqCnV29EPbkI9fRS9LLVxiYnHBMOltpg2wHSadms3jd0lLG1Sce8RyywbcSIGsSMKYivTkEetT9iwsjeAsuXGfSF//pKnLNvgO64aZLIQqs1Alu7dFulmQEQKcyIh38I3zmsn5REn9/pXyCRRH3YhH5lOXrpKvT6z9AbWuCzbYawJVLajVJ33PDJSdVR2L3GONAxwxFTG5CHTUZ+aRzUVvZZo+hzLfLTv6AWf4gz8z9hy3Yoj4Tij2oEErVjdrSUoOPQMBre+AUMr8pDV3tfIPzRGUM3NcOWbejWDvSW7cZxdsWNrS4tgUgJYrcqqBuG8ABgZC2iPJKG/DsAex9oz8TZFuqld3HO+28TLlaUhhJ+b5+wE3q6lKA64PyT4P6LjObbMl9Eg5TOlf7w3F2V3i+Q7+5Lc3311GKci281uUTImR+aF6SU6fB4cD48+LrXnuTmKVrxkyK/ByC147FvR2Pq/zlub9q6f42BasNP2dTCvflvZuZ3xfot/Kzp6co78tK7YWQ1nHhAQKXPbx1eZEHyYHDpQH6Ctr2L5NX3oh94EaLlJljop/CzbtDQGoRl6muzboVFjUb4hU712fmsN6ZRLVlF8vSfo+9/wTh/r7FkUDduVQpkxHSCn/lbs9Tmm6Mv1A9hKW22TbQk2nFxb3wM59Sfod/82OM45ZdUHLpL0qctlpXCXRcGO6EMXIf2IAo+JTpTr7+He93DhtlXWeZR6dXQ2LRPStAOCA1XngJzvgOVJaCVQiCG3rZXIQSvGzfg/tdfDLUmljSc1gHsUcu5Uz51N6zrhy3mpxeW4h5xEFahbAzkRzbeZNGrN+I+NB91/4uwsdUI3pIDMuvzsluK1iDRyGGCikXvwrzncM4/DXnVmYix9b1n11AAw68ViZTSNKBXNeHe/TzqrwvhE49CXxMN6koM4Z1zXQQkYazVAa5G/f5pkk8twvreichzj0PsWReEj75WMEgbxKVuFqpUr02LdDyJfv4t1JOLUc+/5ZUSSk0JY5AEn9cdsxYu/AlHtH5ALFKGjCVMvDp6OPKMw5GzZiCnT+odxvuJlcjjhqCpe0L4CR699y7Wy9eiXn4X9/HXzV4TnXFTPratwelFHggALK1pfPlSxnd9RlyWGDqoEKbC2RmD6ihi2j6Io6cgzzgM2TDKlKLTOUKRTfKlP/+nSOP4lYa2LtTbjajn3kS/+RF6xXrY3mFme8QOIptdGEfn7oQBLaA+3sb7r/4ruyXaSQo7WPXv2alVeVuGCKgsR+w3FnHoJOTUBthvLGKvkYia/nOJ9LZOaNqK/vhT9Mr1qHdWwztrTFEvnjD3j5YF3YZDJHnJ2QcIrdFSsEeslYibRPVdidBeQiO80rG3PYF+uxG98H1cIRCjahF11TC8CjFhJGLvUVBfjaitMqXX6ore5slV0NqBbmmHlg7Yuh29dhN67SZo6TBV1M2tiFgCSiNeBdWCsmhKkqW+GL+gITyy6sh4K6UqiRIyfbXGB8JXm/IIRMsQWkN7N7qlA1wXvWBlb2GLHZggnYYHbkmwLUS0zOz7489yPfSEntdN+0bFWylVjrH/2awlKh3Q1m3Lo62IzDY+qy4sev8cRgHR4vupATAy1goqibIiWGHtas/ida72WP/z/oqSSNEAlNOH71UcAw6AiwQX6hLthd+KVGgACLShVziKukQbSCs7+18cedw3VECVEzMAZIqAimOANMBbn65yu6hPtKGEZcLK4hgsDTBlg0onRn2iDUdYRUkOrg8w/9QkOylLduEKWfQBu+LHPEfHWr4QsXjBAeDnTmNiLYXbjlrYGiA8DWjO+ONpxTEIJmhMbGtRgrvUB3S3sFNCfHHscPw/Ox70NfA+n4EAAAAASUVORK5CYII=") center/cover no-repeat}
+.mpi.ym,.mpd.ym{background:url("data:image/png;base64,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") center/cover no-repeat}
+.mpi{font-size:0!important;color:transparent!important;box-shadow:0 0 0 .5px rgba(0,0,0,.14)}
+.mpd{width:15px;height:15px;border-radius:4.5px;box-shadow:0 0 0 .5px rgba(0,0,0,.14)}
+/* «Космос» с 3D-сценой: карточки и таблицы прозрачнее — космос виден сквозь них; то, что позади, приглушается, поэтому цифры читаются */
+:root[data-theme="space"][data-k3d="1"]{--card:rgba(18,21,58,.34);--card2:rgba(30,34,84,.5);--hdr:rgba(7,9,32,.5)}
+:root[data-theme="space"][data-k3d="1"] .card,:root[data-theme="space"][data-k3d="1"] .k,:root[data-theme="space"][data-k3d="1"] .pc,:root[data-theme="space"][data-k3d="1"] .tw,:root[data-theme="space"][data-k3d="1"] .spl{
+  backdrop-filter:blur(9px) brightness(.68) saturate(1.2);-webkit-backdrop-filter:blur(9px) brightness(.68) saturate(1.2)}
+:root[data-theme="space"][data-k3d="1"] .tw{background:rgba(14,17,50,.3)}
+:root[data-theme="space"][data-k3d="1"] .tb th,:root[data-theme="space"][data-k3d="1"] .tb tr.tot td{background:rgba(24,28,76,.9)}
+:root[data-theme="space"][data-k3d="1"] .tb td:first-child{background:rgba(15,18,52,.86)}
+:root[data-theme="space"][data-k3d="1"] .tb th:first-child,:root[data-theme="space"][data-k3d="1"] .tb tr.tot td:first-child{background:rgba(24,28,76,.96)}
+/* посыл дня — только слова: созвездия и полёты отсюда убраны */
+:root[data-theme="space"] .aff{min-height:0}
+.aff .q{margin-right:0!important;min-height:0}
+/* СПП — общая цифра и товары одной строкой */
+.spl{display:grid;grid-template-columns:minmax(0,1fr);margin-top:12px;border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:var(--sh1)}
+.spr,.sph{display:grid;grid-template-columns:minmax(0,1fr) 54px 124px;gap:8px;align-items:center;padding:9px 14px;text-align:left;border-bottom:.5px solid var(--line2);width:100%}
+.sph{font:600 11.5px/1.2 var(--f);color:var(--ink3);border-bottom-color:var(--line)}
+.sph span:nth-child(n+2),.spr .p,.spr .c{text-align:right}
+.spr{font-size:14px}
+.spr .n{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.spr .p{font:700 15px/1 var(--fd)}
+.spr .c{font-size:12px;color:var(--ink2);white-space:nowrap}
+@media (hover:hover){.spr:hover{background:var(--fill2)}}
+@media (min-width:900px){.spl{grid-template-columns:repeat(2,minmax(0,1fr))}.spl .sph{grid-column:1/-1;display:none}}
+@media (min-width:1240px){.spl{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
 <header class="top svc-hdr" id="top">
   <div class="bar">
-    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки, Панель"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-nm">Панель</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" id="toZakup" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/panel/" aria-current="page" role="menuitem"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Панель</b><small>продажи, прибыль, ДРР по товарам</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
+    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-nm">Панель</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" id="toZakup" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/panel/" aria-current="page" role="menuitem"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Панель</b><small>продажи, прибыль, ДРР по товарам</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a><a class="svc-it" href="/shov/reklama/" id="toRekl" role="menuitem"><em class="svc-ic r"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11.2" cy="12.8" r="7.4" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><circle cx="11.2" cy="12.8" r="3" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><path d="m11.2 12.8 7.2-7.2" stroke="#ff8fb1" stroke-width="2.3" stroke-linecap="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Реклама</b><small>РК ВБ: статистика, ключи, акции</small></span><i class="svc-sp" aria-hidden="true"></i></a></div></div><!--/SVC:HTML-->
     <nav class="dtabs seg" id="dtabs" aria-label="Разделы"></nav>
     <div class="sp"></div>
     <button class="ico press" id="k3Btn" aria-label="Погрузиться в космос" title="Погрузиться в космос"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -632,10 +650,10 @@ m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return
 addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
-// столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели)
-const TH=[['auto','auto','auto','auto','auto'],['light',null,'light','light','light'],['dark','graphite','dark','dark','dark'],['space','space','space','space','space'],['jim','jim',null,null,null],
-  ['farcry','farcry','farcry',null,null],['sonic','sonic','sonic',null,null],['solitaire','solitaire','solitaire',null,null],['birds','birds','birds',null,null]],
-  KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme'];
+// столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели, svcTheme(5, …) — у Рекламы)
+const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space',null],['jim','jim',null,null,null,null],
+  ['farcry','farcry','farcry',null,null,null],['sonic','sonic','sonic',null,null,null],['solitaire','solitaire','solitaire',null,null,null],['birds','birds','birds',null,null,null]],
+  KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme','rek.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
 /* выбор темы в формате Юнитки: svcPicker({btn:'#id кнопки', list:[[ключ, название, группа, чей значок/кружок]], cur, onPick, sw:{свои кружки}}).
    Значки и кружки общих тем — те же, что в Юнитке (TH и SWATCH там) */
@@ -1061,7 +1079,7 @@ function vSum(){
   if(g==='d'&&S.mp==='all')notes.push('День — только Озон: у ВБ в панели недели, у ЯМ месяцы.');
   if(g==='w'&&S.mp==='all'&&D.mp.ym)notes.push('Неделя — ВБ и Озон: у ЯМ в панели только месяцы.');
   if(joined())notes.push('Товар, который продаётся на нескольких площадках, идёт одной строкой с суммой по площадкам — разбивка внутри. Отдельной строкой на каждую площадку — «Товары», кнопка «Вместе».');
-  return `<div class="aff" id="aff"></div><div class="sysw" id="sysw" hidden><div class="sysh"><b>Система продаж</b><span id="sysc"></span></div><div class="sysl" id="sysl"></div></div>
+  return `<div class="aff" id="aff"></div>
 <div class="g sg">
 <div class="card hero"><div class="lbl">Продажи · ${plabel(g,k,true)}${S.mp!=='all'?' · '+MPN[S.mp]:''}${S.kab?' · Каб '+S.kab:''}</div>
 <div class="big"><span class="num" id="heroV" data-v="${PS.get('lastHero','')}">${fr(m.sales)}</span>${dS!=null?chip(dS):''}</div>
@@ -1088,24 +1106,6 @@ ${kpi('Эквайринг и хранение',`<span class="num">${fp(sh(m.acq+
 <div class="g g2" style="margin-top:12px">${catc}${sklc}${lead}${drag}${mov}</div>
 ${notes.length?`<div class="note">${notes.join(' ')}</div>`:''}${foot()}`;
 }
-/* «Данные в космосе» (тема «Космос» в 3D): в «Сводке» площадки — планеты на орбитах, в срезе одной площадки — её склейки. Размер — продажи,
-   цвет — маржа (зелёная от 12% продаж, жёлтая около нуля, красная в минусе); у самой большой — кольцо. Планеты рисует сцена (KOSMOS.system),
-   подписи — кнопки страницы: площадка — data-mp (выбрать её), склейка — data-skl (открыть лист). */
-function sysDraw(){
-  if(!K3.live)return;const el=$('#sysw');if(!el||S.tab!=='sum'){KOSMOS.system(null);return}
-  const g=S.g,k=curK(),its=items(g,k),all=S.mp==='all'&&MPS.length>1;
-  let ls=all?MPS.map(mp=>({t:MPN[mp],m:met(vsum(its.filter(x=>x.mp===mp).map(x=>x.v))),a:`data-mp="${mp}"`}))
-    :sklsC(g,k).filter(x=>x.key!=='-').map(x=>({t:x.t,m:x.m,a:`data-skl="${esc(x.key)}"`}));
-  const nar=innerWidth<900;ls=ls.filter(x=>x.m.sales>0).sort((a,b)=>b.m.sales-a.m.sales).slice(0,all||!nar?7:5);   // на телефоне склеек пять: семь подписей не помещаются
-  el.hidden=!ls.length;if(!ls.length){KOSMOS.system(null);return}
-  const mx=ls[0].m.sales,G=[.37,.95,.69],Y=[1,.81,.44],B=[1,.53,.59];
-  const colr=q=>{const t=Math.max(-1,Math.min(1,q/.12)),a=t>=0?Y:B,b=t>=0?G:Y,u=t>=0?t:t+1;return a.map((v,i)=>v+(b[i]-v)*u)};
-  const sp=ls.map((x,i)=>{const r=Math.sqrt(x.m.sales/mx),q=x.m.profit/x.m.sales;return {r,q,col:colr(q),ring:i===0&&ls.length>1,d:Math.round(26+54*r)}});
-  $('#sysc').textContent=(all?'площадки':'склейки · '+MPN[S.mp])+' · размер — продажи, цвет — маржа';
-  $('#sysl').innerHTML=ls.map((x,i)=>`<button ${x.a} class="press" aria-label="${esc(x.t)}"><i style="width:${sp[i].d}px;height:${sp[i].d}px"></i><b>${esc(x.t.length>18?x.t.slice(0,17)+'…':x.t)}</b>${nar&&!all&&i>2?'':`<small class="num">${fm(x.m.sales)} · ${(sp[i].q*100).toFixed(1).replace('.',',')}%</small>`}</button>`).join('');
-  KOSMOS.system({el,items:sp,labels:$$('#sysl button')});
-}
-
 /* по какой день данные каждой площадки: ВБ грузится неделями, Озон — днями, ЯМ — месяцами. Строка под выбором площадки и срока, в каждом разделе */
 const KINDN={wm:'неделями',w:'неделями',d:'по дням',m:'по месяцам'};
 const uptoS=(mp,long)=>{const B=D.mp[mp];if(!B.upto)return '';const d=pd(B.upto);return B.kind==='m'?MONN[d.getUTCMonth()].toLowerCase():(long?DOW[d.getUTCDay()]+', ':'')+dstr(d)};
@@ -1308,11 +1308,8 @@ function vSpp(){
   return `<div class="card hero"><div class="lbl">${S.mp==='ozon'?'Соинвест Озона':S.mp==='all'?'Доплата площадок':'СПП'} · ${plabel(g,k,true)}${S.mp!=='all'?' · '+MPN[S.mp]:''}</div>
 <div class="big"><span class="num">${P>0?fp(Sx/P):'—'}</span></div>
 <div class="sub">${bym.length>1?bym.map(o=>`<span>${MPN[o.mp]} <b class="num">${fp(o.x/o.p)}</b></span>`).join(''):''}<span>продажи по нашей цене <b class="num">${fm(P)}</b></span><span>площадка доплатила <b class="num">${fm(Sx)}</b></span></div>
-<div class="note">Доля нашей цены, которую доплатила площадка (у Озона — соинвест), — как лист «СПП» панели. «Наша цена» — в кабинете со скидкой продавца, «Покупателю» — на витрине в последнем снимке, линия — последние 30 дней. Товар без продаж за период считается по снимку витрины.</div></div>
-<div class="tools" style="margin-top:12px"><label class="srch${S.q?' has':''}" id="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" placeholder="Товар" value="${esc(S.q)}" autocomplete="off"><button class="cl" id="qx" type="button" aria-label="Очистить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></label></div>
-<div class="cnt">Товаров с СПП ${rs.length}</div>
-<div class="pcs">${rs.slice(0,150).map(({it,s,last})=>`<button class="pc press" data-open="${pid(it)}"><div class="h"><div class="n"><b>${mpi(it.mp)}${hl(it.r.a,S.q.trim())}</b><small>${s.src?`по продажам · ${fq(s.q)} шт`:'витрина, продаж за период нет'}</small></div><div class="s"><b class="num">${fp(s.pct)}</b><small class="mut3" style="font-size:12.5px">${nm[it.mp]}</small></div></div>
-<div class="m" style="grid-template-columns:1fr 1fr 1.3fr"><div><span>Наша цена</span><b class="num">${last?fr(last[3]):'—'}</b></div><div><span>Покупателю</span><b class="num">${last&&last[4]?fr(last[4]):'—'}</b></div><div>${spark(sppDays(it.mp,it.i,30))}</div></div></button>`).join('')}</div>${foot()}`;
+<div class="note">Доля нашей цены, которую доплатила площадка (у Озона — соинвест), как лист «СПП» панели. Цена «покупателю» — с витрины в последнем снимке. Подробности по товару — по нажатию и в Юнитке.</div></div>
+<div class="spl"><div class="sph"><span>Товар · ${rs.length}</span><span>${S.mp==='ozon'?'Соинвест':'СПП'}</span><span>наша → покупателю</span></div>${rs.slice(0,200).map(({it,s,last})=>`<button class="spr press" data-open="${pid(it)}"><span class="n">${mpi(it.mp)}${esc(it.r.a)}</span><b class="p num">${fp(s.pct)}</b><span class="c num">${last?fr(last[3]):'—'} → ${last&&last[4]?fr(last[4]):'—'}</span></button>`).join('')}</div>${foot()}`;
 }
 
 /* ───────── Год ───────── */
@@ -1530,7 +1527,6 @@ function render(keep){
   const yw=$('#ytw');if(yw&&!keep)yw.scrollLeft=yw.scrollWidth;
   reopen();
   affDraw();
-  sysDraw();
 }
 function go(t){if(S.tab===t){scrollTo({top:0,behavior:'smooth'});return}SCR[S.tab]=scrollY;S.tab=t;PS.set('tab',t);S.q='';list.n=60;K3.call('go',t);
   $$('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));const dt=$('#dtabs');dt.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===t));dt._place&&dt._place();
@@ -1584,7 +1580,7 @@ function applyTheme(t,user){
   const dark=t==='dark'||t==='space'||(t==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);
   $('#tc').content=t==='space'?'#060822':dark?'#000000':'#f2f2f7';
   $('#sndBtn').hidden=t!=='space';
-  if(t==='space'){if(!r.dataset.k3d)stars.start();K3.on(user);aff.start();if(user)AMB.want();setTimeout(()=>{if(document.documentElement.dataset.theme==='space'){const i=new Image();i.src='kosmos/orion.webp'}},2600)}else{stars.stop();K3.off();aff.stop();AMB.stop();ORI.close()}
+  if(t==='space'){if(!r.dataset.k3d)stars.start();K3.on(user);aff.start();if(user)AMB.want();}else{stars.stop();K3.off();aff.stop();AMB.stop();ORI.close()}
   $$('.seg').forEach(s=>s._place&&s._place());
 }
 function themeInit(){
@@ -1600,7 +1596,7 @@ const K3=(()=>{let st=0,want=false,lz=false,obs=null;const R=document.documentEl
   const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
   const run=()=>{if(!want||!window.KOSMOS)return;const up=lz;lz=false;
     const ok=KOSMOS.start({base:'kosmos/',tab:S.tab,launch:up,
-      onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();sysDraw();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
+      onReady(){if(!want)return;R.dataset.k3d='1';stars.stop();if(up&&!KOSMOS.state().calm){R.classList.add('k3up');setTimeout(()=>R.classList.remove('k3up'),2000)}},
       onFail(){st=3;delete R.dataset.k3d;if(want)stars.start()}});
     if(!ok)return;
     if(shw.classList.contains('on'))KOSMOS.zoom(true);KOSMOS.pause('ori',ORI.isOpen());
@@ -1641,140 +1637,10 @@ const stars=(()=>{const cv=$('#stars'),cx=cv.getContext('2d');let st=[],raf=0,on
   document.addEventListener('visibilitychange',()=>{if(!on)return;cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(draw)});
   return {start(){if(on)return;on=true;size();raf=requestAnimationFrame(draw)},stop(){on=false;cancelAnimationFrame(raf)}}})();
 
-/* «Космос»: созвездия и полёт к настоящим местам (Андрей 12.11: «не статичный шар, а красивое созвездие… место, которое реально
-   существует; при нажатии попадаешь туда и можешь путешествовать»; потом: «надо больше 1 как то мало же»). Места настоящие — снимки
-   космического телескопа «Хаббл»; звёзды созвездий стоят по карте неба, масштаб честный: снимок Туманности Ориона занимает полградуса
-   неба под Поясом Ориона. Орион описан здесь, остальные места — kosmos/mesta.json (panel_sayt\kosmos_mesta.py), грузится только в «Космосе».
-   Мир места: снимок — квадрат [0..1], север вверху, восток слева. Камера: центр (x, y) в мире и s — сколько пикселей экрана в единице мира. */
-const ORI=(()=>{
-  const ORION=(()=>{const FOV=.5,T=[.442,.447],RA0=83.8186,DE0=-5.3897,KD=Math.cos(DE0*Math.PI/180);
-    const st=(n,ra,de,m,c)=>[n,T[0]-(ra-RA0)*KD/FOV,T[1]-(de-DE0)/FOV,m,c];   // прямое восхождение и склонение в градусах, звёздная величина, цвет
-    return {id:'ori',name:'Орион',obj:'Туманность Ориона',go:'К Туманности Ориона',img:'orion',T,seed:20261112,
-      stars:[st('Бетельгейзе',88.7929,7.4071,.5,'255,176,128'),st('Ригель',78.6345,-8.2017,.1,'188,214,255'),st('Беллатрикс',81.2828,6.3497,1.6,'205,222,255'),
-        st('Минтака',83.0017,-.2992,2.2,'210,225,255'),st('Альнилам',84.0534,-1.2019,1.7,'210,225,255'),st('Альнитак',85.1897,-1.9428,1.8,'210,225,255'),
-        st('Саиф',86.9391,-9.6697,2.1,'205,222,255'),st('Меисса',83.7845,9.9342,3.4,'210,225,255'),st('Хатиса',83.8583,-5.91,2.8,'210,225,255')],
-      lines:[[0,2],[0,5],[2,3],[3,4],[4,5],[5,6],[3,1],[6,1],[7,0],[7,2]],dash:[4,8],lab:[[0,0,'Бетельгейзе'],[1,1,'Ригель'],[5,-1,'Пояс Ориона']],
-      cst:[.75,-10.4,27,50,0],fld:[-25,51,-46,72],far:[-14,16,-34,12],zmax:9,
-      det:[['trap',.442,.447,.11],['bar',.43,.535,.10],['m43',.32,.215,.12]],   // участки снимка крупно: имя, центр, половина стороны (как в kosmos_make.py)
-      pills:[['const','Созвездие'],['neb','Туманность'],['trap','Трапеция'],['bar','Перемычка'],['m43','M43']],
-      tg:{neb:[.47,.47,1],trap:[.442,.447,3.4],bar:[.43,.53,3],m43:[.32,.215,2.7]},
-      V:{const:['Созвездие Орион','зимнее небо над Россией','Плечо Ориона — красный сверхгигант Бетельгейзе, нога — голубой Ригель, посередине три звезды Пояса. Под Поясом висит Меч, и средняя «звезда» в нём — не звезда, а туманность.'],
-        neb:['Туманность Ориона','M42 · около 1 344 световых лет от нас','Облако газа и пыли поперечником примерно в 24 световых года. Здесь прямо сейчас рождаются звёзды и планеты. В ясную ночь его видно без телескопа — это средняя «звезда» в Мече Ориона.'],
-        trap:['Трапеция','сердце туманности','Четыре молодые горячие звезды. Их свет заставляет газ вокруг светиться, а звёздный ветер выдувает в облаке полость — в неё мы и смотрим.'],
-        bar:['Перемычка Ориона','край полости','Плотная стена газа и пыли. Звёзды Трапеции светят на неё сбоку, поэтому она горит яркой полосой.'],
-        m43:['M43','туманность де Мерана','Часть того же облака за тёмной полосой пыли. Её подсвечивает одна-единственная молодая звезда — она в центре.']},
-      credit:'Снимок: NASA, ESA, M. Robberto (STScI/ESA) и команда проекта «Хаббл».'}})();
-  /* место → всё, что нужно для рисования: звёзды, фоновые звёзды (для глубины, не каталог), границы. У мест мельче Ориона снимок в сотни раз
-     меньше созвездия, поэтому есть ещё «встречные» звёзды W — кольцами вокруг места, чтобы в долгом приближении экран не был пустым */
-  const prep=p=>{const c=p.cst;p.T=p.T||[.5,.5];p.S=p.stars.map(a=>({n:a[0],x:a[1],y:a[2],m:a[3],c:a[4]}));
-    p.fld=p.fld||[c[0]-.95*c[2],1.89*c[2],c[1]-.71*c[3],1.44*c[3]];p.far=p.far||[c[0]-.55*c[2],c[0]+.565*c[2],c[1]-.47*c[3],c[1]+.45*c[3]];
-    let seed=p.seed||(20261113+p.id.charCodeAt(0)*131+p.id.charCodeAt(1)*17);const rnd=()=>(seed=seed*48271%2147483647)/2147483647;
-    p.F=Array.from({length:520},()=>({x:p.fld[0]+rnd()*p.fld[1],y:p.fld[2]+rnd()*p.fld[3],m:rnd(),p:rnd()*6.28}));
-    const R=Math.max(c[2],c[3]);
-    p.W=p.id==='ori'?[]:Array.from({length:300},()=>{const a=rnd()*6.283,r=Math.exp(Math.log(.72)+rnd()*Math.log(R/.72));return {x:p.T[0]+Math.cos(a)*r,y:p.T[1]+Math.sin(a)*r,m:rnd(),p:rnd()*6.28}});
-    return p};
-  const places=[prep(ORION)];
-  let P=places[0],cp=places[0],pinned=false,lp=null;   // P — место в открытом слое, cp — созвездие в карточке посыла
-  const cam={x:.47,y:.47,s:800},ptrs=new Map();
-  let w=0,h=0,d=1,box=null,cz,cw,cv,cx,anim=null,cur='',raf=0,isOpen=false,pinch=null,lastTap=0,down=null,cardT=0,autoT=0;
-  let fbH=0;const meas=()=>{fbH=P.id!=='ori'&&box?box.querySelector('.cbot').offsetHeight:0},free=()=>fbH?[84,Math.max(160,h-fbH+30-84)]:null;   // у новых мест созвездие вписывается в полосу между заголовком и нижней панелью
-  const cover=()=>Math.max(w,h),sC=()=>{const f=free();return Math.min(w/P.cst[2],f?f[1]/(P.cst[3]*.78):h/P.cst[3])},smin=()=>sC()*.8,smax=()=>cover()*P.zmax;
-  const tgt=k=>{if(k==='const'){const s=sC(),f=free();return {x:P.cst[0],y:P.cst[1]+(f?(h/2-f[0]-f[1]/2)/s:0),s}}const t=P.tg[k]||P.tg.neb;return {x:t[0],y:t[1],s:cover()*t[2]}};
-  const load=()=>lp||(lp=fetch('kosmos/mesta.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).then(a=>{for(const p of a)if(!places.some(q=>q.id===p.id))places.push(prep(p));pls()}).catch(()=>{lp=null}));
-  /* небо: фоновые звёзды, линии и звёзды созвездия, отметка места. c — камера, k — пикселей холста в пикселе экрана, fa — мы ещё «у созвездия» (1 … 0) */
-  function sky(ctx,W,H,c,t,k,fa,mini,p){
-    ctx.clearRect(0,0,W,H);const X=x=>W/2+(x-c.x)*c.s*k,Y=y=>H/2+(y-c.y)*c.s*k,T=p.T,S=p.S,tx0=X(T[0]),ty0=Y(T[1]);
-    for(const f of p.F){const x=X(f.x),y=Y(f.y);if(x<-4||y<-4||x>W+4||y>H+4)continue;const a=(.18+.5*f.m)*(.6+.4*Math.sin(t*.0011+f.p))*(.3+.7*fa);
-      ctx.fillStyle='rgba(215,222,255,'+a.toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,(.45+f.m*.75)*k*(mini?.8:1),0,6.283);ctx.fill()}
-    if(!mini)for(const f of p.W){const x=X(f.x),y=Y(f.y);if(x<-4||y<-4||x>W+4||y>H+4)continue;   // встречные звёзды: у самого места не видны, проявляются, разлетаясь к краям
-      const a=(.16+.5*f.m)*(.6+.4*Math.sin(t*.0011+f.p))*Math.min(1,Math.max(0,(Math.hypot(x-tx0,y-ty0)/k-30)/110));if(a<.012)continue;
-      ctx.fillStyle='rgba(215,222,255,'+a.toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,(.45+f.m*.75)*k,0,6.283);ctx.fill()}
-    if(fa>.02){ctx.lineWidth=k;ctx.strokeStyle='rgba(170,182,255,'+(.34*fa).toFixed(3)+')';ctx.beginPath();
-      for(const [a,b] of p.lines){ctx.moveTo(X(S[a].x),Y(S[a].y));ctx.lineTo(X(S[b].x),Y(S[b].y))}ctx.stroke();
-      const q=p.dash;if(q&&q.length){ctx.setLineDash([2*k,4*k]);ctx.beginPath();ctx.moveTo(X(S[q[0]].x),Y(S[q[0]].y));ctx.lineTo(tx0,ty0);if(q[1]!=null)ctx.lineTo(X(S[q[1]].x),Y(S[q[1]].y));ctx.stroke();ctx.setLineDash([])}}
-    for(const s of S){const x=X(s.x),y=Y(s.y);if(x<-40||y<-40||x>W+40||y>H+40)continue;const r=Math.max(1.1,3.9-s.m*.72)*k*(mini?.72:1),tw=.82+.18*Math.sin(t*.0017+s.x);
-      const g=ctx.createRadialGradient(x,y,0,x,y,r*4.2);g.addColorStop(0,'rgba('+s.c+','+(.55*tw).toFixed(3)+')');g.addColorStop(1,'rgba('+s.c+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*4.2,0,6.283);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,'+(.95*tw).toFixed(3)+')';ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill()}
-    const fm=p.id==='ori'||mini?fa:Math.max(fa,1-Math.min(1,Math.max(0,(c.s-18)/60)));   // место издалека — розовая искра и расходящееся кольцо: туда и летим; у мелких мест искра живёт, пока снимок не вырастет
-    if(fm>.02){const ph=(t%2600)/2600,rr=(mini?5:7)*k;
-      const g=ctx.createRadialGradient(tx0,ty0,0,tx0,ty0,rr*2.4);g.addColorStop(0,'rgba(255,150,205,'+(.9*fm).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,205,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(tx0,ty0,rr*2.4,0,6.283);ctx.fill();
-      ctx.strokeStyle='rgba(255,190,225,'+((1-ph)*.7*fm).toFixed(3)+')';ctx.lineWidth=1.2*k;ctx.beginPath();ctx.arc(tx0,ty0,rr*(1+ph*2.6),0,6.283);ctx.stroke()}
-    if(mini||fm<=.35)return;
-    ctx.font='500 '+(11.5*k)+'px -apple-system,"Segoe UI",Roboto,sans-serif';ctx.textBaseline='middle';
-    if(fa>.35){ctx.fillStyle='rgba(200,206,255,'+Math.min(1,(fa-.35)*1.4).toFixed(3)+')';
-      for(const [i,dx,tx] of p.lab){const x=X(S[i].x),y=Y(S[i].y),tw=ctx.measureText(tx).width;   // подпись не уходит за край экрана
-        if(dx===0){ctx.textAlign='left';ctx.fillText(tx,Math.max(8*k,Math.min(W-tw-8*k,x-tw/2)),y-17*k)}
-        else if(dx>0&&x+13*k+tw>W-6*k||dx<0&&x-13*k-tw>6*k){ctx.textAlign='right';ctx.fillText(tx,x-13*k,y)}
-        else{ctx.textAlign='left';ctx.fillText(tx,x+13*k,y)}}}
-    const tx=p.obj,tw=ctx.measureText(tx).width;ctx.fillStyle='rgba(255,190,225,'+Math.min(1,(fm-.35)*1.6).toFixed(3)+')';
-    if(tx0+17*k+tw>W-6*k){ctx.textAlign='right';ctx.fillText(tx,tx0-17*k,ty0+k)}else{ctx.textAlign='left';ctx.fillText(tx,tx0+17*k,ty0+k)}
-    ctx.textAlign='left';
-  }
-  function card(){   // созвездие в карточке посыла: живое, чуть дышит; нажатие по карточке — полёт
-    cancelAnimationFrame(cardT);let last=0;load();
-    const loop=t=>{const el=document.querySelector('#aff .cst');if(!el||document.documentElement.dataset.theme!=='space')return;cardT=requestAnimationFrame(loop);if(t-last<60||document.hidden||isOpen)return;last=t;
-      const r=el.getBoundingClientRect(),k=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*k),H=Math.round(r.height*k);if(!W||!H)return;if(el.width!==W||el.height!==H){el.width=W;el.height=H}
-      const c=cp.cst,s=Math.min(r.height/(c[3]*.94),c[4]?r.width*.4/c[4]:1e9),off=Math.min(.31,.5-(c[4]*s*.5+12)/r.width);   // широкое созвездие сдвигается левее, чтобы не упереться в край
-      sky(el.getContext('2d'),W,H,{x:c[0]-r.width*off/s+Math.sin(t/7000)*.3*c[2]/27,y:c[1]+Math.cos(t/9000)*.25*c[3]/50,s},t,k,1,true,cp)};
-    cardT=requestAnimationFrame(loop)}
-  function ui(){if(!box)return;const v=P.V[cur];if(v){box.querySelector('#ctt').textContent=v[0];box.querySelector('#cts').textContent=v[1];box.querySelector('#cft').textContent=v[2]}
-    box.querySelectorAll('[data-ori]').forEach(b=>b.classList.toggle('on',b.dataset.ori===cur));box.querySelectorAll('[data-pl]').forEach(b=>b.classList.toggle('on',b.dataset.pl===P.id))}
-  function pls(){if(!box)return;const el=box.querySelector('#cpl');el.hidden=places.length<2;el.innerHTML=places.map(p=>`<button class="pill pl" data-pl="${p.id}">${p.name}</button>`).join('');ui()}
-  function fill(){   // снимок, участки крупно, кнопки и подпись автора — для выбранного места
-    if(!box)return;cw.querySelectorAll('.cdt').forEach(i=>i.remove());const im=box.querySelector('#cimg');im.removeAttribute('src');im.src='kosmos/'+P.img+'.webp';
-    cw.insertAdjacentHTML('beforeend',P.det.map(([n,x,y,hf])=>`<img class="cdt" data-n="${n}" alt="" draggable="false" style="left:${((x-hf)*100).toFixed(2)}%;top:${((y-hf)*100).toFixed(2)}%;width:${(hf*200).toFixed(2)}%;height:${(hf*200).toFixed(2)}%">`).join(''));
-    box.querySelector('#cgo').innerHTML=P.pills.map(([k,t])=>`<button class="pill" data-ori="${k}">${t}</button>`).join('');
-    box.querySelector('#ccr').textContent='Двигайте и приближайте сами или выберите место. '+P.credit;pls()}
-  function size(){w=innerWidth;h=innerHeight;d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*d);cv.height=Math.round(h*d);meas()}
-  function clamp(){cam.s=Math.max(smin(),Math.min(smax(),cam.s));const far=cam.s<cover()*.5,f=P.far;cam.x=Math.max(far?f[0]:-.15,Math.min(far?f[1]:1.15,cam.x));cam.y=Math.max(far?f[2]:-.15,Math.min(far?f[3]:1.15,cam.y))}
-  function zoomAt(px,py,s){s=Math.max(smin(),Math.min(smax(),s));const wx=cam.x+(px-w/2)/cam.s,wy=cam.y+(py-h/2)/cam.s;cam.s=s;cam.x=wx-(px-w/2)/s;cam.y=wy-(py-h/2)/s}
-  function fly(k,ms,to){const a={x:cam.x,y:cam.y,s:cam.s},b=to||tgt(k);if(!to){cur=k;ui()}
-    anim={a,b,zin:b.s>=a.s,t0:performance.now(),ms:ms||Math.max(1100,Math.min(3800,600+Math.abs(Math.log(b.s/a.s))*820))}}
-  function frame(t){if(!isOpen)return;raf=requestAnimationFrame(frame);
-    if(anim){const u=Math.min(1,(t-anim.t0)/anim.ms),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,s=anim.a.s*Math.pow(anim.b.s/anim.a.s,e);   // цель плавно съезжает в центр, пока меняется масштаб
-      if(anim.zin){cam.x=anim.b.x-(anim.b.x-anim.a.x)*anim.a.s*(1-e)/s;cam.y=anim.b.y-(anim.b.y-anim.a.y)*anim.a.s*(1-e)/s}
-      else{cam.x=anim.a.x-(anim.a.x-anim.b.x)*anim.b.s*e/s;cam.y=anim.a.y-(anim.a.y-anim.b.y)*anim.b.s*e/s}
-      cam.s=s;if(u>=1)anim=null}
-    const idle=!anim&&!ptrs.size,s=cam.s*(idle?1+.012*Math.sin(t/6500):1),x=cam.x+(idle?Math.sin(t/11000)*9/s:0),y=cam.y+(idle?Math.cos(t/13000)*7/s:0);   // без рук вид чуть дышит и плывёт
-    cw.style.transform='translate('+(w/2-x*s).toFixed(2)+'px,'+(h/2-y*s).toFixed(2)+'px) scale('+(s/1000).toFixed(6)+')';
-    sky(cx,cv.width,cv.height,{x,y,s},t,d,Math.max(0,Math.min(1,1-Math.log(s/sC())/Math.log(14))),false,P);
-    if(s>cover()*1.6)for(const im of cw.querySelectorAll('.cdt:not([src])')){const n=P.det.find(q=>q[0]===im.dataset.n);   // подлетели близко — подгружается этот участок снимка крупно
-      if(n&&Math.abs(n[1]-x)<n[3]+w/s/2&&Math.abs(n[2]-y)<n[3]+h/s/2){im.onload=()=>im.classList.add('on');im.src='kosmos/'+P.img+'-'+n[0]+'.webp'}}
-  }
-  function build(){
-    box=document.createElement('div');box.className='cosmo';box.id='cosmo';box.hidden=true;
-    box.innerHTML=`<div class="cz" id="cz"><div class="cw" id="cw"><img class="cb0" id="cimg" alt="" draggable="false"></div><canvas id="ccv"></canvas></div>
-<div class="ctop"><div><b id="ctt"></b><small id="cts"></small></div><button class="shx press" id="cxx" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-<div class="cbot"><div class="pills pls" id="cpl" hidden></div><p id="cft"></p><div class="pills" id="cgo"></div><small id="ccr"></small></div>`;
-    document.body.appendChild(box);cz=box.querySelector('#cz');cw=box.querySelector('#cw');cv=box.querySelector('#ccv');cx=cv.getContext('2d');
-    box.addEventListener('click',e=>{const b=e.target.closest('[data-ori]');if(b){fly(b.dataset.ori);return}const q=e.target.closest('[data-pl]');if(q){go(q.dataset.pl);return}if(e.target.closest('#cxx'))close()});
-    cz.addEventListener('pointerdown',e=>{try{cz.setPointerCapture(e.pointerId)}catch(q){}ptrs.set(e.pointerId,[e.clientX,e.clientY]);anim=null;cz.classList.add('drag');down={x:e.clientX,y:e.clientY,t:Date.now(),m:0};
-      if(ptrs.size===2){const [p,q]=[...ptrs.values()];pinch={d:Math.hypot(p[0]-q[0],p[1]-q[1])||1,s:cam.s}}});
-    cz.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p[0],dy=e.clientY-p[1];p[0]=e.clientX;p[1]=e.clientY;if(down)down.m+=Math.abs(dx)+Math.abs(dy);
-      if(ptrs.size===1){cam.x-=dx/cam.s;cam.y-=dy/cam.s}
-      else if(pinch){const [a,b]=[...ptrs.values()];zoomAt((a[0]+b[0])/2,(a[1]+b[1])/2,pinch.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d)}
-      clamp();if(down&&down.m>8&&cur){cur='';ui()}});
-    const up=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(ptrs.size)return;cz.classList.remove('drag');
-      if(down&&down.m<8&&Date.now()-down.t<320){const now=Date.now();   // двойное касание — приблизить это место
-        if(now-lastTap<340){const s=Math.min(smax(),cam.s*2.3);fly('',900,{x:cam.x+(e.clientX-w/2)/cam.s,y:cam.y+(e.clientY-h/2)/cam.s,s});cur='';ui();lastTap=0}else lastTap=now}};
-    cz.addEventListener('pointerup',up);cz.addEventListener('pointercancel',up);
-    cz.addEventListener('wheel',e=>{e.preventDefault();anim=null;zoomAt(e.clientX,e.clientY,cam.s*Math.exp(-e.deltaY*.0016));clamp();if(cur){cur='';ui()}},{passive:false});
-    addEventListener('resize',()=>{if(isOpen){size();clamp()}});
-    document.addEventListener('visibilitychange',()=>{if(!isOpen)return;cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(frame)});
-  }
-  const pick=id=>places.find(p=>p.id===id)||places[0];
-  /* секунду смотрим на созвездие — и летим к месту; чем мельче место, тем дольше полёт */
-  const arm=()=>{clearTimeout(autoT);autoT=setTimeout(()=>{if(isOpen&&cur==='const'&&!ptrs.size&&!anim)fly('neb',3600+Math.min(1600,Math.max(0,(Math.log(cover()/sC())-4.2)*520)))},1100)};
-  function show(id){P=pick(id);cur='const';fill();meas();Object.assign(cam,tgt('const'));anim=null;ui();arm()}
-  function open(id){if(isOpen)return;if(!box)build();isOpen=true;box.hidden=false;size();show(id||'ori');document.documentElement.classList.add('noscroll');
-    requestAnimationFrame(()=>box.classList.add('on'));raf=requestAnimationFrame(frame);load()}
-  function go(id){if(!isOpen||P.id===id)return;box.classList.add('sw');clearTimeout(autoT);setTimeout(()=>{if(!isOpen)return;show(id);box.classList.remove('sw')},230)}   // другое созвездие, не закрывая слой
-  function close(){if(!isOpen)return false;isOpen=false;box.classList.remove('on','sw');cancelAnimationFrame(raf);clearTimeout(autoT);anim=null;ptrs.clear();document.documentElement.classList.remove('noscroll');
-    setTimeout(()=>{if(!isOpen)box.hidden=true},520);return true}
-  return {open,close,card,fly,go,isOpen:()=>isOpen,places:()=>places.map(p=>p.id),
-    turn(i){if(!pinned)cp=places[i%places.length]},pin(id){pinned=!!id;if(id)cp=pick(id);affDraw()},cardId:()=>cp.id,goText:()=>cp.go,   // созвездие в карточке меняется вместе с посылом; pin — для проверки
-    state:()=>({pl:P.id,cur,x:cam.x,y:cam.y,s:cam.s,cover:cover(),anim:!!anim,img:!!(box&&box.querySelector('#cimg').naturalWidth),det:box?[...box.querySelectorAll('.cdt.on')].map(i=>i.dataset.n):[]})};
-})();
+/* Созвездия и полёты к туманностям (модуль ORI) и «Система продаж» 13.11.2026 убраны со страницы по слову Андрея («тут лишнее, кроме аффирмаций»; их место —
+   сайт дочки). Прежний код — в app.html.bak_20261113_lishnee, описание — PEREDACHKA_kosmos_dlya_dochi.md. Заглушка оставлена, чтобы «назад», Escape и
+   загрузчик сцены работали как раньше. */
+const ORI={open(){},close(){return false},card(){},turn(){},pin(){},isOpen:()=>false,state:()=>({}),places:()=>[],cardId:()=>'',goText:()=>''};
 
 /* «Космос»: посылы — свои, в духе тех, что в Юнитке; порядок раз в два дня один у всех */
 const AFF=['Я вижу всю картину и выбираю лучшее','Мои цифры растут спокойно и уверенно','Каждое решение сегодня приближает меня к цели','Порядок в цифрах — порядок в делах',
@@ -1783,9 +1649,9 @@ const AFF=['Я вижу всю картину и выбираю лучшее','�
  'Я доверяю своему опыту и проверяю цифрами','Сегодняшний шаг окупится многократно','Я создаю ценность, и она возвращается прибылью','У меня достаточно времени, сил и средств на главное'];
 const aff=(()=>{let i=0,tm=0,on=false,ord=[];
   const mix=()=>{let s=Math.floor(Date.now()/1728e5)%2147483647||7;const r=()=>(s=s*48271%2147483647)/2147483647;ord=AFF.map((_,j)=>j);for(let j=ord.length-1;j>0;j--){const q=Math.floor(r()*(j+1));[ord[j],ord[q]]=[ord[q],ord[j]]}};
-  const draw=()=>{const el=$('#aff');if(!el||!on)return;ORI.turn(i);const t=AFF[ord[i%ord.length]];
-    el.innerHTML=`<canvas class="cst" aria-hidden="true"></canvas><div class="cap">Орбита дня</div><div class="q">${t.split(' ').map((w,j)=>`<span style="animation-delay:${j*70}ms">${esc(w)}</span>`).join(' ')}</div><div class="dots">${ord.slice(0,6).map((_,j)=>`<i class="${j===i%6?'on':''}"></i>`).join('')}</div><span class="go">${esc(ORI.goText())}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>`;
-    el.onclick=e=>{if(e.target.closest('.dots')){next();return}ORI.open(ORI.cardId())};ORI.card()};
+  const draw=()=>{const el=$('#aff');if(!el||!on)return;const t=AFF[ord[i%ord.length]];
+    el.innerHTML=`<div class="cap">Посыл дня</div><div class="q">${t.split(' ').map((w,j)=>`<span style="animation-delay:${j*70}ms">${esc(w)}</span>`).join(' ')}</div><div class="dots">${ord.slice(0,6).map((_,j)=>`<i class="${j===i%6?'on':''}"></i>`).join('')}</div>`;
+    el.onclick=()=>next()};   // нажатие — следующий посыл
   const next=()=>{i=(i+1)%ord.length;draw();arm()},arm=()=>{clearTimeout(tm);if(on)tm=setTimeout(next,9000)};
   return {start(){if(!ord.length)mix();on=true;draw();arm()},stop(){on=false;clearTimeout(tm)},draw(){if(on)draw()}}})();
 const affDraw=()=>aff.draw();
@@ -1844,7 +1710,7 @@ $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').val
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>K3.see(false),()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
-window.PANEL={get D(){return D},K3,fresh,sysDraw,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
+window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
