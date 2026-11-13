@@ -789,6 +789,7 @@ const akWhy=a=>{const s=String(a.st||'').replace(/^\s*(не\s+)?участвуе
 const akSub=a=>jn(a.s<=D.today?'идёт до '+dm(a.e):dm(a.s)+'–'+dm(a.e),a.avto?'автоакция':'',a.uch?'':esc(akWhy(a)));
 function vAk(){const rows=akRows();let h=fresh();
   h+=`<div class="note">${K.lk?'Плановые цены взяты из кабинета ВБ — с автоакциями'+(K.lk_at?' (прочитано '+dm(K.lk_at.slice(0,10))+' в '+K.lk_at.slice(11,16)+' МСК)':'')+'.':'Через токен ВБ отдаёт только обычные акции. Автоакций сейчас идёт '+(K.avto_n||0)+' — по товарам их видно только в кабинете.'} Вход — не кнопкой ВБ, а сменой цены: снижаем процентом скидки, цену до скидки подгоняем до рубля. Каждое изменение — после подтверждения.</div>`;
+  h+=ballyCard();
   if(!rows.length)return h+`<div class="empty"><b>${S.ak.f==='can'?'Входить некуда':S.ak.f==='in'?'Нигде не участвуем':'Акций нет'}</b>${S.ak.f==='can'?'Нет акций, где плановая цена ниже нашей.':'Попробуйте другой отбор.'}</div>`;
   h+='<div class="list" style="margin-top:12px">';
   for(const {t,L} of rows){h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="meta"><span class="pill num">сейчас ${rub2(t.pr.f)}</span><span class="pill num">скидка ${t.pr.d}%</span></div></div></button><div style="margin-top:6px">`;
@@ -859,7 +860,7 @@ function openProd(nm){if(!TOV[nm])return;sheet(()=>{const t=TOV[nm],ix=PI(),pp=P
   const memo={},gm=i=>memo[i]||(memo[i]=pAgg(t,[i]));const pn=t.pan||{};
   const panp=(x,l)=>x&&x[0]>0&&x[2]!=null?`<span class="pill ${100*x[2]>=10?'g':x[2]>=0?'w':'b'} num">панель ${esc(l||'')}: маржа ${pc(100*x[2])} · ДРР ${pc(100*(x[1]||0))}</span>`:'';
   let h=`<div class="prh"><div class="ph"${foto(t)}></div><div class="pp">${t.pr?`<b class="num">${rub2(t.pr.f)}</b><span class="num">до скидки ${f0(t.pr.p)} ₽ · скидка ${t.pr.d}%${t.pr.c&&t.pr.c!==t.pr.f?' · с WB Клубом '+f0(t.pr.c)+' ₽':''}</span>`:'<b>цена не прочиталась</b>'}
-     <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">${t.fbo!=null?`<span class="pill num">склады ВБ: ${f0(t.fbo)} шт</span>`:''}${a.oq?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}${panp(pn.w,D.pan&&D.pan.wl)}${panp(pn.m,D.pan&&D.pan.ml)}</div></div></div>`;
+     <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">${t.fbo!=null?`<span class="pill num">склады ВБ: ${f0(t.fbo)} шт</span>`:''}${t.fbs!=null?`<span class="pill num">свой склад: ${f0(t.fbs)} шт</span>`:''}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}${panp(pn.w,D.pan&&D.pan.wl)}${panp(pn.m,D.pan&&D.pan.ml)}</div></div></div>`;
   h+=`<div class="tiles" style="margin-top:14px"><div class="tile"><div class="l">ДРР · ${perLab()}</div><div class="v num ${dcls(a.drr)}">${pc(a.drr)}</div><div class="d">${b?delta(a.drr,b.drr,1):'норма до '+NORMA+'%'}</div></div>
     <div class="tile"><div class="l">Реклама</div><div class="v num">${kr(a.s)} <small>₽</small></div><div class="d">${b?delta(a.s,b.s,1):'&nbsp;'}</div></div>
     <div class="tile"><div class="l">Заказы товара</div><div class="v num">${f0(a.oq)} <small>шт</small></div><div class="d">${jn(kr(a.or)+' ₽',b?delta(a.or,b.or):'')}</div></div>
@@ -870,9 +871,10 @@ function openProd(nm){if(!TOV[nm])return;sheet(()=>{const t=TOV[nm],ix=PI(),pp=P
     <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт / ${kr(td.or)} ₽</div></div></div>`;
   const cm=['drr','s','or','cpo'].includes(S.chm)?S.chm:'drr';
   h+=`<div class="hrw"><h3>По дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы'],['cpo','Цена зак.']],cm,'sm')}</div>${dayChart(gm,cm)}`;
-  h+=`<div class="acts x3"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>по правилу: вниз — скидкой, вверх — ценой до скидки</span></button>
+  h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>по правилу: вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="note" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметка</b><span>что сделали и зачем</span></button>
-     <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button></div>`;
+     <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
+     ${K.bally?`<button class="ab press${UPR||t.bl?'':' nolk'}" type="button" data-act="bally" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><b>Баллы за отзывы</b><span>${t.bl?'идёт: '+(t.bl.got||0)+' из '+t.bl.cnt+' отзывов':'баллы покупателю за отзыв'}</span></button>`:''}</div>`;
   h+=`<div class="hrw"><h3>Работают · ${W.length}</h3></div>`;
   if(W.length>1){const aw=pAgg(t,ix,true);h+=`<div class="note" style="margin:0 0 8px">Вместе: расход <b class="num">${rub(aw.s)}</b> · клики <b class="num">${f0(aw.c)}</b> · заказы с рекламы <b class="num">${f0(aw.q)}</b> · цена заказа <b class="num">${aw.cpo==null?'—':isFinite(aw.cpo)?rub(aw.cpo):'нет'}</b></div>`}
   h+=W.length?'<div class="rows">'+W.map(r=>rkRow(r,nm,ix)).join('')+'</div>':'<div class="note">Сейчас ни одна кампания товара не работает.</div>';
@@ -961,7 +963,7 @@ async function pollRes(){try{const r=await fetch('https://ntfy.sh/'+UPR.res+'/js
 async function run(cmd,done){const box=$('#runbox');if(!box)return;
   box.innerHTML='<div class="prog"><span class="sp"></span><span id="runtx">Отправляю команду…</span></div>';
   try{listen();const id=await send(cmd);const tx=$('#runtx');if(tx)tx.textContent='Жду сторожа…';
-    const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{cl();rej(new Error('Сторож не ответил за '+(cmd.k==='refresh'?'время сбора':'2 минуты')+'. Команда могла выполниться — загляните в «Историю» чуть позже.'))},cmd.k==='refresh'?(cmd.mode==='full'?50:8)*60000:120000);
+    const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{cl();rej(new Error('Сторож не ответил за '+(cmd.k==='refresh'?'время сбора':/^bally/.test(cmd.k)?'5 минут':'2 минуты')+'. Команда могла выполниться — загляните в «Историю» чуть позже.'))},cmd.k==='refresh'?(cmd.mode==='full'?50:8)*60000:/^bally/.test(cmd.k)?300000:120000);
       const pl=setInterval(pollRes,3500),cl=()=>{clearTimeout(to);clearInterval(pl);delete WAIT[id]};
       WAIT[id]=m=>{if(m.st==='work'){const e=$('#runtx');if(e)e.textContent=m.msg||'Выполняю…';return}cl();res(m)}});
     if(r.st!=='done')throw new Error(r.msg||'Не получилось');
@@ -973,6 +975,7 @@ function applyPatch(p){if(!p)return;const Kk=D.kab[p.kab||S.kab];
   if(Kk&&p.tov)for(const nm in p.tov){const t=Kk.tov.find(x=>String(x.nm)===String(nm));if(t)Object.assign(t,p.tov[nm])}
   if(p.ist)D.ist=p.ist.concat(D.ist||[]);
   if(p.lim)D.lim=Object.assign(D.lim||{},p.lim);
+  if(Kk&&p.bally){const b=Kk.bally||(Kk.bally={promos:[],val:[]});b.promos=(b.promos||[]).filter(x=>x.id!==p.bally.id);if(!p.bally.del)b.promos.unshift(p.bally)}
   if(p.nst)D.nst=p.nst;
   if(p.kl&&KL&&KL.kab[p.kab||S.kab]){const z=KL.kab[p.kab||S.kab].k[p.kl.key];if(z)for(const q of z.q){if(p.kl.x&&p.kl.x[q.t]!=null){if(p.kl.x[q.t])q.x=1;else delete q.x}if(p.kl.b&&q.t in p.kl.b){if(p.kl.b[q.t])q.b=p.kl.b[q.t];else delete q.b}}}
   prep();render(true)}
@@ -1093,6 +1096,51 @@ function actRefresh(mode){if(!UPR){reload().then(()=>toast('Показаны п�
   sheet(()=>({t:mode==='full'?'Обновить всё':'Обновить быстро',s:esc(D.kab.kab1?'оба кабинета':K.name),h:`<div class="note">${mode==='full'?'Полный сбор: 31 день статистики, запросы с местами, минус-фразы, воронка, акции, остатки. Идёт 15–30 минут — страницу можно закрыть.':'Быстрый сбор: статусы, ставки, бюджеты, лимиты, цены, статистика и запросы за 3 дня. Около двух минут.'} Заодно в «Историю» попадёт то, что меняли в кабинете ВБ.</div>${RUNBOX('Запустить сбор')}`,
     after:()=>{$('#okBtn').onclick=()=>{$('#refBtn').classList.add('spin');run({k:'refresh',mode},()=>{$('#refBtn').classList.remove('spin');reload().then(()=>{closeAll();toast('Данные обновлены')}).catch(()=>{closeAll()})})}}}),true)}
 
+/* ───────── баллы за отзывы (Каб 1): акции читаются из кабинета; создать и остановить — сторож через кабинет, после подтверждения ───────── */
+const BLK=1.2806;   // 1 балл покупателю = 1,2806 ₽: комиссия ВБ 23% и НДС 22% от комиссии
+function ballyCard(){const b=K.bally;if(!b)return '';const L=(b.promos||[]).filter(p=>p.st==='active'||p.st==='planned'),dr=(b.promos||[]).filter(p=>p.st==='draft').length;
+  let h=`<div class="card" style="margin-top:12px;padding:13px 14px"><div class="hrw" style="margin:0 0 4px"><h3>Баллы за отзывы</h3><span class="muted" style="font-size:12.5px">${b.at?'кабинет прочитан '+dm(b.at.slice(0,10))+' в '+b.at.slice(11,16):''}</span></div>
+   <div class="muted" style="font-size:13px;margin-bottom:4px">Покупатель получает баллы ВБ за отзыв. 1 балл обходится в ${f2(BLK)} ₽: сверху комиссия ВБ 23% и НДС. Новая акция — из листа товара, кнопка «Баллы за отзывы».</div>`;
+  if(!L.length)h+='<div class="note" style="margin-top:6px">Идущих акций нет.</div>';
+  for(const p of L)h+=`<button class="akr press" type="button" data-bly="${p.id}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(p.name)}</b><span class="num">${jn(p.st==='planned'?'старт '+dm(p.s):'идёт с '+dm(p.s),'товаров '+p.n,'отзывов '+p.fakt+' из '+p.cel)}</span></div><div class="pr num">${rub(p.spent)}<small>из ${rub(p.bud)}</small></div></button>`;
+  if(dr)h+=`<div class="muted" style="font-size:12.5px;margin-top:8px">Черновиков в кабинете: ${dr}.</div>`;
+  return h+'</div>'}
+function openBally(id){sheet(()=>{const p=((K.bally||{}).promos||[]).find(x=>x.id===id);if(!p)return {t:'Баллы за отзывы',s:'',h:'<div class="empty"><b>Акции нет в списке</b>Обновите данные.</div>'};
+  const its=p.items||[];
+  let h=`<div class="tiles"><div class="tile"><div class="l">Отзывы</div><div class="v num">${f0(p.fakt)} <small>из ${f0(p.cel)}</small></div><div class="d">оплачено ${f0(p.opl)}</div></div>
+    <div class="tile"><div class="l">Потрачено</div><div class="v num">${rub(p.spent)}</div><div class="d">из ${rub(p.bud)}</div></div>
+    <div class="tile"><div class="l">Покупателям</div><div class="v num">до ${kr(p.net)} <small>₽</small></div><div class="d">остальное — комиссия ВБ и НДС</div></div>
+    <div class="tile"><div class="l">Кому</div><div class="v" style="font-size:15px;line-height:1.25">${p.aud?'новым и уже купившим':'только новым покупателям'}</div><div class="d">${p.st==='planned'?'старт '+dm(p.s):p.st==='draft'?'черновик':'идёт с '+dm(p.s)}</div></div></div>
+    <div class="hrw"><h3>Товары · ${its.length||p.n}</h3></div>`;
+  h+=its.length?'<div>'+its.map(i=>{const t=TOV[i.nm];return `<button class="akr press" type="button" data-nm2="${i.nm}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(t?t.art:'№ '+i.nm)}</b><span class="num">${jn('за текст '+i.t,'фото '+i.p,'видео '+i.v)}</span></div><div class="pr num">${i.got==null?'—':f0(i.got)}<small>из ${f0(i.cnt)} отзывов</small></div></button>`}).join('')+'</div>':'<div class="note" style="margin-top:0">Товары этой акции не прочитаны.</div>';
+  if(p.st==='active'||p.st==='planned')h+=`<div class="acts" style="grid-template-columns:1fr"><button class="btn gray press" type="button" data-act="ballystop" data-id="${p.id}">Остановить акцию</button></div>`;
+  return {t:esc(p.name),s:'Баллы за отзывы · № '+p.id+' · '+esc(K.name),h}})}
+function blRange(t){const v=(K.bally&&K.bally.val)||[],pr=t.pr?t.pr.f:0,i=pr<=500?1:pr<=2000?2:pr<=5000?3:4;return v.find(x=>x.id===i)||{t:[100,5000,150],p:[50,4850,100],v:[50,4850,100],cnt:[20,10000,25],mx:5000}}
+function actBally(nm){if(!need())return;const t=TOV[nm];if(!t)return;const R=blRange(t),td=D.today.slice(8,10)+'.'+D.today.slice(5,7);
+  const o={t:String(R.t[0]),p:String(R.p[0]),v:String(R.v[0]),cnt:String(R.cnt[0]),aud:0,name:(t.art+' '+td).slice(0,60)};
+  sheet(()=>({t:'Баллы за отзывы',s:esc(t.art),h:`<div class="note">Покупатель получает баллы ВБ за отзыв на этот товар: за текст, за фото и за видео — баллы складываются. На карточке появится значок «За отзыв … ВБ». Акция создаётся и запускается в кабинете только после вашего подтверждения.</div>
+    <label class="fld"><span>За текст, баллов · от ${R.t[0]}${R.t[2]?' · ВБ советует '+R.t[2]:''}</span><input class="inp num" id="blt" inputmode="numeric" value="${esc(o.t)}"></label>
+    <label class="fld"><span>За фото, баллов · от ${R.p[0]}</span><input class="inp num" id="blp" inputmode="numeric" value="${esc(o.p)}"></label>
+    <label class="fld"><span>За видео, баллов · от ${R.v[0]}</span><input class="inp num" id="blv" inputmode="numeric" value="${esc(o.v)}"></label>
+    <label class="fld"><span>Сколько отзывов собрать · от ${R.cnt[0]}</span><input class="inp num" id="blc" inputmode="numeric" value="${esc(o.cnt)}"></label>
+    <div class="fld"><span>Кому предлагать</span>${seg('blaud',[[0,'Только новым покупателям'],[1,'И тем, кто уже купил']],o.aud,'sm')}</div>
+    <label class="fld"><span>Название акции · покупатели его не видят</span><input class="inp" id="bln" maxlength="60" value="${esc(o.name)}" style="font-size:16px"></label>
+    <div id="blcalc"></div><div id="blerr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Запустить акцию')}`,
+    after:()=>{const up=()=>{const a=numv('blt'),b=numv('blp'),c=numv('blv'),n=numv('blc'),ii=x=>isFinite(x)&&x===Math.round(x)&&x>=0;
+        const okn=ii(a)&&ii(b)&&ii(c)&&ii(n)&&a>=1,one=a+b+c,net=one*n,tot=net*BLK,ok=okn&&n>=R.cnt[0]&&n<=500&&one<=R.mx&&tot<=50000&&$('#bln').value.trim().length>=3;
+        $('#blcalc').innerHTML=okn&&n>=1?`<div class="cmp"><div><small>Покупателям, не больше</small><b class="num">${rub(net)}</b></div><div class="ar">→</div><div><small>Бюджет с комиссией ВБ</small><b class="num">${rub2(tot)}</b></div></div>
+          <div class="kv"><span>За отзыв с текстом, фото и видео</span><b class="num">${f0(one)} баллов · ${rub2(one*BLK)}</b><span>Комиссия ВБ 23% и НДС 22% от неё</span><b class="num">${rub2(tot-net)}</b></div>
+          <div class="note">Это потолок: ВБ списывает только за пришедшие отзывы и только за те части (текст, фото, видео), что прошли его проверку. Для запуска на балансе должно быть ${o.aud?'30':'20'}% бюджета — ${rub(tot*(o.aud?0.3:0.2))}; если меньше, акция останется черновиком в кабинете.</div>`:'';
+        $('#blerr').textContent=!okn?(isFinite(a)&&isFinite(n)?'Баллы и число отзывов — целыми числами, за текст — больше нуля.':''):n<R.cnt[0]?'ВБ принимает цель от '+R.cnt[0]+' отзывов.':n>500?'Больше 500 отзывов за одну акцию сервис не оформляет.':one>R.mx?'Больше '+f0(R.mx)+' баллов за один отзыв для товара с такой ценой ВБ не принимает.':tot>50000?'Бюджет больше 50 000 ₽ сервис не оформляет.':a<R.t[0]||b<R.p[0]||c<R.v[0]?'Меньше обычного минимума ВБ ('+R.t[0]+' / '+R.p[0]+' / '+R.v[0]+'). В части категорий минимум ниже — кабинет примет или откажет сам.':'';
+        $('#okBtn').disabled=!ok};
+      for(const id of ['blt','blp','blv','blc','bln'])$('#'+id).oninput=()=>{o.t=$('#blt').value;o.p=$('#blp').value;o.v=$('#blv').value;o.cnt=$('#blc').value;o.name=$('#bln').value;up()};up();
+      $('#okBtn').onclick=()=>{const a=numv('blt'),b=numv('blp'),c=numv('blv'),n=numv('blc');run({k:'bally',nm:+nm,t:a,p:b,v:c,cnt:n,aud:o.aud,name:$('#bln').value.trim(),bud:Math.round((a+b+c)*n*BLK*100)/100},()=>{closeAll();openProd(+nm)})}}}),true);
+  SEGCB.blaud=v=>{o.aud=+v;redraw()}}
+function actBallyStop(id){if(!need())return;const p=((K.bally||{}).promos||[]).find(x=>x.id===id);if(!p)return;
+  sheet(()=>({t:'Остановить акцию?',s:esc(p.name),h:`<div class="cmp"><div><small>Сейчас</small><b>${p.st==='planned'?'запланирована':'идёт'}</b></div><div class="ar">→</div><div><small>Станет</small><b>в архиве</b></div></div>
+    <div class="note">Значок «баллы за отзыв» пропадёт с карточек. Покупатели, которые уже купили товар по акции, ещё 5 дней могут оставить отзыв и получить баллы — за них ВБ спишет как обычно. Вернуть акцию из архива нельзя, только создать новую.</div>${RUNBOX('Остановить')}`,
+    after:()=>{$('#okBtn').onclick=()=>run({k:'ballystop',pid:id},()=>{closeAll();render(true)})}}),true)}
+
 /* ───────── биддер: совет считает сборщик (bidder.py), в режиме «сам» ставку ставит страж ───────── */
 const BDK={segodnya:' сегодня',posle:' после смены ставки',vchera:' вчера',malo:' сегодня'};
 const bdOn=b=>!!(b&&b.mode&&b.mode!=='off');
@@ -1185,6 +1233,7 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
     else if(a==='price')actPrice(+x.dataset.nm);else if(a==='note')actNote(x.dataset.nm||0);else if(a==='create')actCreate(+x.dataset.nm);
     else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
     else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='bidall')openBidAll();
+    else if(a==='bally'){const t=TOV[x.dataset.nm];if(t&&t.bl)openBally(t.bl.id);else actBally(+x.dataset.nm)}else if(a==='ballystop')actBallyStop(+x.dataset.id);
     else if(a==='unlock')unlock();else if(a==='lockupr'){UPR=null;RS.del('upr');if(ES){ES.close();ES=null}render(true);toast('Управление на этом устройстве выключено')}
     else if(a==='ref-fast')actRefresh('fast');else if(a==='ref-full')actRefresh('full');
     else if(a==='nstsave'){if(!need())return;const n=nst();$$('[data-nst]').forEach(b=>{const k=b.dataset.nst,v=b.getAttribute('aria-checked')==='true';if(k==='on')n.on=v;else n[k].on=v});
@@ -1192,6 +1241,8 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
       sheet(()=>({t:'Сохранить настройки уведомлений?',s:'',h:`<div class="note">Сторож начнёт присылать по новым правилам со следующей проверки.</div>${RUNBOX('Сохранить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'nst',nst:n})}}),true)}
     return}
   if(x=c('[data-bdr]')){const [id,nm]=x.dataset.bdr.split('|');openRk(+id,nm);return}
+  if(x=c('[data-bly]')){openBally(+x.dataset.bly);return}
+  if(x=c('[data-nm2]')){openProd(+x.dataset.nm2);return}
   if(x=c('.rk[data-rk]')){const [id,nm]=x.dataset.rk.split('|');openRk(+id,nm);return}
   if(x=c('.pc[data-nm], tr[data-nm]')){openProd(+x.dataset.nm);return}
 });
