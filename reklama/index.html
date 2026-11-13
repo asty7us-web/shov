@@ -182,13 +182,13 @@ input,textarea,select{font:inherit;color:inherit}
 @media (max-width:899px){
   .fs{display:block}.fs[hidden]{display:none}
   .sub .srch{display:none}
-  .fsp{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 72px);z-index:66;display:flex;align-items:center;height:54px;border-radius:27px;max-width:calc(100vw - 28px);
+  .fsp{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 66px);z-index:66;display:flex;align-items:center;height:50px;border-radius:25px;max-width:calc(100vw - 28px);
     background:var(--hdr);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border:.5px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.10)}
-  .fsb{display:flex;align-items:center;gap:8px;min-width:54px;height:54px;padding:0 15px;border:0;background:none;color:var(--acc);font:inherit;font-size:15.5px;font-weight:600;cursor:pointer;border-radius:27px}
+  .fsb{display:flex;align-items:center;gap:8px;min-width:50px;height:50px;padding:0 13px;border:0;background:none;color:var(--acc);font:inherit;font-size:15.5px;font-weight:600;cursor:pointer;border-radius:25px}
   .fsb svg{width:24px;height:24px;flex:none}
   .fsb span{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
   .fsb span:empty{display:none}
-  .fsx{display:none;align-items:center;justify-content:center;width:42px;height:54px;margin-left:-8px;border:0;background:none;color:var(--ink3);cursor:pointer;border-radius:27px}
+  .fsx{display:none;align-items:center;justify-content:center;width:40px;height:50px;margin-left:-8px;border:0;background:none;color:var(--ink3);cursor:pointer;border-radius:25px}
   .fsx svg{width:17px;height:17px}
   .fs.has .fsx{display:flex}
   .fs.on .fsp{display:none}
@@ -200,6 +200,9 @@ input,textarea,select{font:inherit;color:inherit}
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e96' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m16 16 4 4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px 50%;background-size:19px}
   .fsd{flex:none;height:44px;padding:0 8px;border:0;background:none;color:var(--acc);font:inherit;font-size:16px;font-weight:600;cursor:pointer}
   html.srq .view>.fresh,html.srq .view>.tiles,html.srq .view>.card{display:none}
+  /* запас под кнопку поиска: конец страницы и последние строки таблицы можно вывести из-под неё */
+  main#view{padding-bottom:78px}
+  #view .tws::after{content:"";display:block;height:60px}
 }
 /* ── вкладки: снизу на телефоне, сверху на широком экране ── */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:70;display:flex;justify-content:space-around;background:var(--hdr);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);
@@ -606,6 +609,11 @@ td.t1 small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root[data-lite="1"]:is([data-theme="kosmos"],[data-theme="space"]){--hdr:rgba(7,9,32,.95)}
 :root[data-lite="1"][data-theme="space"][data-k3d="1"]{--hdr:rgba(7,9,32,.9)}
 :root[data-lite="1"] :is(.hdr,.tabs){backdrop-filter:none;-webkit-backdrop-filter:none}
+/* 14.11, тёмные темы: столбики там яркие — белое число заказов внутри читалось плохо, делаем его тёмным */
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .bars .col i em{color:#06180c}}
+:root:is([data-theme="dark"],[data-theme="kosmos"],[data-theme="space"]) .bars .col i em{color:#06180c}
+/* 14.11: «нет заказов» в плитке ДРР — словами, а не числом: шрифт меньше, чтобы на телефоне помещалось в одну строку */
+.dbx b.num.tx{font-size:21px;line-height:1.2;letter-spacing:-.01em}.dbxs.x3 .dbx b.num.tx{font-size:16px}
 /* ───────── плавные переходы (только телефон и только там, где браузер умеет): разделы и листы уезжают вбок ───────── */
 .hdr{view-transition-name:rk-hdr}.tabs{view-transition-name:rk-tabs}.sheet{view-transition-name:rk-sheet}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.2s}
@@ -963,8 +971,9 @@ function tovRows(){const ix=PI();let a=K.tov.map(t=>({t,a:pAgg(t,ix),w:wrk(t).le
 function kabAgg(ix){const a={v:0,c:0,a:0,o:0,q:0,s:0,sp:0};for(const r of K.rk){const x=rkAll(r,ix);for(const k of ['v','c','a','o','q','s','sp'])a[k]+=x[k]}fin(a);
   a.oq=0;a.or=0;for(const t of K.tov){a.oq+=sum(t.o&&t.o.q,ix);a.or+=sum(t.o&&t.o.r,ix)}a.drr=a.or?100*a.s/a.or:null;return a}
 /* столбики «как на листах Telegram»: сверху расход и ДРР, в столбике — заказы, шт; день без заказов — красный, высота по расходу */
-/* 14.11: график ниже и столбики выше (было h 176 / mh 62 / шкала от 1,3 нормы): при ДРР ниже нормы над столбиками на телефоне оставалась пустая полоса ~80 px */
-function drrChart(ix,get,o){o=o||{};let mxS=0,mxD=NORMA*1.15;const cap=o.cap||60;
+/* 14.11: график ниже, столбики выше, шкала — по самому дорогому дню периода, как на листах Telegram (не мельче 5%). Было h 176 / mh 62 / шкала
+   от 1,3 нормы: при ДРР ниже нормы над столбиками на телефоне оставалась пустая полоса ~80 px. Норму показывает цвет столбика */
+function drrChart(ix,get,o){o=o||{};let mxS=0,mxD=NORMA/3;const cap=o.cap||60;
   for(const i of ix){const g=get(i);if(g.s>mxS)mxS=g.s;if(g.or>0&&g.drr!=null)mxD=Math.max(mxD,Math.min(g.drr,cap))}
   const noz=g=>!g.or&&g.s>=1;
   return chart({ix,h:o.h||140,mh:72,dot:o.dot,val:i=>get(i).drr,
@@ -1311,7 +1320,7 @@ const MG=()=>((D.mst||{}).glub)||300;
 const ksh=v=>v>=1000?f1(v/1000)+'к':f0(v);   // короткая сумма над столбиком: на телефоне 14 столбиков по 24 точки
 const perSeg=()=>`<div class="pseg">${seg('per',[[7,'7 дней'],[14,'14 дней'],[30,'30 дней']],S.per,'sm')}<span class="muted num">${perLab()} · сегодня отдельно</span></div>`;
 function drrBox(title,cur,prev,prevLab,sub){const ok=v=>v!=null&&isFinite(v),d=ok(cur)&&ok(prev)?cur-prev:null,cls=d==null||Math.abs(d)<0.5?'':d>0?' b':' g';
-  return `<div class="dbx${cls}"><div class="l">${title}</div><div class="r"><b class="num${cls?'':' '+dcls(cur)}">${cur!=null&&!isFinite(cur)?'нет заказов':pc(cur)}</b>${d==null?'':Math.abs(d)<0.5?'<span class="tr muted">как было</span>':`<span class="tr">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</span>`}</div><div class="d num">${prev!=null&&prevLab?prevLab+': '+(isFinite(prev)?pc(prev):'нет заказов')+'<br>':''}${sub}</div></div>`}
+  return `<div class="dbx${cls}"><div class="l">${title}</div><div class="r"><b class="num${cls?'':' '+dcls(cur)}${cur!=null&&!isFinite(cur)?' tx':''}">${cur!=null&&!isFinite(cur)?'нет заказов':pc(cur)}</b>${d==null?'':Math.abs(d)<0.5?'<span class="tr muted">как было</span>':`<span class="tr">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</span>`}</div><div class="d num">${prev!=null&&prevLab?prevLab+': '+(isFinite(prev)?pc(prev):'нет заказов')+'<br>':''}${sub}</div></div>`}
 function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
 /* последние правки — сразу в листе, без перехода в отдельный раздел; «показать ещё» раскрывает тут же */
 function chgBlock(nm,cid){const L=istOf(nm,cid,0),key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:4;
