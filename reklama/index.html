@@ -268,7 +268,8 @@ th[data-s]:after{content:"";display:inline-block;width:0;height:0;margin-left:4p
 th[aria-sort="descending"]:after{border-top-color:var(--acc);margin-top:3px}
 th[aria-sort="ascending"]:after{border-bottom-color:var(--acc);margin-bottom:3px}
 th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:2;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
-th:first-child{z-index:3}   /* 14.11: угол шапки — выше первого столбца: при прокрутке вниз название товара вылезало поверх слова «Товар» */
+th:first-child{z-index:3}   /* 14.11: угол шапки — выше первого столбца: при прокрутке вбок и вниз название товара не должно ложиться поверх слова «Товар» */
+.tws th{box-shadow:inset 0 -1px 0 var(--line)}   /* 14.11: чёткая линия под шапкой — строка, наполовину ушедшая под шапку, выглядела как обрывок («штрих» под словом «Товар») */
 th:first-child{z-index:3}
 tbody tr{cursor:pointer}
 @media (hover:hover){tbody tr:hover td{background:var(--card2)}}
@@ -603,11 +604,11 @@ td.t1 small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root[data-theme="kosmos"]:not([data-lite="1"]) :is(.pc,.tile,.card,.rk.pg){backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--sh1),0 0 0 .5px var(--line)}
 /* 14.11: без видеокарты (data-lite) размытия под шапкой и нижней панелью разделов нет — строки таблицы просвечивали сквозь подписи
    («Товары», «Кампании»…), хуже всего в «Космосе». Там шапка и панель почти непрозрачные и без размытия; на телефоне — как было */
-:root[data-lite="1"]{--hdr:rgba(246,246,250,.97)}
-@media (prefers-color-scheme:dark){:root[data-lite="1"]:where(:not([data-theme="light"])){--hdr:rgba(16,16,18,.96)}}
-:root[data-lite="1"][data-theme="dark"]{--hdr:rgba(16,16,18,.96)}
-:root[data-lite="1"]:is([data-theme="kosmos"],[data-theme="space"]){--hdr:rgba(7,9,32,.95)}
-:root[data-lite="1"][data-theme="space"][data-k3d="1"]{--hdr:rgba(7,9,32,.9)}
+:root[data-lite="1"]{--hdr:#f6f6fa}
+@media (prefers-color-scheme:dark){:root[data-lite="1"]:where(:not([data-theme="light"])){--hdr:#101012}}
+:root[data-lite="1"][data-theme="dark"]{--hdr:#101012}
+:root[data-lite="1"]:is([data-theme="kosmos"],[data-theme="space"]){--hdr:#070920}
+:root[data-lite="1"][data-theme="space"][data-k3d="1"]{--hdr:#070920}
 :root[data-lite="1"] :is(.hdr,.tabs){backdrop-filter:none;-webkit-backdrop-filter:none}
 /* 14.11, тёмные темы: столбики там яркие — белое число заказов внутри читалось плохо, делаем его тёмным */
 @media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .bars .col i em{color:#06180c}}
