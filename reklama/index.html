@@ -824,6 +824,55 @@ body.hasrunp .toast{bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 64px
 .kv.grk b{white-space:normal;min-width:0;overflow-wrap:anywhere}
 .kv.grk{grid-template-columns:auto minmax(0,1fr)}
 
+/* ── 14.11 Андрей (06:40): «ставку если не поставил… назад — выкидывает все товары». Лист действия поверх листа кампании не ниже его
+   (min-height ставит drawSheet), на компьютере — обычный лист сбоку. Восстановление листа после обновления страницы — без движения ── */
+:root[data-shnoa] :is(.sheet,.scrim){transition:none!important}
+:root[data-shnoa] .sheet :is(.tt,.sbody){animation:none!important}
+
+/* ── ход команды: «Отправлено → Сторож выполняет → Готово» и ответ сторожа крупно (14.11 Андрей: «если в процессе назад — непонятно, чем закончится») ── */
+.rsteps{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:14px 0 2px;font-size:12.5px;font-weight:600;color:var(--ink3)}
+.rsteps>b{font-weight:400;color:var(--ink3);opacity:.6}
+.rsteps span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.rsteps i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.6px currentColor;flex:none}
+.rsteps .ok{color:var(--good)}.rsteps .ok i{background:var(--good);box-shadow:none}
+.rsteps .cur{color:var(--acc)}.rsteps .cur i{background:var(--acc);box-shadow:0 0 0 3px var(--acc-soft);animation:bdPulse 1.6s ease-in-out infinite}
+.rsteps .x{color:var(--bad)}.rsteps .x i{background:var(--bad);box-shadow:none}
+.rsteps+.prog{margin-top:8px}
+.rfact{border-radius:15px;padding:12px 14px;margin-top:10px;display:grid;gap:3px}
+.rfact b{font-size:17px;font-weight:700;line-height:1.28;overflow-wrap:anywhere}
+.rfact small{font-size:12px;color:var(--ink3);font-weight:500}
+.rfact.g{background:var(--good-soft)}.rfact.g b{color:var(--good)}
+.rfact.b{background:var(--bad-soft)}.rfact.b b{color:var(--bad)}
+.rfact.w{background:var(--warn-soft)}.rfact.w b{color:var(--warn)}
+.rfact+.acts{margin-top:12px}
+/* итог вверху экрана — поверх листов, держится 6+ секунд; нажатие убирает */
+.runres{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top) + 10px);z-index:210;display:grid;gap:8px;justify-items:center;padding:0 16px;pointer-events:none}
+.rres{display:flex;align-items:flex-start;gap:11px;width:min(520px,100%);border:0;border-radius:18px;padding:12px 15px 13px 12px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;
+  box-shadow:var(--sh2),0 0 0 .5px var(--line);pointer-events:auto;opacity:0;transform:translateY(-14px);transition:opacity .22s var(--ease),transform .3s var(--out)}
+.rres.on{opacity:1;transform:none}
+.rres>div{min-width:0}
+.rres i{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 14px/1 var(--f);font-style:normal;color:#fff;background:var(--good)}
+.rres.b i{background:var(--bad)}.rres.w i{background:var(--warn)}
+.rres small{display:block;font-size:12px;font-weight:600;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rres b{display:block;font-size:15.5px;font-weight:700;line-height:1.3;margin-top:1px;overflow-wrap:anywhere}
+.rres.g b{color:var(--good)}.rres.b b{color:var(--bad)}.rres.w b{color:var(--warn)}
+:root[data-theme="kosmos"] .rres,:root[data-theme="space"] .rres{background:#0a0d2c}
+:root[data-lite="1"] .rres{transition:none}
+@media (prefers-reduced-motion:reduce){.rres{transition:none}.rsteps .cur i{animation:none}}
+
+/* ── биддер: «Как это работает» (свёрнуто) и общая ставка (14.11 Андрей: «уточни, как работает… есть общая ставка для всех помимо биддера») ── */
+.bdhow{border-radius:12px;background:var(--fill2);padding:0 12px}
+.bdhow summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:40px;font-size:14px;font-weight:650;color:var(--acc)}
+.bdhow summary::-webkit-details-marker{display:none}
+.bdhow summary::after{content:"";width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);margin:-3px 0 0 auto;transition:transform .2s var(--ease)}
+.bdhow[open] summary::after{transform:rotate(-135deg);margin-top:3px}
+.bdhow ul{margin:0;padding:0 0 11px 17px;display:grid;gap:5px;font-size:13px;line-height:1.4;color:var(--ink2)}
+.bdhow li b{color:var(--ink);font-weight:700}
+.sbody>.bdhow{margin-top:10px}
+.bdkl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:baseline;font-size:13.5px;margin-top:10px}
+.bdc .bdkl{margin-top:0}
+.bdkl span{color:var(--ink3)}.bdkl b{font-weight:650;text-align:right;min-width:0;overflow-wrap:anywhere}
+
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
 /* текст на цветной кнопке (зелёной, жёлтой): в светлой теме белый, в тёмных — тёмный, как у столбиков графика */
@@ -934,6 +983,46 @@ body.mjob #runp{display:none}
 .rfr span small{display:block;font-size:12.5px;line-height:1.3;color:var(--ink3);margin-top:2px}
 .rfr em{flex:none;font-style:normal;font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--fill);border-radius:999px;padding:4px 9px;white-space:nowrap}
 
+/* ── 14.11: сводная запись «Что меняли» раскрывается списком (evX в d_novoe.js) ── */
+.evx>.ev{position:relative;padding-right:24px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.evx>.ev::after{content:'›';position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:600;line-height:1;color:var(--acc);transition:transform .2s ease}
+.evx.on>.ev::after{transform:translateY(-50%) rotate(90deg)}
+.evx.on>.ev{border-bottom:0}
+.evx .evd{display:none;margin:0 0 8px 56px;padding:6px 10px;border-radius:12px;background:var(--card2)}
+.evx.on .evd{display:block}
+.evx:last-child.on .evd{margin-bottom:0}
+.evdr{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:.5px solid var(--line);font-size:13.5px;line-height:1.3}
+.evdr:last-child{border-bottom:0}
+.evdr span{min-width:0;overflow-wrap:anywhere;color:var(--ink)}
+.evdr em{flex:none;font-style:normal;color:var(--ink3);white-space:nowrap}
+.evdr em b{color:var(--ink);font-weight:650}
+.evx .evd .tnote{margin:4px 0 0}
+@media (max-width:400px){.evx .evd{margin-left:0}}
+
+/* ── 14.11: «Последняя команда: … — готово / не выполнена» в блоке управления кампанией (lcLine) ── */
+.lcmd{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--card2);font-size:13.5px;line-height:1.35;color:var(--ink2)}
+.lcmd:empty{display:none}
+.lcmd b{color:var(--ink);font-weight:650}
+.lcmd>i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--ink3)}
+.lcmd>i.g{background:var(--good)}.lcmd>i.w{background:var(--warn)}.lcmd>i.b{background:var(--bad)}
+.lcmd .sp{flex:none;width:13px;height:13px;margin-top:2px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--acc);animation:rot .7s linear infinite}
+
+/* ── 14.11: продажи по дням в листе товара — компактно, в один ряд; подсказка вместо мест по фразам ── */
+.sal1{margin-top:2px}
+.pmxh{margin-top:12px}
+
+/* ── 14.11: «Акции ВБ» в листе товара — цена, ДРР, маржа панели; у акции — ниже на N ₽ и маржа по расчёту ── */
+.akm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.akm>div{min-width:0;background:var(--card2);border-radius:14px;padding:9px 11px}
+.akm small{display:block;font-size:12px;font-weight:600;color:var(--ink3)}
+.akm b{display:block;font:700 18px var(--fd);line-height:1.2;margin-top:2px;overflow-wrap:anywhere}
+.akm b.muted{color:var(--ink3)}
+.akm em{display:block;font-style:normal;font-size:11.5px;line-height:1.25;color:var(--ink3);margin-top:2px}
+.akr .pr{max-width:52%}
+.akr .pr small i{display:block;font-style:normal;white-space:normal}
+.akr .pr small i.good{color:var(--good)}.akr .pr small i.bad{color:var(--bad)}
+@media (max-width:370px){.akm b{font-size:16px}.akm>div{padding:8px 9px}}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -1026,6 +1115,64 @@ body.mjob #runp{display:none}
 .kvt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 12px;padding:0 16px 16px;font-size:13px;line-height:1.35}
 .kvt b{font-weight:650;white-space:nowrap}.kvt span{color:var(--ink2)}
 
+/* ── 14.11 Андрей 06:40: «…статистика табличного типа, как в Марпле» — таблица по дням под гистограммой (dayTbl в d_tabl.js): своя высота, листается внутри себя
+   вбок и вниз, «Дата» закреплена слева, строка «За период» — выделена; страница и лист не раздвигаются ── */
+.hrw.dth{margin-top:14px}
+.tw.dtw{max-height:min(430px,62vh);max-width:100%}
+.tw.dtw th{white-space:normal;line-height:1.15;vertical-align:bottom;max-width:86px;box-shadow:inset 0 -1px 0 var(--line)}
+.tw.dtw td.t1{min-width:0;max-width:none}
+.tw.dtw td.t1 small{display:block;font-size:11px;font-weight:500;color:var(--ink3);margin-top:1px}
+.tw.dtw tr.dtr{cursor:default}
+.tw.dtw tr.dtot td{font-weight:650;box-shadow:inset 0 -1px 0 var(--line)}
+.tw.dtw tr.dtot td{background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+.sheet .tw.dtw tr.dtot td{background:color-mix(in srgb,var(--acc) 10%,var(--card2))}
+@media (max-width:700px){.tw.dtw th,.tw.dtw td{padding:8px 7px}.tw.dtw td{font-size:13.5px}}
+.sheet .tw.dtw{background:var(--card2);box-shadow:none;border-radius:16px}
+.sheet .tw.dtw th,.sheet .tw.dtw td:first-child{background:var(--card2)}
+/* «Космос»: полупрозрачные карточки — закреплённым ячейкам плотный фон, как у остальных таблиц листа (те же цвета, что в a_head.html) */
+:root:is([data-theme="kosmos"],[data-theme="space"]) .sheet .tw.dtw,:root:is([data-theme="kosmos"],[data-theme="space"]) .sheet .tw.dtw th,:root:is([data-theme="kosmos"],[data-theme="space"]) .sheet .tw.dtw td:first-child{background:#1a1f52}
+
+/* ── 14.11 Андрей 06:40: «цены акций, где участвуем, выделить зелёным и нашу цену больше» и «под каждым товаром в разделе акции гистограмма продаж как в ЛК ВБ,
+   в 1 ряд… не размашисто» ── */
+.akp{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 8px;margin-top:4px}
+.akp b{font:700 21px/1.1 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.akp span{font-size:12px;color:var(--ink3);font-weight:600}
+.akr.akin{background:var(--good-soft);border-radius:12px;padding:10px 11px;margin:5px 0;border-bottom:0}
+.akr.akin .pr{color:var(--good)}
+.akr .akok{display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;box-shadow:inset 0 0 0 1.2px var(--good);color:var(--good);font-weight:700}
+.akg{margin-top:10px;padding:8px 10px 6px;border-radius:12px;background:var(--fill2)}
+.akgl{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink3);font-weight:600;margin-bottom:2px}
+.akgl b{color:var(--ink);font-size:13px}
+/* компактная гистограмма заказов (sparkQ в c_core.js): столбики до 30 px + число над наибольшим = 40 px, даты под крайними */
+.sq{min-width:0}
+.sqb{display:flex;align-items:flex-end;gap:2px;height:40px}
+.sqc{position:relative;flex:1;min-width:0;height:100%;display:flex;align-items:flex-end}
+.sqc i{display:block;width:100%;border-radius:2.5px 2.5px 1px 1px;background:var(--wb)}
+.sqc i.z{height:2px;background:var(--bar)}
+.sqc em{position:absolute;top:0;left:50%;transform:translateX(-50%);font-style:normal;font-size:10.5px;font-weight:700;line-height:1;color:var(--ink2);white-space:nowrap}
+.sqc em.l{left:0;transform:none}.sqc em.r{left:auto;right:0;transform:none}
+.sqx{display:flex;justify-content:space-between;margin-top:3px;font-size:10px;font-weight:600;line-height:1;color:var(--ink3)}
+
+/* ── 14.11 Андрей 06:40: «раздел цены показать по каждому по панели данные» — карточки раздела «Цены» (vCeny в d_views.js) ── */
+.pc.cnc{grid-template-columns:44px 1fr;gap:6px 11px;padding:12px 13px}
+.pc.cnc .ph{width:44px;height:58px;border-radius:10px}
+.pc.cnc .nm{-webkit-line-clamp:1;font-size:15px}
+.cnp{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;margin-top:3px}
+.cnp b{font:700 21px/1.1 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.cnp span{font-size:12px;color:var(--ink3);font-weight:600}
+.cnm{grid-column:1/-1;margin-top:0;gap:4px}
+.cnm .pill{height:auto;min-height:22px;white-space:normal;line-height:1.2;padding:3px 8px}
+/* панель: неделя и месяц — двумя столбцами рядом: период, маржа и ДРР, продажи */
+.cnpn{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;padding-top:7px;border-top:.5px solid var(--line2)}
+.cnpr{display:flex;flex-wrap:wrap;align-items:baseline;align-content:flex-start;gap:0 7px;font-size:12px;line-height:1.35;color:var(--ink2);min-width:0}
+.cnpr .l{flex:0 0 100%;font-size:11px;font-weight:600;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cnpr b{font-weight:700}
+.cnpr span:last-child{flex:0 0 100%}
+
+/* ── 14.11: семь разделов в нижней полосе — подписи помещаются на 360 ── */
+@media (max-width:899px){.tabs button span{max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}}
+@media (max-width:385px){.tabs button{font-size:9.5px;letter-spacing:-.03em}.tabs button svg{width:22px;height:22px}}
+
 </style>
 </head>
 <body>
@@ -1043,10 +1190,12 @@ body.mjob #runp{display:none}
   <button type="button" data-tab="tov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M10 19V5M16 19v-7M21 19H3"/></svg><span>Товары</span></button>
   <button type="button" data-tab="rk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4l3 1 9 4V5L7 9z"/><path d="M19.5 9.5a4 4 0 0 1 0 5"/><path d="M8 15v3.5"/></svg><span>Кампании</span></button>
   <button type="button" data-tab="skl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="9" height="9" rx="2.5"/><rect x="11.5" y="5" width="9" height="9" rx="2.5"/></svg><span>Склейки</span></button>
-  <button type="button" data-tab="bl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><span>Баллы</span></button>
+  <!-- 14.11 Андрей 06:40: «раздел цены показать по каждому по панели данные» — седьмой раздел «Цены» (vCeny в d_views.js); порядок: Товары, Кампании, Склейки, Цены, Акции, Баллы, Ещё -->
+  <button type="button" data-tab="ceny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M10 7.5v9M10 7.5h3a2.6 2.6 0 0 1 0 5.2h-4.5M8.5 14.8h5"/></svg><span>Цены</span></button>
   <button type="button" data-tab="ak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><span>Акции</span></button>
+  <button type="button" data-tab="bl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><span>Баллы</span></button>
   <button type="button" data-tab="esh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="8" cy="17" r="2" fill="var(--bg)"/></svg><span>Ещё</span></button>
-  <!-- 14.11 Андрей: «поиск… не надо раздел целый — вот можно кнопкой справа в шапке от периодов»: седьмой кнопки «Поиск» здесь больше нет, разделов снова шесть;
+  <!-- 14.11 Андрей: «поиск… не надо раздел целый — вот можно кнопкой справа в шапке от периодов»: седьмой кнопки «Поиск» здесь больше нет (с 06:40 седьмой раздел — «Цены»);
        лупа #fsb стоит в строке #sub под шапкой (её ставит sync() в d_views.js), по нажатию — тот же лист с полем и списком с картинками (openFind) -->
 </nav>
 <main id="view"><div class="sk"></div></main>
@@ -1366,6 +1515,12 @@ function spark(ix,get,mode,one){const n=ix.length,G=ix.map(get),noz=g=>!g.or&&g.
     b+=`<div class="spc${one&&k<n-1?' dm':''}">${tv?`<em class="num${k<2?' l':k>n-3?' r':''}">${tv}</em>`:''}<i style="height:${h}px;background:${c}"></i></div>`;
     x+=`<span>${n<=8||k===0||((n-1-k)%st===0&&k>=2)?D.days[ix[k]].slice(8,10):''}</span>`});
   return `<div class="spb${n>16?' many':''}${n>8?' tp':''}">${b}</div><div class="spx num${n>16?' many':''}">${x}</div>`}
+/* 14.11 Андрей 06:40: «под каждым товаром в разделе акции гистограмма продаж как в ЛК ВБ, только в 1 ряд, прям такой же дизайн возьми, просто не размашисто» —
+   режим заказов карточки, компактно: ровные столбики одного цвета (цвет ВБ) высотой по заказам дня, шт; наибольший день подписан, даты — у первого и последнего.
+   ix — дни, q(i) → заказы дня, шт. Вся гистограмма — до 44 px вместе с числом над столбиком; размеры — a_css_v.css (.sq) */
+function sparkQ(ix,q){const n=ix.length,v=ix.map(i=>+q(i)||0),mx=Math.max(0,...v),top=mx>0?v.lastIndexOf(mx):-1;let b='';
+  v.forEach((x,k)=>{b+=`<div class="sqc">${k===top?`<em class="num${k<3?' l':k>n-4?' r':''}">${f0(x)}</em>`:''}<i${x>0?` style="height:${Math.max(3,Math.round(30*x/mx))}px"`:' class="z"'}></i></div>`});
+  return `<div class="sq"><div class="sqb">${b}</div><div class="sqx num"><span>${n?dm(D.days[ix[0]]):''}</span><span>${n?dm(D.days[ix[n-1]]):''}</span></div></div>`}
 
 /* ───────── мелочи интерфейса ───────── */
 let toastT=0;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),Math.max(2600,Math.min(7000,String(t).length*55)))}   // длинное сообщение (ответ «обновить РК») висит дольше
@@ -1429,6 +1584,8 @@ function fsSync(){const f=$('#fs');if(f)f.hidden=false;const s=$('#sub');if(s)s.
    и место свободно, она с подписью, как поле поиска. Строку пересобирает sync(), поэтому нажатие ловим на документе. На телефоне старое поле .srch скрыто (a_css_v.css) */
 const FSB=tx=>`<button class="fsb press" id="fsb" type="button" aria-label="Найти товар или кампанию"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>${tx}</span></button>`;
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#fsb'))openFind()});
+/* 14.11 Андрей 06:40: «раздел цены…» — седьмой раздел «Цены» (vCeny). Порядок разделов внизу: Товары, Кампании, Склейки, Цены, Акции, Баллы, Ещё.
+   Список разделов TABS и карта сцены «Космос 3D» K3MAP — в d_novoe.js (там уже с «Ценами») */
 function sync(){
   $('#kabSeg').innerHTML=Object.keys(D.kab).map(k=>`<button type="button" data-kab="${k}" aria-pressed="${k===S.kab}">${WBL}${esc(D.kab[k].name)}</button>`).join('');
   $$('#tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab));
@@ -1437,6 +1594,7 @@ function sync(){
   else if(S.tab==='rk'){const nw=K.rk.filter(r=>rkSt(r).w).length;   // числа на кнопках — видно, что это отбор списка (14.11 Андрей: «кнопка „Работают“ — не понял смысл»)
     h=per+seg('rkf',[['w','Работают · '+nw],['p','На паузе · '+(K.rk.length-nw)],['all','Все · '+K.rk.length]],S.rkf.f,'sm')+srch('Кампания или товар')}
   else if(S.tab==='skl')h=per+srch('Товар склейки');
+  else if(S.tab==='ceny')h=per+srch('Товар');   // период — для «заказы за период» в карточках «Цен»
   else if(S.tab==='bl'){wp=0;h=K.bally?seg('blf',[['on','Идут'],['no','Товары без акции']],S.blf,'sm')+srch('Товар или акция'):''}
   else if(S.tab==='ak'){wp=0;h=seg('akf',[['can','Можно войти'],['in','Участвуем'],['all','Все']],S.ak.f,'sm')+srch('Товар')}
   else wp=0;
@@ -1451,7 +1609,7 @@ function sync(){
 }
 function render(keep){const y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
   $('#view').innerHTML=`<div class="view"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`
-    +({tov:vTov,rk:vRk,skl:vSkl,bl:vBl,ak:vAk,esh:vEsh})[S.tab]()+'</div>';twFit();
+    +({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)()+'</div>';twFit();
   if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
 /* смена раздела: вперёд — страница уезжает влево, назад — вправо */
 function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render();return}const d=TABS.indexOf(tab)-TABS.indexOf(S.tab);
@@ -1502,7 +1660,7 @@ function vTov(){
    <div class="tile"><div class="l">Клики</div><div class="v num">${kr(a.c)}</div><div class="d">клик из показа ${pc(a.ctr)} · ${rub2(a.cpc)} за клик</div></div>
    <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт / ${kr(td.or)} ₽ · работает ${nW} РК</div></div></div>`;
   const memo={};const gm=i=>memo[i]||(memo[i]=kabAgg([i])),cm=['drr','s','or'].includes(S.chm)?S.chm:'drr';
-  h+=`<div class="card" style="margin-top:10px"><div class="hrw" style="margin:0 0 8px"><h3 class="h3wb">${WBL}${esc(K.name)} по дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],cm,'sm')}</div>${dayChart(gm,cm)}</div>`;
+  h+=`<div class="card" style="margin-top:10px"><div class="hrw" style="margin:0 0 8px"><h3 class="h3wb">${WBL}${esc(K.name)} по дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],cm,'sm')}</div>${dayChart(gm,cm)}</div>`+dayTbl('kab',PIc(),gm);   // 14.11 Андрей 06:40: «…табличного типа, как в Марпле» — те же дни, что у гистограммы
   h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}${viewSeg('view',S.view)}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
       ${S.view==='cards'?seg('sort',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],S.sort,'sm'):tblBtn('tov')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или покажите все товары.</div>';
@@ -1563,11 +1721,52 @@ function vAk(){const rows=akRows();let h=fresh(1);
   h+=`<div class="muted tnote" style="margin:0 3px 2px">Вход и выход — ценой. Нажмите на акцию — покажу расчёт «было → стало».${K.lk?'':' Автоакции ('+(K.avto_n||0)+') видны только в кабинете ВБ.'}</div>`;
   if(!rows.length)return h+`<div class="empty"><b>${S.ak.f==='can'?'Входить некуда':S.ak.f==='in'?'Нигде не участвуем':'Акций нет'}</b>${S.ak.f==='can'?'Нет акций, где плановая цена ниже нашей.':'Попробуйте другой отбор.'}</div>`;
   h+='<div class="list" style="margin-top:12px">';
-  for(const {t,L} of rows){h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="meta"><span class="pill num">сейчас ${rub2(t.pr.f)}</span><span class="pill num">скидка ${t.pr.d}%</span></div></div></button><div style="margin-top:6px">`;
-    for(const a of L)h+=`<button class="akr press" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
-      <div class="pr num">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="good">участвуем</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
+  /* 14.11 Андрей 06:40: «цены акций, где участвуем, выделить зелёным и нашу цену больше» — строка акции, где товар участвует, на зелёной подложке, плановая цена
+     зелёная с пометкой «участвуем»; наша цена — крупно рядом с названием товара. «…под каждым товаром в разделе акции гистограмма продаж как в ЛК ВБ, в 1 ряд» — sparkQ */
+  const i30=PI(30);
+  for(const {t,L} of rows){const q30=sum(t.o&&t.o.q,i30);
+    h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="akp"><b class="num">${rub2(t.pr.f)}</b><span class="num">наша цена · скидка ${t.pr.d}%</span></div></div></button>
+      <div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div><div style="margin-top:4px">`;
+    for(const a of L)h+=`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
+      <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">участвуем</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
     h+='</div></div>'}
   return h+'</div>'}
+
+/* ───────── Цены ───────── */
+/* 14.11 Андрей 06:40: «раздел цены показать по каждому по панели данные» — по каждому товару с ценой одна карточка: наша цена крупно, до скидки и наша скидка,
+   у покупателя и скидка ВБ (buyer), нижняя цена автоакций и блокировка (t.am), участие в акциях сейчас, заказы за период и данные панели ВБ (t.pan: w — неделя,
+   m — месяц; [продажи ₽, ДРР, маржа с налогом] — столбцы листов «SKU (неделя факт)» и «SKU», подписи периодов — D.pan). Нет панели у кабинета — без неё.
+   Сортировка: маржа (сначала низкая — где теряем), цена, заказы за период. Нажатие — лист товара */
+S.cns=RS.get('cns','mar');
+function cenyRows(){const ix=PI(),q=(S.q||'').toLowerCase();
+  const L=K.tov.filter(t=>t.pr&&(!q||(t.art+' '+t.nm).toLowerCase().includes(q))).map(t=>({t,a:pAgg(t,ix),m:pmar(t)}));
+  const key=({mar:x=>x.m==null?1e9:x.m,pr:x=>-x.t.pr.f,oq:x=>-x.a.oq})[S.cns]||(x=>x.m==null?1e9:x.m);
+  return L.sort((x,y)=>key(x)-key(y)||y.a.oq-x.a.oq)}
+const panLab=s=>esc(String(s||'').trim().replace(/^(\d+)\.(\S+?)\s*-\s*(\d+)\.\2$/,'$1–$3.$2').replace(/\s*-\s*/,'–'));   // «02.нояб. - 08.нояб.» → «02–08.нояб.»
+function cnPan(v,l){if(!v)return '';
+  if(!(v[0]>0))return `<div class="cnpr"><span class="l">${l}</span><span class="muted">продаж нет</span></div>`;
+  const m=v[2]==null?null:100*v[2];
+  return `<div class="cnpr"><span class="l">${l}</span><b class="num ${mcls(m)}">маржа ${pc(m)}</b><span class="num">ДРР ${pc(100*(v[1]||0))}</span><span class="num">продажи ${kr(v[0])} ₽</span></div>`}   // столбец панели: период, маржа и ДРР, продажи (неделя и месяц стоят рядом)
+function cnCard(x){const t=x.t,p=t.pr,by=buyer(t),pn=t.pan,A=(t.ak||[]).filter(a=>a.e>=D.today),U=A.filter(a=>a.uch).sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:0),
+    can=A.filter(a=>!a.uch&&a.plan&&p.f>a.plan).length,nr=U[0];
+  let pl='';
+  if(by)pl+=`<span class="pill num">у покупателя ${by.calc?'≈ ':''}${rub(by.v)} · скидка ВБ ${f0(by.spp)}%</span>`;
+  if(t.am&&t.am[0])pl+=`<span class="pill num">нижняя цена автоакций ${rub(t.am[0])}${t.am[2]?' до '+dm(t.am[2]):''}</span>`;
+  if(t.am&&t.am[1])pl+='<span class="pill w">снижение в автоакциях заблокировано</span>';
+  if(U.length)pl+=`<span class="pill g num">в акциях: ${U.length}${nr&&nr.plan?' · '+(nr.s<=D.today?'сейчас ':'с '+dm(nr.s)+' ')+rub(nr.plan):''}</span>`;
+  else if(can)pl+=`<span class="pill num">можно войти в акции: ${can}</span>`;
+  pl+=`<span class="pill num">заказы ${perTx()}: ${f0(x.a.oq)} шт</span>`;
+  const pan=pn?cnPan(pn.w,'неделя '+panLab(D.pan&&D.pan.wl))+cnPan(pn.m,panLab(D.pan&&D.pan.ml)||'месяц'):'';
+  return `<button class="pc cnc press" type="button" data-nm="${t.nm}"><div class="ph"${foto(t)}></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div>
+    <div class="cnp"><b class="num">${rub2(p.f)}</b><span class="num">до скидки ${f0(p.p)} ₽ · наша скидка ${p.d}%</span></div></div>
+    <div class="meta cnm">${pl}</div>${pan?`<div class="cnpn">${pan}</div>`:''}</button>`}
+function vCeny(){if(typeof SEGCB==='object')SEGCB.cns=v=>{S.cns=v;RS.set('cns',v);render(true)};   // SEGCB объявлен в e_sheets.js — к первому показу раздела он уже есть
+  const rows=cenyRows(),hasP=K.tov.some(t=>t.pan);let h=fresh();
+  h+=`<div class="hrw"><h3>Цены · ${rows.length}</h3>${seg('cns',[['mar','Маржа'],['pr','Цена'],['oq','Заказы']],S.cns,'sm')}</div>`;
+  if(!hasP)h+='<div class="muted tnote" style="margin:0 3px 6px">Данных панели по этому кабинету нет — показаны цены и акции.</div>';
+  else if(S.cns==='mar')h+='<div class="muted tnote" style="margin:0 3px 6px">Сначала товары с самой низкой маржей по панели (неделя; без продаж за неделю — месяц).</div>';
+  if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск.</div>';
+  return h+'<div class="list">'+rows.map(cnCard).join('')+'</div>'}
 
 /* ───────── записи журнала ───────── */
 const WHO={'сервис':['s','сервис'],'кабинет':['k','кабинет'],'чат':['z','чат'],'марпла':['','заметка'],'заметка':['','заметка']};
@@ -1630,8 +1829,8 @@ const tblCols=id=>{const st=tblSt(id);return st.ord.map(k=>TBL[id].cols.find(c=>
 function tblSort(id,rows){const st=tblSt(id),C=TBL[id].cols,c=C.find(x=>x.k===st.sort)||C[0],c2=st.sort2?C.find(x=>x.k===st.sort2):null;   // «нет данных» — всегда внизу, «нет заказов» (∞) — как самое большое
   const nv=v=>v==null||(typeof v==='number'&&isNaN(v))?null:v===Infinity?1e15:v,cmp=(a,b,d)=>a==null?(b==null?0:1):b==null?-1:(a<b?-1:a>b?1:0)*d;
   return rows.map(r=>[nv(c.v(r)),c2?nv(c2.v(r)):null,r]).sort((a,b)=>cmp(a[0],b[0],st.dir)||(c2?cmp(a[1],b[1],st.dir2):0)).map(x=>x[2])}
-function tblHtml(id,rows,attr){const st=tblSt(id),cols=tblCols(id);
-  let h=`<div class="tw tws" data-tbl="${id}"><table><thead><tr>`+cols.map(c=>`<th data-ts="${id}|${c.k}"${st.sort===c.k?` aria-sort="${st.dir<0?'descending':'ascending'}"`:st.sort2===c.k?` data-s2="${st.dir2<0?'d':'a'}"`:''}${c.t?` title="${esc(c.t)}"`:''}>${c.l}${st.sort2&&st.sort===c.k?'<i class="sn">1</i>':st.sort2===c.k?'<i class="sn">2</i>':''}</th>`).join('')+'</tr></thead><tbody>';
+function tblHtml(id,rows,attr,cls){const st=tblSt(id),cols=tblCols(id);   // cls — класс обёртки вместо tws (таблица по дням — dtw: своя высота, не тянет страницу к себе)
+  let h=`<div class="tw ${cls||'tws'}" data-tbl="${id}"><table><thead><tr>`+cols.map(c=>`<th data-ts="${id}|${c.k}"${st.sort===c.k?` aria-sort="${st.dir<0?'descending':'ascending'}"`:st.sort2===c.k?` data-s2="${st.dir2<0?'d':'a'}"`:''}${c.t?` title="${esc(c.t)}"`:''}>${c.l}${st.sort2&&st.sort===c.k?'<i class="sn">1</i>':st.sort2===c.k?'<i class="sn">2</i>':''}</th>`).join('')+'</tr></thead><tbody>';
   for(const r of rows)h+=`<tr ${attr(r)}>`+cols.map((c,i)=>`<td class="${i?'num':'t1'}${c.cls?' '+(c.cls(r)||''):''}">${c.h(r)}</td>`).join('')+'</tr>';
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
@@ -1734,8 +1933,40 @@ TBL.skl={sort:['or',-1],cols:[
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
   {k:'pr',l:'Цена наша, ₽',def:0,v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'}]};
 
+/* ───────── 14.11 Андрей 06:40: «помимо представленности статистика в гистограммах надо ещё показать табличного типа как в Марпле, тоже там важны показатели —
+   показы, клики, СПМ, СПС, ДРР РК, ДРР, затраты, заказы кол-во, корзины, и также выбор фильтров и прочее как делал» — таблица по дням под гистограммой:
+   первая строка «За период» (итог), дальше день за днём, свежий сверху. Свои столбцы и сортировка — те же, что у общих таблиц (TBL, tblSt, openCols),
+   запоминаются отдельно для каждого места: dayTbl(kind, ix, get) — kind 'kab' главная, 'skl' склейка, 'tov' лист товара, 'rk' лист кампании;
+   ix — дни, как у гистограммы; get(i) → {v показы, c клики, a корзины, q заказы РК шт, s траты ₽, sp сумма заказов РК ₽, or заказы товара ₽, oq заказы товара шт},
+   поля может не быть — тогда «—» ───────── */
+const DFL=['v','c','a','q','s','sp','or','oq'];
+function dRow(i,g){g=g||{};const x={i};for(const k of DFL)x[k]=typeof g[k]==='number'&&isFinite(g[k])?g[k]:null;
+  const dv=(a,b,m)=>a==null||!b?null:m*a/b,dr=(s,o)=>s==null||o==null?null:o?100*s/o:(s>=1?Infinity:null);   // траты есть, заказов 0 — «нет зак.»
+  x.ctr=dv(x.c,x.v,100);x.cpc=dv(x.s,x.c,1);x.cpm=dv(x.s,x.v,1000);x.drrk=dr(x.s,x.sp);x.drr=dr(x.s,x.or);return x}
+const dNum=(k,l,o)=>Object.assign({k,l,v:x=>x[k],h:x=>x[k]==null?'—':f0(x[k])},o||{});
+const dDrr=(k,l,t)=>({k,l,t,v:x=>x[k],h:x=>x[k]==null?'—':`<b>${drrT(x[k])}</b>`,cls:x=>dcls(x[k])});
+const DCOLS=[
+  {k:'d',l:'Дата',v:x=>x.i,h:x=>x.tot?`<b>За период</b><small>${x.lab}</small>`:dlab(x.i)+(x.i===T?'<small>сегодня, день идёт</small>':'')},
+  dNum('v','Показы'),dNum('c','Клики'),
+  {k:'ctr',l:'CTR',t:'клик из показа: клики ÷ показы',v:x=>x.ctr,h:x=>pc(x.ctr)},
+  {k:'cpc',l:'CPC, ₽',t:'цена клика: затраты ÷ клики',v:x=>x.cpc,h:x=>x.cpc==null?'—':f2(x.cpc)},
+  {k:'cpm',l:'CPM, ₽',t:'цена 1000 показов: затраты ÷ показы × 1000',v:x=>x.cpm,h:x=>x.cpm==null?'—':f0(x.cpm)},
+  dNum('a','Корзины'),
+  dNum('q','Заказы РК, шт',{t:'заказы, которые ВБ отнёс к рекламе'}),
+  dNum('oq','Заказы товара, шт',{t:'все заказы, как гистограмма товара в кабинете ВБ'}),
+  dNum('s','Затраты, ₽',{cls:x=>sbad(x.s,x.oq!=null?x.oq:x.q)}),
+  dDrr('drrk','ДРР РК','затраты ÷ сумма заказов с рекламы, ₽'),
+  dDrr('drr','ДРР','затраты ÷ все заказы товара, ₽'),
+  dNum('sp','Заказы РК, ₽',{t:'сумма заказов, которые ВБ отнёс к рекламе',def:0}),
+  dNum('or','Заказы товара, ₽',{t:'сумма всех заказов товара',def:0})];
+function dayTbl(kind,ix,get){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['d',-1],cols:DCOLS};
+  const R=ix.map(i=>dRow(i,get(i))),tt={};
+  for(const k of DFL){let s=null;for(const r of R)if(r[k]!=null)s=(s||0)+r[k];tt[k]=s}
+  const tot=Object.assign(dRow(-1,tt),{tot:1,lab:ix.length?dm(D.days[ix[0]])+'–'+dm(D.days[ix[ix.length-1]]):''});
+  return `<div class="hrw dth"><h3>По дням таблицей</h3>${tblBtn(id)}</div>`+tblHtml(id,[tot].concat(tblSort(id,R)),x=>x.tot?'class="dtot"':'class="dtr"','dtw')}
+
 /* ───────── Склейки ───────── */
-function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0};for(const t of L){const x=pAgg(t,ix);a.s+=x.s;a.or+=x.or;a.oq+=x.oq;a.q+=x.q;a.c+=x.c;a.v+=x.v;a.sp+=x.sp}
+function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0,a:0};for(const t of L){const x=pAgg(t,ix);a.s+=x.s;a.or+=x.or;a.oq+=x.oq;a.q+=x.q;a.c+=x.c;a.v+=x.v;a.sp+=x.sp;a.a+=x.a}   // a — корзины (для таблицы по дням)
   a.drr=a.or?100*a.s/a.or:(a.s?Infinity:null);a.drrk=a.sp?100*a.s/a.sp:(a.s?Infinity:null);a.cpa=a.oq?a.s/a.oq:null;return a}
 function sklGroups(){const ix=PI(),G=new Map();
   for(const t of K.tov){if(!t.imt)continue;let g=G.get(t.imt);if(!g)G.set(t.imt,g={imt:t.imt,L:[]});g.L.push({t,a:pAgg(t,ix),w:wrk(t).length})}
@@ -1764,7 +1995,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
       +g.L.map(x=>`<tr data-nm="${x.t.nm}"><td>${tcell(x.t,esc(x.t.art)+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))}</td><td class="num ${dcls(x.a.drr)}"><b>${x.a.s||x.a.or?drrT(x.a.drr):'—'}</b></td><td class="num">${x.a.s?f0(x.a.s):'—'}</td><td class="num">${f0(x.a.oq)}</td><td class="num">${ostCell(x.t.fbo)}<span class="muted"> · </span>${ostCell(x.t.fbs)}</td></tr>`).join('')
       +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div>`}
   return h+'</div>'}
-function openSkl(imt){sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===String(imt));if(!g)return {t:'Склейка',s:'',h:'<div class="empty">Склейки нет в данных.</div>'};
+function openSkl(imt){if(typeof shMark==='function')shMark('skl',imt);sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===String(imt));if(!g)return {t:'Склейка',s:'',h:'<div class="empty">Склейки нет в данных.</div>'};
   const L=g.L.map(x=>x.t),ix=PI(),pp=PP(),a=g.a,b=pp?sklAgg(L,pp):null,td=sklAgg(L,[T]),memo={},gm=i=>memo[i]||(memo[i]=sklAgg(L,[i]));
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   /* 14.11: как в листе товара — четыре главные цифры kpi4 вместо плашек «ДРР вчера» и «ДРР период» («Вчера» — кнопкой периода) */
@@ -1772,7 +2003,7 @@ function openSkl(imt){sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===Str
   h+=`<div class="tiles t3" style="margin-top:10px"><div class="tile"><div class="l">Реклама на 1 заказ</div><div class="v num">${a.cpa==null?'—':rub(a.cpa)}</div><div class="d">реклама ÷ все заказы</div></div>
     <div class="tile"><div class="l">Заказы без рекламы</div><div class="v num">${f0(g.bez)} <small>шт</small></div><div class="d">товары, на которые не тратились</div></div>
     <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт</div></div></div>`;
-  h+='<div class="hrw"><h3>Склейка по дням: ДРР и заказы</h3></div>'+drrChart(cx,gm)+CHLG;
+  h+='<div class="hrw"><h3>Склейка по дням: ДРР и заказы</h3></div>'+drrChart(cx,gm)+CHLG+dayTbl('skl',cx,gm);   // 14.11 Андрей 06:40: таблица по дням, как в Марпле
   const rows=tblSort('skl',g.L);
   h+=`<div class="hrw"><h3>Товары склейки · ${g.L.length}</h3>${tblBtn('skl')}</div>`+tblHtml('skl',rows,x=>`data-nm2="${x.t.nm}"`);
   const W=[];for(const t of L)for(const r of wrk(t))W.push([r,t.nm]);
@@ -1815,7 +2046,8 @@ function vBl(){const b=K.bally;
    13.11 ~22:00, правки Андрея: период в самом листе; вместо строки-воронки — плитки конверсий; столбики как в Telegram (сверху расход и ДРР,
    внутри заказы товара, шт); фразы — одна таблица прямо в кампании (частота, траты, заказы, место, выбор нескольких, исключить / вернуть,
    снять место по нажатию); последние правки сразу в листе; заметки одним списком, готовая заметка сохраняется нажатием ───────── */
-const TABS=['tov','rk','skl','bl','ak','esh'];
+/* 14.11 Андрей 06:40: «раздел цены показать по каждому по панели данные» — седьмой раздел «Цены» (vCeny, d_views.js); порядок внизу: Товары, Кампании, Склейки, Цены, Акции, Баллы, Ещё */
+const TABS=['tov','rk','skl','ceny','ak','bl','esh'];
 const LITE=document.documentElement.dataset.lite==='1';   // компьютер без видеокарты (ставит скрипт в шапке) — без переходов и без движения сцены
 if(!TABS.includes(S.tab))S.tab='tov';
 S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s')};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
@@ -1833,7 +2065,7 @@ function navBack(){if(SHS.length){back();return true}return false}
 /* темы. «Космос 3D» — та же сцена, что в «Панели» (panel/kosmos/scene.js — Земля, Луна и небо по картам NASA), грузится только при этой теме.
    «Космос» — прежний, обычный: звёздное небо картинкой и градиент, как в Юнитке и Склейках, без 3D (13.11 Андрей: «добавь ещё обычный наш космос») */
 const THL=[['auto','Как в системе','Обычные'],['light','Светлая','Обычные'],['dark','Тёмная','Обычные'],['kosmos','Космос','Космос','space'],['space','Космос 3D','Космос']];
-const K3MAP={tov:'sum',rk:'cat',skl:'skl',bl:'prod',ak:'spp',esh:'year'};
+const K3MAP={tov:'sum',rk:'cat',skl:'skl',ceny:'spp',bl:'prod',ak:'spp',esh:'year'};
 const K3=(()=>{let st=0,want=false;const R=document.documentElement;   // st: 0 не грузили, 1 грузится, 2 есть, 3 не вышло
   const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
   const run=()=>{if(!want||!window.KOSMOS)return;
@@ -1868,7 +2100,45 @@ function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i}
 /* последние правки — сразу в листе, без перехода в отдельный раздел; «показать ещё» раскрывает тут же */
 function chgBlock(nm,cid){const L=istOf(nm,cid,0),key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:4;
   return `<div class="hrw"><h3>Что меняли</h3>${L.length>4?`<button class="lnk" type="button" data-act="chgmore" data-key="${key}">${open?'свернуть':'показать ещё '+Math.min(L.length-4,36)}</button>`:''}</div>`
-    +(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,n).map(z=>evHtml(z,1)).join('')+'</div>'   /* в листе кампании её название под каждой правкой не повторяем (стиль .evrk) */+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок за 4 месяца не было.</div>')}
+    +(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'   /* в листе кампании её название под каждой правкой не повторяем (стиль .evrk) */+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок за 4 месяца не было.</div>')}
+/* 14.11 Андрей: «то меняли если нажимаю на нее скажем ставки кластеров то открываются какие что» — сводная запись («ставки кластеров: изменено N»,
+   «минус-фразы: добавлено N», «акция …: вошли N товаров») со значком «›»: нажатие раскрывает список прямо под записью — фраза (товар) · было → стало.
+   Список пишет сборщик в поле det (sbor.py, с 14.11); у старых записей его нет — так и пишем. Запись журнала рисует evHtml (d_views.js), тут только обёртка */
+const EVX=new Set(),EVRX=/^(ставки кластеров: изменено|минус-фразы: (добавлено|убрано)|акция «.*»: (вошли|вышли))/;
+function evX(z,full){const d=z.det&&z.det.length?z.det:null,ch=z.chto||'',n=parseInt((ch.match(/(\d+)\D*$/)||[])[1])||0,ak=/^акция/.test(ch);
+  /* старые записи минус-фраз без списка: до 6 фраз и так видны в самой записи — раскрывать нечего */
+  if(!d&&(!EVRX.test(ch)||(/^минус/.test(ch)&&n<=6)))return evHtml(z,full);
+  const k=z.t+'|'+(z.cid||'')+'|'+(z.nm||'')+'|'+ch,num=v=>typeof v==='number';
+  const b=d?d.map(x=>{const q=x[0],a=x[1],c=x[2];return `<div class="evdr"><span>${esc(String(q))}</span><em class="num">${num(a)||num(c)?`${num(a)?kop(a):'общая'} → <b>${num(c)?kop(c):'общая'}</b>`:`<b>${esc(String(c||a||''))}</b>`}</em></div>`}).join('')
+      +(n>d.length?`<div class="muted tnote">и ещё ${n-d.length} — в записи сохранены первые ${d.length}</div>`:'')
+    :`<div class="muted tnote">Какие именно ${ak?'товары':'фразы'} — в записи не сохранено (сохраняется с 14.11).</div>`;
+  return `<div class="evx${EVX.has(k)?' on':''}" data-evx="${esc(k)}">${evHtml(z,full)}<div class="evd">${b}</div></div>`}
+
+/* 14.11 Андрей: «если в процессе назад непонятно чем закончится как будто ничем» — итог последней команды по кампании виден в блоке управления
+   и после ухода с листа: «Последняя команда: Ставка — готово в 07:12» / «не выполнена: причина». Источник — очередь ожидания соседа (WQ, WAIT в e_sheets.js):
+   на ответ сторожа ставим свою короткую запись и передаём ответ дальше как было. Ничего не придумываем: ответ пришёл раньше, чем мы его увидели, — строки нет.
+   Показываем 15 минут; живёт до закрытия вкладки (sessionStorage) */
+const LCK={status:'Пауза или запуск',bid:'Ставка',deposit:'Пополнение',limit:'Лимит дня',klbid:'Ставка фразы',minus:'Минус-фразы',grafik:'График показа',bidder:'Биддер'};   // «Обновить» (rkref) сюда не берём: его итог и так в строке «перечитана в …» и сообщением — третий раз не повторяем (кадр 14.11)
+const LCW={};let LC={};
+try{LC=JSON.parse(sessionStorage.getItem('rk_lc')||'{}')||{};for(const c in LC)if(LC[c].st==='work')delete LC[c]}catch(e){LC={}}   // «выполняется» после обновления страницы — итога не знаем, строки нет
+const lcSave=()=>{try{sessionStorage.setItem('rk_lc',JSON.stringify(LC))}catch(e){}};
+const lcHm=ts=>{try{return new Date(ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'})}catch(e){return ''}};
+function lcTx(cid){const x=LC[cid];if(!x||Date.now()-(x.t1||x.t0)>15*60000)return '';const n='Последняя команда: <b>'+(LCK[x.k]||'команда')+'</b> — ';
+  if(x.st==='work')return `<span class="sp"></span><span>${n}сторож выполняет…</span>`;
+  if(x.st==='done')return `<i class="g"></i><span>${n}готово в ${lcHm(x.t1)}${x.msg?' · '+esc(x.msg):''}</span>`;
+  if(x.st==='late')return `<i class="w"></i><span>${n}сторож не ответил к ${lcHm(x.t1)}. Могла выполниться — загляните в «Что меняли» через пару минут</span>`;
+  return `<i class="b"></i><span>${n}не выполнена${x.msg?': '+esc(x.msg):''} · ${lcHm(x.t1)}</span>`}
+const lcLine=cid=>`<div class="lcmd" data-lc="${cid}">${lcTx(cid)}</div>`;
+function lcTick(){if(typeof WQ==='undefined'||typeof WAIT==='undefined')return;const now=Date.now(),inq=new Set();let ch=0;
+  for(const e of WQ){inq.add(e.id);const c=e.cmd||{};if(!c.cid||!LCK[c.k])continue;
+    if(!LCW[e.id]){LCW[e.id]={cid:+c.cid,k:c.k,t0:e.t0,dl:e.dl,got:0};LC[c.cid]={k:c.k,t0:e.t0,st:'work'};ch=1}
+    LCW[e.id].dl=e.dl;const f=WAIT[e.id];
+    if(f&&!f.__lc){const w=m=>{const x=LCW[e.id];if(x&&m&&m.st!=='work'){x.got=1;LC[x.cid]={k:x.k,t0:x.t0,t1:Date.now(),st:m.st==='done'?'done':'no',msg:String(m.msg||'').slice(0,160)};lcSave()}return f(m)};w.__lc=1;WAIT[e.id]=w}}
+  for(const id in LCW){if(inq.has(id))continue;const x=LCW[id],y=LC[x.cid];delete LCW[id];if(x.got||!y||y.t0!==x.t0)continue;
+    if(now>=x.dl)LC[x.cid]=Object.assign(y,{t1:now,st:'late'});else delete LC[x.cid];ch=1}   // ушла из очереди без ответа: по сроку — «не ответил», иначе итога не знаем
+  if(ch)lcSave();
+  for(const el of $$('.lcmd[data-lc]')){const s=lcTx(el.dataset.lc);if(el._s!==s){el.innerHTML=s;el._s=s}}}
+setInterval(lcTick,500);
 /* заметки. 14.11 Андрей: «поиск фильтр такой к заметкам не надо. просто 2 фильтра то что я писал и из истории и вместе показать», «поиск с выбором заметок
    по словам не надо, то что из марплы как бы тема заметок не надо ее у нас», «все вообще заметки вместе не нужно» — в листе заметок товара или кампании
    три кнопки: Мои · Из истории · Вместе, поле и кнопка «Добавить». Готовых заметок-слов (ряд слов над списком читался как «выбор заметок по словам»),
@@ -1884,7 +2154,7 @@ function openNotes(nm,cid){if(!nm&&!cid){openIst();return}   // общего с�
     return {t:'Заметки',s:esc(r?r.name:t?t.art:K.name),h:`<div class="ntrow"><input class="inp" id="nt" maxlength="300" placeholder="Написать заметку" autocomplete="off" value="${esc(draft)}"><button class="btn press" type="button" id="ntgo"${draft.trim()?'':' disabled'}>Добавить</button></div>
       <div id="ntst" class="muted tnote" style="min-height:16px"></div>
       <div class="ntf">${seg('ntf',[['my','Мои · '+my.length],['ist','Из истории · '+hi.length],['all','Вместе']],f)}</div>`
-      +(show.length?`<div${cid?' class="evrk"':''}>`+show.map(z=>isN(z)?ntRow(z,f==='all'):evHtml(z,1)).join('')+'</div>'+(L.length>show.length?`<div class="muted tnote">Показаны последние ${show.length} из ${L.length}.</div>`:'')
+      +(show.length?`<div${cid?' class="evrk"':''}>`+show.map(z=>isN(z)?ntRow(z,f==='all'):evX(z,1)).join('')+'</div>'+(L.length>show.length?`<div class="muted tnote">Показаны последние ${show.length} из ${L.length}.</div>`:'')
         :`<div class="note" style="margin-top:8px">${f==='ist'?'Правок за 4 месяца не было.':'Заметок пока нет — напишите первую в поле выше.'}</div>`),
       after:()=>{const inp=$('#nt'),go=$('#ntgo');
         const save=tx=>{tx=String(tx||'').trim();if(!tx||!need())return;const st=$('#ntst');st.className='muted tnote';st.textContent='Сохраняю…';go.disabled=true;
@@ -2087,12 +2357,9 @@ async function perenosRun(L){const box=$('#runbox');if(!box)return;const it=L.ma
 
 /* ── товар: порядок как на листе маркетолога — цена и остатки, ДРР вчера и за период, дни, что меняли, кампании, места, скидка ВБ, цена, акции ── */
 function openProd(nm,ctx){if(!TOV[nm])return;const i=ctx?ctx.indexOf(+nm):-1;
+  /* 14.11 Андрей: «если находишся в рк или товаре нельзя обновить страницу» — лист запоминается (shMark пишет сосед в e_sheets.js) */
+  if(typeof shMark==='function')shMark('tov',nm);
   sheet(()=>prodBody(nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openProd(ctx[j],ctx)}:null)}
-function prodMx(nm){const t=TOV[nm];if(!KL)return '<div class="sk" style="height:90px"></div>';
-  const rl=kwRkList(t);if(!rl.length)return '';const sv={sort:S.kw.sort,dir:S.kw.dir};S.kw.sort='s';S.kw.dir=-1;
-  const rows=kwData(t,0).filter(e=>!e.xall&&(e.a.s||e.m||e.mr)).slice(0,8);Object.assign(S.kw,sv);
-  if(!rows.length)return '<div class="note" style="margin-top:0">За период показов по фразам не было.</div>';
-  return matrix(rows,e=>`data-kwo="${e.rk[0]}|${nm}|${esc(e.t)}"`)+'<div class="muted tnote">Главные фразы по тратам. Исключить фразу и снять место — в листе кампании.</div>'}
 function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?pAgg(t,pp):null,td=pAgg(t,[T]),y=T>0?pAgg(t,[T-1]):null,y2=T>1?pAgg(t,[T-2]):null,W=wrk(t),P=t.rk.map(id=>RK[id]).filter(r=>r&&!rkSt(r).w);
   const memo={},gm=i=>memo[i]||(memo[i]=pAgg(t,[i])),pn=t.pan||{},cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   const panl=(x,l)=>x&&x[0]>0&&x[2]!=null?`<span>панель ${esc(l||'')}: <b class="${mcls(100*x[2])}">ДРР ${pc(100*(x[1]||0))} · маржа ${pc(100*x[2])}</b></span>`:'';
@@ -2108,8 +2375,20 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 Андрей: «в товаре плашка „ДРР вчера“ завис, зачем, если период выше — выбор»: плашки «вчера» нет, «Вчера» — кнопкой периода */
   h+=kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.oq)}">${rub(td.s)}</b> · заказы <b>${f0(td.oq)} шт</b> на ${kr(td.or)} ₽ · цена заказа с рекламы ${perZa()} <b>${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет заказов'}</b></div>`;
+  /* 14.11 Андрей: «гистограмма продаж как в лк вб только в 1 ряд прям такой же дизайн возьми просто не размашисто» — продажи по дням сразу под главными
+     цифрами, низко (100 px); это прежний блок «Карточка по дням: заказали, шт» (он стоял внизу листа) — перенесён сюда, второго нет.
+     Нет счёта карточки за день — заказы по отчёту ВБ (t.o.q), подпись под столбиками говорит об этом */
+  const hasF=i=>!!(t.f&&t.f.has[i]),sq=i=>hasF(i)?t.f.o[i]:t.o&&t.o.q?t.o.q[i]||0:null;
+  if(cx.some(i=>sq(i)!=null)){const nf=cx.filter(i=>!hasF(i)).length;
+    h+=`<div class="hrw"><h3>Продажи по дням, шт</h3><span class="muted" style="font-size:12.5px">как в кабинете</span></div><div class="sal1">`+chart({ix:cx,h:100,val:sq,col:()=>'var(--acc)',top:i=>sq(i)?sq(i):'',
+      read:i=>hasF(i)?`<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · открыли ${f0(t.f.op[i])} · в корзину ${f0(t.f.cart[i])}${t.f.op[i]?' ('+pc(100*t.f.cart[i]/t.f.op[i])+')':''} · заказали <b>${f0(t.f.o[i])}</b> на ${rub(t.f.r[i])} · выкупили ${f0(t.f.b[i])}`
+        :`<b>${dlab(i)}</b> · заказали <b>${f0(sq(i)||0)}</b> — по отчёту ВБ, счёта карточки за этот день нет`})+'</div>'
+      +(nf?`<div class="muted tnote">${nf===cx.length?'Счёта карточки нет — заказы по отчёту ВБ (он показывает меньше).':'За '+nf+' дн. счёта карточки нет — там заказы по отчёту ВБ (он показывает меньше).'}</div>`:'')}
   const cd=chgDays(nm,0);
   h+='<div class="hrw"><h3>По дням: ДРР и заказы</h3></div>'+drrChart(cx,gm,{dot:i=>cd.has(i)})+CHLG;
+  /* 14.11 Андрей: «помимо представленности статистика в гистограммах надо еще показать табличного типа как в марпле» — таблица по дням под гистограммой
+     (dayTbl пишет сосед в d_tabl.js: свои столбцы и сортировка) */
+  if(typeof dayTbl==='function')h+=dayTbl('tov',cx,i=>{const x=gm(i);return {v:x.v,c:x.c,a:x.a,q:x.q,s:x.s,sp:x.sp,or:x.or,oq:x.oq}});
   h+=chgBlock(nm,0);
   /* 14.11 Андрей: «траты и периоды отдельно сверху всех рабочих РК в товаре такие же» — цифры над списком те же, что в строках; второго переключателя
      периода здесь больше нет (позже в тот же день: «над рк отдельный смену периода или нет… как на главной он в шапке») — период один, прилип к верху листа */
@@ -2119,7 +2398,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   h+=W.length?`<div class="rows" data-rctx="${rctx}">`+W.map(r=>rkRow(r,nm,ix)).join('')+'</div>':'<div class="note" style="margin-top:0">Сейчас ни одна кампания товара не работает.</div>';
   if(P.length){const act=P.filter(r=>rkAgg(r,nm,PI(30)).s>0),old=P.filter(r=>!act.includes(r)),show=S.openP===nm?P:act;
     h+=`<div class="hrw"><h3>На паузе · ${P.length}</h3>${old.length&&S.openP!==nm?`<button class="lnk" type="button" data-act="allp" data-nm="${nm}">показать все</button>`:''}</div>`+(show.length?`<div class="rows" data-rctx="${rctx}">`+show.map(r=>rkRow(r,nm,ix)).join('')+'</div>':'<div class="note" style="margin-top:0">За 30 дней расхода по ним не было.</div>')}
-  if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+=`<div class="hrw"><h3>Места по фразам, 7 дней</h3></div><div id="pmx">${prodMx(nm)}</div>`+(KL?MXLG:'');
+  /* 14.11 Андрей: «места по фразам только внутри рк соотв» — в листе товара мест по фразам больше нет, только в таблице фраз своей кампании */
+  if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+='<div class="muted tnote pmxh">Места по фразам — в листе кампании: нажмите на кампанию выше.</div>';
   const sk=t.imt?K.tov.filter(z=>z.imt===t.imt):[];
   if(sk.length>1){const sa=sklAgg(sk,ix);h+=`<div class="hrw"><h3>Склейка</h3></div><button class="akr press" type="button" data-skl="${t.imt}" style="width:100%;border:0;background:var(--card2);border-radius:14px;padding:11px 13px;text-align:left;cursor:pointer"><div><b>${sk.length} товаров в склейке</b><span class="num">реклама ${kr(sa.s)} ₽ · заказы ${f0(sa.oq)} шт ${perZa()}</span></div><div class="pr num ${dcls(sa.drr)}">${pc(sa.drr)}<small>ДРР склейки</small></div></button>`}
   const pdm={};for(const x of t.pd||[])pdm[x[0]]=x;
@@ -2131,20 +2411,28 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
       return `<span>${x?`<b class="num${ch?' chg':''}">${ch?(x[1]<p[1]?'▼':'▲'):''}${f0(x[1])}</b><small class="num">${f0(x[2])}</small>`:'<b class="muted">—</b>'}</span>`}).join('')
       +'</div><div class="muted" style="font-size:12px;margin-top:4px">Синим — нашу цену меняли. Нет заказов в день — нет цены.</div>'}
   const aks=(t.ak||[]).filter(x=>x.e>=D.today);
-  if(aks.length&&t.pr){const inA=aks.filter(x=>x.uch&&x.s<=D.today);
-    h+=`<div class="hrw"><h3>Акции ВБ</h3></div><div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div><div class="muted" style="font-size:12.5px;margin:3px 0 2px">Цена акции · наша сейчас ${rub2(t.pr.f)} · нажмите на акцию, чтобы войти ценой</div><div>`
-      +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b><span>${akSub(x)}</span></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="good">участвуем</span>':x.plan&&t.pr.f>x.plan?'цена '+f0(100*(x.plan-t.pr.f)/t.pr.f)+'%':'цена подходит'}</small></div></button>`).join('')+'</div>'}
-  if(t.f&&cx.some(i=>t.f.has[i])){const nf=ix.filter(i=>!t.f.has[i]).length;
-    h+=`<div class="hrw"><h3>Карточка по дням: заказали, шт — как в кабинете</h3></div>`+chart({ix:cx,h:124,val:i=>t.f.has[i]?t.f.o[i]:null,col:()=>'var(--acc)',top:i=>t.f.has[i]&&t.f.o[i]?t.f.o[i]:'',
-      read:i=>t.f.has[i]?`<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · открыли ${f0(t.f.op[i])} · в корзину ${f0(t.f.cart[i])}${t.f.op[i]?' ('+pc(100*t.f.cart[i]/t.f.op[i])+')':''} · заказали <b>${f0(t.f.o[i])}</b> на ${rub(t.f.r[i])} · выкупили ${f0(t.f.b[i])}`:`<b>${dlab(i)}</b> · счёта карточки за этот день нет`})
-      +(nf?`<div class="muted" style="font-size:12px;margin-top:4px">За ${nf} дн. счёта карточки ещё нет — там заказы по отчёту ВБ (он показывает меньше).</div>`:'')}
+  /* 14.11 Андрей (кадр блока «Акции ВБ», «Без акции» обведено): «Здесь показатели по панели добавь дрр цену маржу сюда» — под строкой «Без акции / В акции»
+     три цифры: наша цена сейчас, ДРР за период (то же, что «ДРР от всего» вверху), маржа из панели (лист «SKU» за месяц, нет — недельный; подпись — какой).
+     У каждой акции — на сколько её цена ниже нашей (₽ и %) и маржа по цене акции ПО РАСЧЁТУ: маржа панели в ₽ на штуку (доля × наша цена) минус разница цен,
+     делить на цену акции. Комиссию ВБ с разницы панель не отдаёт — её не возвращаем, оценка чуть ниже настоящей (сказано под списком).
+     14.11 Андрей 06:40: «цены акций где участвуем выделить зелёным» — строка участия как в разделе «Акции»: .akin и метка .akok «участвуем» */
+  if(aks.length&&t.pr){const inA=aks.filter(x=>x.uch&&x.s<=D.today),P=t.pr.f;
+    const pz=pn.m&&pn.m[2]!=null?[pn.m,D.pan&&D.pan.ml]:pn.w&&pn.w[2]!=null?[pn.w,D.pan&&D.pan.wl]:null,mg=pz?pz[0][2]:null;
+    const m2=pl=>mg==null||!pl||!P?null:(mg*P-(P-pl))/pl;let anyM=false;
+    h+=`<div class="hrw"><h3>Акции ВБ</h3></div><div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`
+      +`<div class="akm"><div><small>Цена</small><b class="num">${rub2(P)}</b><em>наша сейчас</em></div>`
+      +`<div><small>ДРР</small><b class="num ${a.drr!=null&&!isFinite(a.drr)?'bad':dcls(a.drr)}">${a.drr==null?'—':isFinite(a.drr)?pc(a.drr):'нет заказов'}</b><em>${perZa()}</em></div>`
+      +`<div><small>Маржа</small>${mg!=null?`<b class="num ${mcls(100*mg)}">${pc(100*mg)}</b><em>по панели${pz[1]?', '+esc(String(pz[1]).toLowerCase()):''}</em>`:'<b class="muted">—</b><em>нет в панели</em>'}</div></div>`
+      +`<div class="muted" style="font-size:12.5px;margin:6px 0 2px">Нажмите на акцию, чтобы войти ценой</div><div>`
+      +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
+        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b><span>${akSub(x)}</span></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':''}${lo?`<i>ниже на ${rub(P-x.plan)} (−${f0(100*(P-x.plan)/P)}%)</i>`:x.uch?'':'<i>цена подходит</i>'}${mm!=null?`<i class="${mm<0?'bad':''}">маржа ≈ ${pc(100*mm)}</i>`:''}</small></div></button>`}).join('')+'</div>'
+      +(anyM?'<div class="muted tnote">Маржа по цене акции — по расчёту: маржа панели в ₽ на штуку минус разница цен. Комиссию ВБ с разницы панель не даёт — настоящая маржа чуть выше.</div>':'')}
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
      ${K.bally?`<button class="ab press${UPR||t.bl?'':' nolk'}" type="button" data-act="bally" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><b>Баллы за отзывы</b><span>${t.bl?'идёт: '+(t.bl.got||0)+' из '+t.bl.cnt+' отзывов':'баллы покупателю за отзыв'}</span></button>`:''}</div>`;
   h+=notesBlock(nm,0);
-  return {t:esc(t.art),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+`${esc(t.subj||'товар')} · № ${t.nm} · ${esc(K.name)}`,h,
-    after:()=>{if(!KL)loadKl().then(()=>{const x=$('#pmx');if(x)x.innerHTML=prodMx(nm)}).catch(()=>{})}}}
+  return {t:esc(t.art),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+`${esc(t.subj||'товар')} · № ${t.nm} · ${esc(K.name)}`,h}}
 
 /* ── кампания: статус и остатки, период, ДРР, плитки конверсий, дни, что меняли, действия, настройки, заметки, фразы и места ── */
 /* 14.11 Андрей: «путает то что сверху настройки сверху и снизу надо нормально в 1 месте», «настройки рк очень одно цветно + мелко чуть», «нет кнопки
@@ -2170,9 +2458,10 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
     :mb?til('Биддер','цель '+mb.cel+' место','до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):til('Автопополнение','нет','пополняется вручную','adinfo');
   return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b></div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button></div>
-    <div class="ctg">${h}</div>
+    <div class="ctg">${h}</div>${lcLine(r.id)}
     <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button></div>`}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
+  if(typeof shMark==='function')shMark('rk',id,nm);   // 14.11: обновление страницы возвращает в этот лист
   sheet(()=>rkBody(+id,nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openRk(ctx[j][0],ctx[j][1],ctx)}:null)}
 /* другие работающие кампании того же товара — прямо из листа кампании (14.11 Андрей: «в одной РК рабочей, если есть рабочая активная вторая, — из РК мочь
    тоже зайти, но кратко отображались ДРР от общего и ДРР РК, и затраты»). ДРР общий — расход кампании к заказам всего товара, ДРР РК — к заказам, которые ВБ отнёс к ней */
@@ -2216,6 +2505,9 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     read:i=>{const x=g(i);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · заказы товара <b>${f0(x.oq)} шт</b> на ${rub(x.or)}, из них с этой рекламы <b>${f0(x.q)}</b> · ДРР <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
     /* 14.11 Андрей: «снизу куча текста не понятного» — под столбиками одна короткая строка вместо абзаца */
     +'<div class="muted tnote">В столбике — заказы всего товара, шт; ДРР считается к ним.</div>';
+  /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
+     (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
+  if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g);
   h+=chgBlock(nm,id);
   h+=notesBlock(nm,id);
   /* блоков «Настройки сейчас», «Ставка» (минимум и советы ВБ — в листе «Ставка»), биддера и графика внизу больше нет — всё в блоке управления сверху.
@@ -2262,7 +2554,7 @@ function openIst(){if(!IKIND.some(x=>x[0]===S.ist.k))S.ist.k='all';
     <div class="chips">${IKIND.map(([k,l])=>`<button class="chip press" type="button" data-istk="${k}" aria-pressed="${S.ist.k===k}">${l}${k==='all'?' · '+all:cnt[k]?' · '+cnt[k]:''}</button>`).join('')}<button class="chip press" type="button" data-act="istavto" aria-pressed="${S.ist.avto}">+ автоматика</button></div>`;
   if(!L.length)return {t:'Журнал правок',s:esc(K.name),h:h+'<div class="empty"><b>Пусто</b>По этому отбору записей нет. «Автоматика» — правки биддера, графика и лимита дня — скрыта, пока не включить.</div>'};
   let day='';h+='<div style="margin-top:6px">';
-  for(const z of L.slice(0,300)){const d=z.t.slice(0,10);if(d!==day){day=d;h+=`<div class="dayh">${dm(d)}${d===D.today?' · сегодня':''}</div>`}h+=evHtml(z)}
+  for(const z of L.slice(0,300)){const d=z.t.slice(0,10);if(d!==day){day=d;h+=`<div class="dayh">${dm(d)}${d===D.today?' · сегодня':''}</div>`}h+=evX(z)}
   return {t:'Журнал правок',s:esc(K.name)+' · записей '+L.length,h:h+'</div>'+(L.length>300?`<div class="muted tnote">Показаны первые 300 из ${L.length} — уточните отбором.</div>`:''),
     after:()=>{const i=$('#istq');if(i)i.oninput=()=>{S.ist.q=i.value;const p=i.selectionStart;redraw();const j=$('#istq');if(j){j.focus();try{j.setSelectionRange(p,p)}catch(e){}}}}}})}
 
@@ -2322,6 +2614,9 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
     swapSheet(dx<0?1:-1)},{passive:true});
   /* 14.11: «Активные / Исключённые / Все» в таблице фраз — спокойная смена (frSwitch); ловим раньше общего обработчика, он перерисовал бы весь лист */
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-frf]');if(x){e.stopPropagation();frSwitch(x.dataset.frf)}});
+  /* 14.11: сводная запись «Что меняли» — раскрыть / свернуть список на месте, без перерисовки листа */
+  el.addEventListener('click',e=>{const v=e.target.closest&&e.target.closest('.evx>.ev'),w=v&&v.parentNode;if(!w)return;e.stopPropagation();
+    const k=w.dataset.evx,on=!w.classList.contains('on');w.classList.toggle('on',on);if(on)EVX.add(k);else EVX.delete(k)});
   /* период в листе прилипает к верху; на узком экране нажатая кнопка периода остаётся на виду (кнопки прокручиваются вбок внутри себя) */
   new MutationObserver(()=>{const b=el.querySelector('.pseg .seg [aria-pressed="true"]'),s=b&&b.parentNode;if(s&&s.scrollWidth>s.clientWidth+2)s.scrollLeft=Math.max(0,b.offsetLeft-(s.clientWidth-b.offsetWidth)/2)}).observe(el,{childList:true});
   /* «Требуют внимания» в «Кампаниях»: нажали «Работают / На паузе / Все» в шапке — отбор снимается (раньше общего обработчика, он перерисует список) */
@@ -2334,7 +2629,7 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
    новое содержимое въезжает сбоку, а высота листа доезжает плавно (shNav). На компьютере без видеокарты и при «меньше движения» — сразу. */
 const SHS=[];
 const SHRM=matchMedia('(prefers-reduced-motion:reduce)');
-const shMove=()=>document.documentElement.dataset.lite!=='1'&&!SHRM.matches;
+const shMove=()=>document.documentElement.dataset.lite!=='1'&&!SHRM.matches&&!document.documentElement.dataset.shnoa;
 const shKeep=u=>{u.sc={y:$('#sbody').scrollTop,tw:$$('#sbody .tws').map(e=>[e.scrollTop,e.scrollLeft])}};
 let SHT=0;
 /* смена содержимого открытого листа: dir «f» — вперёд, «b» — назад. Ничего не ждёт и не запирает: содержимое меняется сразу, движение — только украшение,
@@ -2345,16 +2640,49 @@ function shNav(dir,fn){const sh=$('#sheet'),go=shMove()&&$('#shw').classList.con
   if(ph){sh.style.transition='none';sh.style.transform='none';const dy=y0-sh.getBoundingClientRect().top;sh.style.transform=Math.abs(dy)>2?`translateY(${dy}px)`:''}   // лист встал на прежнюю высоту…
   void sh.offsetWidth;sh.style.transition='';sh.style.transform='';   // …и плавно доезжает до новой
   sh.classList.add(dir==='b'?'shnb':'shnf');clearTimeout(SHT);SHT=setTimeout(()=>sh.classList.remove('shnf','shnb'),420)}
-function sheet(fn,mid,nav){const was=SHS.length,k=SWK;if(was&&!k)shKeep(SHS[was-1]);SHS.push({fn,mid:!!mid,nav:nav||null});if(was||k)shNav(k==='shb'?'b':'f',()=>drawSheet());else{drawSheet();K3.call('zoom',true)}}
-function drawSheet(keep){const top=SHS[SHS.length-1],w=$('#shw');
-  if(!top){w.classList.remove('on');document.body.style.overflow='';return}
-  const sv=keep?null:top.sc,tw=keep?$$('#sbody .tws').map(e=>[e.scrollTop,e.scrollLeft]):sv?sv.tw:[],o=top.fn(),st=keep?$('#sbody').scrollTop:sv?sv.y:0,one=SHS.length<2;top.sc=null;$('#sheet').classList.toggle('mid',top.mid);
+/* 14.11 Андрей: «ставку если не поставил и в кластере если назад — то выкидывает все товары». Лист «Ставка» короткий: поверх листа кампании он
+   садился низко, а над ним сквозь затемнение была видна главная с товарами — казалось, что кампания закрылась; касание этого затемнения и правда
+   закрывало всё. Теперь лист действия поверх другого листа не ниже листа под ним (mh — его высота; на компьютере — обычный лист сбоку, не окно
+   посередине), а затемнение листы не закрывает (ниже, «события») */
+function sheet(fn,mid,nav){const was=SHS.length,k=SWK,sh=$('#sheet'),mh=was&&!WIDE()?Math.round(sh.getBoundingClientRect().height):0;if(was&&!k)shKeep(SHS[was-1]);
+  SHS.push({fn,mid:!!mid,nav:nav||null,adr:SHMK,mh:mh?Math.max(mh,SHS[was-1].mh||0):0});SHMK=null;if(was||k)shNav(k==='shb'?'b':'f',()=>drawSheet());else{drawSheet();K3.call('zoom',true)}}
+function drawSheet(keep){const top=SHS[SHS.length-1],w=$('#shw');shSave();if(WQ.length)setTimeout(wqDraw,0);
+  if(!top){w.classList.remove('on');document.body.style.overflow='';$('#sheet').style.minHeight='';return}
+  const sv=keep?null:top.sc,tw=keep?$$('#sbody .tws').map(e=>[e.scrollTop,e.scrollLeft]):sv?sv.tw:[],o=top.fn(),st=keep?$('#sbody').scrollTop:sv?sv.y:0,one=SHS.length<2;top.sc=null;
+  $('#sheet').classList.toggle('mid',top.mid&&one);$('#sheet').style.minHeight=!one&&top.mh&&!WIDE()?top.mh+'px':'';
   $('#shh').innerHTML=`<button class="bk press" type="button" data-act="back" aria-label="${one?'Закрыть':'Назад'}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button>`
     +`<div class="tt"><b>${o.t}</b>${o.s?`<span>${o.s}</span>`:''}</div><button class="x" type="button" data-act="close" aria-label="Закрыть" tabindex="-1" hidden></button>`;
   $('#sbody').innerHTML=o.h;$('#sbody').scrollTop=st;$$('#sbody .tws').forEach((e,i)=>{if(tw[i]){e.scrollTop=tw[i][0];e.scrollLeft=tw[i][1]}});w.classList.add('on');document.body.style.overflow='hidden';if(o.after)o.after()}
 const redraw=()=>{if(SHS.length)drawSheet(true)};
 function back(){SHS.pop();if(SHS.length)shNav('b',()=>drawSheet());else{drawSheet();K3.call('zoom',false)}}
 function closeAll(){SHS.length=0;drawSheet();K3.call('zoom',false);return true}
+/* 14.11 Андрей: «если находишься в РК или товаре — нельзя обновить страницу». Листы товара, кампании и склейки помечают себя адресом:
+   shMark('tov',nm) / shMark('rk',id,nm) / shMark('skl',imt) первой строкой openProd / openRk / openSkl — метку забирает ближайший sheet().
+   Цепочка помеченных листов стопки (не больше 4), кабинет и раздел — в адресе страницы (#sh=tov-…~rk-…-…&kb=…&tb=…, без новых шагов
+   в истории браузера) и в памяти вкладки. Обновили страницу — после загрузки те же листы открываются сразу, без движения. Листы действий
+   (ставка, лимит и т.п.) адреса не имеют и не восстанавливаются. Лист закрыли — адрес убран */
+let SHMK=null,SHAT=0;const SHAK='rek.sh';
+function shMark(kind,...a){SHMK={k:String(kind),a:a.map(x=>String(x==null?'':x).replace(/[^\w]/g,''))};queueMicrotask(()=>{SHMK=null})}
+const shAdr=()=>SHS.filter(u=>u.adr).slice(-4).map(u=>[u.adr.k,...u.adr.a].join('-')).join('~');
+/* пишем после текущего шага: svcBack (кнопка «назад» телефона) после своего шага возвращает прежний адрес — наш должен лечь последним */
+function shSave(){clearTimeout(SHAT);SHAT=setTimeout(()=>{const a=shAdr(),ours=/^#sh=/.test(location.hash);
+  try{if(a)sessionStorage.setItem(SHAK,JSON.stringify({a,kab:S.kab,tab:S.tab}));else sessionStorage.removeItem(SHAK)}catch(e){}
+  const h=a?'#sh='+a+'&kb='+encodeURIComponent(S.kab)+'&tb='+encodeURIComponent(S.tab):'';if(location.hash===h||(!a&&!ours))return;   // чужой адрес (#nm=…) не трогаем
+  try{history.replaceState(history.state,'',location.pathname+location.search+h)}catch(e){}},0)}
+function shRead(){let o=null;const g=k=>{const m=location.hash.match(new RegExp('[#&]'+k+'=([^&]*)'));return m?decodeURIComponent(m[1]):''};
+  if(/^#sh=/.test(location.hash))o={a:g('sh'),kab:g('kb'),tab:g('tb')};
+  if(!o)try{o=JSON.parse(sessionStorage.getItem(SHAK)||'null')}catch(e){}
+  return o&&o.a?o:null}
+/* до первой отрисовки: кабинет и раздел, где был открыт лист */
+function shPre(o){if(!o)return;if(o.kab&&D.kab&&D.kab[o.kab]&&o.kab!==S.kab){S.kab=o.kab;RS.set('kab',S.kab)}if(o.tab&&TABS.includes(o.tab))S.tab=o.tab}
+/* после отрисовки: открыть те же листы, если товар / кампания / склейка есть в данных этого кабинета; первого же несуществующего — дальше не идём */
+function shOpen(o){if(!o)return;const R=document.documentElement;R.dataset.shnoa='1';
+  try{for(const p of String(o.a).split('~')){const [k,x,y]=p.split('-');
+      if(k==='tov'&&TOV[x])openProd(+x);
+      else if(k==='rk'&&RK[x])openRk(+x,y&&RK[x].nm[y]?y:undefined);
+      else if(k==='skl'&&typeof sklGroups==='function'&&sklGroups().some(g=>String(g.imt)===x))openSkl(x);
+      else break}}catch(e){}
+  shSave();requestAnimationFrame(()=>requestAnimationFrame(()=>{delete R.dataset.shnoa}))}
 const bidTxt=(r,e)=>Object.entries(e.b||{}).map(([p,v])=>(r.pl.length>1||p!=='search'?(PLN[p]||p)+' ':'')+kop(v)+(r.pay==='cpm'?' за 1000':' за клик')).join(' · ');
 /* минимальная ставка ВБ по тем же местам показа, что и ставка кампании: «мин. 3,10 ₽» | «мин. 90,00 / 310,00 ₽»; на минимуме — пометка */
 const minTxt=e=>{const L=Object.keys(e.b||{}).map(p=>minOf(e,p));return L.length&&L.every(v=>v!=null)?L.map(v=>f2(v/100)).join(' / ')+' ₽':''};
@@ -2407,15 +2735,30 @@ const RUNW={status:['Меняю статус кампании в кабинет�
   bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240]};
 const runW=c=>RUNW[c.k==='refresh'?'refresh_'+(c.mode==='full'?'full':'fast'):c.k]||['Сторож выполняет команду','обычно до полминуты',45];
 const mmss=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
-const RUNPROG='<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">Отправляю команду сторожу…</b><small id="runsub"></small></div></div>';
+/* 14.11 Андрей: «на сетку поменял лимит — очень долго грузит… и если в процессе назад — непонятно, чем закончится, как будто ничем».
+   В листе — три шага «Отправлено → Сторож выполняет → Готово», текущий отмечен; ответ сторожа — крупно его словами («Лимит 155 ₽ в день сохранён»).
+   Ушли из листа — внизу плашка хода, итог — заметным сообщением вверху экрана (runRes): держится не меньше 6 секунд, смена листа его не убирает.
+   st: 0 — отправляю, 1 — сторож выполняет, 2 — готово; bad — на каком шаге не вышло */
+const runSteps=(st,bad)=>'<div class="rsteps">'+['Отправлено','Сторож выполняет','Готово'].map((t,i)=>{const c=bad!=null&&i===bad?'x':i<st||st===2?'ok':i===st?'cur':'';
+  return `<span class="${c}"><i></i>${t}</span>`}).join('<b aria-hidden="true">›</b>')+'</div>';
+const runProg=st=>runSteps(st)+'<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">'+(st?'Сторож выполняет…':'Отправляю команду сторожу…')+'</b><small id="runsub"></small></div></div>';
+const RUNPROG=runProg(0);
+const RUNNM={status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
+  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы'};
+/* итог команды вверху экрана: k — g (готово) / b (отказ) / w (сторож молчит); нажатие убирает */
+function runRes(cmd,k,msg){let w=$('#runres');if(!w){w=document.createElement('div');w.id='runres';w.className='runres';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w)}
+  const r=RK[cmd.cid],t=cmd.nm&&TOV[cmd.nm],sub=r?r.name:t?t.art:'',el=document.createElement('button');el.type='button';el.className='rres '+k;
+  el.innerHTML=`<i>${k==='g'?'✓':k==='b'?'!':'…'}</i><div><small>${esc(RUNNM[cmd.k]||'Команда')}${sub?' · '+esc(sub):''}</small><b>${esc(msg)}</b></div>`;
+  const off=()=>{el.classList.remove('on');setTimeout(()=>el.remove(),300)};el.onclick=off;
+  w.prepend(el);while(w.children.length>3)w.lastChild.remove();requestAnimationFrame(()=>el.classList.add('on'));setTimeout(off,Math.max(6500,Math.min(12000,String(msg).length*70)))}
 const WQ=[];let WQT=0,WQP=0;
 const wqTop=e=>!!e.my&&SHS[SHS.length-1]===e.my;
 function wqAlive(id){const now=Date.now();for(const e of WQ){if(e.id!==id&&!e.msg)e.q=1;e.dl=Math.max(e.dl,Math.min(now+e.ms,e.t0+e.ms+600000))}}
 function wqDraw(){const now=Date.now();
-  for(const e of WQ){if(!wqTop(e))continue;let tx=$('#runtx');if(!tx){const b=$('#runbox');if(!b)continue;b.innerHTML=RUNPROG;tx=$('#runtx')}   // лист перерисовали посреди ожидания — кнопки не возвращаем, чтобы команду не отправили второй раз
+  for(const e of WQ){if(!wqTop(e))continue;let tx=$('#runtx');if(!tx){const b=$('#runbox');if(!b)continue;b.innerHTML=runProg(1);tx=$('#runtx')}   // лист перерисовали посреди ожидания — кнопки не возвращаем, чтобы команду не отправили второй раз
     const w=runW(e.cmd),el=now-e.t0,sb=$('#runsub');tx.textContent=e.msg||w[0]+'…';
     if(sb)sb.textContent=(el>w[2]*1000?(e.q&&!e.msg?'Сторож доделывает прошлую команду — ваша следующая. ':'Дольше обычного, сторож ещё работает. ')+'Лист можно закрыть: итог появится внизу экрана. ':w[1].charAt(0).toUpperCase()+w[1].slice(1)+'. ')+'Прошло '+mmss(el)}
-  const B=WQ.filter(e=>!wqTop(e)&&now-e.t0>2500);let p=$('#runp');
+  const B=WQ.filter(e=>!wqTop(e)&&(e.my||now-e.t0>2500));let p=$('#runp');   // ушли из листа команды — плашка сразу
   if(!B.length){if(p)p.classList.remove('on');document.body.classList.remove('hasrunp');return}
   if(!p){p=document.createElement('button');p.type='button';p.id='runp';p.className='runp';p.innerHTML='<span class="sp"></span><span id="runpt"></span>';document.body.appendChild(p);
     p.onclick=()=>toast('Сторож делает команды по одной. Ждать на этом экране не обязательно — итог появится здесь же, внизу.')}
@@ -2429,17 +2772,18 @@ function waitRes(cmd,id,ms,o){o=o||{};return new Promise((res,rej)=>{const e={id
   e.out=()=>{fin();const mn=Math.max(1,Math.round((Date.now()-e.t0)/60000)),er=new Error(o.late?o.late(mn):'Сторож не ответил за '+mn+' мин — попробуйте ещё раз чуть позже');er.late=1;rej(er)};
   WAIT[id]=m=>{if(m.st==='work'){e.msg=m.msg||'';if(o.onWork)o.onWork(e.msg);wqDraw();return}fin();res(m)};WQ.push(e);wqStart()})}
 async function run(cmd,done){const box=$('#runbox');if(!box)return false;const my=SHS[SHS.length-1],keep=[...box.childNodes];   /* 14.11 Андрей: «после включения РК выкинуло в раздел» — помним свой лист подтверждения */
-  const mine=()=>SHS[SHS.length-1]===my?$('#runbox'):null;let sent=false;box.innerHTML=RUNPROG;
-  try{listen();const id=await send(cmd);sent=true;
+  const mine=()=>SHS[SHS.length-1]===my?$('#runbox'):null;let sent=false;box.innerHTML=runProg(0);const t0=Date.now();
+  try{listen();const id=await send(cmd);sent=true;{const b1=mine(),s=b1&&b1.querySelector('.rsteps');if(s)s.outerHTML=runSteps(1)}
     const r=await waitRes(cmd,id,cmd.k==='refresh'?(cmd.mode==='full'?50:8)*60000:/^bally/.test(cmd.k)?300000:120000,{my,late:mn=>'Сторож не ответил за '+mn+' мин. Команда могла выполниться — сразу не повторяйте, загляните в журнал правок через пару минут.'});
     if(r.st!=='done'){const er=new Error(r.msg||'Не получилось');er.no=1;throw er}
-    const b2=mine();if(b2)b2.innerHTML=`<div class="note g">✓ ${esc(r.msg||'Готово')}</div>`;
-    applyPatch(r.patch);toast('✓ '+(r.msg||'Готово'));setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},1300);return true
+    const b2=mine(),fact=r.msg||'Готово';
+    if(b2)b2.innerHTML=runSteps(2)+`<div class="rfact g"><b>✓ ${esc(fact)}</b><small>ответ сторожа · ${mmss(Date.now()-t0)}</small></div>`;
+    applyPatch(r.patch);runRes(cmd,'g',fact);setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},b2?2200:300);return true
   }catch(e){const b2=mine(),msg=sent?e.message:'Команда не ушла — нет связи. В кабинете ничего не изменилось: проверьте интернет и попробуйте ещё раз.';
     /* отказ сторожа или не ушло — можно поправить и повторить (кнопки возвращаются на место); сторож молчит — повторять вслепую нельзя */
-    if(b2){b2.innerHTML=`<div class="note ${e.late?'w':'b'}">${esc(msg)}</div><div class="acts" style="grid-template-columns:${e.late?'1fr':'1fr 1.6fr'}"><button class="btn gray press" type="button" data-act="back">${e.late?'Закрыть':'Назад'}</button>${e.late?'':`<button class="btn press" type="button" id="runagain">${sent?'Изменить и повторить':'Попробовать ещё раз'}</button>`}</div>`;
-      const ra=$('#runagain');if(ra)ra.onclick=()=>{if(b2.isConnected&&keep.length)b2.replaceChildren(b2.firstChild,...keep);else redraw()}}
-    else toast(e.late?'Сторож не ответил — загляните в журнал правок':sent?'Не получилось: '+msg:'Команда не ушла — проверьте интернет');   // лист уже закрыли — говорим внизу экрана; открыт — всё написано в нём
+    if(b2){b2.innerHTML=runSteps(sent?1:0,sent?1:0)+`<div class="rfact ${e.late?'w':'b'}"><b>${esc(msg)}</b><small>${e.late?'сторож молчит':sent?'ответ сторожа':'команда не ушла'} · ${mmss(Date.now()-t0)}</small></div><div class="acts" style="grid-template-columns:${e.late?'1fr':'1fr 1.6fr'}"><button class="btn gray press" type="button" data-act="back">${e.late?'Закрыть':'Назад'}</button>${e.late?'':`<button class="btn press" type="button" id="runagain">${sent?'Изменить и повторить':'Попробовать ещё раз'}</button>`}</div>`;
+      const ra=$('#runagain');if(ra)ra.onclick=()=>{if(b2.isConnected&&keep.length)b2.replaceChildren(b2.querySelector('.rfact'),...keep);else redraw()}}
+    else runRes(cmd,e.late?'w':'b',sent?msg:'Команда не ушла — нет связи. В кабинете ничего не изменилось.');   // лист уже закрыли — итог вверху экрана; открыт — всё написано в нём
     return false}}
 /* команда без листа «было → стало»: заметка и замер места ничего в кабинете не меняют — ответ ждём прямо на месте; ход виден плашкой внизу экрана */
 async function quick(cmd,onWork,ms){listen();let id,r;
@@ -2673,11 +3017,26 @@ function bdFact(nm,q,b){const kq=String(q||'').trim().replace(/\s+/g,' ').toLowe
    фраза, цель, факт, ставка сейчас и потолок. Работающий (ставку правда меняют, и кампания идёт) — с зелёной точкой и обводкой, совет — синий, выключенный — спокойный.
    Ведёт Марпла — показаны её цель, потолок и фраза, а факт — наш замер по этой фразе */
 const BDZ={search:'поиск',carousel:'карусель',catalog:'каталог'};
+/* 14.11 Андрей: «у тебя биддер — там выбор места же ещё, надо уточни, как работает; и ещё там в таких есть общая ставка для всех помимо биддера».
+   Как работает — по шапке bidder.py и карточке 22 «Учёт задач»; свёрнуто, раскрывается нажатием (раскрытое остаётся раскрытым при перерисовке).
+   Рядом — общая ставка сейчас и сколько фраз кампании со своей ставкой (из данных фраз KL; не загружены — не пишем) */
+let BDHO=false;
+document.addEventListener('toggle',e=>{const x=e.target;if(x&&x.classList&&x.classList.contains('bdhow'))BDHO=x.open},true);
+const bdHow=()=>`<details class="bdhow"${BDHO?' open':''}><summary>Как это работает</summary><ul>
+  <li>Цель — место товара в поиске по выбранной фразе (не выбрана — по главному запросу кампании).</li>
+  <li>Место — из нашего свежего замера выдачи (не старше часа с небольшим), нет замера — среднее место за день по данным ВБ.</li>
+  <li>Хуже цели — ставка вверх на 8%, сильно хуже — на 15%; лучше цели — вниз на 8%. Не выше потолка и не ниже минимума ВБ.</li>
+  <li>«Сам» — ставку меняет сторож, не чаще раза в час и не больше 10 раз в день. «Совет» только подсказывает.</li>
+  <li>Биддер двигает <b>общую ставку</b> товара в кампании — она действует на все фразы. Свои ставки фраз (бывают только у кампаний «за показы» с ручной ставкой) он не трогает: фраза со своей ставкой живёт по ней.</li></ul></details>`;
+/* сколько фраз кампании со своей ставкой; null — фразы не загружены */
+const klOwnN=(id,nm)=>{const z=KL&&KL.kab&&KL.kab[S.kab]&&((KL.kab[S.kab].k||{})[id+'|'+nm]);return z&&Array.isArray(z.q)?z.q.filter(x=>x.b).length:null};
+function bdKl(r,nm,cur){const n=klOwnN(r.id,nm),fr=n%10===1&&n%100!==11?'фразы':'фраз';
+  return `<div class="bdkl"><span>Общая ставка сейчас</span><b class="num">${kop(cur)}</b>${n==null?'':`<span>Своя ставка</span><b>${n?'у '+n+' '+fr+' — биддер их не трогает':r.pay==='cpm'?'ни у одной фразы — общая на всех':'у кампаний «за клик» не бывает'}</b>`}</div>`}
 function bdBlock(r,nm){const e=r.nm[nm]||{},b=e.bd;if(!e.b||(e.b.search==null&&e.b.combined==null))return '';
   const on=bdOn(b),ch=bdCh(b),own=on&&b.src==='svoi',MB=((r.mar&&r.mar.bid)||[]).filter(z=>z.nm==null||String(z.nm)===String(nm)),mb=MB.find(z=>z.zona==='search')||MB[0],go=rkSt(r).w;
   const pl=(b&&b.pl)||(e.b.search!=null?'search':'combined'),cur=e.b[pl];
   let h=`<div class="hrw"><h3>Биддер</h3><button class="lnk" type="button" data-act="bidder" data-rk="${r.id}|${nm}">${own?'настроить':mb?'включить свой':'включить'}</button></div>`;
-  if(!own&&!mb)return h+'<div class="bdc"><div class="bdh"><i></i><div><b>Выключен</b><small>Задайте цель и потолок — сервис подскажет ставку или будет ставить её сам.</small></div></div></div>';
+  if(!own&&!mb)return h+'<div class="bdc"><div class="bdh"><i></i><div><b>Выключен</b><small>Задайте цель и потолок — сервис подскажет ставку или будет ставить её сам.</small></div></div>'+bdKl(r,nm,cur)+bdHow()+'</div>';
   const lead=mb?'mar':b.mode==='sam'?'sam':'sov',q=mb?(mb.kw||(b&&(b.q||b.qs))||''):(b.q||b.qs||''),cel=mb?mb.cel:b.cel,mx=mb?mb.max:b.max,nq=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase(),f=bdFact(nm,q,on&&(!q||nq(b.q||b.qs)===nq(q))?b:null);   // место из расчёта биддера берём, только если он считал по этой же фразе
   const busy=!!q&&typeof FR!=='undefined'&&FR.busy&&FR.busy.has(q);
   h+=`<div class="bdc ${lead}${go?' on':''}"><div class="bdh"><i></i><div><b>${lead==='mar'?'Ставку ведёт биддер Марплы':lead==='sam'?'Наш биддер сам ставит ставку':'Наш биддер: совет'}${go?'':' · кампания не идёт'}</b>
@@ -2685,12 +3044,13 @@ function bdBlock(r,nm){const e=r.nm[nm]||{},b=e.bd;if(!e.b||(e.b.search==null&&e
     <div class="bdq"><small>Фраза</small><b>${q?esc(q):'главный запрос кампании'}</b></div>
     <div class="bdg"><div><small>Цель</small><b class="num">${cel!=null?f0(cel)+' место':'—'}</b></div>
       <div class="${f.n==null||cel==null?'':f.n<=cel?'g':'r'}"><small>Факт</small><b class="num${f.n==null?' no':''}">${f.v}</b><em>${esc(f.s)}</em>${q?`<button class="lnk${UPR?'':' nolk'}" type="button" data-frm1="${r.id}|${nm}|${esc(q)}"${busy?' disabled':''}>${busy?'снимаю…':'снять сейчас'}</button>`:''}</div>
-      <div><small>Ставка сейчас</small><b class="num">${kop(cur)}</b></div><div><small>Потолок</small><b class="num">${mx?kop(mx):'—'}</b></div></div>`;
+      <div><small>Общая ставка</small><b class="num">${kop(cur)}</b></div><div><small>Потолок</small><b class="num">${mx?kop(mx):'—'}</b></div></div>`;
+  {const n=klOwnN(r.id,nm);if(n)h+=`<div class="bdw">Своя ставка у ${n} ${n%10===1&&n%100!==11?'фразы':'фраз'} — биддер их не трогает, остальные идут по общей.</div>`}
   const oth=MB.filter(z=>z!==mb&&z.cel!=null&&z.max>0);
   if(lead==='mar'&&oth.length)h+=`<div class="bdw">Ещё в Марпле: ${oth.map(z=>(BDZ[z.zona]||esc(z.zona))+' — цель '+f0(z.cel)+', до '+kop(z.max)).join('; ')}.</div>`;
   if(on&&b.kod&&b.cur!=null&&b.kod!=='pauza')h+=`<div class="bdr"><span>${lead==='sam'?'Поставит':lead==='mar'?'Наш биддер поставил бы':'Поставил бы'}</span><b class="num">${ch?kop(b.cur)+' → '+kop(b.new):(lead==='sam'?'оставит ':'оставил бы ')+kop(b.cur)}</b></div>`;
   if(on&&b.why)h+=`<div class="bdw${b.kod==='potolok'||b.kod==='min_potolok'?' w':''}">${esc(b.why)}${b.t&&b.kod?` Посчитано в ${esc(b.t)} МСК.`:''}</div>`;
-  return h+'</div>'}
+  return h+bdHow()+'</div>'}
 function bdAll(){const L=[];for(const r of K.rk)for(const nm in r.nm){const b=r.nm[nm].bd;if(bdOn(b)&&b.kod&&b.kod!=='pauza')L.push({r,nm,b,ch:bdCh(b)})}   // кампании на паузе в общий список не идут
   return L.sort((x,y)=>(y.b.mode==='sam')-(x.b.mode==='sam')||y.ch-x.ch||(y.b.kod==='potolok')-(x.b.kod==='potolok')||(y.b.p||0)-(x.b.p||0))}
 /* свой график показа по часам (13.11, вместо графика Марплы): часы МСК, 7 дней × 24 часа; исполняет страж раз в 10 минут */
@@ -2779,6 +3139,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
   if(o.q&&!qs.includes(o.q))qs.unshift(o.q);
   sheet(()=>({t:'Биддер',s:esc(r.name),h:`${seg('bdm',[['off','Выключен'],['sovet','Совет'],['sam','Сам']],o.mode,'sm')}
      <div class="hint">${o.mode==='off'?'Совет не считается, ставка не меняется.':o.mode==='sovet'?'Сервис только подсказывает ставку, сам её не трогает.':'Сервис сам меняет ставку: не выше потолка, не больше 30% за раз, не чаще раза в час.'}</div>
+     ${bdKl(r,nm,cur)}${bdHow()}
      ${o.mode==='off'?'':`<label class="fld"><span>Цель — место в поиске</span><input class="inp num" id="bdc" inputmode="numeric" value="${esc(o.cel)}"></label>
      <label class="fld"><span>Потолок ставки, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ставка ${kop(cur)}${mn!=null?' · минимум ВБ '+kop(mn):''}</span><input class="inp num" id="bdx" inputmode="decimal" value="${esc(o.max)}"></label>
      <label class="fld"><span>По какому запросу смотреть место</span><select class="inp" id="bdq" style="width:100%;font-size:16px"><option value="">Главный запрос кампании</option>${qs.map(q=>`<option value="${esc(q)}"${q===o.q?' selected':''}>${esc(q)}</option>`).join('')}</select></label>`}
@@ -2814,7 +3175,7 @@ function onSeg0(id,v){
 document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
   if(x=c('[data-seg] button')){onSeg(x.parentNode.dataset.seg,x.dataset.v);return}
   if(x=c('[data-kab]')){S.kab=x.dataset.kab;RS.set('kab',S.kab);S.kw.cid=0;S.ist.nm=0;S.ist.cid=0;unfz();prep();closeAll();sync();render();return}
-  if(x=c('#tabs [data-tab]')){go(x.dataset.tab);return}
+  if(x=c('#tabs [data-tab]')){go(x.dataset.tab);if(SHS.length)shSave();return}
   if(x=c('[data-bv]')){$('#bv').value=f2(+x.dataset.bv/100).replace(/\s/g,'');$('#bv').oninput();return}
   if(x=c('[data-dv]')){$('#dv').value=x.dataset.dv;$('#dv').oninput();return}
   if(x=c('label.ck')){return}   // галочки таблицы фраз — событие change ниже
@@ -2843,7 +3204,8 @@ document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;u
 document.addEventListener('submit',e=>{if(e.target.id==='uf'){e.preventDefault();const p=$('#up').value.toLowerCase().replace(/[\s‐-―−]+/g,m=>/\s/.test(m[0])?'':'-');if(!p)return;   /* 14.11: телефон сам ставит заглавную букву и длинное тире — раньше из-за этого «пароль не подошёл» */$('#ugo').disabled=true;$('#uerr').textContent='';
   unlockDo(p).then(()=>{const pd=PEND;PEND=null;back();render(true);redraw();toast('Управление включено');if(pd&&pd[0]!=='unlock'&&pd[0]!=='nstsave')setTimeout(()=>{INACT=true;try{doAct(pd[0],pd[1])}finally{INACT=false}},430)}).catch(()=>{$('#ugo').disabled=false;$('#uerr').textContent='Пароль не подошёл'})}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&SHS.length)back()});
-$('#scrim').addEventListener('click',closeAll);
+/* 14.11 Андрей: «вообще если сверху нажмёшь — сворачивается, так не очень, искать потом». Касание затемнения (и шапки сайта под ним) лист больше
+   не закрывает. Закрывают: стрелка «назад», шторка (потянуть лист или его шапку вниз), «назад» телефона, Esc на компьютере */
 $('#refBtn').addEventListener('click',()=>openRef());
 if(window.svcPicker)svcPicker({btn:'#thBtn',list:THL,cur:RS.get('theme','auto'),onPick:t=>applyTheme(t,true)});else $('#thBtn').addEventListener('click',themeCycle);
 /* шторка: тянем вниз за полоску или за шапку листа (14.11 — полоска одна была мелкой целью для пальца). Лист идёт за пальцем, затемнение светлеет;
@@ -2852,7 +3214,7 @@ if(window.svcPicker)svcPicker({btn:'#thBtn',list:THL,cur:RS.get('theme','auto'),
   const dn=e=>{if(WIDE()||!SHS.length||(e.target.closest&&e.target.closest('button,a,input')))return;y0=yl=e.clientY;tl=e.timeStamp;v=0;try{e.currentTarget.setPointerCapture(e.pointerId)}catch(x){}};
   const mv=e=>{if(y0==null)return;const d=Math.max(0,e.clientY-y0),dt=e.timeStamp-tl;if(dt>0){v=.6*v+.4*(e.clientY-yl)/dt;yl=e.clientY;tl=e.timeStamp}
     sh.style.transition='none';sh.style.transform=`translateY(${d}px)`;sc.style.transition='none';sc.style.opacity=String(Math.max(.3,1-d/(sh.offsetHeight||1)))};
-  const end=e=>{if(y0==null)return;const d=e.clientY-y0;y0=null;if(e.timeStamp-tl>90)v=0;sh.style.transition='';sh.style.transform='';sc.style.transition='';sc.style.opacity='';if(e.type==='pointerup'&&(d>110||(d>40&&v>.5)))closeAll()};
+  const end=e=>{if(y0==null)return;const d=e.clientY-y0;y0=null;if(e.timeStamp-tl>90)v=0;sh.style.transition='';sh.style.transform='';sc.style.transition='';sc.style.opacity='';if(e.type==='pointerup'&&(d>110||(d>40&&v>.5)))back()};   // 14.11: шторка, как и «назад», снимает только верхний лист
   for(const g of [$('#grab'),$('#shh')]){g.addEventListener('pointerdown',dn);g.addEventListener('pointermove',mv);g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end)}})();
 let rsT=0,wide0=WIDE();addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(()=>{twFit();if(WIDE()!==wide0){wide0=WIDE();if(D)render(true)}},200)});
 
@@ -2868,13 +3230,15 @@ async function boot(pass){
   try{D=await load(pass)}catch(e){
     if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){const L=$('#lock');if(!$('#pwf'))L.innerHTML=LOCKF;L.hidden=false;$('#pwerr').textContent=pass?'Пароль не подошёл':'';$('#pwgo').disabled=false;setTimeout(()=>$('#pw').focus(),60);return}
     $('#view').innerHTML=`<div class="empty"><b>Не открылось</b>${e.message==='NO_GZ'?'Этот браузер слишком старый. Обновите его или откройте в другом.':esc(e.message)}<br><br><button class="btn sm gray press" type="button" onclick="location.reload()">Повторить</button></div>`;return}
+  const sha=shRead();shPre(sha);   // 14.11: обновили страницу в листе — тот же кабинет и раздел…
   $('#lock').hidden=true;$('#lock').innerHTML='';prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
   if(UPASS){const p=UPASS;UPASS=null;if(!UPR)unlockDo(p).then(()=>{render(true);toast('Управление включено')}).catch(()=>{})}   // вошли паролем управления — второй раз его не спрашиваем
-  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1])}
+  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha)}   // …и те же листы
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
-window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
-  FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T}};
+window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
+  FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
+  get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC}};   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
 hashKey();boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
