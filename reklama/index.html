@@ -1299,6 +1299,18 @@ body.mjob #runp{display:none}
 .osbt .osar{color:var(--acc);font-weight:600}
 .osh{margin-top:6px;padding:4px 0 2px}
 
+/* 14.11 23:08: «По панели» — компактная строка наверху листа товара, один период */
+.pnq{margin-top:12px;padding:10px 14px 12px}
+.pnqh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pnql{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.pnqs{display:inline-flex;background:var(--bar);border-radius:999px;padding:2px}
+.pnqs button{font:600 12.5px/1 var(--fb,inherit);color:var(--ink2);background:none;border:0;border-radius:999px;padding:6px 11px;cursor:pointer}
+.pnqs button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.pnqd{margin-left:auto;font-size:11.5px;color:var(--ink3);white-space:nowrap}
+.pnqv{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;margin-top:9px}
+.pnqv small{display:block;font-size:12px;color:var(--ink3);margin-bottom:2px}
+.pnqv b{font:700 20px/1.15 var(--fd);letter-spacing:-.02em}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2789,6 +2801,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
      <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${t.oh?`<button type="button" class="osbt press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}">${ostPills(t)}<span class="pill osar">остатки по дням ${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}</div>`;
   if(t.oh&&S.ostOpen)h+=ostHist(t);
   if(ostNet(t)&&W.length)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.</div>';
+  h+=panBlock(t,a);   // 14.11 23:08 Андрей: «по панели надо видеть сверху ситуацию, необязательно сразу 3 периода» — сразу под ценой и остатками, один период
   /* 14.11 (четвёртый заход): строки «панель неделя / месяц: ДРР · маржа» над главными цифрами больше нет — те же числа в блоке «Показатели» под кампаниями (panBlock) */
   /* 14.11 Андрей: «в товаре плашка „ДРР вчера“ завис, зачем, если период выше — выбор»: плашки «вчера» нет, «Вчера» — кнопкой периода */
   h+=kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
@@ -2796,7 +2809,6 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее» — кампании товара сразу под главными цифрами (раньше стояли после гистограмм,
      таблицы по дням и «Что меняли»), заголовок крупный, с числом; кампании на паузе — свёрнутой строкой «На паузе · N ›» под работающими */
   h+=prodRk(t,nm,ix,pp,a,W,P,rctx);
-  h+=panBlock(t,a);   // 14.11 (четвёртый заход) Андрей 09:18: «По панели маржу и дрр … это отдельно выше поставить лучше булочек»
   /* 14.11 Андрей: «гистограмма продаж как в лк вб только в 1 ряд прям такой же дизайн возьми просто не размашисто» — продажи по дням сразу под главными
      цифрами, низко (100 px); это прежний блок «Карточка по дням: заказали, шт» (он стоял внизу листа) — перенесён сюда, второго нет.
      Нет счёта карточки за день — заказы по отчёту ВБ (t.o.q), подпись под столбиками говорит об этом */
@@ -2873,17 +2885,17 @@ function prodRk(t,nm,ix,pp,a,W,P,rctx){
    меняется первый столбец. Маржа: от 10% зелёная, 0–10 жёлтая, минус красная; ДРР — светофором. В панели продаж нет — «—», не «0%» */
 const panWk=s=>{s=String(s||'').trim();const m=s.match(/(\d{1,2})\.?\s*([^\d\s.\-–]+)\.?\s*[-–]\s*(\d{1,2})\.?\s*([^\d\s.\-–]+)\.?/);
   return m?(m[2]===m[4]?m[1]+'–'+m[3]+' '+m[4]+'.':m[1]+' '+m[2]+'. – '+m[3]+' '+m[4]+'.'):s};
-function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,has=x=>!!(x&&x[0]>0),no='<span class="muted">—</span>';
-  if(!has(w)&&!has(m)&&!(a&&(a.or||a.s)))return '';
-  const mg=x=>has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=x=>has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
-    sl=x=>has(x)?`<b class="num">${kr(x[0])} ₽</b>`:no;
-  const pd=a.drr==null?no:!isFinite(a.drr)?'<b class="bad">нет зак.</b>':`<b class="num ${dcls(a.drr)}">${pc(a.drr)}</b>`;
+/* 14.11 23:08 Андрей: «не очень такой блок, по панели надо видеть сверху ситуацию, необязательно сразу 3 периода» — компактная строка
+   «По панели: маржа · ДРР · продажи» под ценой и остатками, один период (неделя | месяц переключателем; по умолчанию месяц при «30 дн», иначе неделя).
+   Столбец «период» убран — те же ДРР и заказы в главных цифрах ниже */
+function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
+  if(!has(w)&&!has(m))return '';
+  const k=S.pnp||(S.per>=30?'m':'w'),x=k==='m'?m:w;
   const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'';
-  return `<div class="hrw pnh"><h3>Показатели</h3><span class="muted">панель и реклама</span></div><div class="pnt"><table><thead><tr><th></th><th>период<small>${perZa().replace(/^за /,'')}</small></th><th>неделя<small>${esc(wl)}</small></th><th>месяц<small>${esc(ml)}</small></th></tr></thead><tbody>`
-    +`<tr data-pn="m"><th>Маржа</th><td>${no}</td><td>${mg(w)}</td><td>${mg(m)}</td></tr>`
-    +`<tr data-pn="d"><th>ДРР</th><td>${pd}</td><td>${dr(w)}</td><td>${dr(m)}</td></tr>`
-    +`<tr data-pn="s"><th>Продажи</th><td>${a.or?`<b class="num">${kr(a.or)} ₽</b>`:'<b class="num">0 ₽</b>'}</td><td>${sl(w)}</td><td>${sl(m)}</td></tr></tbody></table>`
-    +`<div class="pnn">Период — считаем сами: ДРР — реклама к заказам товара, продажи — заказы. Неделя и месяц — из панели.</div></div>`}
+  const mg=has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
+    sl=has(x)?`<b class="num">${kr(x[0])} ₽</b>`:no,bt=(v,l)=>`<button type="button" class="press" data-act="pnp" data-k="${v}" aria-pressed="${k===v}">${l}</button>`;
+  return `<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><span class="pnqs">${bt('w','неделя')}${bt('m','месяц')}</span><small class="pnqd">${esc(k==='m'?ml:wl)}</small></div>`
+    +`<div class="pnqv"><div data-pn="m"><small>Маржа</small>${mg}</div><div data-pn="d"><small>ДРР</small>${dr}</div><div data-pn="s"><small>Продажи</small>${sl}</div></div></div>`}
 /* 14.11 Андрей 08:05: «над акции динамику цен» — «Цена по дням» над блоком «Акции ВБ»: компактная гистограмма (общая chart, ось слева) по дням с заказами
    (t.pd — [день, наша цена, у покупателя, скидка ВБ %], медиана по заказам дня); день без заказов — пустой. Переключатель «Наша цена | У покупателя | Скидка ВБ»
    (прежний отдельный блок «Скидка ВБ (СПП)» — третьей кнопкой), нажатие на день — строка над графиком со всеми тремя. Столбики цен — от нижней круглой
@@ -3116,6 +3128,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='unfz'){unfz();render(true)}
   else if(a==='cols')openCols(ds.id);
   else if(a==='ref')openRef();
+  else if(a==='pnp'){S.pnp=ds.k;redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
