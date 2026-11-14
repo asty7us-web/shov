@@ -1773,6 +1773,18 @@ function rkSt(r){
   if(r.st===11)return {c:'off',t:'пауза',w:0};
   if(r.st===4)return {c:'off',t:'готова к запуску',w:0};
   return {c:'off',t:'завершена',w:0}}
+/* 15.11 Андрей (кадр «СПС Утеплитель 2020 6м»): «непонятно почему встала… если она работает, но на паузе, её в раздел такой не надо… причину паузы надо понимать».
+   pzWhy — причина паузы: кто и когда поставил (журнал правок D.ist) или кончился бюджет; rkLive — работает, или на паузе не дольше 3 дней / тратила за 3 дня:
+   такую не прячем в «На паузе», она в общем списке со своей причиной */
+const PZK={'сервис':'с сайта','кабинет':'в кабинете ВБ','марпла':'Марплой','чат':'чатом К'};
+function pzWhy(r){if(!r||r.st!==11||rkSt(r).w)return '';
+  if(r.bud!=null&&r.bud<=0)return 'кончился бюджет';
+  const z=(D.ist||[]).find(x=>x.cid===r.id&&/пауз|запуск|стоп|останов/i.test(x.chto||''));
+  if(z&&!/запуск/i.test(z.chto)){const t=String(z.t||'');return 'поставили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
+  return 'кто поставил — в журнале нет'}
+function rkLive(r){if(!r)return 0;if(rkSt(r).w)return 1;if(r.st!==11)return 0;
+  if(String(r.upd||'').slice(0,10)>=D.days[Math.max(0,T-2)])return 1;
+  const ix=[T,T-1,T-2].filter(i=>i>=0);for(const nm in r.nm)if(rkAgg(r,nm,ix).s>0)return 1;return 0}
 const stHtml=r=>{const s=rkSt(r);return `<span class="stt ${s.c}"><i></i>${s.t}</span>`};
 function rkAgg(r,nm,ix){const e=r.nm[nm],d=e&&e.d,a={v:0,c:0,a:0,o:0,q:0,s:0,sp:0};
   if(d)for(const k in a)a[k]=sum(d[k],ix);fin(a);return a}
@@ -1783,7 +1795,7 @@ function pAgg(t,ix,onlyW){const a={v:0,c:0,a:0,o:0,q:0,s:0,sp:0};
   for(const id of t.rk){const r=RK[id];if(!r||(onlyW&&!rkSt(r).w))continue;const x=rkAgg(r,t.nm,ix);for(const k of ['v','c','a','o','q','s','sp'])a[k]+=x[k]}
   fin(a);a.oq=sum(t.o&&t.o.q,ix);a.or=sum(t.o&&t.o.r,ix);a.wb=sum(t.o&&t.o.wb,ix);
   a.drr=a.or?100*a.s/a.or:(a.s?Infinity:null);a.cpoAll=a.oq?a.s/a.oq:null;return a}
-const wrk=t=>t.rk.map(id=>RK[id]).filter(r=>r&&rkSt(r).w);
+const wrk=t=>t.rk.map(id=>RK[id]).filter(r=>r&&rkLive(r));
 const pmar=t=>t.pan&&t.pan.w&&t.pan.w[0]>0&&t.pan.w[2]!=null?100*t.pan.w[2]:(t.pan&&t.pan.m&&t.pan.m[0]>0&&t.pan.m[2]!=null?100*t.pan.m[2]:null);
 /* 14.11 (утро, четвёртый заход) Андрей: «Всегда картинка должна быть хотя писал может дубль». Нет ссылки на фото у товара (или товара кампании нет в списке —
    foto({nm})) — адрес картинки витрины ВБ по номеру товара: basket-NN.wbbasket.ru/vol{nm/100000}/part{nm/1000}/{nm}/images/c246x328/1.webp. Номер корзины NN
@@ -1919,7 +1931,7 @@ function hl(s,t){s=String(s||'');if(!t||!t.length)return esc(s);const n=sNorm(s)
   let h='',on=0;for(let i=0;i<s.length;i++){if(m[i]!==on){h+=m[i]?'<mark class="hit">':'</mark>';on=m[i]}h+=esc(s[i])}return h+(on?'</mark>':'')}
 const FQ={q:'',f:'tov'};   // запрос и что ищем: товары | кампании
 const fqBase=()=>FQ.f==='rk'
-  ?K.rk.flatMap(r=>Object.keys(r.nm).map(nm=>({r,nm,t:TOV[nm],a:rkAgg(r,nm,PI()),w:rkSt(r).w}))).sort((x,y)=>(y.w>0)-(x.w>0)||y.a.s-x.a.s)
+  ?K.rk.flatMap(r=>Object.keys(r.nm).map(nm=>({r,nm,t:TOV[nm],a:rkAgg(r,nm,PI()),w:rkLive(r)}))).sort((x,y)=>(y.w>0)-(x.w>0)||y.a.s-x.a.s)
   :K.tov.map(t=>({t,a:pAgg(t,PI()),w:wrk(t).length})).sort((x,y)=>(y.w>0)-(x.w>0)||y.a.s-x.a.s);
 const fqHay=x=>x.r?[x.r.name,[x.t?x.t.art:'',x.r.id,x.nm].join(' ')]:[x.t.art,[x.t.subj||'',x.t.nm].join(' ')];
 function fqList(){const L=$('#fql'),n=$('#fqn');if(!L)return;const base=fqBase(),R=sFind(base,FQ.q,fqHay),on=FQ.q.trim()!=='';
@@ -1954,7 +1966,7 @@ function sync(){
   $$('#tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab));
   const per=seg('per',PERS(),perKey(),'sm');let h='',wp=1;   // wp — в строке есть периоды: лупа справа от них, без подписи
   if(S.tab==='tov')h=per+srch('Товар');   // вид «таблица / карточки» — в шапке самого списка (vTov), как в «Кампаниях»: 14.11 Андрей «когда меняешь вид сверху, не видишь, что меняешь ниже»
-  else if(S.tab==='rk'){const nw=K.rk.filter(r=>rkSt(r).w).length;   // числа на кнопках — видно, что это отбор списка (14.11 Андрей: «кнопка „Работают“ — не понял смысл»)
+  else if(S.tab==='rk'){const nw=K.rk.filter(r=>rkLive(r)).length;   // числа на кнопках — видно, что это отбор списка (14.11 Андрей: «кнопка „Работают“ — не понял смысл»)
     h=per+seg('rkf',[['w','Работают · '+nw],['p','На паузе · '+(K.rk.length-nw)],['all','Все · '+K.rk.length]],S.rkf.f,'sm')+srch('Кампания или товар')}
   else if(S.tab==='skl')h=per+srch('Товар склейки');
   else if(S.tab==='ceny')h=per+srch('Товар');   // период — для «заказы за период» в карточках «Цен»
@@ -2014,7 +2026,7 @@ function dayChart(get,mode){   // get(i)→{s,or,oq,q,c,v,cpo,drr}
 const frzChip=id=>FRZ[id]?'<button class="chip press frz" type="button" data-act="unfz" title="После смены периода строки остались на своих местах">порядок прежний · пересортировать</button>':'';
 function vTov(){
   const ix=PI(),pp=PP(),a=kabAgg(ix),b=pp?kabAgg(pp):null,td=kabAgg([T]),rows=tovRows();
-  const nW=K.rk.filter(r=>rkSt(r).w).length;
+  const nW=K.rk.filter(r=>rkLive(r)).length;
   let h=fresh();
   h+=`<div class="tiles x6">
    <div class="tile"><div class="l">Доля рекламы (ДРР)</div><div class="v num ${dcls(a.drr)}">${pc(a.drr)}</div><div class="d">${jn(b?delta(a.drr,b.drr,1):'','норма до '+NORMA+'%')}</div></div>
@@ -2706,7 +2718,7 @@ function rkVnim(){const z={bud:new Set(),zas:new Set()};if(!K||T<5)return z;cons
   return z}
 const VNL={bud:'Бюджет 0',zas:'Крутятся вхолостую'};
 function rkRows(){const ix=PI(),q=(S.q||'').toLowerCase(),vn=VNL[S.rkf.vn]?rkVnim()[S.rkf.vn]:null;let L=[];
-  for(const r of K.rk){const w=rkSt(r).w;
+  for(const r of K.rk){const w=rkLive(r);
     for(const nm in r.nm){const t=TOV[nm],a=rkAgg(r,nm,ix),o=sum(t&&t.o&&t.o.r,ix);L.push({r,nm,t,a,w,oq:sum(t&&t.o&&t.o.q,ix),drr:o?100*a.s/o:(a.s?Infinity:null)})}}
   if(FRZ.rk){const m=new Map(L.map(x=>[x.r.id+'|'+x.nm,x]));return FRZ.rk.map(k=>m.get(k)).filter(Boolean)}   // период сменили — кампании остаются на своих местах
   L=L.filter(x=>(vn?vn.has(x.r.id):(S.rkf.f==='all'||(S.rkf.f==='w')===!!x.w))&&(!q||(x.r.name+' '+(x.t?x.t.art:'')+' '+x.r.id).toLowerCase().includes(q)));
@@ -2720,7 +2732,7 @@ function rkCard(x){const r=x.r,e=r.nm[x.nm]||{},a=x.a,g=ourGr(r);
    <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
    <div class="k kpi"><div><b class="num ${dcls(x.drr)}">${drrT(x.drr)}</b><span>ДРР</span></div><div><b class="num ${sbad(a.s,a.q)}">${rub(a.s)}</b><span>траты</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div></div></button>`}
 function vRk(){const VN=rkVnim();if(S.rkf.vn&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
-  const rows=rkRows(),nW=K.rk.filter(r=>rkSt(r).w).length,tot=rows.reduce((z,x)=>{z.s+=x.a.s;z.q+=x.a.q;return z},{s:0,q:0});
+  const rows=rkRows(),nW=K.rk.filter(r=>rkLive(r)).length,tot=rows.reduce((z,x)=>{z.s+=x.a.s;z.q+=x.a.q;return z},{s:0,q:0});
   let h=fresh();
   if(VN.bud.size||VN.zas.size){const vr=(k,sub)=>VN[k].size?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
     h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas','живые, но 5 дней тратят меньше 100 ₽ в день')}</div>`}
@@ -2790,7 +2802,7 @@ function ostHist(t){const od=K.oh_d||[],ix=[],at={};od.forEach((d,k)=>{const i=D
       +chart({ix,h:96,val:f,col:i=>f(i)?col:'var(--bad,#e5484d)',top:i=>{const x=f(i);return x==null?'':x>=1e4?(x/1e3).toFixed(0)+'к':x>=1e3?(x/1e3).toFixed(1).replace('.0','')+'к':x},
         read:i=>`<b>${dlab(i)}${i===T?' (сейчас)':''}</b> · ${ttl==='Склады ВБ'?'склады ВБ':'свой склад'}: <b>${f0(f(i)||0)} шт</b>`})+'</div>'};
   return `<div class="osh">${one(0,'Склады ВБ',t.fbo,'var(--acc)')}${one(1,'Свой склад',t.fbs,'var(--acc2,var(--acc))')}</div>`}
-function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?pAgg(t,pp):null,td=pAgg(t,[T]),y=T>0?pAgg(t,[T-1]):null,y2=T>1?pAgg(t,[T-2]):null,W=wrk(t),P=t.rk.map(id=>RK[id]).filter(r=>r&&!rkSt(r).w);
+function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?pAgg(t,pp):null,td=pAgg(t,[T]),y=T>0?pAgg(t,[T-1]):null,y2=T>1?pAgg(t,[T-2]):null,W=wrk(t),P=t.rk.map(id=>RK[id]).filter(r=>r&&!rkLive(r));
   const memo={},gm=i=>memo[i]||(memo[i]=pAgg(t,[i])),pn=t.pan||{},cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   const rctx=t.rk.map(id=>id+'|'+nm).join(','),by=buyer(t);
   /* 13.11 Андрей: «с нашей скидкой нашу цену надо и цену для покупателя чуть меньше», цену с WB Клубом не показываем */
@@ -2864,7 +2876,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
    раскрывает список, «свернуть» — обратно */
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
-  let h=`<div class="rkbox"><div class="rkcap">Рекламные кампании</div><div class="hrw rkhd"><h3>Работают <b class="num">${W.length}</b></h3><span class="muted num">${perZa()}</span></div>`;
+  let h=`<div class="rkbox"><div class="rkcap">Рекламные кампании</div><div class="hrw rkhd"><h3>Работают <b class="num">${W.filter(r=>rkSt(r).w).length}</b>${W.some(r=>!rkSt(r).w)?` <small class="muted">· на паузе ${W.filter(r=>!rkSt(r).w).length}</small>`:''}</h3><span class="muted num">${perZa()}</span></div>`;
   if(W.length>1){const aw=pAgg(t,ix,true);
     if(Math.abs((aw.s||0)-(a.s||0))>=1){const bw=pp?pAgg(t,pp,true):null;
       h+=kpi4({drr:aw.drr,pdrr:bw&&bw.drr,drrk:aw.drrk,s:aw.s,ps:bw&&bw.s,q:aw.q,z:aw.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(aw.oq)+' шт</b>'})+'<div style="height:10px"></div>'}}
@@ -3002,7 +3014,7 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   if(srch)h+=own?til('Биддер','цель '+b.cel+' место','до '+kop(b.max),'bidder','o',b.mode==='sam'?'свой, сам ставит':'свой, советует')
     :mb?til('Биддер','цель '+mb.cel+' место','до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):til('Автопополнение','нет','пополняется вручную','adinfo');
-  return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b></div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button></div>
+  return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button></div>
     <div class="ctg">${h}</div>${lcLine(r.id)}
     <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button></div>`}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
@@ -3431,6 +3443,7 @@ const rkDrr=v=>v==null?'—':!isFinite(v)?'<em>нет зак.</em>':pc(v);
 function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm],tt=TOV[nm],or=tt?sum(tt.o&&tt.o.r,ix):0,d=or?100*a.s/or:(a.s?Infinity:null),lv=rkSt(r).w;
   const b=e.bd,mb=lv&&r.mar&&r.mar.bid&&r.mar.bid.length,own=lv&&bdOn(b)&&b.src==='svoi',low=r.bud!=null&&(r.bud<=0||(r.bud<300&&lv)),go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
   const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':'')
+    +(r.st===11&&!lv?`<span class="pill b pzw">пауза: ${pzWhy(r)}</span>`:'')   // 15.11: причина паузы — видно сразу в строке
     +(low?`<span class="pill b num">остаток бюджета ${rub(r.bud)}</span>`:'')
     +(mb?'<span class="pill lv mr bdl"><i></i>биддер Марплы</span>':own?`<span class="pill a lv${b.mode==='sam'?'':' sv'} bdl"><i></i>биддер: ${b.mode==='sam'?'сам':'совет'}</span>`:'');
   const gb=go?`<span class="rkgo ${go}${UPR?'':' nolk'}" role="button" data-act="st" data-rk="${r.id}|${nm}" aria-label="${go==='pz'?'Поставить на паузу':'Запустить'}: ${esc(r.name)}"><svg viewBox="0 0 24 24" fill="${go==='pz'?'none':'currentColor'}" stroke="currentColor" stroke-width="${go==='pz'?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${go==='pz'?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${go==='pz'?'Пауза':'Запустить'}</span>`:'';
