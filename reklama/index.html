@@ -3082,6 +3082,9 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g);
+  /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
+  const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
+  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div>${klHow(r)}<div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
   h+=rkOther(id,nm);
   /* управление и настройки — после цифр (15.11). Блок управления — один; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же.
      14.11 Андрей: «бидер пусть сразу будет открыт» — биддер раскрыт под управлением, график показа — тут же, когда он есть (свой или Марплы) */
@@ -3092,8 +3095,6 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=notesBlock(nm,id);
   /* блоков «Настройки сейчас», «Ставка» (минимум и советы ВБ — в листе «Ставка»), биддера и графика внизу больше нет — всё в блоке управления сверху.
      Фразы — последним блоком листа: при «Активные / Исключённые / Все» высота меняется только в самом низу (FR.mh держит её, см. frSwitch) */
-  const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
-  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div>${klHow(r)}<div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
   const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   return {ph,t:esc(r.name),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b> · ':'')+`№ ${r.id} · создана ${dm(r.cr)}${r.cr?'.'+r.cr.slice(0,4):''}${r.start?' · запущена '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}`,h,
