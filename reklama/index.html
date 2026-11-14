@@ -266,9 +266,17 @@ h3{font:650 13px/1.2 var(--f);letter-spacing:.04em;text-transform:uppercase;colo
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:9px 10px;text-align:right;white-space:nowrap;border-bottom:.5px solid var(--line2)}
 th{font-size:11.5px;font-weight:650;color:var(--ink3);letter-spacing:.02em;position:sticky;top:0;background:var(--card);cursor:pointer;user-select:none;z-index:1}
-th[data-s]:after{content:"";display:inline-block;width:0;height:0;margin-left:4px;vertical-align:middle;border:4px solid transparent}
+th[data-s]:after,th[aria-sort]:after,th[data-s2]:after{content:"";display:inline-block;width:0;height:0;margin-left:4px;vertical-align:middle;border:4px solid transparent}
 th[aria-sort="descending"]:after{border-top-color:var(--acc);margin-top:3px}
 th[aria-sort="ascending"]:after{border-bottom-color:var(--acc);margin-bottom:3px}
+/* двойная сортировка (14.11 Андрей: «в Марпле можно было двойную сортировку: один столбец основной и по нему второй»): в шапке цифры 1 и 2, стрелка второго столбца — серая */
+th[aria-sort]{color:var(--ink)}
+th[data-s2]{color:var(--ink2)}
+th[data-s2="d"]:after{border-top-color:var(--ink3);margin-top:3px}
+th[data-s2="a"]:after{border-bottom-color:var(--ink3);margin-bottom:3px}
+th .sn,.fsq .sn{font-style:normal;font-size:9.5px;font-weight:700;color:var(--acc);margin-left:2px;vertical-align:top}
+th[data-s2] .sn{color:var(--ink3)}
+.ssel{flex:none;height:36px;max-width:40vw;border:0;border-radius:10px;background:var(--fill);color:var(--ink);font:inherit;font-size:14px;padding:0 8px}
 th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:2;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
 th:first-child{z-index:3}   /* 14.11: угол шапки — выше первого столбца: при прокрутке вбок и вниз название товара не должно ложиться поверх слова «Товар» */
 .tws th{box-shadow:inset 0 -1px 0 var(--line)}   /* 14.11: чёткая линия под шапкой — строка, наполовину ушедшая под шапку, выглядела как обрывок («штрих» под словом «Товар») */
@@ -1044,7 +1052,7 @@ function vTov(){
   h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}${viewSeg('view',S.view)}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
       ${S.view==='cards'?seg('sort',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],S.sort,'sm'):tblBtn('tov')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или покажите все товары.</div>';
-  if(S.view==='table')return h+tblHtml('tov',rows,x=>`data-nm="${x.t.nm}"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка. «Столбцы» — скрыть лишние, вернуть, переставить. ${ostAt()}</div>`;
+  if(S.view==='table')return h+tblHtml('tov',rows,x=>`data-nm="${x.t.nm}"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2 в шапке). «Столбцы» — выбрать оба столбца сортировки, скрыть лишние, переставить. ${ostAt()}</div>`;
   h+='<div class="list">';
   for(const {t,a,w} of rows){const m=pmar(t),nP=t.rk.length-w,days=PI().map(i=>{const s=t.rk.reduce((z,id)=>z+(RK[id]&&RK[id].nm[t.nm]&&RK[id].nm[t.nm].d?RK[id].nm[t.nm].d.s[i]||0:0),0),o=t.o?t.o.r[i]:0;return o?100*s/o:(s?Infinity:null)});
     h+=`<button class="pc press" type="button" data-nm="${t.nm}"><div class="ph"${foto(t)}></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div>
@@ -1149,28 +1157,41 @@ function tblSt(id){const T0=TBL[id],s=RS.get('tb.'+id,null)||{},all=T0.cols.map(
   const hid=new Set((s.hid||[]).filter(k=>all.includes(k)));
   for(const c of T0.cols)if(c.def===0&&!kn.has(c.k))hid.add(c.k);   // столбец, которого человек ещё не настраивал, — как задумано по умолчанию
   hid.delete(fx);
-  return {ord:[fx].concat(ord.filter(k=>k!==fx)),hid,sort:all.includes(s.sort)?s.sort:T0.sort[0],dir:all.includes(s.sort)?s.dir:T0.sort[1]}}
-const tblSave=(id,st)=>RS.set('tb.'+id,{ord:st.ord,hid:[...st.hid],sort:st.sort,dir:st.dir,kn:TBL[id].cols.map(c=>c.k)});
+  /* 14.11 Андрей: «в Марпле можно было двойную сортировку ставить: один столбец основной и по нему второй — надо тоже». sort2 / dir2 — второй столбец:
+     он решает порядок строк, у которых в основном столбце значения равны. Нажали на новый столбец — он основной, прежний основной остаётся вторым */
+  const so=all.includes(s.sort)?s.sort:T0.sort[0];
+  return {ord:[fx].concat(ord.filter(k=>k!==fx)),hid,sort:so,dir:all.includes(s.sort)?s.dir:T0.sort[1],sort2:all.includes(s.sort2)&&s.sort2!==so?s.sort2:null,dir2:s.dir2===1?1:-1}}
+const tblSave=(id,st)=>RS.set('tb.'+id,{ord:st.ord,hid:[...st.hid],sort:st.sort,dir:st.dir,sort2:st.sort2||null,dir2:st.dir2===1?1:-1,kn:TBL[id].cols.map(c=>c.k)});
 const tblCols=id=>{const st=tblSt(id);return st.ord.map(k=>TBL[id].cols.find(c=>c.k===k)).filter(c=>!st.hid.has(c.k))};
-function tblSort(id,rows){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===st.sort)||TBL[id].cols[0],d=st.dir;   // «нет данных» — всегда внизу, «нет заказов» (∞) — как самое большое
-  const val=r=>{const v=c.v(r);return v==null||(typeof v==='number'&&isNaN(v))?null:v===Infinity?1e15:v};
-  return rows.map(r=>[val(r),r]).sort((a,b)=>a[0]==null?(b[0]==null?0:1):b[0]==null?-1:(a[0]<b[0]?-1:a[0]>b[0]?1:0)*d).map(x=>x[1])}
+function tblSort(id,rows){const st=tblSt(id),C=TBL[id].cols,c=C.find(x=>x.k===st.sort)||C[0],c2=st.sort2?C.find(x=>x.k===st.sort2):null;   // «нет данных» — всегда внизу, «нет заказов» (∞) — как самое большое
+  const nv=v=>v==null||(typeof v==='number'&&isNaN(v))?null:v===Infinity?1e15:v,cmp=(a,b,d)=>a==null?(b==null?0:1):b==null?-1:(a<b?-1:a>b?1:0)*d;
+  return rows.map(r=>[nv(c.v(r)),c2?nv(c2.v(r)):null,r]).sort((a,b)=>cmp(a[0],b[0],st.dir)||(c2?cmp(a[1],b[1],st.dir2):0)).map(x=>x[2])}
 function tblHtml(id,rows,attr){const st=tblSt(id),cols=tblCols(id);
-  let h=`<div class="tw tws" data-tbl="${id}"><table><thead><tr>`+cols.map(c=>`<th data-ts="${id}|${c.k}"${st.sort===c.k?` aria-sort="${st.dir<0?'descending':'ascending'}"`:''}${c.t?` title="${esc(c.t)}"`:''}>${c.l}</th>`).join('')+'</tr></thead><tbody>';
+  let h=`<div class="tw tws" data-tbl="${id}"><table><thead><tr>`+cols.map(c=>`<th data-ts="${id}|${c.k}"${st.sort===c.k?` aria-sort="${st.dir<0?'descending':'ascending'}"`:st.sort2===c.k?` data-s2="${st.dir2<0?'d':'a'}"`:''}${c.t?` title="${esc(c.t)}"`:''}>${c.l}${st.sort2&&st.sort===c.k?'<i class="sn">1</i>':st.sort2===c.k?'<i class="sn">2</i>':''}</th>`).join('')+'</tr></thead><tbody>';
   for(const r of rows)h+=`<tr ${attr(r)}>`+cols.map((c,i)=>`<td class="${i?'num':'t1'}${c.cls?' '+(c.cls(r)||''):''}">${c.h(r)}</td>`).join('')+'</tr>';
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
-function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k)st.dir=-st.dir;else{st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
+function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k)st.dir=-st.dir;else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
 function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
   const row=(k,i)=>{const c=T0.cols.find(x=>x.k===k),on=!st.hid.has(k);
     return `<div class="opt colr"><div><b>${c.l}</b>${c.t?`<span>${esc(c.t)}</span>`:''}</div>${i===0?'<span class="muted" style="font-size:12.5px;flex:none">всегда первый</span>'
       :`<button class="mvb press" type="button" data-colmv="${k}|-1"${i<=1?' disabled':''} aria-label="Выше">↑</button><button class="mvb press" type="button" data-colmv="${k}|1"${i===st.ord.length-1?' disabled':''} aria-label="Ниже">↓</button><button class="sw" type="button" role="switch" data-colsw="${k}" aria-checked="${on}" aria-label="${c.l}"></button>`}</div>`};
-  return {t:'Столбцы таблицы',s:'что показывать и в каком порядке · запоминается на этом устройстве',h:st.ord.map(row).join('')
+  const opts=(cur,none)=>(none?`<option value=""${cur?'':' selected'}>— нет —</option>`:'')+T0.cols.map(c=>`<option value="${c.k}"${c.k===cur?' selected':''}>${esc(String(c.l).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim())}</option>`).join('');
+  const dirB=(n,d)=>`<button class="mvb press" type="button" data-sdir="${n}" aria-label="${d<0?'По убыванию':'По возрастанию'}" title="${d<0?'по убыванию':'по возрастанию'}">${d<0?'↓':'↑'}</button>`;
+  const srt=`<div class="hrw" style="margin-top:2px"><h3>Сортировка</h3></div>
+    <div class="opt colr"><div><b>Сначала по</b><span>основной столбец</span></div><select class="ssel" id="sso1" aria-label="Основной столбец сортировки">${opts(st.sort)}</select>${dirB(1,st.dir)}</div>
+    <div class="opt colr"><div><b>Затем по</b><span>когда в основном значения равны</span></div><select class="ssel" id="sso2" aria-label="Второй столбец сортировки">${opts(st.sort2,1)}</select>${dirB(2,st.dir2)}</div>
+    <div class="hrw"><h3>Столбцы</h3></div>`;
+  return {t:'Столбцы и сортировка',s:'что показывать, в каком порядке и как сортировать · запоминается на этом устройстве',h:srt+st.ord.map(row).join('')
     +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>',
     after:()=>{const ap=()=>{redraw();render(true)};
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
       $$('[data-colmv]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),p=b.dataset.colmv.split('|'),i=s2.ord.indexOf(p[0]),j=i+(+p[1]);if(i<1||j<1||j>=s2.ord.length)return;s2.ord.splice(i,1);s2.ord.splice(j,0,p[0]);tblSave(id,s2);ap()});
-      const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()}}}},true)}
+      const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()};
+      const s1=$('#sso1'),s2=$('#sso2');
+      if(s1)s1.onchange=()=>{const z=tblSt(id),c=T0.cols.find(x=>x.k===s1.value);if(!c)return;if(z.sort2===c.k)z.sort2=null;z.sort=c.k;z.dir=c.asc?1:-1;tblSave(id,z);unfz();ap()};
+      if(s2)s2.onchange=()=>{const z=tblSt(id),c=T0.cols.find(x=>x.k===s2.value);z.sort2=c&&c.k!==z.sort?c.k:null;z.dir2=c&&c.asc?1:-1;tblSave(id,z);unfz();ap()};
+      $$('[data-sdir]').forEach(b=>b.onclick=()=>{const z=tblSt(id);if(b.dataset.sdir==='1')z.dir=-z.dir;else z.dir2=-z.dir2;tblSave(id,z);unfz();ap()})}}},true)}
 /* шапка столбцов остаётся на месте: таблица занимает экран под шапкой сайта и листается внутри себя */
 function twFit(){const hd=$('.hdr'),tb=$('#tabs');if(!hd||!tb)return;const w=WIDE(),top=hd.getBoundingClientRect().height+(w?tb.getBoundingClientRect().height:0),bot=w?14:tb.getBoundingClientRect().height+8;
   document.documentElement.style.setProperty('--twh',Math.max(280,innerHeight-top-bot-10)+'px')}
@@ -1414,22 +1435,22 @@ function matrix(rows,attr){const days=[];for(let i=T;i>T-7&&i>=0;i--)days.push(i
 const MXLG='<div class="lg"><span><i style="background:var(--good)"></i>место лучше прошлого замера</span><span><i style="background:var(--bad)"></i>хуже</span><span><i style="background:var(--acc)"></i>глубже замера</span><span>«8 ← 111» — с рекламой 8-е, без рекламы 111-е</span><span>точка — стоим в рекламном месте</span><span>«м» — замер Марплы</span><span>«~» — среднее за день по ВБ</span></div>';
 
 /* фразы кампании — одна таблица: выбор нескольких, исключить / вернуть, сортировка по любому столбцу, место «сейчас» по нажатию */
-const FR={key:'',sel:new Set(),all:false,f:'act',sort:'s',dir:-1,tm:null,busy:new Set(),jam:false,note:''};
+const FR={key:'',sel:new Set(),all:false,f:'act',sort:'s',dir:-1,sort2:null,dir2:-1,tm:null,busy:new Set(),jam:false,note:''};
 function frAll(id,nm){const t=TOV[nm];if(!t||!KL||!((KL.kab[S.kab]||{}).k||{})[id+'|'+nm])return null;
   const sv={sort:S.kw.sort,dir:S.kw.dir};S.kw.sort='s';S.kw.dir=-1;const L=kwData(t,+id);Object.assign(S.kw,sv);return L}
-function frSort(L){const key=({t:e=>e.t.toLowerCase(),f:e=>e.f||null,s:e=>e.a.s,o:e=>e.a.o,cpo:e=>e.cpo,p:e=>e.pn})[FR.sort]||(e=>e.a.s),d=FR.dir;
-  const val=e=>{const v=key(e);return v==null?null:v===Infinity?1e15:v};
-  return L.map(e=>[val(e),e]).sort((a,b)=>(a[0]==null?(b[0]==null?0:1):b[0]==null?-1:(a[0]<b[0]?-1:a[0]>b[0]?1:0)*d)||b[1].a.s-a[1].a.s).map(x=>x[1])}
+function frSort(L){const KS={t:e=>e.t.toLowerCase(),f:e=>e.f||null,s:e=>e.a.s,o:e=>e.a.o,cpo:e=>e.cpo,p:e=>e.pn},key=KS[FR.sort]||(e=>e.a.s),key2=FR.sort2&&FR.sort2!==FR.sort?KS[FR.sort2]:null;
+  const nv=v=>v==null?null:v===Infinity?1e15:v,cmp=(a,b,d)=>a==null?(b==null?0:1):b==null?-1:(a<b?-1:a>b?1:0)*d;   // 14.11: двойная сортировка — при равных в основном столбце решает второй
+  return L.map(e=>[nv(key(e)),key2?nv(key2(e)):null,e]).sort((a,b)=>cmp(a[0],b[0],FR.dir)||(key2?cmp(a[1],b[1],FR.dir2):0)||b[2].a.s-a[2].a.s).map(x=>x[2])}
 function frShown(id,nm){const all=frAll(id,nm)||[],L=frSort(FR.f==='act'?all.filter(e=>!e.xall):FR.f==='x'?all.filter(e=>e.xall):all);return {all,L,show:L.slice(0,FR.all?500:12)}}
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.busy=new Set()}
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
   const z=frShown(id,nm),all=z.all,L=z.L,show=z.show;
   const nx=all.filter(e=>e.xall).length,days=[];for(let i=T;i>T-7&&i>=0;i--)days.push(i);
-  const th=(k,l)=>`<th data-fs="${k}"${FR.sort===k?` aria-sort="${FR.dir<0?'descending':'ascending'}"`:''}>${l}</th>`,allOn=show.length>0&&show.every(e=>FR.sel.has(e.t));
+  const sn=k=>FR.sort2&&FR.sort2!==FR.sort?(FR.sort===k?'<i class="sn">1</i>':FR.sort2===k?'<i class="sn">2</i>':''):'',th=(k,l)=>`<th data-fs="${k}"${FR.sort===k?` aria-sort="${FR.dir<0?'descending':'ascending'}"`:FR.sort2===k?` data-s2="${FR.dir2<0?'d':'a'}"`:''}>${l}${sn(k)}</th>`,allOn=show.length>0&&show.every(e=>FR.sel.has(e.t));
   let h=`<div class="chips" style="margin:0 0 8px"><button class="chip press" type="button" data-frf="act" aria-pressed="${FR.f==='act'}">Активные · ${all.length-nx}</button><button class="chip press" type="button" data-frf="x" aria-pressed="${FR.f==='x'}">Исключённые · ${nx}</button><button class="chip press" type="button" data-frf="all" aria-pressed="${FR.f==='all'}">Все · ${all.length}</button></div>`;
   if(!show.length)return h+`<div class="note" style="margin-top:0">${FR.f==='x'?'Исключённых фраз у кампании нет.':'Фраз с показами за период нет.'}</div>`;
-  h+=`<div class="tw tws frw"><table class="fr"><thead><tr><th class="q"><div class="qw"><label class="ck"><input type="checkbox" id="frall"${allOn?' checked':''} aria-label="Выбрать все"></label><span data-fs="t" class="fsq">Фраза${FR.sort==='t'?(FR.dir<0?' ▾':' ▴'):''}</span></div></th>`
+  h+=`<div class="tw tws frw"><table class="fr"><thead><tr><th class="q"><div class="qw"><label class="ck"><input type="checkbox" id="frall"${allOn?' checked':''} aria-label="Выбрать все"></label><span data-fs="t" class="fsq">Фраза${FR.sort==='t'?(FR.dir<0?' ▾':' ▴'):FR.sort2==='t'?(FR.dir2<0?' ▿':' ▵'):''}${sn('t')}</span></div></th>`
     +th('p','Сейчас')+th('f','Частота')+th('s','Траты, ₽')+th('o','Заказы')+th('cpo','Цена заказа')
     +days.slice(1).map(i=>`<th class="dh${FR.tm===i?' on':''}" data-frd="${i}" title="Нажмите — время замеров">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join('')+'</tr></thead><tbody>';
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(e.t),on=FR.sel.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
@@ -1439,7 +1460,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
       +cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return mxCell(c,p,FR.tm===days[k+1])}).join('')+'</tr>'}
   h+='</tbody></table></div>';
   if(L.length>show.length)h+=`<div style="margin-top:8px"><button class="btn gray sm press" type="button" data-act="frmore" style="width:100%">Показать все ${L.length}</button></div>`;
-  h+=`<div class="muted tnote">${D.mst&&D.mst.at?'Наши замеры выдачи ВБ (Москва): последний плановый — '+dm(D.mst.at.slice(0,10))+' в '+D.mst.at.slice(11,16)+' МСК. ':''}Нажмите на место в столбце «Сейчас» — снимется заново. Нажмите на дату — покажет время замеров. Частота — запросов всего кластера за месяц, как в Марпле.${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
+  h+=`<div class="muted tnote">${D.mst&&D.mst.at?'Наши замеры выдачи ВБ (Москва): последний плановый — '+dm(D.mst.at.slice(0,10))+' в '+D.mst.at.slice(11,16)+' МСК. ':''}Нажмите на место в столбце «Сейчас» — снимется заново. Нажмите на дату — покажет время замеров. Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2). Частота — запросов всего кластера за месяц, как в Марпле.${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
   const lk=UPR?'':' nolk',n=FR.sel.size,xs=[...FR.sel].filter(q=>(all.find(e=>e.t===q)||{}).xall).length;
   h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button>${n-xs?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}<button class="btn sm gray press${lk}" type="button" data-act="frmes">Снять места</button></div>`
     :`<div class="acts" style="grid-template-columns:1fr"><button class="btn gray sm press${lk}" type="button" data-act="frmes" style="width:100%">Снять места показанных фраз сейчас</button></div>`;
@@ -1483,7 +1504,7 @@ function vRk(){const rows=rkRows(),nW=K.rk.filter(r=>rkSt(r).w).length,tot=rows.
     h+=`<button class="note w press" type="button" data-act="perenos" style="display:block;width:100%;text-align:left;cursor:pointer;font:inherit;font-size:13px;border:0">Марпла ещё ведёт ${nl?'лимит дня у '+nl:''}${nl&&ng?' и ':''}${ng?'график у '+ng:''} ${(Math.max(nl,ng)%10===1&&Math.max(nl,ng)%100!==11)?'кампании':'кампаний'}. <b>Перенести к себе ›</b></button>`}
   h+=`<div class="hrw"><h3>Кампании · ${rows.length}</h3>${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или выберите «Все».</div>';
-  if(S.rkv==='table')return h+tblHtml('rk',rows,x=>`data-rk="${x.r.id}|${x.nm}" data-ctx="rk"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка. «Столбцы» — скрыть лишние, вернуть, переставить. ${ostAt()}</div>`;
+  if(S.rkv==='table')return h+tblHtml('rk',rows,x=>`data-rk="${x.r.id}|${x.nm}" data-ctx="rk"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2 в шапке). «Столбцы» — выбрать оба столбца сортировки, скрыть лишние, переставить. ${ostAt()}</div>`;
   return h+'<div class="list">'+rows.slice(0,150).map(rkCard).join('')+'</div>'+(rows.length>150?`<div class="muted" style="margin:8px 4px;font-size:13px">Показаны первые 150 из ${rows.length} — уточните поиском.</div>`:'')}
 
 /* ── перенос из Марплы (13.11 Андрей «нам нужно отказаться от их подписки»): её лимит дня и график → свои, тем же значением.
@@ -2048,7 +2069,7 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
   if(x=c('[data-frm1]')){const [cid,nm,...q]=x.dataset.frm1.split('|');if(!FR.key)FR.key=cid+'|'+nm;frMeasure(cid,nm,[q.join('|')]);return}
   if(x=c('[data-frf]')){FR.f=x.dataset.frf;FR.all=false;redraw();return}
   if(x=c('[data-frd]')){const i=+x.dataset.frd;FR.tm=FR.tm===i?null:i;redraw();return}
-  if(x=c('[data-fs]')){const k=x.dataset.fs;if(FR.sort===k)FR.dir=-FR.dir;else{FR.sort=k;FR.dir=k==='t'||k==='p'?1:-1}redraw();return}
+  if(x=c('[data-fs]')){const k=x.dataset.fs;if(FR.sort===k)FR.dir=-FR.dir;else{FR.sort2=FR.sort;FR.dir2=FR.dir;FR.sort=k;FR.dir=k==='t'||k==='p'?1:-1}redraw();return}
   if(x=c('[data-kwo]')){const [cid,nm,...q]=x.dataset.kwo.split('|');openKw(+nm,+cid,q.join('|'));return}
   if(x=c('th[data-ts]')){const p=x.dataset.ts.split('|');tblClick(p[0],p[1]);return}
   if(x=c('[data-skl]')){openSkl(x.dataset.skl);return}
