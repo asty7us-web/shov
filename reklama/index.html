@@ -2374,16 +2374,25 @@ function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},mb=r.mar&&r.ma
 function pickProd(){sheet(()=>{const L=kwProds();return {t:'Товар',s:'у кого есть реклама в поиске',h:'<div>'+L.map(({t,s,w})=>`<button class="akr press" type="button" data-pick="${t.nm}" style="width:100%;border-left:0;border-right:0;border-top:0;background:none;text-align:left;cursor:pointer"><i class="tph"${foto(t)}></i><div><b>${esc(t.art)}</b><span>${w?w+' РК работает':'на паузе'}</span></div><div class="pr num">${rub(s)}<small>реклама ${perZa()}</small></div></button>`).join('')+'</div>'}})}
 
 /* ───────── команды сторожу: шифруем ключом управления, шлём через ntfy, ответ ждём там же ───────── */
+/* 14.11 Андрей («Да, сделай» — запасной канал связи): команды и ответы идут сразу через три независимых сервера связи, сработает любой живой.
+   14.11 ntfy.sh на полтора часа перестал отвечать серверу, а потом закрыл его адрес — кнопки сайта молчали. Те же адреса — HOSTS в worker.py: менять в обоих местах. */
+const NH=['https://ntfy.sh','https://ntfy.envs.net','https://ntfy.adminforge.de'],DONE=new Set();
+const nhSig=()=>{try{return AbortSignal.timeout(9000)}catch(e){return undefined}};
 const WAIT={},SEEN=new Set();let ES=null;
 const ckey=()=>crypto.subtle.importKey('raw',b64u8(UPR.key),'AES-GCM',false,['encrypt','decrypt']);
 const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 async function send(cmd){cmd.id=cmd.id||rid();cmd.ts=Date.now();if(!cmd.kab)cmd.kab=S.kab;
   const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await ckey(),new TextEncoder().encode(JSON.stringify(cmd))));
-  const r=await fetch('https://ntfy.sh/'+UPR.cmd,{method:'POST',body:u8b64(iv)+'.'+u8b64(ct)});if(!r.ok)throw new Error('Команда не ушла ('+r.status+'). Проверьте связь.');return cmd.id}
+  const body=u8b64(iv)+'.'+u8b64(ct);   /* шлём на все серверы связи разом; хватит одного принявшего — остальные досылаются сами */
+  const ok=await new Promise(res=>{let n=NH.length,fin=false;NH.forEach(h=>fetch(h+'/'+UPR.cmd,{method:'POST',body,signal:nhSig()}).then(r=>r.ok,()=>false).then(v=>{n--;if(fin)return;if(v){fin=true;res(true)}else if(!n){fin=true;res(false)}}))});
+  if(!ok)throw new Error('Команда не ушла: ни один сервер связи не ответил. Проверьте интернет и повторите.');return cmd.id}
 async function onMsg(m){if(!m||m.event!=='message'||SEEN.has(m.id))return;SEEN.add(m.id);
-  try{const [a,b]=String(m.message).split('.'),r=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(a)},await ckey(),b64u8(b))));wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch)applyPatch(r.patch)}catch(e){}}
-function listen(){if(ES||!UPR)return;try{ES=new EventSource('https://ntfy.sh/'+UPR.res+'/sse');ES.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch(x){}};ES.onerror=()=>{}}catch(e){ES=null}}
-async function pollRes(){try{const r=await fetch('https://ntfy.sh/'+UPR.res+'/json?poll=1&since=3m',{cache:'no-store'});if(!r.ok)return;for(const l of (await r.text()).split('\n'))if(l.trim())try{await onMsg(JSON.parse(l))}catch(e){}}catch(e){}}
+  try{const [a,b]=String(m.message).split('.'),r=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(a)},await ckey(),b64u8(b))));
+    const dk=r.id+'|'+r.st+'|'+(r.msg||'');if(DONE.has(dk))return;DONE.add(dk);   /* тот же ответ приходит с каждого сервера связи — берём первый */
+    wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch)applyPatch(r.patch)}catch(e){}}
+function listen(){if(ES||!UPR)return;const L=[];for(const h of NH)try{const s=new EventSource(h+'/'+UPR.res+'/sse');s.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch(x){}};s.onerror=()=>{};L.push(s)}catch(e){}
+  ES=L.length?{L,close(){L.forEach(s=>{try{s.close()}catch(e){}})}}:null}
+async function pollRes(){await Promise.all(NH.map(async h=>{try{const r=await fetch(h+'/'+UPR.res+'/json?poll=1&since=3m',{cache:'no-store',signal:nhSig()});if(!r.ok)return;for(const l of (await r.text()).split('\n'))if(l.trim())try{await onMsg(JSON.parse(l))}catch(e){}}catch(e){}}))}
 /* 14.11 Андрей: «нажал несколько запросов обновить вручную — долго крутится ещё, надо понятный поушн». Сторож делает команды по одной, поэтому:
    — в листе подтверждения написано, что делается, сколько это обычно занимает и сколько уже прошло; дольше обычного — сказано, что лист можно закрыть;
    — команды без своего листа (замер места, «обновить РК», шаблон) и те, чей лист закрыли, видны плашкой внизу экрана: что делается, сколько их в очереди, сколько прошло;
