@@ -1903,9 +1903,20 @@ async function qSend(){
   const msgs=[];let cur='🗳 Конкуренты — решения с сайта'+(OZ?'':' · '+M.n);
   const vis=s=>s.replace(/<[^>]+>/g,'').length;
   blocks.forEach(b=>{if(vis(cur+'\n\n'+b)>560){msgs.push(cur);cur='🗳 Конкуренты — решения с сайта (ещё)'+(OZ?'':' · '+M.n)}cur+='\n\n'+b});msgs.push(cur);
+  // 14.11 Бондарев: «работает только с VPN»: без VPN api.telegram.org из России висит, кнопка «не реагирует».
+  // Теперь сначала сразу три сервера ntfy (как у «Рекламы», soglas.py watch читает все), каждый с ожиданием до 8 с;
+  // Телеграм — только если ни один не принял, тоже с ограничением ожидания.
+  const tmo=ms=>{const c=new AbortController();setTimeout(()=>c.abort(),ms);return c.signal};
+  const R=D.relay||{},NHS=['https://ntfy.sh','https://ntfy.envs.net','https://ntfy.adminforge.de'];
+  if(R.topic){
+    toast('Отправляю…');
+    const body=JSON.stringify({items:items.map(x=>[x.d,(OZ?'':MP+':')+String(x.our),String(x.comp)])});
+    const ok=await Promise.any(NHS.map(hh=>fetch(hh+'/'+R.topic,{method:'POST',body,signal:tmo(8000)}).then(r=>{if(!r.ok)throw 0;return 1}))).catch(()=>0);
+    if(ok){qDone();return}
+  }
   try{
     for(const text of msgs){
-      const r=await fetch('https://api.telegram.org/bot'+T.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},
+      const r=await fetch('https://api.telegram.org/bot'+T.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},signal:tmo(10000),
         body:JSON.stringify({chat_id:T.chat,text,parse_mode:'HTML',disable_web_page_preview:true,reply_markup:{inline_keyboard:koKb('')}})});
       const j=await r.json();if(!j.ok)throw new Error(j.description||'ошибка');
       // 26.10: номер сообщения бота — в кнопку, чтобы сторож применил решения сам и удалил сообщение (soglas.py watch)
@@ -1913,12 +1924,7 @@ async function qSend(){
         body:JSON.stringify({chat_id:T.chat,message_id:mid,reply_markup:{inline_keyboard:koKb(mid)}})}).catch(()=>{});
     }
     qDone();
-  }catch(e){
-    // 09.11: с телефона api.telegram.org часто не открывается — запасной путь через ntfy.sh (soglas.py watch читает и его)
-    const R=D.relay||{};
-    if(R.topic){try{const r=await fetch('https://ntfy.sh/'+R.topic,{method:'POST',body:JSON.stringify({items:items.map(x=>[x.d,(OZ?'':MP+':')+String(x.our),String(x.comp)])})});
-      if(!r.ok)throw new Error('HTTP '+r.status);qDone();return}catch(e2){}}
-    toast('Не отправилось: '+e.message)}
+  }catch(e){toast('Не отправилось: нет связи. Попробуйте ещё раз')}
 }
 function qDone(){
   const items=Q.filter(x=>!x.sent),now=Date.now();items.forEach(x=>x.sent=now);KS.set('q',Q);qbar();
