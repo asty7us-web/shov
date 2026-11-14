@@ -1013,19 +1013,22 @@ html,body{overscroll-behavior-y:contain}
 /* в «Космос 3D» фон рисует сцена — свои звёзды страницы не нужны */
 :root[data-theme="space"] #spDeco{display:none}
 
-/* 14.11 Андрей: «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании».
-   Рамка окошка: тонкий светлый блик медленно обходит её по кругу (12 с), под ним мягкое свечение; подпись слева вверху — «Рекламные кампании» (d_kosmos.js) */
-@property --spa{syntax:"<angle>";inherits:false;initial-value:0deg}
-#spCard::after,#spCard::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;padding:1.5px;
-  background:conic-gradient(from var(--spa),rgba(190,180,255,.18) 0deg,rgba(190,180,255,.18) 200deg,rgba(214,206,255,.55) 250deg,#fff 282deg,rgba(150,215,255,.75) 300deg,rgba(190,180,255,.18) 345deg);
+/* 14.11 Андрей: блок кампаний в листе товара — «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании».
+   Рамка .rkbox (prodRk, d_novoe.js): тонкая линия цвета темы, по ней медленно (14 с) обходит мягкий блик; подпись сверху. Во всех темах; без видеокарты — блик медленнее, без свечения */
+@property --rka{syntax:"<angle>";inherits:false;initial-value:0deg}
+.rkbox{position:relative;margin:6px 0 14px;padding:12px 12px 10px;border-radius:calc(var(--r) + 6px);isolation:isolate}
+.rkbox::before,.rkbox::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1.5px;
+  background:conic-gradient(from var(--rka),color-mix(in srgb,var(--acc) 22%,transparent) 0deg,color-mix(in srgb,var(--acc) 22%,transparent) 210deg,
+    color-mix(in srgb,var(--acc) 70%,transparent) 260deg,color-mix(in srgb,var(--acc) 35%,#fff) 288deg,color-mix(in srgb,var(--acc) 55%,transparent) 310deg,color-mix(in srgb,var(--acc) 22%,transparent) 350deg);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
-  animation:sp-ring 12s linear infinite}
-#spCard::before{padding:5px;filter:blur(6px);opacity:.55}
-@keyframes sp-ring{to{--spa:360deg}}
-#spCard .splogo{white-space:nowrap}
-@media (max-width:899px){#spCard .splogo{letter-spacing:.16em}#spCard .spch{display:none}}
-:root[data-lite="1"] #spCard::before{display:none}
-:root[data-lite="1"] #spCard::after{animation-duration:20s}
+  animation:rk-ring 14s linear infinite}
+.rkbox::before{padding:4px;filter:blur(7px);opacity:.45}
+@keyframes rk-ring{to{--rka:360deg}}
+.rkbox .rkcap{font:700 11px/1 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin:2px 2px 0}
+.rkbox>.rkhd{margin-top:-4px}
+:root[data-lite="1"] .rkbox::before{display:none}
+:root[data-lite="1"] .rkbox::after{animation-duration:24s}
+@media (prefers-reduced-motion:reduce){.rkbox::before,.rkbox::after{animation-duration:30s}}
 
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
@@ -2831,7 +2834,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
    пришлась на кампании, что сейчас на паузе), иначе это те же числа второй раз подряд. На паузе — одна свёрнутая строка «На паузе · N ›»: нажатие
    раскрывает список, «свернуть» — обратно */
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
-  let h=`<div class="hrw rkhd"><h3>Работают <b class="num">${W.length}</b></h3><span class="muted num">${perZa()}</span></div>`;
+  /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
+  let h=`<div class="rkbox"><div class="rkcap">Рекламные кампании</div><div class="hrw rkhd"><h3>Работают <b class="num">${W.length}</b></h3><span class="muted num">${perZa()}</span></div>`;
   if(W.length>1){const aw=pAgg(t,ix,true);
     if(Math.abs((aw.s||0)-(a.s||0))>=1){const bw=pp?pAgg(t,pp,true):null;
       h+=kpi4({drr:aw.drr,pdrr:bw&&bw.drr,drrk:aw.drrk,s:aw.s,ps:bw&&bw.s,q:aw.q,z:aw.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(aw.oq)+' шт</b>'})+'<div style="height:10px"></div>'}}
@@ -2844,7 +2848,7 @@ function prodRk(t,nm,ix,pp,a,W,P,rctx){
       :`<button class="pzr press" type="button" data-act="allp" data-nm="${nm}" aria-expanded="false"><span><b>На паузе · ${Po.length}</b><small>${n30?'тратили за 30 дней: '+n30:'за 30 дней расхода не было'}</small></span><i aria-hidden="true">›</i></button>`}
   /* 14.11 Андрей: «места по фразам только внутри рк соотв» — в листе товара мест по фразам нет, только в таблице фраз своей кампании */
   if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+='<div class="muted tnote pmxh">Места по фразам — в листе кампании: нажмите на кампанию выше.</div>';
-  return h}
+  return h+'</div>'}
 /* 14.11 (утро, четвёртый заход) Андрей 09:18, кадр «Сетка5х51х10м», блок «Акции ВБ» с тремя плитками: «По панели маржу и дрр и что ещё просил данные с изменением
    сроков это отдельно выше поставить лучше булочек». Отдельный блок «Показатели» сразу под кампаниями: одна карточка-таблица, строки «Маржа», «ДРР», «Продажи, ₽»,
    столбцы — выбранный период (считаем сами: ДРР — реклама к заказам товара, продажи — заказы ₽; маржи за период нет — «—»), неделя и месяц панели (лист «SKU»:
@@ -3273,7 +3277,7 @@ function spaceDeco(on,deco){
   if(w.firstChild)return;
   const el=document.createElement('section');el.id='spCard';el.tabIndex=0;el.setAttribute('aria-roledescription','слайд-шоу');el.setAttribute('aria-label','Аффирмации: листать стрелками ← →');
   el.innerHTML='<i class="spimg" aria-hidden="true"></i><i class="spsh" aria-hidden="true"></i><canvas class="spst" aria-hidden="true"></canvas><i class="spfl" aria-hidden="true"></i><div class="sphud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
-   '<div class="sptop"><span class="splogo">РЕКЛАМНЫЕ КАМПАНИИ</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
+   '<div class="sptop"><span class="splogo">РЕКЛАМА</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
    `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
    '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
    `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button>${SP_TRACKS.length>1?`<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[spP.t%SP_TRACKS.length][1]} — сменить" style="font-size:18px;line-height:1">♫<small>${spP.t%SP_TRACKS.length+1}</small></button>`:''}<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
@@ -3570,7 +3574,10 @@ const numv=id=>{const e=$('#'+id);return e?parseFloat(String(e.value).replace(/\
 function actStatus(id,nm){if(!need())return;const r=RK[id],to=r.st===9?'pause':'start';
   sheet(()=>({t:to==='pause'?'Поставить на паузу?':'Запустить кампанию?',s:esc(r.name),h:`<div class="cmp"><div><small>Сейчас</small><b>${rkSt(r).t}</b></div><div class="ar">→</div><div><small>Станет</small><b>${to==='pause'?'пауза':'идёт'}</b></div></div>
    ${to==='start'&&r.bud!=null&&r.bud<50?`<div class="note w">Бюджет ${rub(r.bud)} — ВБ может не запустить. Сначала пополните.</div>`:''}${r.mar&&r.mar.gr?'<div class="note w">Кампания в графике Марплы: он включит или выключит её по своим часам.</div>':''}
-   ${RUNBOX(to==='pause'?'Поставить на паузу':'Запустить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to})}}),true)}
+   ${to!=='start'||!noLim(r)?'':`<div class="marb"><b>У кампании нет лимита расхода в день</b><span>Задайте лимит, чтобы после запуска она не потратила лишнего.</span><button class="btn sm press" type="button" id="slim">Задать лимит</button></div>`}
+   ${RUNBOX(to==='pause'?'Поставить на паузу':'Запустить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to});const sl=$('#slim');if(sl)sl.onclick=()=>actLim(id,nm)}}),true)}
+/* 14.11 Андрей: «те, кто без трат, — чтобы когда начать её, показало: задай лимит». Лимита нет ни своего, ни ВБ, ни в Марпле */
+function noLim(r){const ol=ourLim(r);return !(ol&&ol.on)&&!(r.lw&&r.lw.on)&&!(r.mar&&r.mar.lim&&r.mar.lim.max>0)}
 function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Object.keys(e.b||{});let pl=pls[0];
   sheet(()=>{const cur=e.b[pl],mk=pl==='recommendations'?'recommendation':pl,mn=(e.min||{})[mk],rc=e.rec||{},cpm=r.pay==='cpm',mb=r.mar&&(r.mar.bid||[]).length;
     const RL={range1To2:'места 1–2',range3To10:'места 3–10',range11To34:'места 11–34',competitiveBid:'конкурентная',leadersBid:'лидеры'};
@@ -4047,7 +4054,7 @@ function ptrNote(pm){const nm=[...new Set((pm||[]).map(x=>x.n).filter(Boolean))]
   runRes({k:'_ptr'},'g',atTx()+(pm&&pm.length?' · ваши изменения применены ('+pm.length+(nm.length?': '+nm.slice(0,3).join(', ').toLowerCase():'')+'), в данных закрепятся со сбором':' · все ваши изменения уже в данных'))}
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
-window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
+window.REK={actStatus,noLim,get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
   FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
   get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC},
   prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
