@@ -1293,6 +1293,12 @@ body.mjob #runp{display:none}
 .wbq .wbl{margin:0}
 .klr .wbq{height:24px;min-width:30px;margin-left:6px}
 
+/* 14.11: остатки в листе товара — нажатие раскрывает гистограммы по дням */
+.osbt{display:contents;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.osbt .pill{cursor:pointer}
+.osbt .osar{color:var(--acc);font-weight:600}
+.osh{margin-top:6px;padding:4px 0 2px}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2762,6 +2768,16 @@ function openProd(nm,ctx){if(!TOV[nm])return;const i=ctx?ctx.indexOf(+nm):-1;
   /* 14.11 Андрей: «если находишся в рк или товаре нельзя обновить страницу» — лист запоминается (shMark пишет сосед в e_sheets.js) */
   if(typeof shMark==='function')shMark('tov',nm);
   sheet(()=>prodBody(nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openProd(ctx[j],ctx)}:null)}
+/* 14.11 Андрей: «кнопку открывается или просто блок… гистограмма 2 недели остатки на фбо динамика и фбс также, может лучше ниже блок открыв» —
+   нажатие на остатки в листе товара раскрывает под ними две гистограммы за 14 дней: склады ВБ и свой склад (отчёт ВБ «История остатков по дням»;
+   сегодня — свежий остаток, как в плашках) */
+function ostHist(t){const od=K.oh_d||[],ix=[],at={};od.forEach((d,k)=>{const i=D.days.indexOf(d);if(i>=0){ix.push(i);at[i]=k}});if(!ix.length)return '';
+  const v=(j,cur)=>i=>{const k=at[i];if(i===T&&cur!=null)return cur;return k==null?null:t.oh[j][k]};
+  const one=(j,ttl,cur,col)=>{const f=v(j,cur),fs=ix.map(f).filter(x=>x!=null),a=fs[0],b=fs[fs.length-1],dd=b-a;
+    return `<div class="hrw"><h3>${ttl}, шт</h3><span class="muted num" style="font-size:12.5px">${fs.length?`сейчас ${f0(b)} · за 2 недели ${dd>0?'▲ +'+f0(dd):dd<0?'▼ '+f0(dd):'без изменений'}`:''}</span></div><div class="sal1">`
+      +chart({ix,h:96,val:f,col:i=>f(i)?col:'var(--bad,#e5484d)',top:i=>{const x=f(i);return x==null?'':x>=1e4?(x/1e3).toFixed(0)+'к':x>=1e3?(x/1e3).toFixed(1).replace('.0','')+'к':x},
+        read:i=>`<b>${dlab(i)}${i===T?' (сейчас)':''}</b> · ${ttl==='Склады ВБ'?'склады ВБ':'свой склад'}: <b>${f0(f(i)||0)} шт</b>`})+'</div>'};
+  return `<div class="osh">${one(0,'Склады ВБ',t.fbo,'var(--acc)')}${one(1,'Свой склад',t.fbs,'var(--acc2,var(--acc))')}</div>`}
 function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?pAgg(t,pp):null,td=pAgg(t,[T]),y=T>0?pAgg(t,[T-1]):null,y2=T>1?pAgg(t,[T-2]):null,W=wrk(t),P=t.rk.map(id=>RK[id]).filter(r=>r&&!rkSt(r).w);
   const memo={},gm=i=>memo[i]||(memo[i]=pAgg(t,[i])),pn=t.pan||{},cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   const rctx=t.rk.map(id=>id+'|'+nm).join(','),by=buyer(t);
@@ -2770,7 +2786,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   let h=perSeg()+`<div class="prh"><div class="ph"${foto(t)}></div><div class="pp">${t.pr?`<span class="pl1">наша цена</span><b class="num">${rub2(t.pr.f)}</b>
        <span class="pb num">${by?`у покупателя ${by.calc?'≈ ':''}<b>${rub(by.v)}</b> · скидка ВБ ${f0(by.spp)}%`:'у покупателя — нет данных: за период не было заказов'}</span><span class="num">до скидки ${f0(t.pr.p)} ₽ · наша скидка ${t.pr.d}%</span>`:'<b>цена не прочиталась</b>'}</div></div>
      <div class="wbln"><a class="press" href="https://www.wildberries.ru/catalog/${t.nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар на ВБ ↗</a></div>
-     <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${ostPills(t)}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}</div>`;
+     <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${t.oh?`<button type="button" class="osbt press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}">${ostPills(t)}<span class="pill osar">остатки по дням ${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}</div>`;
+  if(t.oh&&S.ostOpen)h+=ostHist(t);
   if(ostNet(t)&&W.length)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.</div>';
   /* 14.11 (четвёртый заход): строки «панель неделя / месяц: ДРР · маржа» над главными цифрами больше нет — те же числа в блоке «Показатели» под кампаниями (panBlock) */
   /* 14.11 Андрей: «в товаре плашка „ДРР вчера“ завис, зачем, если период выше — выбор»: плашки «вчера» нет, «Вчера» — кнопкой периода */
@@ -2819,10 +2836,10 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
     /* 14.11 (четвёртый заход): плиток «Цена / ДРР / Маржа» здесь больше нет — маржа и ДРР в блоке «Показатели» выше, цена — в «Цене по дням» */
     h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div><div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`
       +prcBlock(t,nm,cx)
-      +`<div class="muted akhint" style="font-size:12.5px;margin:6px 0 2px">Нажмите на акцию, чтобы войти ценой</div><div class="akl">`
+      +`<div class="akl">`
       +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
-        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b><span>${akSub(x)}</span></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':''}${lo?`<i>ниже на ${rub(P-x.plan)} (−${(d=>d<10?f1(d):f0(d))(100*(P-x.plan)/P)}%)</i>`:x.uch?'':'<i>цена подходит</i>'}${mm!=null?`<i class="${mm<0?'bad':''}">маржа ≈ ${pc(100*mm)}</i>`:''}</small></div></button>`}).join('')+'</div>'
-      +(anyM?'<div class="muted tnote">Маржа по цене акции — по расчёту: маржа панели в ₽ на штуку минус разница цен. Комиссию ВБ с разницы панель не даёт — настоящая маржа чуть выше.</div>':'')}
+        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':'<i>не участвуем</i>'}</small></div></button>`}).join('')+'</div>'
+}
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
@@ -2872,7 +2889,8 @@ function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,has=x=>!!(x&&x[0]>0),no=
    (прежний отдельный блок «Скидка ВБ (СПП)» — третьей кнопкой), нажатие на день — строка над графиком со всеми тремя. Столбики цен — от нижней круглой
    отметки, а не от нуля: цены отличаются на проценты, от нуля все столбики вышли бы одной высоты («плоский график», 14.11); шкала слева подписана настоящими
    ценами. Подписаны наибольшая и наименьшая; день, когда меняли нашу цену, — точка под датой и стрелка ▲▼ над столбиком */
-const PRM=[['f','Наша цена'],['b','У покупателя'],['s','Скидка ВБ']];
+/* 14.11 23:05 Андрей: «мне нужна динамика покупателя и наша цена всё», «расписывать про акции не надо… проще сделай красиво» — без «Скидки ВБ», без линий акций на графике и строки «чтобы войти» */
+const PRM=[['f','Наша цена'],['b','У покупателя']];
 const prCx=()=>{const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);return cx};   // те же дни, что у остальных графиков листа товара
 /* 14.11 (утро, четвёртый заход) Андрей 09:10, кадр листа «Лопата» (Каб 1) без заказов за 14 дней: «Тут вроде просил динамику цены». t.pd есть только
    у дней С ЗАКАЗАМИ — у товара без заказов блок пропадал. Теперь НАША цена есть каждый день (prOur): от нынешней (t.pr.f) назад по журналу «Что меняли» —
@@ -2904,9 +2922,8 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   /* 14.11 (четвёртый заход) Андрей 09:18: «выше динамика цен гистограмма чтобы я понимал реально войти в акцию» — на «Нашей цене» линии плановых цен идущих
      и будущих акций: пунктир — где не участвуем, зелёная — где участвуем; под графиком строка «чтобы войти в …, цену нужно снизить на N ₽» для ближайшей
      по цене акции без участия. Шкала — от круглой отметки ниже самой низкой линии и столбика: разница видна, а не «все одной высоты» */
-  const P0=t.pr&&+t.pr.f,AK=P0>0?(t.ak||[]).filter(x=>x.e>=D.today&&x.plan>0):[];
-  const inTx=prIn(t,AK,P0);
-  if(!has.length)return hd('нет заказов')+'<div class="note prnz" style="margin-top:6px">За период не было заказов — цены у покупателя и скидки ВБ нет.</div>'+inTx;
+  const AK=[],inTx='';
+  if(!has.length)return hd('нет заказов')+'<div class="note prnz" style="margin-top:6px">За период не было заказов — цены у покупателя нет.</div>'+inTx;
   const vs=has.map(vOf),mn0=Math.min(...vs),mx=Math.max(...vs),iMx=has.filter(i=>vOf(i)===mx).pop(),iMn=has.filter(i=>vOf(i)===mn0).pop(),HL=md==='f'?AK:[];
   const mn=HL.length?Math.min(mn0,...HL.map(x=>x.plan)):mn0,mxL=HL.length?Math.max(mx,...HL.map(x=>x.plan)):mx;
   let base=0;if(md!=='s'){const R=Math.max(mxL-mn,mxL*0.04,1),p=Math.pow(10,Math.floor(Math.log10(R)));let st=p;for(const k of [1,2,5,10]){st=k*p;if(R/st<=2.5)break}base=Math.max(0,Math.floor((mn-R*0.6)/st)*st)}
@@ -2919,7 +2936,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   const fv=v=>md==='s'?f0(v)+'%':f0(v);
   const col=i=>{if(md==='b')return 'var(--wb)';if(md==='s'){const p=prv(i),v=pdm[i][3];return !p||Math.round(p[3])===Math.round(v)?'var(--warn)':v>p[3]?'var(--good)':'var(--bad)'}
     return chg(i)?'var(--acc)':unc(i)?'color-mix(in srgb,var(--acc) 22%,transparent)':'color-mix(in srgb,var(--acc) 50%,transparent)'};
-  const buy=i=>pdm[i]?` · у покупателя <b>${rub(pdm[i][2])}</b> · скидка ВБ <b>${f0(pdm[i][3])}%</b>`:' · заказов не было';
+  const buy=i=>pdm[i]?` · у покупателя <b>${rub(pdm[i][2])}</b>`:' · заказов не было';
   const ch=chart({ix:cx,h:HL.length?124:92,mh:HL.length?MHp:undefined,mxv:HL.length?top0:undefined,hl,val:i=>{const v=vOf(i);return v==null?null:v-base},col,dot:i=>!!chg(i),
     top:i=>{if(vOf(i)==null)return '';const c=md==='f'?chg(i):0,k=cx.indexOf(i),l=(i===iMx||i===iMn)&&!(Math.abs(iMx-iMn)===1&&i===Math.min(iMx,iMn))?   /* наибольшая и наименьшая в соседних днях — подпись одна, у позднего дня (кадр 14.11: «6 4006 350») */`<span class="${k<2?'e0':k>cx.length-3?'e1':''}">${fv(vOf(i))}</span>`:'';return (c?`<span class="pca">${c<0?'▼':'▲'}</span>`:'')+l},   // у крайних дней подпись сдвинута внутрь — не наезжает на шкалу
     ax:md==='s'?undefined:{f:v=>{const x=v+base;return x>=10000?axNum(x):f0(x)},int:true},
@@ -2932,8 +2949,8 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   /* шапка: «от N до M ₽»; цена весь период одна — «N ₽ · не менялась» (если журнал покрывает не весь период — «не менялась с ДД.ММ») */
   const rng=mn0===mx?fv(mx)+(md==='s'?'':' ₽')+(md==='f'&&hasO&&!O.n?(O.nu?(O.l0?' · не менялась с '+dm(O.l0):''):' · не менялась'):''):'от '+fv(mn0)+' до '+fv(mx)+(md==='s'?'':' ₽');
   const lg=(md==='s'?'<span><i style="background:var(--good)"></i>подняли</span><span><i style="background:var(--bad)"></i>урезали</span><span><i style="background:var(--warn)"></i>так же</span>':'')
-    +'<span><i class="pcd"></i>меняли нашу цену</span>'+(HL.some(x=>!x.uch)?'<span><i class="hlk"></i>плановая цена акции</span>':'')+(HL.some(x=>x.uch)?'<span><i class="hlk in"></i>участвуем</span>':'')
-    +(md==='f'?(hasO&&O.nu?`<span>бледные — до ${O.l0?dm(O.l0):'начала журнала'}: изменения не записывались</span>`:''):'<span>нет заказов — нет цены</span>');
+    +'<span><i class="pcd"></i>меняли нашу цену</span>'
+    +(md==='f'?(hasO&&O.nu?`<span>бледные — до ${O.l0?dm(O.l0):'начала журнала'} не записывали</span>`:''):'<span>пусто — не было заказов</span>');
   return hd(rng)+ch+inTx+`<div class="lg prlg">${lg}</div>`}
 /* короткое имя акции для подписи линии: «Чёрная пятница: выгодные предложения» → «ЧП: выгодные…» */
 function akShort(n){n=String(n||'').replace(/\s+/g,' ').trim();if(n.length<=15)return n;const m=n.match(/^([^:]+):\s*(.+)$/);
@@ -3099,6 +3116,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='unfz'){unfz();render(true)}
   else if(a==='cols')openCols(ds.id);
   else if(a==='ref')openRef();
+  else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
   else if(a==='istall'){S.ist.k='all';S.ist.q='';openIst()}
