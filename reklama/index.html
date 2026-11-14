@@ -2888,13 +2888,14 @@ const panWk=s=>{s=String(s||'').trim();const m=s.match(/(\d{1,2})\.?\s*([^\d\s.\
 /* 14.11 23:08 Андрей: «не очень такой блок, по панели надо видеть сверху ситуацию, необязательно сразу 3 периода» — компактная строка
    «По панели: маржа · ДРР · продажи» под ценой и остатками, один период (неделя | месяц переключателем; по умолчанию месяц при «30 дн», иначе неделя).
    Столбец «период» убран — те же ДРР и заказы в главных цифрах ниже */
-function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
-  if(!has(w)&&!has(m))return '';
-  const k=S.pnp||(S.per>=30?'m':'w'),x=k==='m'?m:w;
-  const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'';
+/* 14.11 Андрей «2 недели добавь» — третья кнопка «2 недели» (t.pan.w2, подпись D.pan.w2l; при «14 дн» выбрана сама) */
+function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,w2=pn.w2,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
+  if(!has(w)&&!has(m)&&!has(w2))return '';
+  const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w'),x=k==='m'?m:k==='w2'?w2:w;
+  const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'',w2l=D.pan&&D.pan.w2l?panWk(D.pan.w2l):'';
   const mg=has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
     sl=has(x)?`<b class="num">${kr(x[0])} ₽</b>`:no,bt=(v,l)=>`<button type="button" class="press" data-act="pnp" data-k="${v}" aria-pressed="${k===v}">${l}</button>`;
-  return `<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><span class="pnqs">${bt('w','неделя')}${bt('m','месяц')}</span><small class="pnqd">${esc(k==='m'?ml:wl)}</small></div>`
+  return `<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><span class="pnqs">${bt('w','неделя')}${D.pan&&D.pan.w2l?bt('w2','2 недели'):''}${bt('m','месяц')}</span><small class="pnqd">${esc(k==='m'?ml:k==='w2'?w2l:wl)}</small></div>`
     +`<div class="pnqv"><div data-pn="m"><small>Маржа</small>${mg}</div><div data-pn="d"><small>ДРР</small>${dr}</div><div data-pn="s"><small>Продажи</small>${sl}</div></div></div>`}
 /* 14.11 Андрей 08:05: «над акции динамику цен» — «Цена по дням» над блоком «Акции ВБ»: компактная гистограмма (общая chart, ось слева) по дням с заказами
    (t.pd — [день, наша цена, у покупателя, скидка ВБ %], медиана по заказам дня); день без заказов — пустой. Переключатель «Наша цена | У покупателя | Скидка ВБ»
