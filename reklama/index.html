@@ -3054,31 +3054,40 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<div class="wbln">${t?`<button class="totov press" type="button" data-nm2="${nm}"><span class="ph"${foto(t)}></span>Товар здесь ›</button>`:''}<a class="press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener">${WBL}Кампания ↗</a>${t?`<a class="press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар ↗</a>`:''}</div>`;
   /* отдельной жёлтой строки «бюджета осталось … — кампания скоро встанет» больше нет: то же говорит красная плитка «Остаток бюджета» (не дублируем) */
   if(ostNet(t)&&st.w)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.</div>';
-  /* блок управления — один, сразу под шапкой; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же */
-  h+=rkCtl(r,nm);
-  /* 14.11 Андрей: «бидер пусть сразу будет открыт» — блок биддера раскрыт сразу под управлением, а не в самом низу листа; график показа — тут же,
-     когда он есть (свой или Марплы): все настройки в одном месте. Нет графика — хватает плитки «График показа» */
-  h+=bdBlock(r,nm);
-  if((ourGr(r)&&ourGr(r).on)||(r.mar&&r.mar.gr))h+=grBlock(r,nm);
+  /* 15.11 Андрей: «по блокам внутри рк не правильная логика надо сначала показатели по рк + панель показатели тоже надо. Статистика гистограмма по дрр …
+     ничего не понятно на нее смотря … и дрр по рк и общий. Статистика рк по дням. Потом уже настройки и прочее» — порядок листа: показатели РК → панель товара →
+     гистограмма ДРР (переключатель «ДРР общий | ДРР РК | Расход», одна цифра над столбиком, шкала и линия нормы) → таблица по дням → другие РК товара →
+     управление и настройки (блок управления, биддер, график) → что меняли, заметки, фразы. Было: управление первым (14.11) */
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
+  h+=`<div class="hrw"><h3>Показатели кампании</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div>`;
   h+=kpi4({drr:zp.v,pdrr:zpp&&zpp.v,drrk:a.drrk,s:a.s,ps:zpp&&zpp.x.s,q:a.q,z:a.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(zp.oq)+' шт</b>'});
-  h+=rkOther(id,nm);
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
     ${tl('Цена клика',rub2(a.cpc),'расход ÷ клики')}${tl('Цена заказа',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''}</div>`;
-  const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);let mxS=0;for(const i of cx)mxS=Math.max(mxS,g(i).s);
-  /* столбики как на листе кампании в Telegram: высота — расход; сверху расход и ДРР к заказам товара; в столбике — заказы товара, шт */
-  h+='<div class="hrw"><h3>По дням: расход, ДРР, заказы товара</h3></div>'+chart({ix:cx,h:176,mh:60,val:i=>g(i).s,hf:i=>{const x=g(i);return x.s>=1?Math.max(0.1,x.s/(mxS||1)):0},
-    col:i=>{const x=g(i);return !x.or&&x.s>=1?'var(--bad)':dcol(x.drr)},dot:i=>cd.has(i),inn:i=>g(i).oq||'',
-    top:i=>{const x=g(i);return x.s>=1?`<span class="t0${x.or?'':' bd'}">${ksh(x.s)}</span>${x.or?pc(x.drr):'<span class="z0">0 зак</span>'}`:''},
-    read:i=>{const x=g(i);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · заказы товара <b>${f0(x.oq)} шт</b> на ${rub(x.or)}, из них с этой рекламы <b>${f0(x.q)}</b> · ДРР <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
-    /* 14.11 Андрей: «снизу куча текста не понятного» — под столбиками одна короткая строка вместо абзаца */
-    +'<div class="muted tnote">В столбике — заказы всего товара, шт; ДРР считается к ним.</div>';
+  if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
+  const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
+  /* гистограмма: высота — то, что выбрано (ДРР к заказам товара, ДРР к заказам с этой рекламы или расход), над столбиком одна цифра; день с тратами без заказов —
+     красный во всю высоту, «0 зак»; линия — норма ДРР 15%; шкала слева. ДРР выше 60% упирается в верх (цифра над ним настоящая) */
+  const dmo=S.rkdm||'o',zk=x=>x.s>=1&&!(dmo==='k'?x.sp:x.or),dv=x=>dmo==='k'?(x.sp?100*x.s/x.sp:null):x.drr,
+    dbt=(v,l)=>`<button type="button" class="press" data-act="rkdm" data-k="${v}" aria-pressed="${dmo===v}">${l}</button>`;
+  h+=`<div class="hrw"><h3>По дням</h3><span class="pnqs">${dbt('o','ДРР общий')}${dbt('k','ДРР РК')}${dbt('s','Расход')}</span></div>`+chart({ix:cx,h:176,mh:72,
+    val:i=>{const x=g(i);if(dmo==='s')return x.s>=1?x.s:null;return zk(x)?Infinity:x.s>=1?dv(x):null},cap:dmo==='s'?0:60,line:dmo==='s'?0:NORMA,
+    ax:dmo==='s'?{f:axNum}:{f:v=>f0(v)+'%'},
+    col:i=>{const x=g(i);return zk(x)?'var(--bad)':dcol(dmo==='s'?x.drr:dv(x))},dot:i=>cd.has(i),
+    top:i=>{const x=g(i);if(x.s<1)return '';if(zk(x))return '<span class="z0">0 зак</span>';return dmo==='s'?ksh(x.s):f0(dv(x))+'%'},
+    read:i=>{const x=g(i),dk=x.sp?100*x.s/x.sp:(x.s>=1?Infinity:null),nz=v=>v!=null&&!isFinite(v);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · ДРР общий <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · ДРР РК <b class="${nz(dk)?'bad':dcls(dk)}">${nz(dk)?'заказов нет':pc(dk)}</b> · заказы товара <b>${f0(x.oq)} шт</b>, с этой рекламы <b>${f0(x.q)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
+    +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе.':'ДРР общий — расход к заказам всего товара.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g);
+  h+=rkOther(id,nm);
+  /* управление и настройки — после цифр (15.11). Блок управления — один; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же.
+     14.11 Андрей: «бидер пусть сразу будет открыт» — биддер раскрыт под управлением, график показа — тут же, когда он есть (свой или Марплы) */
+  h+=`<div class="hrw"><h3>Управление и настройки</h3></div>`+rkCtl(r,nm);
+  h+=bdBlock(r,nm);
+  if((ourGr(r)&&ourGr(r).on)||(r.mar&&r.mar.gr))h+=grBlock(r,nm);
   h+=chgBlock(nm,id);
   h+=notesBlock(nm,id);
   /* блоков «Настройки сейчас», «Ставка» (минимум и советы ВБ — в листе «Ставка»), биддера и графика внизу больше нет — всё в блоке управления сверху.
@@ -3152,6 +3161,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='cols')openCols(ds.id);
   else if(a==='ref')openRef();
   else if(a==='pnp'){S.pnp=ds.k;redraw()}
+  else if(a==='rkdm'){S.rkdm=ds.k;redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
