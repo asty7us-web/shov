@@ -1184,6 +1184,14 @@ body.mjob #runp{display:none}
 :root:is([data-theme="kosmos"],[data-theme="space"]) .sheet .tws.frw tr.klr>td{background:#1a1f52}
 :root:is([data-theme="kosmos"],[data-theme="space"]) .klq{background:rgba(255,255,255,.06)}
 
+/* 14.11 Андрей: «попадаешь на ВБ — запрос посмотреть выдачу» — значок выдачи ВБ у кластера и у фраз состава (wbq в d_novoe.js) */
+.qw{display:flex;align-items:center;gap:4px}
+.qw .qn{flex:1;min-width:0}
+.wbq{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:1px;min-width:34px;height:30px;padding:0 5px;border-radius:9px;background:var(--fill2);color:var(--ink2);text-decoration:none;font-size:11px;font-weight:700}
+.wbq i{font-style:normal;font-size:11px;margin-left:1px}
+.wbq .wbl{margin:0}
+.klr .wbq{height:24px;min-width:30px;margin-left:6px}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -2420,6 +2428,9 @@ function frSort(L){const KS={t:e=>e.t.toLowerCase(),b:e=>e.b||null,f:e=>e.f||nul
   const nv=v=>v==null?null:v===Infinity?1e15:v,cmp=(a,b,d)=>a==null?(b==null?0:1):b==null?-1:(a<b?-1:a>b?1:0)*d;   // 14.11: двойная сортировка — при равных в основном столбце решает второй
   return L.map(e=>[nv(key(e)),key2?nv(key2(e)):null,e]).sort((a,b)=>cmp(a[0],b[0],FR.dir)||(key2?cmp(a[1],b[1],FR.dir2):0)||b[2].a.s-a[2].a.s).map(x=>x[2])}
 function frShown(id,nm){const all=frAll(id,nm)||[],L=frSort(FR.f==='act'?all.filter(e=>!e.xall):FR.f==='x'?all.filter(e=>e.xall):all);return {all,L,show:L.slice(0,FR.all?500:12)}}
+/* 14.11 Андрей: «при нажатии на него, как в Марпле, попадаешь на ВБ — запрос посмотреть выдачу». Нажатие на название кластера раскрывает его состав,
+   поэтому выдача ВБ — отдельной кнопкой-значком справа (у кластера и у каждой фразы состава); новая вкладка, лист и строка не открываются */
+const wbq=q=>`<a class="wbq press" href="https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Выдача ВБ по запросу «${esc(q)}»" aria-label="Открыть выдачу ВБ по запросу">${WBL}<i aria-hidden="true">↗</i></a>`;
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
@@ -2435,7 +2446,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
      (klRow / klToggle ниже); лист фразы (места по дням, ставка, исключить по одной) — кнопкой в раскрытом составе. Места, выбор и исключение — как были */
   const ncol=2+(man?1:0)+4+days.length-1;
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
-    h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button></div></td>`
+    h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button>${wbq(e.t)}</div></td>`
       +`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n"><span class="sp"></span></span><small>снимаю…</small>':c0?cellIn(c0,p0)+`<small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>`
       +(man?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:'')
       +`<td class="num">${e.f?kr(e.f):'—'}</td><td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td><td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td><td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`
@@ -2444,7 +2455,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   h+='</tbody></table></div>';
   if(L.length>show.length)h+=`<div style="margin-top:8px"><button class="btn gray sm press" type="button" data-act="frmore" style="width:100%">Показать все ${L.length}</button></div>`;
   /* 14.11 Андрей: «снизу куча текста не понятного» — под таблицей одна строка: что нажимается (было семь предложений) */
-  h+=`<div class="muted tnote">Нажмите: на кластер — из каких запросов он состоит, на место — снимется заново, на дату — время замеров, на столбец — сортировка. Частота — запросов за месяц.${rr&&rr.pay==='cpc'?' Кампания за клик: исключать фразы ВБ здесь не даёт.':''}${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
+  h+=`<div class="muted tnote">Нажмите: на кластер — из каких запросов он состоит, на значок ВБ — выдача по запросу, на место — снимется заново, на дату — время замеров, на столбец — сортировка. Частота — запросов за месяц.${rr&&rr.pay==='cpc'?' Кампания за клик: исключать фразы ВБ здесь не даёт.':''}${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
   const lk=UPR?'':' nolk',n=FR.sel.size,xs=[...FR.sel].filter(q=>(all.find(e=>e.t===q)||{}).xall).length;
   h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}<button class="btn sm gray press${lk}" type="button" data-act="frmes">Снять места</button></div>`
     :`<div class="acts" style="grid-template-columns:1fr"><button class="btn gray sm press${lk}" type="button" data-act="frmes" style="width:100%">Снять места показанных фраз · ${show.length}</button></div>`;
@@ -2473,7 +2484,7 @@ function klSost(t,id,nm){const z=klOf(t),go=`<button class="btn gray sm press kl
   if(!z||!z.q||!z.q.length)return `<div class="klno"><b>Состав кластера пока не собран.</b> Он собирается раз в 3 недели, только по Каб 1 — для главных кластеров кампаний, которые работают.</div>${go}`;
   const all=FR.opA.has(t),L=all?z.q:z.q.slice(0,KLN),wk=z.q.some(x=>!x[1]&&x[2]);
   let h=`<div class="klh"><b>Из каких запросов состоит · ${f0(z.n||z.q.length)}</b><span>частота за месяц</span></div><div class="klq">`
-    +L.map(x=>`<div><span>${esc(x[0])}</span><em class="num${x[1]||x[2]?'':' z'}">${x[1]?f0(x[1]):x[2]?f0(x[2])+' / нед.':'—'}</em></div>`).join('')+'</div>';
+    +L.map(x=>`<div><span>${esc(x[0])}</span><em class="num${x[1]||x[2]?'':' z'}">${x[1]?f0(x[1]):x[2]?f0(x[2])+' / нед.':'—'}</em>${wbq(x[0])}</div>`).join('')+'</div>';
   if(z.q.length>L.length)h+=`<button class="lnk klm" type="button" data-klm="${esc(t)}">ещё ${z.q.length-L.length} ›</button>`;
   h+=`<div class="muted tnote">${(z.n||0)>z.q.length?'Здесь '+z.q.length+' из '+f0(z.n)+', частые — сверху. ':''}«—» — редкие написания, в отчёте ВБ «Поисковые запросы» их нет.${wk?' «/ нед.» — частота за неделю.':''}${z.f?' Наш подсчёт частоты кластера — '+f0(z.f)+' в месяц.':''} Снято в кабинете ВБ${z.d?' '+dm(z.d):''}${z.c&&+z.c!==+id?' по другой кампании с этим кластером':''}.</div>`;
   return h+go}
