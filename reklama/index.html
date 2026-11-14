@@ -929,6 +929,90 @@ html,body{overscroll-behavior-y:contain}
 :root[data-lite="1"] .ptr{transition:none!important}:root[data-lite="1"] .ptr svg{transform:none}:root[data-lite="1"] .ptr.spin svg{animation:none}
 @media (prefers-reduced-motion:reduce){.ptr{transition:none!important}.ptr.spin svg{animation:none}}
 
+/* 14.11 Андрей в «К»: «тему космоса в рекламе не полноценно, ниче не движется, аффирмаций нет, надо как везде».
+   «Космос» как в Склейках и Юнитке (код перенесён из skleykipp.html): по фону мерцают звёзды и пролетают метеоры (#spDeco),
+   над разделами окошко #spCard — слайд-шоу аффирмаций (те же, что в Склейках/Юнитке, порядок один у всех раз в 2 дня),
+   живые звёзды в окошке, картинка плывёт камерой, музыка Космоса из /shov/. В «Космос 3D» — окошко и музыка, фон — 3D-сцена.
+   JS — d_kosmos.js. Картинки и музыка — общие файлы сайта /shov/ (выкладывает Склейки). */
+:root{--sph:url("/shov/space-hero.webp");--sbh:clamp(250px,28vw,360px)}
+#spDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#spDeco .kz{position:absolute;width:var(--z);height:var(--z);border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(200,215,255,.85);opacity:.15;animation:sp-tw var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes sp-tw{0%,100%{opacity:.12;transform:scale(.55)}50%{opacity:1;transform:scale(1)}}
+#spDeco .met{position:absolute;left:0;top:0;width:190px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(214,206,255,.7) 70%,#fff);box-shadow:0 0 8px rgba(190,180,255,.7);opacity:0}
+#spWrap{max-width:1240px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px))}
+#spWrap:empty{display:none}
+#spWrap:not(:empty)+main{padding-top:0}
+#spCard{position:relative;height:var(--sbh);margin:0 0 14px;border-radius:22px;overflow:hidden;isolation:isolate;background:#050716;outline:none;
+  box-shadow:0 0 0 1px rgba(190,180,255,.3),0 0 42px rgba(120,100,255,.24),0 18px 50px rgba(0,0,0,.55);-webkit-user-select:none;user-select:none}
+#spCard:focus-visible{box-shadow:0 0 0 2px #cfc6ff,0 0 42px rgba(120,100,255,.4)}
+#spCard .spimg{position:absolute;inset:-7%;background:var(--sph) 50% 50%/cover;transition:transform 2.6s cubic-bezier(.2,.7,.2,1);will-change:transform}
+#spCard .spsh{position:absolute;inset:0;background:radial-gradient(ellipse 62% 60% at 50% 48%,rgba(4,6,20,.58),rgba(4,6,20,.18) 72%,transparent),linear-gradient(180deg,rgba(4,6,20,.6),transparent 26%,transparent 72%,rgba(4,6,20,.6))}
+#spCard canvas.spst{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#spCard .spfl{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:linear-gradient(105deg,transparent 30%,rgba(220,214,255,.16) 45%,rgba(255,255,255,.28) 50%,rgba(220,214,255,.16) 55%,transparent 70%)}
+#spCard .sphud{position:absolute;z-index:2;inset:10px;pointer-events:none;border-radius:16px;border:1px solid rgba(200,190,255,.16)}
+#spCard .sphud i{position:absolute;width:24px;height:24px;border:2px solid #d3cbff;filter:drop-shadow(0 0 5px rgba(164,147,255,.95))}
+#spCard .sphud i:nth-child(1){left:-1px;top:-1px;border-right:0;border-bottom:0;border-top-left-radius:16px}
+#spCard .sphud i:nth-child(2){right:-1px;top:-1px;border-left:0;border-bottom:0;border-top-right-radius:16px}
+#spCard .sphud i:nth-child(3){left:-1px;bottom:-1px;border-right:0;border-top:0;border-bottom-left-radius:16px}
+#spCard .sphud i:nth-child(4){right:-1px;bottom:-1px;border-left:0;border-top:0;border-bottom-right-radius:16px}
+#spCard .sptop{position:absolute;z-index:3;left:26px;right:26px;top:22px;display:flex;align-items:center;gap:10px;pointer-events:none;font:700 11px/1 "Manrope",var(--f);letter-spacing:.16em;text-transform:uppercase;color:rgba(232,229,255,.85)}
+#spCard .splogo{font:700 13px/1 "Unbounded","Manrope",var(--fd);letter-spacing:.26em;color:#fff;text-shadow:0 0 12px rgba(164,147,255,.95)}
+#spCard .spch{padding:5px 10px;border-radius:999px;background:rgba(164,147,255,.16);border:1px solid rgba(200,190,255,.32)}
+#spCard .spnum{margin-left:auto;font-variant-numeric:tabular-nums}
+#spCard .spstage{position:absolute;z-index:2;inset:58px 78px 56px;display:grid;place-items:center;text-align:center;cursor:grab;touch-action:pan-y}
+#spCard .spstage:active{cursor:grabbing}
+#spCard .spq{grid-area:1/1;margin:0;max-width:21ch;font:800 clamp(25px,3.5vw,50px)/1.16 "Manrope","Manrope",var(--f);letter-spacing:-.022em;color:#fff;text-wrap:balance;text-shadow:0 2px 22px rgba(5,6,25,.85),0 0 40px rgba(130,110,255,.35)}
+#spCard .spq span{display:inline-block}
+#spCard .spq.drag{transition:none}
+#spCard .spq.back{transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s}
+#spCard .spnav{position:absolute;z-index:3;top:50%;width:46px;height:46px;margin-top:-23px;padding:0;border-radius:50%;border:1px solid rgba(220,215,255,.36);background:rgba(10,12,36,.42);color:#fff;display:grid;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .2s,background .2s}
+#spCard .spnav:hover{background:rgba(164,147,255,.38);transform:scale(1.08)}
+#spCard .spnav:active{transform:scale(.94)}
+#spCard .spnav.prev{left:20px} #spCard .spnav.next{right:20px}
+#spCard .spnav svg{width:20px;height:20px;display:block}
+#spCard .spbar{position:absolute;z-index:3;left:26px;right:146px;bottom:20px;display:flex;gap:6px}
+#spCard .spbar button{flex:1;min-width:0;height:16px;padding:6px 0;border:0;background:none;cursor:pointer}
+#spCard .spbar button i{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden}
+#spCard .spbar button i b{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}
+#spCard .spbar button.done i b{transform:scaleX(1);background:rgba(255,255,255,.75)}
+#spCard .spbar button.cur i b{animation:sp-fill 7s linear forwards;box-shadow:0 0 8px #b3a5ff}
+#spCard:is(.hold,.stop) .spbar button.cur i b{animation-play-state:paused}
+@keyframes sp-fill{to{transform:scaleX(1)}}
+#spCard .spbtns{position:absolute;z-index:3;right:22px;bottom:10px;display:flex;gap:6px}
+#spCard .spbtns button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(220,215,255,.36);background:rgba(10,12,36,.42);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+#spCard .spmenu{position:absolute;right:0;bottom:44px;display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:16px;background:rgba(10,12,36,.86);border:1px solid rgba(220,215,255,.36)}
+#spCard .spmenu[hidden]{display:none}
+#spCard .spbtns .spmenu button{width:auto;height:34px;border-radius:17px;padding:0 16px;font-size:14px;font-family:inherit;white-space:nowrap;display:block;text-align:left}
+#spCard .spbtns .spmenu button[aria-current="true"]{background:rgba(164,147,255,.6);border-color:#fff}
+#spCard [data-sp="next"] small{font-size:10px;margin:6px 0 0 1px}
+#spCard .spbtns [data-sp="next"]{display:flex;align-items:center;justify-content:center}
+#spCard .spbtns button:hover{background:rgba(164,147,255,.38)}
+#spCard .spbtns svg{width:16px;height:16px;display:block}
+#spCard [data-sp="play"] .pl,#spCard.stop [data-sp="play"] .pa,#spCard [data-sp="mute"] .off,#spCard [data-sp="mute"][aria-pressed="true"] .on{display:none}
+#spCard [data-sp="mute"][aria-pressed="true"] .off{display:block}
+#spCard.stop [data-sp="play"] .pl{display:block}
+#spCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;border-radius:0}
+#spCard.big .spq{font-size:clamp(30px,5.2vw,80px)}
+#spCard.big .spstage{inset:84px 96px 84px}
+@media (max-width:899px){
+  :root{--sph:url("/shov/space-hero-m.webp");--sbh:max(250px,66vw)}
+  #spCard{border-radius:18px}
+  #spCard .sptop{left:20px;right:20px;top:20px;font-size:10px;letter-spacing:.12em}
+  #spCard .splogo{font-size:11.5px}
+  #spCard .spstage{inset:52px 20px 56px}
+  #spCard .spq{max-width:none;font-size:clamp(21px,6.3vw,30px)}
+  #spCard .spnav{display:none}
+  #spCard .spbar{left:20px;right:186px;bottom:24px;gap:3px}
+  #spCard .spbtns{right:16px;bottom:9px}
+  #spCard.big .spq{font-size:clamp(26px,8vw,44px)}
+  #spCard.big .spstage{inset:70px 22px 70px}
+}
+@media (orientation:portrait) and (max-width:899px){#spCard.big .spimg{background-image:url("/shov/space-hero-tall.webp")}}
+/* без видеокарты: без размытия под кнопками окошка */
+:root[data-lite="1"] #spCard .spnav{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* в «Космос 3D» фон рисует сцена — свои звёзды страницы не нужны */
+:root[data-theme="space"] #spDeco{display:none}
+
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
 /* текст на цветной кнопке (зелёной, жёлтой): в светлой теме белый, в тёмных — тёмный, как у столбиков графика */
@@ -1410,6 +1494,7 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
   <!-- 14.11 Андрей: «поиск… не надо раздел целый — вот можно кнопкой справа в шапке от периодов»: седьмой кнопки «Поиск» здесь больше нет (с 06:40 седьмой раздел — «Цены»);
        лупа #fsb стоит в строке #sub под шапкой (её ставит sync() в d_views.js), по нажатию — тот же лист с полем и списком с картинками (openFind) -->
 </nav>
+<div id="spWrap"></div><!-- 14.11 окошко аффирмаций «Космоса» (d_kosmos.js) -->
 <main id="view"><div class="sk"></div></main>
 <div class="shw" id="shw"><div class="scrim" id="scrim"></div><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div class="shh" id="shh"></div><div class="sbody" id="sbody"></div></section></div>
 <div class="toast" id="toast" role="status"></div>
@@ -2324,7 +2409,7 @@ const K3=(()=>{let st=0,want=false;const R=document.documentElement;   // st: 0 
   return {on(){want=true;if(st!==3)setTimeout(load,D?0:500)},off(){want=false;delete R.dataset.k3d;if(window.KOSMOS)try{KOSMOS.stop()}catch(e){}},
     call(fn,a){if(live())try{KOSMOS[fn](a)}catch(e){}}}})();
 function applyTheme(t,user){const R=document.documentElement;if(!THL.some(x=>x[0]===t))t='auto';
-  if(t==='auto')delete R.dataset.theme;else R.dataset.theme=t;RS.set('theme',t);if(t==='space')K3.on();else K3.off();
+  if(t==='auto')delete R.dataset.theme;else R.dataset.theme=t;RS.set('theme',t);if(t==='space')K3.on();else K3.off();kosmosOn(t);
   if(user&&window.svcTheme)svcTheme(5,t);tcSync()}
 
 /* ── кусочки листов ── */
@@ -3044,6 +3129,162 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
   new MutationObserver(()=>{const b=el.querySelector('.pseg .seg [aria-pressed="true"]'),s=b&&b.parentNode;if(s&&s.scrollWidth>s.clientWidth+2)s.scrollLeft=Math.max(0,b.offsetLeft-(s.clientWidth-b.offsetWidth)/2)}).observe(el,{childList:true});
   /* «Требуют внимания» в «Кампаниях»: нажали «Работают / На паузе / Все» в шапке — отбор снимается (раньше общего обработчика, он перерисует список) */
   document.addEventListener('click',e=>{if(S.rkf.vn&&e.target.closest&&e.target.closest('[data-seg="rkf"] button')){S.rkf.vn='';unfz()}},true)})();
+
+/* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
+   Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
+   в «Космосе 3D» фон — сцена), окошко #spCard над разделами — аффирмации Андрея (порядок раз в 2 дня один во всех сервисах, «Благодарю» после каждых трёх),
+   музыка Космоса (/shov/space-music*.mp3, играет с первого нажатия). Включает applyTheme (d_novoe.js) через kosmosOn(). Стили — a_css_k.css */
+/* «Космос» (28.10, как в Отклике / Юнитке): аффирмации Андрея с его магнитов, звёзды, метеоры, музыка */
+/* 01.11 Андрей: «микс расположений раз в пару дней, на всех, чтобы естественно» — порядок аффирмаций меняется раз в 2 дня (с полуночи МСК), одинаково во всех сервисах; «Благодарю» по-прежнему после каждых трёх */
+const affMix=a=>{let s=Math.floor((Date.now()+108e5)/1728e5)%2147483646+1;const r=()=>(s=s*16807%2147483647)/2147483647;for(let k=0;k<8;k++)r();a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const SP_AFF=affMix([
+ 'Всё складывается наилучшим образом для моего высшего блага','Из этой ситуации выйдет только хорошее для меня','Я в безопасности','Вселенная любит меня',
+ 'Жизнь моя полна чудес','Деньги сыплются с небес','Я притягиваю изобилие легко и с радостью','Всё, что мне нужно, приходит ко мне вовремя',
+ 'Каждый новый день приносит мне подарки','Удача улыбается мне каждый день','Мир полон возможностей, и они сами находят меня','Я выбираю радость и спокойствие','Интересно, почему мне сегодня повезёт','Сегодня со мной случится что-то хорошее','Всё, за что я берусь, получается','Мои желания сбываются легко','Я открыт всему новому и хорошему'
+]).flatMap((s,i)=>i%3===2?[s,'Благодарю']:[s]);   // как в Отклике (Андрей 28.10): «через каждые 3 аффирмации — одну «Благодарю»»
+const SP_ICO={prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+ play:'<svg class="pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="pl" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 4.8v14.4a1 1 0 0 0 1.5.9l11.2-7.2a1 1 0 0 0 0-1.7L9 4a1 1 0 0 0-1.5.8Z"/></svg>',
+ mute:'<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+ big:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'};
+const SP_CAM=[[0,0,1.04],[-2.6,1,1.1],[2.2,-1.4,1.08],[-1.6,-1.2,1.12],[2.6,1.3,1.09],[0,2,1.11]];
+function spShow(el,i,dir){
+  const n=SP_AFF.length;i=((i%n)+n)%n;dir=dir||1;
+  const st=el.querySelector('.spstage'),old=st.querySelector('.spq:not(.out)'),q=document.createElement('p');
+  q.className='spq';q.innerHTML=SP_AFF[i].split(' ').map(w=>`<span>${w}</span>`).join(' ');st.appendChild(q);
+  // как у Apple: старая фраза тает в размытие, новая проявляется по слову
+  if(old){old.classList.add('out');const ws=[...old.children];
+    if(old.animate)ws.forEach((w,k)=>w.animate([{opacity:1,filter:'blur(0px)',transform:'none'},{opacity:0,filter:'blur(12px)',transform:`translate(${-dir*26}px,-12px) scale(.94)`}],{duration:460,delay:k*24,easing:'cubic-bezier(.4,0,.7,.2)',fill:'forwards'}));
+    setTimeout(()=>old.remove(),520+ws.length*24)}
+  if(q.animate)[...q.children].forEach((w,k)=>w.animate([{opacity:0,filter:'blur(16px)',transform:`translate(${dir*36}px,26px) scale(1.06)`},{opacity:1,filter:'blur(0px)',transform:'none'}],{duration:1100,delay:(old?280:120)+k*75,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));
+  const c=SP_CAM[i%SP_CAM.length];el.querySelector('.spimg').style.transform=`translate(${c[0]}%,${c[1]}%) scale(${c[2]})`;
+  if(old&&el.querySelector('.spfl').animate)el.querySelector('.spfl').animate([{opacity:0,transform:`translateX(${-dir*60}%)`},{opacity:1,offset:.45},{opacity:0,transform:`translateX(${dir*60}%)`}],{duration:1300,easing:'cubic-bezier(.3,.6,.3,1)'});
+  el._i=i;RS.set('spIdx',i);
+  el.querySelector('.spnum').textContent=String(i+1).padStart(2,'0')+' / '+String(n).padStart(2,'0');
+  const segs=el.querySelectorAll('.spbar button');segs.forEach((b,k)=>{b.classList.toggle('done',k<i);b.classList.remove('cur');b.setAttribute('aria-current',k===i)});void el.offsetWidth;segs[i].classList.add('cur');
+}
+function spBig(el,on){   // во весь экран — как в Отклике
+  el.classList.toggle('big',on);document.documentElement.classList.toggle('sp-big',on);
+  if(on&&el.requestFullscreen&&!document.fullscreenElement)el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+  if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+/* живые звёзды поверх картинки окошка: мерцают, плывут за мышью / наклоном, изредка падает звезда; ~30 кадров/с, только пока окошко видно (как в Отклике) */
+function spStars(el){
+  const c=el.querySelector('.spst'),g=c.getContext('2d');
+  let W=0,H=0,ST=[],raf=0,last=0,mx=0,my=0,tx=0,ty=0,met=null;
+  const size=()=>{const dpr=Math.min(2,devicePixelRatio||1);W=c.clientWidth;H=c.clientHeight;if(!W||!H)return;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);
+    ST=Array.from({length:Math.round(W*H/2400)},()=>({x:Math.random()*W,y:Math.random()*H*.78,r:.35+Math.random()*Math.random()*1.5,p:Math.random()*6.3,s:.5+Math.random()*2,z:Math.random(),h:Math.random()<.2?'#cfd8ff':Math.random()<.1?'#ffe2b8':'#fff'}))};
+  const frame=t=>{raf=0;if(!el.isConnected)return;
+    if(t-last>(LITE?90:32)){last=t;mx+=(tx-mx)*.06;my+=(ty-my)*.06;g.clearRect(0,0,W,H);
+      for(const s of ST){g.globalAlpha=.25+.75*Math.abs(Math.sin(s.p+t/1000*s.s));g.fillStyle=s.h;g.beginPath();g.arc(s.x+mx*s.z*14,s.y+my*s.z*8,s.r,0,7);g.fill()}
+      if(!met&&Math.random()<.006)met={x:W*(.15+Math.random()*.7),y:H*Math.random()*.3,a:.35+Math.random()*.35,v:9+Math.random()*6,l:0};
+      if(met){met.l++;const x=met.x+Math.cos(met.a)*met.v*met.l,y=met.y+Math.sin(met.a)*met.v*met.l,k=Math.min(1,met.l/6)*Math.max(0,1-met.l/30),tl=90;
+        const gr=g.createLinearGradient(x-Math.cos(met.a)*tl,y-Math.sin(met.a)*tl,x,y);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(255,255,255,'+k+')');
+        g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.6;g.beginPath();g.moveTo(x-Math.cos(met.a)*tl,y-Math.sin(met.a)*tl);g.lineTo(x,y);g.stroke();if(met.l>30)met=null}
+      g.globalAlpha=1}
+    if(el._vis!==false&&!document.hidden)raf=requestAnimationFrame(frame)};
+  const kick=()=>{if(!raf)raf=requestAnimationFrame(frame)};
+  el.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const r=el.getBoundingClientRect();tx=((e.clientX-r.left)/r.width-.5)*2;ty=((e.clientY-r.top)/r.height-.5)*2});
+  const ori=e=>{if(e.gamma==null||!el.isConnected)return;tx=Math.max(-1,Math.min(1,e.gamma/25));ty=Math.max(-1,Math.min(1,(e.beta-40)/25))};
+  addEventListener('deviceorientation',ori);el._unStars=()=>removeEventListener('deviceorientation',ori);
+  new ResizeObserver(()=>{size();kick()}).observe(c);
+  new IntersectionObserver(es=>{el._vis=es[0].isIntersecting;el.classList.toggle('hold',!el._vis||document.hidden);kick()}).observe(el);
+  document.addEventListener('visibilitychange',()=>{if(el.isConnected){el.classList.toggle('hold',el._vis===false||document.hidden);kick()}});
+  size();kick();
+}
+function spMeteor(d){   // метеор по фону страницы — раз в несколько секунд, наискосок
+  if(!d.isConnected||document.hidden||!d.animate)return;
+  const m=document.createElement('i'),W=innerWidth,H=innerHeight,x=W*(.2+Math.random()*.8),y=H*Math.random()*.45,a=140+Math.random()*25,len=260+Math.random()*260;
+  m.className='met';d.appendChild(m);const dx=Math.cos(a*Math.PI/180)*len,dy=Math.sin(a*Math.PI/180)*len;
+  m.animate([{opacity:0,transform:`translate(${x}px,${y}px) rotate(${a}deg) scaleX(.3)`},{opacity:1,offset:.25},{opacity:0,transform:`translate(${x+dx}px,${y+dy}px) rotate(${a}deg) scaleX(1)`}],{duration:1300+Math.random()*600,easing:'cubic-bezier(.3,.1,.6,1)'}).onfinish=()=>m.remove();
+}
+/* звук — как в Отклике (28.10): кнопка в шапке у тем со звуком и 🔊 в окошке — одна настройка shov.mute, по умолчанию звук включён.
+   Музыка «Космоса» space-music.mp3 (Suno, из Юнитки) играет с первого нажатия — без нажатия браузер звук не даёт. */
+/* звук: одна настройка shov.mute со Склейками и Юниткой, по умолчанию включён; кнопка 🔊 — в окошке */
+const curT=()=>{const t=document.documentElement.dataset.theme;return t==='kosmos'||t==='space'?'space':'x'};
+function soundOff(){return SH.get('mute',0)==1}
+function syncSound(){const off=soundOff();$$('[data-sp="mute"]').forEach(x=>x.setAttribute('aria-pressed',off))}
+function setSound(off){SH.set('mute',off?1:0);spMusic(!off);syncSound()}
+/* Андрей 28.10: музыка без шва и сама возвращается после сна вкладки (как в Отклике). Два плеера по очереди: за SP_XF с до конца
+   второй начинает трек с начала и нарастает, первый затихает. Сторож раз в 2 с и при возврате во вкладку. Новый трек — строка в SP_TRACKS. */
+/* Андрей 29.10: четыре мелодии по 3,3–3,5 мин, идут по очереди с плавным переходом; ♫ в окошке — следующая */
+const SP_TRACKS=[['/shov/space-music.mp3','Космос 1'],['/shov/space-music-2.mp3','Космос 2'],['/shov/space-music-3.mp3','Космос 3'],['/shov/space-music-4.mp3','Космос 4']];
+const SP_VOL=.4,SP_XF=5;
+let spAud=null;
+const spP={a:[],cur:0,want:false,t:0,lastT:-1,stall:0};
+try{spP.t=+localStorage.getItem('shov.spTrack')||0}catch(e){}
+function spFade(el,to,ms,done){clearInterval(el._fd);const from=el.volume,t0=performance.now();
+  el._fd=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k>=1){clearInterval(el._fd);if(done)done()}},50)}
+function spEl(i){if(!spP.a[i]){const el=new Audio();el.preload='auto';el.volume=0;
+  el.addEventListener('timeupdate',()=>{if(spP.want&&el===spP.a[spP.cur]&&el.duration&&!el._xf&&el.duration-el.currentTime<SP_XF)spNext(ms0)});
+  el.addEventListener('ended',()=>{if(spP.want&&el===spP.a[spP.cur]&&!el._xf)spNext(ms0)});spP.a[i]=el}return spP.a[i]}
+const ms0=SP_XF*1000;
+function spCross(ms){const old=spP.a[spP.cur];spP.cur=1-spP.cur;const nw=spEl(spP.cur),f=SP_TRACKS[spP.t%SP_TRACKS.length][0];
+  if(old){old._xf=true;spFade(old,0,ms,()=>{old.pause();old._xf=false})}
+  if(!nw.src.endsWith(f))nw.src=f;try{nw.currentTime=0}catch(e){}
+  nw._xf=false;nw.volume=0;spP.lastT=-1;spP.stall=0;nw.play().then(()=>spFade(nw,SP_VOL,ms)).catch(()=>{});spAud=nw}
+function spMusic(on){spP.want=!!on&&curT()==='space';
+  if(!spP.want){spP.a.forEach(el=>{if(el){clearInterval(el._fd);el.pause();el._xf=false}});return}
+  const el=spP.a[spP.cur];if(el&&el.src&&!el.paused&&!el._xf)return;
+  if(el&&el.src&&el.currentTime>0&&el.duration-el.currentTime>SP_XF){el.volume=0;el.play().then(()=>spFade(el,SP_VOL,1500)).catch(()=>{});spAud=el;return}
+  spCross(1500)}
+/* Андрей 29.10: ♫ — список мелодий, играющая отмечена, нажал — играет она; на кнопке номер текущей */
+function spMenu(card,close){const bx=card.querySelector('.spbtns');let m=bx.querySelector('.spmenu');
+  if(!m){m=document.createElement('div');m.className='spmenu';m.hidden=true;
+    m.innerHTML=SP_TRACKS.map((x,k)=>'<button type="button" data-sp="pick" data-k="'+k+'">'+(k+1)+'. '+x[1]+'</button>').join('');bx.prepend(m);
+    document.addEventListener('click',e=>{if(!e.composedPath().some(x=>x.classList&&x.classList.contains('spbtns')))m.hidden=true})}
+  m.hidden=close||!m.hidden;spMark()}
+function spMark(){const t=spP.t%SP_TRACKS.length;document.querySelectorAll('#spCard [data-sp="pick"]').forEach(b=>b.setAttribute('aria-current',+b.dataset.k===t));
+  document.querySelectorAll('[data-sp="next"]').forEach(b=>{let s=b.querySelector('small');if(!s){b.textContent='♫';s=document.createElement('small');b.append(s)}if(s.textContent!=String(t+1))s.textContent=t+1;b.title='Играет '+SP_TRACKS[t][1]+' — выбрать мелодию'})}
+function spPick(k,card){if(k!==spP.t%SP_TRACKS.length){spP.t=(k-1+SP_TRACKS.length)%SP_TRACKS.length;spNext()}spMenu(card,true)}
+function spNext(ms){if(SP_TRACKS.length<2){if(ms)spCross(ms);return}spP.t=(spP.t+1)%SP_TRACKS.length;try{localStorage.setItem('shov.spTrack',spP.t)}catch(e){}
+  $$('[data-sp="next"]').forEach(b=>b.title='Музыка: '+SP_TRACKS[spP.t][1]+' — сменить');spMark();if(spP.want)spCross(ms||3000)}
+function spWatch(){if(!spP.want||document.hidden)return;const el=spP.a[spP.cur];if(!el||!el.src){spMusic(true);return}
+  if(el.paused){el.play().catch(()=>{});return}
+  if(el.currentTime===spP.lastT){if(++spP.stall>=2){spP.stall=0;el.pause();el.play().catch(()=>{})}}else spP.stall=0;spP.lastT=el.currentTime}
+setInterval(spWatch,2000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){spP.lastT=-1;spWatch()}});
+addEventListener('focus',spWatch);addEventListener('pageshow',spWatch);
+const spKick=()=>{if(curT()==='space'&&!soundOff()&&(!spAud||spAud.paused))spMusic(true)};
+document.addEventListener('pointerdown',spKick,true);document.addEventListener('click',spKick);document.addEventListener('keydown',spKick,true);
+document.addEventListener('fullscreenchange',()=>{const el=$('#spCard');if(!document.fullscreenElement&&el&&el.classList.contains('big')){el.classList.remove('big');document.documentElement.classList.remove('sp-big')}});
+function spaceDeco(on,deco){
+  const d=$('#spDeco'),w=$('#spWrap'),c=$('#spCard');
+  if(on&&!deco&&d){clearInterval(d._iv);d.remove()}
+  if(!on){if(d){clearInterval(d._iv);d.remove()}if(c){if(c._unStars)c._unStars();spBig(c,false)}w.innerHTML='';document.documentElement.classList.remove('sp-big');spMusic(false);$('#fntSp')&&$('#fntSp').remove();return}
+  if(!$('#fntSp')){const l=document.createElement('link');l.id='fntSp';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap';document.head.appendChild(l)}
+  if(!d&&deco){const el=document.createElement('div');el.id='spDeco';el.setAttribute('aria-hidden','true');let h='';
+    for(let k=0;k<42;k++)h+=`<i class="kz" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;--z:${(1.5+Math.random()*2.6).toFixed(1)}px;--d:${(2.5+Math.random()*4).toFixed(1)}s;--dl:${(-Math.random()*6).toFixed(1)}s"></i>`;
+    el.innerHTML=h;document.body.appendChild(el);setTimeout(()=>spMeteor(el),2500);el._iv=setInterval(()=>spMeteor(el),7000)}
+  if(w.firstChild)return;
+  const el=document.createElement('section');el.id='spCard';el.tabIndex=0;el.setAttribute('aria-roledescription','слайд-шоу');el.setAttribute('aria-label','Аффирмации: листать стрелками ← →');
+  el.innerHTML='<i class="spimg" aria-hidden="true"></i><i class="spsh" aria-hidden="true"></i><canvas class="spst" aria-hidden="true"></canvas><i class="spfl" aria-hidden="true"></i><div class="sphud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
+   '<div class="sptop"><span class="splogo">РЕКЛАМА</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
+   `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
+   '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
+   `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button>${SP_TRACKS.length>1?`<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[spP.t%SP_TRACKS.length][1]} — сменить" style="font-size:18px;line-height:1">♫<small>${spP.t%SP_TRACKS.length+1}</small></button>`:''}<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
+  w.appendChild(el);
+  const go=dd=>spShow(el,el._i+dd,dd);
+  el.querySelector('.prev').onclick=()=>go(-1);el.querySelector('.next').onclick=()=>go(1);
+  el.querySelector('.spbar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=[...b.parentNode.children].indexOf(b);if(k!==el._i)spShow(el,k,k>el._i?1:-1)});
+  el.querySelector('.spbar').addEventListener('animationend',e=>{if(e.target.closest('.cur'))go(1)});
+  el.querySelector('.spbtns').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b)return;
+    if(b.dataset.sp==='play')el.classList.toggle('stop');
+    else if(b.dataset.sp==='mute')setSound(b.getAttribute('aria-pressed')!=='true');
+    else if(b.dataset.sp==='next')spMenu(el);else if(b.dataset.sp==='pick')spPick(+b.dataset.k,el);
+    else spBig(el,!el.classList.contains('big'))});
+  el.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){go(1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}else if(e.key==='Escape'&&el.classList.contains('big'))spBig(el,false)});
+  // свайп: фраза едет за пальцем; дальше 50 px — следующая; короткий тап по краю на телефоне — тоже листает
+  const stg=el.querySelector('.spstage');let sx=null,sy=0,mv=false;const cur=()=>stg.querySelector('.spq:not(.out)');
+  stg.addEventListener('pointerdown',e=>{if(e.button>0)return;sx=e.clientX;sy=e.clientY;mv=false;el.classList.add('hold');try{stg.setPointerCapture(e.pointerId)}catch(x){}});
+  stg.addEventListener('pointermove',e=>{if(sx===null)return;const dx=e.clientX-sx,q=cur();if(Math.abs(dx)>8)mv=true;if(!q||!mv)return;q.classList.remove('back');q.classList.add('drag');q.style.transform=`translateX(${dx*.4}px)`;q.style.opacity=1-Math.min(.6,Math.abs(dx)/500)});
+  const up=e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy,q=cur();sx=null;el.classList.toggle('hold',el._vis===false||document.hidden);
+    if(q){q.classList.remove('drag');q.classList.add('back');q.style.transform='';q.style.opacity=''}if(e.type==='pointercancel')return;
+    if(mv&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1);else if(!mv&&e.pointerType!=='mouse'){const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.3)go(-1);else if(x>.7)go(1)}};
+  stg.addEventListener('pointerup',up);stg.addEventListener('pointercancel',up);
+  const i0=+RS.get('spIdx',-1);spShow(el,Number.isFinite(i0)?i0+1:0,1);spStars(el);   // каждый заход — со следующей аффирмации
+}
+function kosmosOn(t){const on=t==='kosmos'||t==='space';spaceDeco(on,t==='kosmos');if(on){syncSound();if(!soundOff()&&spAud&&spAud.paused)spMusic(true)}}
 
 /* ───────── листы: стопка, «назад» возвращает на предыдущий ─────────
    14.11 Андрей: «и крестик справа не надо, хватает назад и шторки» — стрелка «назад» слева есть всегда (на первом листе она закрывает лист),
