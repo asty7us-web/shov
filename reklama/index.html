@@ -2221,6 +2221,13 @@ function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
     <div class="opt colr"><div><b>Сначала по</b><span>основной столбец</span></div><select class="ssel" id="sso1" aria-label="Основной столбец сортировки">${opts(st.sort)}</select>${dirB(1,st.dir)}</div>
     <div class="opt colr"><div><b>Затем по</b><span>когда в основном значения равны</span></div><select class="ssel" id="sso2" aria-label="Второй столбец сортировки">${opts(st.sort2,1)}</select>${dirB(2,st.dir2)}</div>
     <div class="hrw"><h3>Столбцы</h3></div>`;
+  /* 15.11 Андрей «показы и клики и выбор самому что ставить»: у таблицы фраз своя сортировка (нажатием на столбец) — здесь только столбцы (T0.nosort) */
+  if(T0.nosort)return {t:'Столбцы',s:'что показывать и в каком порядке · запоминается на этом устройстве',h:st.ord.map(row).join('')
+    +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>',
+    after:()=>{const ap=()=>{redraw();render(true)};
+      $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
+      $$('[data-colmv]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),p=b.dataset.colmv.split('|'),i=s2.ord.indexOf(p[0]),j=i+(+p[1]);if(i<1||j<1||j>=s2.ord.length)return;s2.ord.splice(i,1);s2.ord.splice(j,0,p[0]);tblSave(id,s2);ap()});
+      const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()}}};
   return {t:'Столбцы и сортировка',s:'что показывать, в каком порядке и как сортировать · запоминается на этом устройстве',h:srt+st.ord.map(row).join('')
     +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>'
     +'<div class="muted tnote">В самой таблице: нажмите на название столбца — сортировка по нему; прежний столбец остаётся вторым (цифры 1 и 2 в шапке).</div>',   // 14.11: пояснение из-под таблиц — только здесь
@@ -2580,33 +2587,36 @@ const MXLG='<div class="lg"><span><i style="background:var(--good)"></i>мест
 const FR={key:'',sel:new Set(),all:false,f:'act',sort:'s',dir:-1,sort2:null,dir2:-1,tm:null,busy:new Set(),jam:false,note:'',mh:0,op:new Set(),opA:new Set()};   // op — раскрытые кластеры (состав), opA — раскрытые целиком
 function frAll(id,nm){const t=TOV[nm];if(!t||!KL||!((KL.kab[S.kab]||{}).k||{})[id+'|'+nm])return null;
   const sv={sort:S.kw.sort,dir:S.kw.dir};S.kw.sort='s';S.kw.dir=-1;const L=kwData(t,+id);Object.assign(S.kw,sv);return L}
-function frSort(L){const KS={t:e=>e.t.toLowerCase(),b:e=>e.b||null,f:e=>e.f||null,s:e=>e.a.s,o:e=>e.a.o,cpo:e=>e.cpo,p:e=>e.pn},key=KS[FR.sort]||(e=>e.a.s),key2=FR.sort2&&FR.sort2!==FR.sort?KS[FR.sort2]:null;
+function frSort(L){const KS={t:e=>e.t.toLowerCase(),b:e=>e.b||null,f:e=>e.f||null,s:e=>e.a.s,o:e=>e.a.o,cpo:e=>e.cpo,p:e=>e.pn,v:e=>e.a.v||null,c:e=>e.a.c,ctr:e=>e.a.v?e.a.c/e.a.v:null,cpc:e=>e.a.c?e.a.s/e.a.c:null,a:e=>e.a.a},key=KS[FR.sort]||(e=>e.a.s),key2=FR.sort2&&FR.sort2!==FR.sort?KS[FR.sort2]:null;
   const nv=v=>v==null?null:v===Infinity?1e15:v,cmp=(a,b,d)=>a==null?(b==null?0:1):b==null?-1:(a<b?-1:a>b?1:0)*d;   // 14.11: двойная сортировка — при равных в основном столбце решает второй
   return L.map(e=>[nv(key(e)),key2?nv(key2(e)):null,e]).sort((a,b)=>cmp(a[0],b[0],FR.dir)||(key2?cmp(a[1],b[1],FR.dir2):0)||b[2].a.s-a[2].a.s).map(x=>x[2])}
 function frShown(id,nm){const all=frAll(id,nm)||[],L=frSort(FR.f==='act'?all.filter(e=>!e.xall):FR.f==='x'?all.filter(e=>e.xall):all);return {all,L,show:L.slice(0,FR.all?500:12)}}
 /* 14.11 Андрей: «при нажатии на него, как в Марпле, попадаешь на ВБ — запрос посмотреть выдачу». Нажатие на название кластера раскрывает его состав,
    поэтому выдача ВБ — отдельной кнопкой-значком справа (у кластера и у каждой фразы состава); новая вкладка, лист и строка не открываются */
 const wbq=q=>`<a class="wbq press" href="https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Выдача ВБ по запросу «${esc(q)}»" aria-label="Открыть выдачу ВБ по запросу">${WBL}<i aria-hidden="true">↗</i></a>`;
+/* 15.11 Андрей «показы и клики и выбор самому что ставить, как уже делали»: столбцы таблицы фраз — как у общих таблиц (TBL, openCols без сортировки);
+   показы, клики, клик из показа, цена клика — из той же статистики кластеров ВБ (e.a.v / e.a.c), корзины — по умолчанию скрыты */
+const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'Цена клика',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'Цена заказа',dn:'Места по дням'};
+function frCols(man){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
+  return tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man))}
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
-  const z=frShown(id,nm),all=z.all,L=z.L,show=z.show,rr=RK[id],man=rr&&rr.pay==='cpm'&&rr.bt==='manual',bs=man?((rr.nm[nm]||{}).b||{}).search:null,lkb=UPR?'':' nolk',canMin=!rr||rr.pay!=='cpc';
+  const z=frShown(id,nm),all=z.all,L=z.L,show=z.show,rr=RK[id],man=rr&&rr.pay==='cpm'&&rr.bt==='manual',fc=frCols(man),dn=fc.includes('dn'),bs=man?((rr.nm[nm]||{}).b||{}).search:null,lkb=UPR?'':' nolk',canMin=!rr||rr.pay!=='cpc';
   const nx=all.filter(e=>e.xall).length,days=[];for(let i=T;i>T-7&&i>=0;i--)days.push(i);
   const sn=k=>FR.sort2&&FR.sort2!==FR.sort?(FR.sort===k?'<i class="sn">1</i>':FR.sort2===k?'<i class="sn">2</i>':''):'',th=(k,l)=>`<th data-fs="${k}"${FR.sort===k?` aria-sort="${FR.dir<0?'descending':'ascending'}"`:FR.sort2===k?` data-s2="${FR.dir2<0?'d':'a'}"`:''}>${l}${sn(k)}</th>`,allOn=show.length>0&&show.every(e=>FR.sel.has(e.t));
-  let h=`<div class="chips" style="margin:0 0 8px"><button class="chip press" type="button" data-frf="act" aria-pressed="${FR.f==='act'}">Активные · ${all.length-nx}</button><button class="chip press" type="button" data-frf="x" aria-pressed="${FR.f==='x'}">Исключённые · ${nx}</button><button class="chip press" type="button" data-frf="all" aria-pressed="${FR.f==='all'}">Все · ${all.length}</button></div>`;
+  let h=`<div class="chips" style="margin:0 0 8px"><button class="chip press" type="button" data-frf="act" aria-pressed="${FR.f==='act'}">Активные · ${all.length-nx}</button><button class="chip press" type="button" data-frf="x" aria-pressed="${FR.f==='x'}">Исключённые · ${nx}</button><button class="chip press" type="button" data-frf="all" aria-pressed="${FR.f==='all'}">Все · ${all.length}</button>${tblBtn('fr')}</div>`;
   if(!show.length)return h+`<div class="note" style="margin-top:0">${FR.f==='x'?'Исключённых фраз у кампании нет.':'Фраз с показами за период нет.'}</div>`;
   h+=`<div class="tw tws frw"><table class="fr"><thead><tr><th class="q"><div class="qw"><label class="ck"><input type="checkbox" id="frall"${allOn?' checked':''} aria-label="Выбрать все"></label><span data-fs="t" class="fsq">Фраза${FR.sort==='t'?(FR.dir<0?' ▾':' ▴'):FR.sort2==='t'?(FR.dir2<0?' ▿':' ▵'):''}${sn('t')}</span></div></th>`
-    +th('p','Сейчас')+(man?th('b','Ставка, ₽'):'')+th('f','Частота')+th('s','Траты, ₽')+th('o','Заказы')+th('cpo','Цена заказа')
-    +days.slice(1).map(i=>`<th class="dh${FR.tm===i?' on':''}" data-frd="${i}" title="Нажмите — время замеров">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join('')+'</tr></thead><tbody>';
+    +fc.map(k=>k==='dn'?'':th(k,FRL[k])).join('')
+    +(!dn?'':days.slice(1).map(i=>`<th class="dh${FR.tm===i?' on':''}" data-frd="${i}" title="Нажмите — время замеров">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join(''))+'</tr></thead><tbody>';
   /* 14.11 Андрей 08:10: «Кластеры кликабельные как в марпле» — нажатие на название кластера раскрывает под строкой, из каких запросов он состоит
      (klRow / klToggle ниже); лист фразы (места по дням, ставка, исключить по одной) — кнопкой в раскрытом составе. Места, выбор и исключение — как были */
-  const ncol=2+(man?1:0)+4+days.length-1;
+  const ncol=1+fc.filter(k=>k!=='dn').length+(dn?days.length-1:0);
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
     h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button>${wbq(e.t)}</div></td>`
-      +`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>`
-      +(man?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:'')
-      +`<td class="num">${e.f?kr(e.f):'—'}</td><td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td><td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td><td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`
-      +cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return mxCell(c,p,FR.tm===days[k+1])}).join('')+'</tr>'
+      +fc.map(k=>k==='p'?`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>`:k==='b'?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:k==='f'?`<td class="num">${e.f?kr(e.f):'—'}</td>`:k==='v'?`<td class="num">${e.a.v?f0(e.a.v):'—'}</td>`:k==='c'?`<td class="num">${e.a.c?f0(e.a.c):'—'}</td>`:k==='ctr'?`<td class="num">${e.a.v?pc(100*e.a.c/e.a.v):'—'}</td>`:k==='cpc'?`<td class="num">${e.a.c?rub2(e.a.s/e.a.c):'—'}</td>`:k==='s'?`<td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td>`:k==='a'?`<td class="num">${e.a.a?f0(e.a.a):'—'}</td>`:k==='o'?`<td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td>`:k==='cpo'?`<td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`:'').join('')
+      +(!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return mxCell(c,p,FR.tm===days[k+1])}).join(''))+'</tr>'
       +(op?klRow(e.t,id,nm,ncol):'')}
   h+='</tbody></table></div>';
   if(L.length>show.length)h+=`<div style="margin-top:8px"><button class="btn gray sm press" type="button" data-act="frmore" style="width:100%">Показать все ${L.length}</button></div>`;
@@ -3444,7 +3454,10 @@ function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm
   const b=e.bd,mb=lv&&r.mar&&r.mar.bid&&r.mar.bid.length,own=lv&&bdOn(b)&&b.src==='svoi',low=r.bud!=null&&(r.bud<=0||(r.bud<300&&lv)),go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
   const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':'')
     +(r.st===11&&!lv?`<span class="pill b pzw">пауза: ${pzWhy(r)}</span>`:'')   // 15.11: причина паузы — видно сразу в строке
-    +(low?`<span class="pill b num">остаток бюджета ${rub(r.bud)}</span>`:'')
+    /* 15.11 Андрей (кадр листа товара «Уплотнитель 20х20 6м белый»): «чтобы видно было зелёным график активен и остаток» — график показа и остаток бюджета
+       плашками в строке кампании: зелёным, когда график включён и бюджета хватает; мало бюджета — красным, как раньше */
+    +(ourGr(r)&&ourGr(r).on?'<span class="pill g"><i></i>график показа</span>':r.mar&&r.mar.gr?'<span class="pill g"><i></i>график Марплы</span>':'')
+    +(r.bud!=null?`<span class="pill ${low?'b':'g'} num">остаток ${rub(r.bud)}</span>`:'')
     +(mb?'<span class="pill lv mr bdl"><i></i>биддер Марплы</span>':own?`<span class="pill a lv${b.mode==='sam'?'':' sv'} bdl"><i></i>биддер: ${b.mode==='sam'?'сам':'совет'}</span>`:'');
   const gb=go?`<span class="rkgo ${go}${UPR?'':' nolk'}" role="button" data-act="st" data-rk="${r.id}|${nm}" aria-label="${go==='pz'?'Поставить на паузу':'Запустить'}: ${esc(r.name)}"><svg viewBox="0 0 24 24" fill="${go==='pz'?'none':'currentColor'}" stroke="currentColor" stroke-width="${go==='pz'?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${go==='pz'?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${go==='pz'?'Пауза':'Запустить'}</span>`:'';
   return `<button class="rk rkr press" type="button" data-rk="${r.id}|${nm}"><div class="t">${ta?`<span class="ph" data-nm2="${nm}" title="Открыть товар"${foto(ta)}></span>`:''}<span class="rkn"><b>${esc(r.name)}</b>${stHtml(r)}</span>${gb}</div>
