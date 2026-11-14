@@ -1013,6 +1013,20 @@ html,body{overscroll-behavior-y:contain}
 /* в «Космос 3D» фон рисует сцена — свои звёзды страницы не нужны */
 :root[data-theme="space"] #spDeco{display:none}
 
+/* 14.11 Андрей: «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании».
+   Рамка окошка: тонкий светлый блик медленно обходит её по кругу (12 с), под ним мягкое свечение; подпись слева вверху — «Рекламные кампании» (d_kosmos.js) */
+@property --spa{syntax:"<angle>";inherits:false;initial-value:0deg}
+#spCard::after,#spCard::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;padding:1.5px;
+  background:conic-gradient(from var(--spa),rgba(190,180,255,.18) 0deg,rgba(190,180,255,.18) 200deg,rgba(214,206,255,.55) 250deg,#fff 282deg,rgba(150,215,255,.75) 300deg,rgba(190,180,255,.18) 345deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  animation:sp-ring 12s linear infinite}
+#spCard::before{padding:5px;filter:blur(6px);opacity:.55}
+@keyframes sp-ring{to{--spa:360deg}}
+#spCard .splogo{white-space:nowrap}
+@media (max-width:899px){#spCard .splogo{letter-spacing:.16em}#spCard .spch{display:none}}
+:root[data-lite="1"] #spCard::before{display:none}
+:root[data-lite="1"] #spCard::after{animation-duration:20s}
+
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
 /* текст на цветной кнопке (зелёной, жёлтой): в светлой теме белый, в тёмных — тёмный, как у столбиков графика */
@@ -3259,7 +3273,7 @@ function spaceDeco(on,deco){
   if(w.firstChild)return;
   const el=document.createElement('section');el.id='spCard';el.tabIndex=0;el.setAttribute('aria-roledescription','слайд-шоу');el.setAttribute('aria-label','Аффирмации: листать стрелками ← →');
   el.innerHTML='<i class="spimg" aria-hidden="true"></i><i class="spsh" aria-hidden="true"></i><canvas class="spst" aria-hidden="true"></canvas><i class="spfl" aria-hidden="true"></i><div class="sphud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
-   '<div class="sptop"><span class="splogo">РЕКЛАМА</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
+   '<div class="sptop"><span class="splogo">РЕКЛАМНЫЕ КАМПАНИИ</span><span class="spch">✦ Аффирмации</span><span class="spnum"></span></div><div class="spstage" aria-live="polite"></div>'+
    `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>`+
    '<div class="spbar">'+SP_AFF.map((_,k)=>`<button type="button" aria-label="Аффирмация ${k+1}"><i><b></b></i></button>`).join('')+'</div>'+
    `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${soundOff()}">${SP_ICO.mute}</button>${SP_TRACKS.length>1?`<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[spP.t%SP_TRACKS.length][1]} — сменить" style="font-size:18px;line-height:1">♫<small>${spP.t%SP_TRACKS.length+1}</small></button>`:''}<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SP_ICO.big}</button></div>`;
