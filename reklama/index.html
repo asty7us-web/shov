@@ -1192,6 +1192,30 @@ body.mjob #runp{display:none}
 .wbq .wbl{margin:0}
 .klr .wbq{height:24px;min-width:30px;margin-left:6px}
 
+/* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
+.mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
+  color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
+.mbtn.sm{height:36px;width:auto;font-size:14px;border-radius:11px;padding:0 14px;box-shadow:none}
+.mbtn .mbt{position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.mbtn .mbf{position:absolute;inset:0;z-index:0;background:var(--good);transform-origin:left center;transform:scaleX(0);transition:transform .7s cubic-bezier(.22,1,.36,1)}
+.mbtn.run{background:var(--good-soft);color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(31,157,85,.35);cursor:default}
+.mbtn.run .mbf{transform:scaleX(var(--mp,0));background:rgba(31,157,85,.42)}
+.mbtn.end .mbf{background:var(--good)}
+.mbtn.run .mbf::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);background-size:200% 100%;animation:sk 1.6s linear infinite}
+.mbtn.run.end .mbf::after{animation:none;background:none}
+.mbtn.end .mbt{color:#fff}
+.mbtn.end{background:var(--good);color:#fff}
+.selbar .mbtn{flex:none}
+/* ожидание места у фразы: мягко дышащая капсула вместо крутилки */
+.plb .mwait{position:relative;overflow:hidden;width:34px;height:22px;border-radius:11px;background:var(--good-soft);display:inline-block}
+.plb .mwait i{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(31,157,85,.38),transparent);background-size:200% 100%;animation:sk 1.3s ease-in-out infinite}
+.plb .mwt{color:var(--good)!important;animation:mbreath 1.6s ease-in-out infinite}
+@keyframes mbreath{50%{opacity:.45}}
+.plb .mfresh{display:inline-block;animation:mfr .7s cubic-bezier(.22,1,.36,1) both}
+@keyframes mfr{from{opacity:0;transform:scale(.7)}60%{opacity:1;transform:scale(1.08)}to{transform:none}}
+:root[data-lite="1"] .mbtn .mbf{transition:none}:root[data-lite="1"] .mbtn .mbf::after,:root[data-lite="1"] .plb .mwait i,:root[data-lite="1"] .plb .mwt,:root[data-lite="1"] .plb .mfresh{animation:none}
+@media (prefers-reduced-motion:reduce){.mbtn .mbf{transition:none}.mbtn .mbf::after,.plb .mwait i,.plb .mwt,.plb .mfresh{animation:none}}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -1544,7 +1568,7 @@ async function load(pass,fresh){
 let KLP=null;
 function loadKl(fresh){   // кластеры — отдельным файлом, когда понадобились
   if(fresh)KLP=null;
-  if(!KLP)KLP=(async()=>{KL=await decFile(await fetchEnc('kl.enc.json',fresh),DKC);return KL})().catch(e=>{KLP=null;throw e});
+  if(!KLP)KLP=(async()=>{KL=await decFile(await fetchEnc('kl.enc.json',fresh),DKC);if(typeof pmemKl==='function')pmemKl();return KL})().catch(e=>{KLP=null;throw e});
   return KLP}
 
 /* числа */
@@ -2447,7 +2471,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   const ncol=2+(man?1:0)+4+days.length-1;
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
     h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button>${wbq(e.t)}</div></td>`
-      +`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n"><span class="sp"></span></span><small>снимаю…</small>':c0?cellIn(c0,p0)+`<small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>`
+      +`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>`
       +(man?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:'')
       +`<td class="num">${e.f?kr(e.f):'—'}</td><td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td><td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td><td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`
       +cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return mxCell(c,p,FR.tm===days[k+1])}).join('')+'</tr>'
@@ -2457,8 +2481,8 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   /* 14.11 Андрей: «снизу куча текста не понятного» — под таблицей одна строка: что нажимается (было семь предложений) */
   h+=`<div class="muted tnote">Нажмите: на кластер — из каких запросов он состоит, на значок ВБ — выдача по запросу, на место — снимется заново, на дату — время замеров, на столбец — сортировка. Частота — запросов за месяц.${rr&&rr.pay==='cpc'?' Кампания за клик: исключать фразы ВБ здесь не даёт.':''}${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
   const lk=UPR?'':' nolk',n=FR.sel.size,xs=[...FR.sel].filter(q=>(all.find(e=>e.t===q)||{}).xall).length;
-  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}<button class="btn sm gray press${lk}" type="button" data-act="frmes">Снять места</button></div>`
-    :`<div class="acts" style="grid-template-columns:1fr"><button class="btn gray sm press${lk}" type="button" data-act="frmes" style="width:100%">Снять места показанных фраз · ${show.length}</button></div>`;
+  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}${mBtn('Прожать выбранные · '+n,lk,1)}</div>`
+    :`<div class="acts" style="grid-template-columns:1fr">${mBtn('Прожать места · '+show.length+' '+(show.length%10===1&&show.length%100!==11?'фраза':show.length%10>=2&&show.length%10<=4&&(show.length%100<12||show.length%100>14)?'фразы':'фраз'),lk)}</div>`;
   if(K.jam){const sk=new Set(all.map(e=>e.t.trim().toLowerCase())),nj=jamRows(nm).filter(q=>!sk.has(q.t.trim().toLowerCase())).length;
     if(nj)h+=`<div class="hrw"><h3>Остальные запросы товара · ${nj}</h3><button class="lnk" type="button" data-act="frjam">${FR.jam?'свернуть':'показать'}</button></div>`
       +`<div class="muted tnote" style="margin-top:0">Из отчёта ВБ за неделю. Это не фразы кампании: ставку им не поставить и не исключить.</div>`+(FR.jam?jamHtml(nm,sk):'')}
@@ -2504,22 +2528,32 @@ function mprog(tx){let e=$('#mprog');document.body.classList.toggle('mjob',!!tx)
   if(!tx){if(e)e.remove();return}
   if(!e){e=document.createElement('div');e.id='mprog';e.setAttribute('role','status');document.body.appendChild(e)}
   e.innerHTML='<span class="sp"></span><span class="num">'+esc(tx)+'</span>'}
+/* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, и зелёным наливается по мере поступления данных, как в Эпл; на каждую фразу — как было,
+   и там эффект ожидания красивый плавный». Кнопка «Прожать места» крупная зелёная; пока идёт замер, она наливается зелёным по доле снятых фраз
+   (FR.job: k — готово, n — всего), текст «Снимаю места · 5 из 20». Ячейка фразы в ожидании — мягко дышащая капсула; пришло место — плавно проявляется */
+function mBtn(tx,lk,sm){const j=FR.job,p=j&&j.n?Math.max(.04,Math.min(1,j.k/j.n)):0;
+  return `<button class="mbtn press${sm?' sm':''}${j?' run':''}${j&&j.end?' end':''}${lk}" type="button" data-act="frmes" style="--mp:${p.toFixed(3)}"${j&&!j.end?' aria-busy="true"':''}><span class="mbf" aria-hidden="true"></span><span class="mbt">${j?esc(j.tx):esc(tx)}</span></button>`}
+function mBtnUpd(){const j=FR.job,p=j&&j.n?Math.max(.04,Math.min(1,j.k/j.n)):0;
+  for(const b of document.querySelectorAll('.mbtn')){b.style.setProperty('--mp',p.toFixed(3));b.classList.toggle('run',!!j);b.classList.toggle('end',!!(j&&j.end));const t=b.querySelector('.mbt');if(t&&j)t.textContent=j.tx}}
 function frMeasure(id,nm,qs){if(!need())return;const bk=q=>nm+'|'+q;qs=qs.filter(q=>!FR.busy.has(bk(q)));if(!qs.length)return;for(const q of qs)FR.busy.add(bk(q));FR.note='';redraw();
   if($('#mprog'))toast('Встал в очередь: '+(qs.length>1?'фраз — '+qs.length:'«'+qs[0].slice(0,40)+'»'));
   MQ=MQ.then(()=>frJob(nm,qs)).catch(()=>{}).then(()=>{for(const q of qs)FR.busy.delete(bk(q));mprog('');redraw()})}
 async function frJob(nm,qs){const n=qs.length,t0=Date.now(),nrm=q=>String(q).trim().replace(/\s+/g,' ').toLowerCase(),got=new Set();let base=0,err='',one='';
   const left=k=>{if(k<2)return '';const s=(Date.now()-t0)/1000/k*(n-k);return s<8?'':' · ещё около '+(s>=90?Math.round(s/60)+' мин':Math.ceil(s/10)*10+' с')};
   const cut=(q,m)=>q.length>m?q.slice(0,m-1).trim()+'…':q;
-  const show=(k,op)=>mprog(n>1?(op&&!k?'Открываю выдачу ВБ · фраз: '+n:'Снимаю места · готово '+Math.min(k,n)+' из '+n+left(k)):'Снимаю место: «'+cut(qs[0],30)+'»');
+  const show=(k,op)=>{const tx=n>1?(op&&!k?'Открываю выдачу ВБ · фраз: '+n:'Снимаю места · готово '+Math.min(k,n)+' из '+n+left(k)):'Снимаю место: «'+cut(qs[0],30)+'»';
+    if(n>1){FR.job={k:Math.min(k,n),n,tx:op&&!k?'Открываю выдачу ВБ…':'Снимаю места · '+Math.min(k,n)+' из '+n};mBtnUpd()}mprog(tx)};
   show(0,1);
   for(let i=0;i<n;i+=15){const p=qs.slice(i,i+15);
     try{const r=await quick({k:'mesto',nm:+nm,qs:p},m=>{const x=/(\d+)\s+из\s+(\d+)/.exec(m||'');if(x)show(base+Math.max(0,+x[1]-1));else show(base,1)},260000);
-      for(const q of Object.keys((((r.patch||{}).ms||{})[nm])||{}))got.add(nrm(q));one=r.msg||''}
+      FR.fresh=FR.fresh||new Set();for(const q of Object.keys((((r.patch||{}).ms||{})[nm])||{})){got.add(nrm(q));FR.fresh.add(nm+'|'+q);for(const x of p)if(nrm(x)===nrm(q))FR.fresh.add(nm+'|'+x)}one=r.msg||'';
+      setTimeout(()=>{if(FR.fresh)FR.fresh.clear()},2600)}
     catch(e){err=e.message}
     base+=p.length;for(const q of p)FR.busy.delete(nm+'|'+q);if(i+15<n){show(base);redraw()}}
   const bad=qs.filter(q=>!got.has(nrm(q))),ok=n-bad.length,sp=bad.slice(0,3).map(q=>'«'+cut(q,30)+'»').join(', ')+(bad.length>3?' и ещё '+(bad.length-3):'');
   const msg=n===1?(ok?(one||'Место снято'):'Место не снято: '+(err||'ВБ не отдал выдачу — попробуйте ещё раз')):!bad.length?'Места сняты: '+ok+' из '+n:ok?'Места сняты: '+ok+' из '+n+'. Не удалось: '+sp:'Места не сняты: '+(err||'ВБ не отдал выдачу — попробуйте ещё раз');
-  FR.note=n>1||!ok?msg+(bad.length&&ok&&err?' ('+err+')':''):'';mprog('');toast(msg)}
+  FR.note=n>1||!ok?msg+(bad.length&&ok&&err?' ('+err+')':''):'';mprog('');toast(msg);
+  if(n>1){FR.job={k:n,n,end:1,tx:ok?'✓ Сняты места · '+ok+' из '+n:'Места не сняты'};mBtnUpd();setTimeout(()=>{if(FR.job&&FR.job.end){FR.job=null;redraw()}},2400)}}
 function actFrMinus(id,nm,add){if(!need())return;const all=frAll(id,nm)||[],qs=[...FR.sel].filter(q=>{const e=all.find(x=>x.t===q);return e&&(add?!e.xall:e.xall)}),r=RK[id];
   if(!qs.length){toast(add?'Выбранные фразы уже исключены':'Среди выбранных нет исключённых');return}
   sheet(()=>({t:add?(qs.length===1?'Исключить фразу?':'Исключить '+qs.length+' фраз?'):(qs.length===1?'Вернуть фразу?':'Вернуть '+qs.length+' фраз?'),s:esc(r.name),
@@ -3132,7 +3166,7 @@ async function send(cmd){cmd.id=cmd.id||rid();cmd.ts=Date.now();if(!cmd.kab)cmd.
 async function onMsg(m){if(!m||m.event!=='message'||SEEN.has(m.id))return;SEEN.add(m.id);
   try{const [a,b]=String(m.message).split('.'),r=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(a)},await ckey(),b64u8(b))));
     const dk=r.id+'|'+r.st+'|'+(r.msg||'');if(DONE.has(dk))return;DONE.add(dk);   /* тот же ответ приходит с каждого сервера связи — берём первый */
-    wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch)applyPatch(r.patch)}catch(e){}}
+    wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch){pmemSave(r.patch,'');applyPatch(r.patch)}}catch(e){}}
 function listen(){if(ES||!UPR)return;const L=[];for(const h of NH)try{const s=new EventSource(h+'/'+UPR.res+'/sse');s.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch(x){}};s.onerror=()=>{};L.push(s)}catch(e){}
   ES=L.length?{L,close(){L.forEach(s=>{try{s.close()}catch(e){}})}}:null}
 async function pollRes(){await Promise.all(NH.map(async h=>{try{const r=await fetch(h+'/'+UPR.res+'/json?poll=1&since=3m',{cache:'no-store',signal:nhSig()});if(!r.ok)return;for(const l of (await r.text()).split('\n'))if(l.trim())try{await onMsg(JSON.parse(l))}catch(e){}}catch(e){}}))}
@@ -3159,7 +3193,7 @@ const runSteps=(st,bad)=>'<div class="rsteps">'+['Отправлено','Вып�
   return `<span class="${c}"><i></i>${t}</span>`}).join('<b aria-hidden="true">›</b>')+'</div>';
 const runProg=st=>runSteps(st)+'<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">'+(st?'Выполняется…':'Отправляю команду…')+'</b><small id="runsub"></small></div></div>';
 const RUNPROG=runProg(0);
-const RUNNM={status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
+const RUNNM={_ptr:'Страница обновлена',status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
   grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы'};
 /* итог команды вверху экрана: k — g (готово) / b (отказ) / w (сторож молчит); нажатие убирает */
 function runRes(cmd,k,msg){let w=$('#runres');if(!w){w=document.createElement('div');w.id='runres';w.className='runres';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w)}
@@ -3201,7 +3235,7 @@ async function run(cmd,done,o){const box=$('#runbox');if(!box)return false;const
     if(r.st!=='done'){const er=new Error(r.msg||'Не получилось');er.no=1;throw er}
     const b2=mine(),fact=r.msg||'Готово';
     if(b2)b2.innerHTML=runSteps(2)+`<div class="rfact g"><b>✓ ${esc(fact)}</b><small>ответ сервиса · ${mmss(Date.now()-t0)}</small></div>`;
-    applyPatch(r.patch);if(b2&&o&&o.ok)try{o.ok(r,b2)}catch(x){}runRes(cmd,'g',fact);setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},b2?2200:300);return true
+    pmemSave(r.patch,RUNNM[cmd.k]||'');applyPatch(r.patch);if(b2&&o&&o.ok)try{o.ok(r,b2)}catch(x){}runRes(cmd,'g',fact);setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},b2?2200:300);return true
   }catch(e){const b2=mine(),msg=sent?e.message:'Команда не ушла — нет связи. В кабинете ничего не изменилось: проверьте интернет и попробуйте ещё раз.';
     /* отказ сторожа или не ушло — можно поправить и повторить (кнопки возвращаются на место); сторож молчит — повторять вслепую нельзя */
     if(b2){b2.innerHTML=runSteps(sent?1:0,sent?1:0)+`<div class="rfact ${e.late?'w':'b'}"><b>${esc(msg)}</b><small>${e.late?'сервис молчит':sent?'ответ сервиса':'команда не ушла'} ·${mmss(Date.now()-t0)}</small></div><div class="acts" style="grid-template-columns:${e.late?'1fr':'1fr 1.6fr'}"><button class="btn gray press" type="button" data-act="back">${e.late?'Закрыть':'Назад'}</button>${e.late?'':`<button class="btn press" type="button" id="runagain">${sent?'Изменить и повторить':'Попробовать ещё раз'}</button>`}</div>`;
@@ -3233,7 +3267,23 @@ function rknMerge(){if(!D||!D.kab)return;const now=Date.now();
     const keep=L.filter(x=>x&&x.n&&now-x.t<RKN_TTL&&!Kk.rk.some(r=>String(r.id)===String(x.n.id)));
     if(keep.length!==L.length){if(keep.length)RS.set(rknKey(kab),keep);else RS.del(rknKey(kab))}
     for(const x of keep)rknPut(Kk,x.n)}}
-function applyPatch(p){if(!p)return;const Kk=D.kab[p.kab||S.kab];
+/* 14.11 Андрей: «при обновлении страницы важно закрепить, что настройки применены, а так непонятно». Ответ сервиса «готово» правит данные
+   на странице сразу (patch), а файл данных догоняет только со следующим сбором (раз в 30 мин). Раньше перезагрузил страницу до сбора — ставка, лимит,
+   график, статус показывались старые, будто не применилось. Теперь каждый принятый ВБ patch помним в памяти устройства (rek.pmem, со временем и названием)
+   и после любой загрузки накладываем снова, пока сбор его не догонит (время данных ≥ времени правки) или не пройдёт 3 часа */
+const PMEM_TTL=3*3600e3,PMEMK='pmem';
+const atMs=()=>{try{return new Date(D.at+':00+03:00').getTime()}catch(e){return 0}};
+function pmemSave(p,nmT){if(!p)return;let c;try{c=JSON.parse(JSON.stringify(p))}catch(e){return}delete c.ms;delete c.ist;
+  if(!c.rk&&!c.tov&&!c.lim&&!c.gr&&!c.grt&&!c.kl&&!c.bally&&!c.nst)return;
+  const now=Date.now(),L=RS.get(PMEMK,[]);RS.set(PMEMK,(Array.isArray(L)?L:[]).filter(x=>x&&now-x.t<PMEM_TTL).concat([{t:now,p:c,n:nmT||''}]).slice(-40))}
+/* после загрузки данных: наложить то, чего в данных ещё нет; вернуть названия наложенного — для плашки после перезагрузки */
+function pmemMerge(){const L=RS.get(PMEMK,null);if(!Array.isArray(L)||!D)return [];const now=Date.now(),at=atMs();
+  const keep=L.filter(x=>x&&x.p&&now-x.t<PMEM_TTL&&!(at&&at>=x.t));
+  if(keep.length!==L.length){if(keep.length)RS.set(PMEMK,keep);else RS.del(PMEMK)}
+  for(const x of keep)try{applyPatch(JSON.parse(JSON.stringify(x.p)),1)}catch(e){}
+  return keep}
+function pmemKl(){const L=RS.get(PMEMK,null);if(!Array.isArray(L))return;for(const x of L)if(x&&x.p&&x.p.kl)try{applyPatch({kab:x.p.kab,kl:x.p.kl},1)}catch(e){}}
+function applyPatch(p,quiet){if(!p)return;const Kk=D.kab[p.kab||S.kab];
   if(Kk&&p.rkn&&rknPut(Kk,p.rkn)){rknSave(p.kab||S.kab,p.rkn);delete FRZ.rk}   // 14.11 (четвёртый заход): список «Кампаний», придержанный после смены периода (FRZ), новую кампанию не прятал бы — отпускаем его
   if(p.ms){D.ms=D.ms||{};for(const nm in p.ms){const o=D.ms[nm]||(D.ms[nm]={});for(const q in p.ms[nm]){const v=p.ms[nm][q];(o[q]||(o[q]=[])).push(v.length>4?[T,v[0],v[1],v[2],v[3],v[4],v[5]]:[T,v[0],v[1],v[2],v[3]]);
     if(v[4]>0||(!v[2]&&v[1])){D.mo=D.mo||{};(D.mo[nm]||(D.mo[nm]={}))[q]=[T,v[0],v[4]>0?v[4]:v[1]]}}}}
@@ -3248,8 +3298,8 @@ function applyPatch(p){if(!p)return;const Kk=D.kab[p.kab||S.kab];
   if(Kk&&p.bally){const b=Kk.bally||(Kk.bally={promos:[],val:[]});b.promos=(b.promos||[]).filter(x=>x.id!==p.bally.id);if(!p.bally.del)b.promos.unshift(p.bally)}
   if(p.nst)D.nst=p.nst;
   if(p.kl&&KL&&KL.kab[p.kab||S.kab]){const z=KL.kab[p.kab||S.kab].k[p.kl.key];if(z)for(const q of z.q){if(p.kl.x&&p.kl.x[q.t]!=null){if(p.kl.x[q.t])q.x=1;else delete q.x}if(p.kl.b&&q.t in p.kl.b){if(p.kl.b[q.t])q.b=p.kl.b[q.t];else delete q.b}}}
-  prep();render(true)}
-async function reload(){D=await load(null,true);rknMerge();KL=null;KLP=null;prep();sync();render(true);redraw()}
+  if(!quiet){prep();render(true)}}
+async function reload(){D=await load(null,true);rknMerge();pmemMerge();KL=null;KLP=null;prep();sync();render(true);redraw()}
 const RUNBOX=(btn,cls)=>`<div id="runbox"><div class="acts" style="grid-template-columns:1fr 1.6fr"><button class="btn gray press" type="button" data-act="back">Отмена</button><button class="btn press ${cls||''}" type="button" id="okBtn">${btn}</button></div></div>`;
 let INACT=false;
 const need=()=>{if(UPR)return true;PEND=INACT?LASTA:null;unlock();return false};   // PEND — действие, которое продолжится само после ввода пароля
@@ -3679,10 +3729,11 @@ if(window.svcPicker)svcPicker({btn:'#thBtn',list:THL,cur:RS.get('theme','auto'),
    выключено стилем overscroll-behavior (a_css_e.css). Без видеокарты и при «меньше движения» стрелка без движения, жест тот же */
 const PTR_TH=70,PTR_MAX=112;let PTRB=false;
 const atTx=()=>{const a=D&&D.at||'';return a?'Данные на '+(a.slice(0,10)===mskDay()?'':dm(a.slice(0,10))+' ')+a.slice(11,16)+' МСК':'Данные обновлены'};
-function ptrDo(){const top=SHS.length&&$('#shw').classList.contains('on')?SHS[SHS.length-1]:null,k=top&&top.adr&&top.adr.k;
-  if(k==='rk'&&UPR&&!RKREF&&RK[top.adr.a[0]])return actRkRef(+top.adr.a[0],top.adr.a[1]);
-  const rb=$('#refBtn');rb.classList.add('spin');
-  return reload().then(()=>toast(atTx()),e=>toast(e&&e.message?e.message:'Не обновилось — проверьте интернет')).then(()=>rb.classList.remove('spin'))}
+/* 14.11 Андрей: «при подтягивании должна обновляться сама страница, а не данные» — жест перезагружает страницу целиком (открытые листы
+   возвращаются из памяти вкладки, данные берутся свежие). После перезагрузки — плашка: данные на какое время и что из ваших изменений применено */
+const PTRK='rek.ptr';
+function ptrDo(){try{sessionStorage.setItem(PTRK,String(Date.now()))}catch(e){}const rb=$('#refBtn');if(rb)rb.classList.add('spin');
+  setTimeout(()=>location.reload(),120);return new Promise(()=>{})}
 (()=>{const ind=document.createElement('div');ind.className='ptr';ind.id='ptr';ind.setAttribute('aria-hidden','true');
   ind.style.cssText='position:fixed;top:0;left:50%;width:40px;height:40px;opacity:0;pointer-events:none';   // размер и «невидим» — сразу, даже если стили ещё не подгрузились
   ind.innerHTML='<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
@@ -3725,20 +3776,26 @@ function hashKey(){const m=location.hash.match(/k=([A-Za-z0-9_-]{40,})/);if(!m)r
     if(o&&o.k&&o.id)RS.set('dk',{id:o.id,k:o.k});if(o&&o.u&&o.u.cmd&&o.u.key){UPR=o.u;RS.set('upr',o.u)}}catch(e){}
   try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}}
 async function boot(pass){
-  try{D=await load(pass)}catch(e){
+  let fr=false;try{fr=!!sessionStorage.getItem(PTRK)}catch(e){}
+  try{D=await load(pass,fr)}catch(e){
     if(e.message==='NEED_PASS'||e.message==='BAD_PASS'){const L=$('#lock');if(!$('#pwf'))L.innerHTML=LOCKF;L.hidden=false;$('#pwerr').textContent=pass?'Пароль не подошёл':'';$('#pwgo').disabled=false;setTimeout(()=>$('#pw').focus(),60);return}
     $('#view').innerHTML=`<div class="empty"><b>Не открылось</b>${e.message==='NO_GZ'?'Этот браузер слишком старый. Обновите его или откройте в другом.':esc(e.message)}<br><br><button class="btn sm gray press" type="button" onclick="location.reload()">Повторить</button></div>`;return}
   rknMerge();   // 14.11: созданная с сайта кампания видна и после обновления страницы, пока её не принёс сбор
+  const pm=pmemMerge();let ptr0=0;try{ptr0=+sessionStorage.getItem(PTRK)||0;sessionStorage.removeItem(PTRK)}catch(e){}   // 14.11: принятые ВБ правки — поверх данных до сбора
   const sha=shRead();shPre(sha);   // 14.11: обновили страницу в листе — тот же кабинет и раздел…
   $('#lock').hidden=true;$('#lock').innerHTML='';prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
   if(UPASS){const p=UPASS;UPASS=null;if(!UPR)unlockDo(p).then(()=>{render(true);toast('Управление включено')}).catch(()=>{})}   // вошли паролем управления — второй раз его не спрашиваем
-  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha)}   // …и те же листы
+  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha);
+  if(ptr0&&Date.now()-ptr0<60000)setTimeout(()=>ptrNote(pm),350)}   // …и те же листы
+/* плашка после «потянуть — обновить»: свежесть данных и что из ваших правок применено и закреплено */
+function ptrNote(pm){const nm=[...new Set((pm||[]).map(x=>x.n).filter(Boolean))];
+  runRes({k:'_ptr'},'g',atTx()+(pm&&pm.length?' · ваши изменения применены ('+pm.length+(nm.length?': '+nm.slice(0,3).join(', ').toLowerCase():'')+'), в данных закрепятся со сбором':' · все ваши изменения уже в данных'))}
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
 window.REK={get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
   FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
   get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC},
-  prOur,prNum,rknMerge,ptrDo,reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
+  prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
 hashKey();boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
