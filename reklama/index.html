@@ -277,6 +277,7 @@ th[data-s2="a"]:after{border-bottom-color:var(--ink3);margin-bottom:3px}
 th .sn,.fsq .sn{font-style:normal;font-size:9.5px;font-weight:700;color:var(--acc);margin-left:2px;vertical-align:top}
 th[data-s2] .sn{color:var(--ink3)}
 .ssel{flex:none;height:36px;max-width:40vw;border:0;border-radius:10px;background:var(--fill);color:var(--ink);font:inherit;font-size:14px;padding:0 8px}
+@media (max-width:430px){.sub [data-seg="per"] button{padding-left:7px;padding-right:7px;font-size:13px}}   /* шесть кнопок периода (сегодня, вчера, позавчера, 7, 14, 30) в одну строку на телефоне */
 th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:2;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
 th:first-child{z-index:3}   /* 14.11: угол шапки — выше первого столбца: при прокрутке вбок и вниз название товара не должно ложиться поверх слова «Товар» */
 .tws th{box-shadow:inset 0 -1px 0 var(--line)}   /* 14.11: чёткая линия под шапкой — строка, наполовину ушедшая под шапку, выглядела как обрывок («штрих» под словом «Товар») */
@@ -842,17 +843,18 @@ const sum=(a,ix)=>{let s=0;if(a)for(const i of ix)s+=a[i]||0;return s};
 const delta=(a,b,inv)=>{if(b==null||!isFinite(b)||!b||a==null||!isFinite(a))return '';const p=100*(a-b)/Math.abs(b);if(Math.abs(p)<1)return '<span class="muted">≈ как было</span>';
   const up=p>0,good=inv?!up:up;return `<span class="${good?'up':'dn'}">${up?'▲':'▼'} ${f0(Math.abs(p))}%</span>`};
 /* период: N полных дней до вчера; сегодня — отдельно (день ещё идёт). 14.11 Андрей «ещё период вчера, позавчера сделай кнопки»: один день — S.per=1,
-   S.off — на сколько дней он отступает от вчера (0 — вчера, 1 — позавчера). PI(n) и PP(n) с явным n отступ не учитывают («последние 30 дней») */
+   S.off — на сколько дней он отступает от вчера (0 — вчера, 1 — позавчера, −1 — сегодня: «и сегодня тогда тоже кнопку»). PI(n) и PP(n) с явным n отступ не учитывают («последние 30 дней») */
 const PI=n=>{const o=n==null?(S.off||0):0;if(n==null)n=S.per;const a=[];for(let i=Math.max(0,T-o-n);i<T-o;i++)a.push(i);return a};
 const PP=n=>{const o=n==null?(S.off||0):0;if(n==null)n=S.per;const a=[];for(let i=T-o-2*n;i<T-o-n;i++)if(i>=0)a.push(i);return a.length===n?a:null};
 const PIc=()=>(S.per<7?PI(7):PI()).concat([T]);                                      // дни для графиков по дням: не меньше недели и сегодня
 const perLab=()=>S.per===1?dm(D.days[Math.max(0,T-1-(S.off||0))]):dm(D.days[Math.max(0,T-S.per)])+'–'+dm(D.days[T-1]);
-const perKey=()=>S.per===1?(S.off?'v2':'v1'):S.per;                                  // значение нажатой кнопки периода
-const perTx=()=>S.per===1?(S.off?'позавчера':'вчера'):S.per+' дн';                   // «7 дн» | «вчера»
-const perZa=()=>S.per===1?(S.off?'за позавчера':'за вчера'):'за '+S.per+' дн.';      // «за 7 дн.» | «за вчера»
-const perDn=()=>S.per===1?(S.off?'позавчера':'вчера'):S.per+' дней';                 // «ДРР 7 дней» | «ДРР вчера»
+const perD1=()=>S.per===1?((S.off||0)<0?'сегодня':S.off?'позавчера':'вчера'):'';      // один день словами
+const perKey=()=>S.per===1?((S.off||0)<0?'v0':S.off?'v2':'v1'):S.per;               // значение нажатой кнопки периода
+const perTx=()=>perD1()||S.per+' дн';                                                // «7 дн» | «вчера»
+const perZa=()=>perD1()?'за '+perD1():'за '+S.per+' дн.';                            // «за 7 дн.» | «за вчера»
+const perDn=()=>perD1()||S.per+' дней';                                              // «ДРР 7 дней» | «ДРР вчера»
 const perPr=()=>S.per===1?'днём раньше':'прошлые '+S.per+' дн.';                     // с чем сравниваем
-const PERS=l=>[['v1','Вчера'],['v2','Позавчера'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
+const PERS=l=>[['v0','Сегодня'],['v1','Вчера'],['v2','Позавчера'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
 
 function prep(){
   if(!D.kab[S.kab])S.kab=Object.keys(D.kab)[0];
@@ -986,7 +988,8 @@ function sync(){
   $$('#tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab));
   const per=seg('per',PERS(),perKey(),'sm');let h='';
   if(S.tab==='tov')h=per+srch('Товар');   // вид «таблица / карточки» — в шапке самого списка (vTov), как в «Кампаниях»: 14.11 Андрей «когда меняешь вид сверху, не видишь, что меняешь ниже»
-  else if(S.tab==='rk')h=per+seg('rkf',[['w','Работают'],['p','На паузе'],['all','Все']],S.rkf.f,'sm')+srch('Кампания или товар');
+  else if(S.tab==='rk'){const nw=K.rk.filter(r=>rkSt(r).w).length;   // числа на кнопках — видно, что это отбор списка (14.11 Андрей: «кнопка „Работают“ — не понял смысл»)
+    h=per+seg('rkf',[['w','Работают · '+nw],['p','На паузе · '+(K.rk.length-nw)],['all','Все · '+K.rk.length]],S.rkf.f,'sm')+srch('Кампания или товар')}
   else if(S.tab==='skl')h=per+srch('Товар склейки');
   else if(S.tab==='bl')h=K.bally?seg('blf',[['on','Идут'],['no','Товары без акции']],S.blf,'sm')+srch('Товар или акция'):'';
   else if(S.tab==='ak')h=seg('akf',[['can','Можно войти'],['in','Участвуем'],['all','Все']],S.ak.f,'sm')+srch('Товар');
@@ -1005,7 +1008,7 @@ function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render(
   smooth(d>0?'fwd':'back',()=>{S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();render()});K3.call('go',K3MAP[tab])}
 const agoMin=()=>Math.round((Date.now()-new Date(D.at+':00+03:00').getTime())/60000);
 const fresh=()=>{const a=D.at.replace('T',' '),ago=agoMin();
-  return `<div class="fresh">Данные на <b>${dm(a.slice(0,10))} ${a.slice(11,16)} МСК</b>${ago>90?`<span class="pill w">давно: ${ago>2880?Math.round(ago/1440)+' дн':Math.round(ago/60)+' ч'} назад</span>`:''}<span>период ${perLab()} · сегодня отдельно</span></div>`};
+  return `<div class="fresh">Данные на <b>${dm(a.slice(0,10))} ${a.slice(11,16)} МСК</b>${ago>90?`<span class="pill w">давно: ${ago>2880?Math.round(ago/1440)+' дн':Math.round(ago/60)+' ч'} назад</span>`:''}<span>${S.per===1&&(S.off||0)<0?'период — сегодня, день ещё идёт':'период '+perLab()+' · сегодня отдельно'}</span></div>`};
 
 /* ───────── Товары ───────── */
 function tovRows(){const ix=PI();let a=K.tov.map(t=>({t,a:pAgg(t,ix),w:wrk(t).length}));
@@ -1610,6 +1613,11 @@ function rkSet(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
     +til('График',g&&g.on?(g.h.every(x=>x===g.h[0])?grRuns(g.h[0]):grHours(g)+' ч в неделю'):m.gr?grRuns(hoursStr(m.gr.h)):'круглые сутки','gr',g&&g.on?'свой':m.gr?'Марпла':'')+'</div>'}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
   sheet(()=>rkBody(+id,nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openRk(ctx[j][0],ctx[j][1],ctx)}:null)}
+/* другие работающие кампании того же товара — прямо из листа кампании (14.11 Андрей: «в одной РК рабочей, если есть рабочая активная вторая, — из РК мочь
+   тоже зайти, но кратко отображались ДРР от общего и ДРР РК, и затраты»). ДРР общий — расход кампании к заказам всего товара, ДРР РК — к заказам, которые ВБ отнёс к ней */
+function rkOther(id,nm){const t=TOV[nm];if(!t)return '';const ix=PI(),or=sum(t.o&&t.o.r,ix),L=t.rk.map(k=>RK[k]).filter(r=>r&&r.id!==+id&&rkSt(r).w);if(!L.length)return '';
+  return `<div class="hrw"><h3>Ещё работают у товара · ${L.length}</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div><div class="list">`+L.map(r=>{const a=rkAgg(r,nm,ix),d=or?100*a.s/or:(a.s?Infinity:null);
+    return `<button class="rk rko press" type="button" data-rk="${r.id}|${nm}"><div class="t"><b>${esc(r.name)}</b>${stHtml(r)}</div><div class="k kpi" style="grid-template-columns:repeat(3,1fr)"><div><b class="num ${dcls(d)}">${drrT(d)}</b><span>ДРР общий</span></div><div><b class="num">${a.drrk==null?'—':isFinite(a.drrk)?pc(a.drrk):'нет зак.'}</b><span>ДРР РК</span></div><div><b class="num">${rub(a.s)}</b><span>затраты</span></div></div></button>`}).join('')+'</div>'}
 function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rkAgg(r,nm,ix),td=rkAgg(r,nm,[T]),st=rkSt(r),t=TOV[nm],ol=ourLim(r);
   const d=e.d||{},g=i=>{const x={s:d.s?d.s[i]:0,c:d.c?d.c[i]:0,v:d.v?d.v[i]:0,q:d.q?d.q[i]:0,a:d.a?d.a[i]:0,sp:d.sp?d.sp[i]:0};x.cpo=x.q?x.s/x.q:(x.s?Infinity:null);x.ctr=x.v?100*x.c/x.v:null;
     x.or=t&&t.o?t.o.r[i]||0:0;x.oq=t&&t.o?t.o.q[i]||0:0;x.drr=x.or?100*x.s/x.or:(x.s?Infinity:null);return x};
@@ -1622,6 +1630,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=perSeg();
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
   h+=`<div class="dbxs">${bx('ДРР вчера · '+dm(D.days[T-1]),zy,zy2,zy2?dm(D.days[T-2]):'')}${bx('ДРР '+perDn(),zp,zpp,perPr())}</div>`;
+  h+=rkOther(id,nm);
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
@@ -2046,7 +2055,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 const SEGCB={};
 function onSeg(id,v){smooth('fade',()=>onSeg0(id,v))}
 function onSeg0(id,v){
-  if(id==='per'){const n=v==='v1'||v==='v2'?1:+v,o=v==='v2'?1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze)
+  if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze)
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
   else if(id==='skls'){S.skls=v;RS.set('skls',v);unfz();render(true)}
