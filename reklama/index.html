@@ -929,6 +929,10 @@ html,body{overscroll-behavior-y:contain}
 :root[data-lite="1"] .ptr{transition:none!important}:root[data-lite="1"] .ptr svg{transform:none}:root[data-lite="1"] .ptr.spin svg{animation:none}
 @media (prefers-reduced-motion:reduce){.ptr{transition:none!important}.ptr.spin svg{animation:none}}
 
+/* 15.11: кнопки паузы / стопа в карточке раздела «Кампании» — справа в строке названия */
+.rk.pg .t .rkgw{margin-left:auto;display:inline-flex;gap:6px;flex:none}
+.rk.pg:has(.rkgo:active){transform:none}
+
 /* 14.11 Андрей в «К»: «тему космоса в рекламе не полноценно, ниче не движется, аффирмаций нет, надо как везде».
    «Космос» как в Склейках и Юнитке (код перенесён из skleykipp.html): по фону мерцают звёзды и пролетают метеоры (#spDeco),
    над разделами окошко #spCard — слайд-шоу аффирмаций (те же, что в Склейках/Юнитке, порядок один у всех раз в 2 дня),
@@ -2471,7 +2475,9 @@ const MG=()=>((D.mst||{}).glub)||300;
 const ksh=v=>v>=1000?f1(v/1000)+'к':f0(v);   // короткая сумма над столбиком: на телефоне 14 столбиков по 24 точки
 /* 14.11 Андрей: «в товаре над рк отдельный смену периода или нет вот как на главной он в шапке» — период в листе один, первой строкой, и прилипает
    к верху листа при прокрутке (стили .pseg — в a_css_n.css); даты периода — строкой под ним, она не прилипает */
-const perSeg=()=>`<div class="pseg">${seg('per',PERS(WIDE()),perKey(),'sm')}</div><div class="psegl muted num">${S.per===1&&(S.off||0)<0?'сегодня — день ещё идёт':perLab()+' · сегодня отдельно'}</div>`;
+/* 15.11 Андрей (кадр листа кампании, стрелка от «№ · создана · запущена» к строке периода): «это сюда перемести и поменьше слов» — x: данные кампании
+   короткой строкой под периодами вместо длинной подписи */
+const perSeg=x=>`<div class="pseg">${seg('per',PERS(WIDE()),perKey(),'sm')}</div><div class="psegl muted num">${x?(S.per===1&&(S.off||0)<0?'сегодня':perLab())+' · '+x:S.per===1&&(S.off||0)<0?'сегодня — день ещё идёт':perLab()+' · сегодня отдельно'}</div>`;
 function drrBox(title,cur,prev,prevLab,sub){const ok=v=>v!=null&&isFinite(v),d=ok(cur)&&ok(prev)?cur-prev:null,cls=d==null||Math.abs(d)<0.5?'':d>0?' b':' g';
   return `<div class="dbx${cls}"><div class="l">${title}</div><div class="r"><b class="num${cls?'':' '+dcls(cur)}${cur!=null&&!isFinite(cur)?' tx':''}">${cur!=null&&!isFinite(cur)?'нет заказов':pc(cur)}</b>${d==null?'':Math.abs(d)<0.5?'<span class="tr muted">как было</span>':`<span class="tr">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</span>`}</div><div class="d num">${prev!=null&&prevLab?prevLab+': '+(isFinite(prev)?pc(prev):'нет заказов')+'<br>':''}${sub}</div></div>`}
 /* четыре главные цифры — одинаково у товара, у кампании и над списком кампаний товара (14.11 Андрей: «заказы шт оставь, и остальное: ДРР РК, ДРР от всего,
@@ -2738,7 +2744,7 @@ function rkRows(){const ix=PI(),q=(S.q||'').toLowerCase(),vn=VNL[S.rkf.vn]?rkVni
 function rkCard(x){const r=x.r,e=r.nm[x.nm]||{},a=x.a,g=ourGr(r);
   /* 14.11 Андрей: «когда товары в списках картинки тоже надо везде» — фото товара у кампании.
      14.11 Андрей 08:10 «сделал спс страницу вышел вошёл но не видно спс»: у только что созданной с сайта кампании (r.nov — ставит applyPatch из ответа сервиса) пометка «новая» */
-  return `<button class="rk pg press" type="button" data-rk="${r.id}|${x.nm}" data-ctx="rk"><div class="t"><span class="ph"${foto(x.t||{nm:x.nm})}></span><b>${esc(r.name)}</b>${stHtml(r)}</div>
+  return `<button class="rk pg press" type="button" data-rk="${r.id}|${x.nm}" data-ctx="rk"><div class="t"><span class="ph"${foto(x.t||{nm:x.nm})}></span><b>${esc(r.name)}</b>${stHtml(r)}<span class="rkgw">${rkGoB(r,x.nm)}</span></div>
    <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
    <div class="k kpi"><div><b class="num ${dcls(x.drr)}">${drrT(x.drr)}</b><span>ДРР</span></div><div><b class="num ${sbad(a.s,a.q)}">${rub(a.s)}</b><span>траты</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div></div></button>`}
 function vRk(){const VN=rkVnim();if(S.rkf.vn&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
@@ -3024,7 +3030,7 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   if(srch)h+=own?til('Биддер','цель '+b.cel+' место','до '+kop(b.max),'bidder','o',b.mode==='sam'?'свой, сам ставит':'свой, советует')
     :mb?til('Биддер','цель '+mb.cel+' место','до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):til('Автопополнение','нет','пополняется вручную','adinfo');
-  return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button></div>
+  return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button>${r.st===11&&st.w?`<button class="ctgo pz press${lk}" type="button" data-act="st" data-to="stop" data-rk="${key}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Остановить</button>`:''}</div>
     <div class="ctg">${h}</div>${lcLine(r.id)}
     <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button></div>`}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
@@ -3044,7 +3050,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const dr=ixs=>{if(!ixs)return null;const x=rkAgg(r,nm,ixs),o=sum(t&&t.o&&t.o.r,ixs);return {x,o,oq:sum(t&&t.o&&t.o.q,ixs),v:o?100*x.s/o:(x.s?Infinity:null)}};
   const bx=(lab,z,pz,pl)=>z?drrBox(lab,z.v,pz&&pz.v,pl,'расход '+kr(z.x.s)+' ₽ · заказы товара '+f0(z.oq)+' шт<br>с этой рекламы '+f0(z.x.q)+' шт'):'';
   /* 14.11 Андрей: «в товаре над рк отдельный смену периода или нет вот как на главной он в шапке» — период первой строкой листа, прилипает к верху */
-  let h=perSeg();
+  let h=perSeg(`№ ${r.id} · с ${dm(r.cr)}${r.start?' · запуск '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}`);
   /* 14.11 Андрей: «открыть товар не надо отдельно банер просто значек должен быть у рк и по нему попадаеш в товар», «переход из рекла комап в товар в сервисе
      не на вб надо кнопку рядом» — голубой полосы «Товар кампании … Открыть товар» больше нет: фото товара стоит первым в листе (нажатие — лист товара),
      и такая же кнопка с фото «Товар здесь» — в ряду ссылок рядом с кабинетом ВБ и карточкой на ВБ. Состояние, ставка и бюджет — в блоке управления ниже */
@@ -3097,7 +3103,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      Фразы — последним блоком листа: при «Активные / Исключённые / Все» высота меняется только в самом низу (FR.mh держит её, см. frSwitch) */
   const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
-  return {ph,t:esc(r.name),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b> · ':'')+`№ ${r.id} · создана ${dm(r.cr)}${r.cr?'.'+r.cr.slice(0,4):''}${r.start?' · запущена '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}`,h,
+  return {ph,t:esc(r.name),s:((ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&srch)loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm)}).catch(()=>{})}}}
 
 /* ── фраза: места по дням и все замеры, ставка фразы, минус ── */
@@ -3177,7 +3183,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='frmes'){const z=frShown(fk[0],fk[1]);frMeasure(fk[0],fk[1],FR.sel.size?[...FR.sel]:z.show.map(e=>e.t))}
   else if(a==='pickprod')pickProd();
   else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}   // 14.11: «На паузе · N ›» — раскрыть / свернуть
-  else if(a==='st')actStatus(+rk[0],rk[1]);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
+  else if(a==='st')actStatus(+rk[0],rk[1],ds.to);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
   else if(a==='price')actPrice(+ds.nm);else if(a==='note'||a==='notes')openNotes(+ds.nm||0,+ds.cid||0);else if(a==='create')actCreate(+ds.nm);
   else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
   else if(a==='perenos')actPerenos();else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='gr')actGr(+rk[0],rk[1]);
@@ -3461,6 +3467,12 @@ function limPill(r){const ol=ourLim(r);
 const rkU=(v,u)=>v+`<small>${u}</small>`;
 const rkMoney=v=>v==null||!isFinite(v)?'—':v>=1e5?rkU(f0(v/1e3)+'к',' ₽'):rkU(f0(v),' ₽');   // 123 456 ₽ не влезает в четверть строки на 360 px; 14.11 (четвёртый заход): «123к ₽» — вплотную, как kr() (Андрей: «Тыс заменить на к»)
 const rkDrr=v=>v==null?'—':!isFinite(v)?'<em>нет зак.</em>':pc(v);
+/* 15.11 Андрей «кнопка остановить где и снаружи»: кнопки «Пауза / Запустить» и «Стоп» (стоит по графику или лимиту — остановить до ручного запуска) —
+   одни и те же в строке кампании листа товара, в карточках раздела «Кампании» */
+function rkGoB(r,nm){const go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
+  const gs=r.st===11&&rkSt(r).w?`<span class="rkgo pz${UPR?'':' nolk'}" role="button" data-act="st" data-to="stop" data-rk="${r.id}|${nm}" aria-label="Остановить: ${esc(r.name)}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Стоп</span>`:'';
+  return gs+(go?`<span class="rkgo ${go}${UPR?'':' nolk'}" role="button" data-act="st" data-rk="${r.id}|${nm}" aria-label="${go==='pz'?'Поставить на паузу':'Запустить'}: ${esc(r.name)}"><svg viewBox="0 0 24 24" fill="${go==='pz'?'none':'currentColor'}" stroke="currentColor" stroke-width="${go==='pz'?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${go==='pz'?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${go==='pz'?'Пауза':'Запустить'}</span>`:'');
+}
 function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm],tt=TOV[nm],or=tt?sum(tt.o&&tt.o.r,ix):0,d=or?100*a.s/or:(a.s?Infinity:null),lv=rkSt(r).w;
   const b=e.bd,mb=lv&&r.mar&&r.mar.bid&&r.mar.bid.length,own=lv&&bdOn(b)&&b.src==='svoi',low=r.bud!=null&&(r.bud<=0||(r.bud<300&&lv)),go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
   const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':'')
@@ -3470,7 +3482,7 @@ function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm
     +(ourGr(r)&&ourGr(r).on?'<span class="pill g"><i></i>график показа</span>':r.mar&&r.mar.gr?'<span class="pill g"><i></i>график Марплы</span>':'')
     +(r.bud!=null?`<span class="pill ${low?'b':'g'} num">остаток ${rub(r.bud)}</span>`:'')
     +(mb?'<span class="pill lv mr bdl"><i></i>биддер Марплы</span>':own?`<span class="pill a lv${b.mode==='sam'?'':' sv'} bdl"><i></i>биддер: ${b.mode==='sam'?'сам':'совет'}</span>`:'');
-  const gb=go?`<span class="rkgo ${go}${UPR?'':' nolk'}" role="button" data-act="st" data-rk="${r.id}|${nm}" aria-label="${go==='pz'?'Поставить на паузу':'Запустить'}: ${esc(r.name)}"><svg viewBox="0 0 24 24" fill="${go==='pz'?'none':'currentColor'}" stroke="currentColor" stroke-width="${go==='pz'?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${go==='pz'?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${go==='pz'?'Пауза':'Запустить'}</span>`:'';
+  const gb=rkGoB(r,nm);
   return `<button class="rk rkr press" type="button" data-rk="${r.id}|${nm}"><div class="t">${ta?`<span class="ph" data-nm2="${nm}" title="Открыть товар"${foto(ta)}></span>`:''}<span class="rkn"><b>${esc(r.name)}</b>${stHtml(r)}</span>${gb}</div>
    ${m?`<div class="m">${m}</div>`:''}
    <div class="k kpi"><div><b class="num ${dcls(d)}">${rkDrr(d)}</b><span>ДРР от всего</span></div><div><b class="num">${rkDrr(a.drrk)}</b><span>ДРР РК</span></div><div><b class="num ${sbad(a.s,a.q)}">${rkMoney(a.s)}</b><span>траты</span></div><div><b class="num">${rkU(f0(a.q),' шт')}</b><span>заказы РК</span></div></div></button>`}
@@ -3640,11 +3652,15 @@ async function checkUpr(){if(!UPR)return;try{const e=await (await fetch('upr.enc
 
 /* ───────── действия (каждое — лист подтверждения «было → стало») ───────── */
 const numv=id=>{const e=$('#'+id);return e?parseFloat(String(e.value).replace(/\s/g,'').replace(',','.')):NaN};
-function actStatus(id,nm){if(!need())return;const r=RK[id],to=r.st===9?'pause':'start';
-  sheet(()=>({t:to==='pause'?'Поставить на паузу?':'Запустить кампанию?',s:esc(r.name),h:`<div class="cmp"><div><small>Сейчас</small><b>${rkSt(r).t}</b></div><div class="ar">→</div><div><small>Станет</small><b>${to==='pause'?'пауза':'идёт'}</b></div></div>
+/* 15.11 Андрей «кнопка остановить где и снаружи»: to='stop' — остановить до ручного запуска (идёт — пауза; стоит по графику или лимиту — снять с них).
+   Пауза и остановка с сайта держатся: свой график и лимит дня кампанию сами не включат, пока её не запустят */
+const rkHold=r=>{const g=ourGr(r),l=ourLim(r);return !!((g&&g.on)||(l&&l.on))};
+function actStatus(id,nm,to0){if(!need())return;const r=RK[id],to=to0==='stop'?'stop':r.st===9?'pause':'start';
+  sheet(()=>({t:to==='stop'?'Остановить кампанию?':to==='pause'?'Поставить на паузу?':'Запустить кампанию?',s:esc(r.name),h:`<div class="cmp"><div><small>Сейчас</small><b>${rkSt(r).t}</b></div><div class="ar">→</div><div><small>Станет</small><b>${to==='start'?'идёт':to==='stop'?'стоит, пока не запустите':'пауза'}</b></div></div>
+   ${to!=='start'&&rkHold(r)?'<div class="note">Свой график и лимит дня её сами не включат, пока не нажмёте «Запустить».</div>':''}
    ${to==='start'&&r.bud!=null&&r.bud<50?`<div class="note w">Бюджет ${rub(r.bud)} — ВБ может не запустить. Сначала пополните.</div>`:''}${r.mar&&r.mar.gr?'<div class="note w">Кампания в графике Марплы: он включит или выключит её по своим часам.</div>':''}
    ${to!=='start'||!noLim(r)?'':`<div class="marb"><b>У кампании нет лимита расхода в день</b><span>Задайте лимит, чтобы после запуска она не потратила лишнего.</span><button class="btn sm press" type="button" id="slim">Задать лимит</button></div>`}
-   ${RUNBOX(to==='pause'?'Поставить на паузу':'Запустить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to});const sl=$('#slim');if(sl)sl.onclick=()=>actLim(id,nm)}}),true)}
+   ${RUNBOX(to==='stop'?'Остановить':to==='pause'?'Поставить на паузу':'Запустить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to});const sl=$('#slim');if(sl)sl.onclick=()=>actLim(id,nm)}}),true)}
 /* 14.11 Андрей: «те, кто без трат, — чтобы когда начать её, показало: задай лимит». Лимита нет ни своего, ни ВБ, ни в Марпле */
 function noLim(r){const ol=ourLim(r);return !(ol&&ol.on)&&!(r.lw&&r.lw.on)&&!(r.mar&&r.mar.lim&&r.mar.lim.max>0)}
 function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Object.keys(e.b||{});let pl=pls[0];
