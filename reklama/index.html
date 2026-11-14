@@ -208,6 +208,7 @@ mark.hit{background:var(--acc-soft);color:inherit;border-radius:4px;padding:0 1p
 .totov{display:flex;align-items:center;gap:11px;width:100%;margin-top:10px;padding:8px 12px 8px 8px;border:0;border-radius:14px;background:var(--card2);text-align:left;cursor:pointer;color:var(--ink)}
 .totov .ph{width:40px;height:52px;border-radius:9px;background:var(--fill) center/cover no-repeat;flex:none}
 .totov div{min-width:0;flex:1}.totov small{display:block;font-size:11.5px;color:var(--ink3);font-weight:600}.totov b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkupd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;font-size:12.5px}.rkupd .lnk{font-weight:700}
 .totov i{font-style:normal;color:var(--acc);font-weight:700;font-size:13.5px;white-space:nowrap}
 .fr .kb{border:0;background:var(--fill);border-radius:8px;padding:5px 8px;font:inherit;font-weight:650;color:var(--ink);cursor:pointer;white-space:nowrap}.fr .kb.own{background:var(--acc-soft);color:var(--acc)}.fr .kb small{display:block;font-size:10.5px;font-weight:600;color:var(--ink3)}
 /* ── вкладки: снизу на телефоне, сверху на широком экране ── */
@@ -1659,6 +1660,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const bx=(lab,z,pz,pl)=>z?drrBox(lab,z.v,pz&&pz.v,pl,'расход '+kr(z.x.s)+' ₽ · заказы товара '+f0(z.oq)+' шт<br>с этой рекламы '+f0(z.x.q)+' шт'):'';
   let h=`<div class="m" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">${stHtml(r)}<span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${r.bud!=null?`<span class="pill num ${r.bud<300&&st.w?'w':''}">остаток бюджета ${f0(r.bud)} ₽</span>`:''}${minPill(e)}${ostPills(t)}</div>`;
   /* 14.11 Андрей: «сделать переход из РК в товар тоже» — строкой с фото, а не мелкой меткой */
+  /* 14.11 Андрей: «обновить РК нужно чтобы» — быстрый сбор прямо из листа кампании, после него остаёмся здесь же */
+  h+=`<div class="rkupd"><span class="muted num">данные на ${D.at?D.at.slice(11,16)+' МСК':'—'}</span><button class="lnk press${lk}" type="button" data-act="rkref">⟳ Обновить</button></div>`;
   if(t)h+=`<button class="totov press" type="button" data-nm2="${nm}"><span class="ph"${foto(t)}></span><div><small>Товар кампании</small><b>${esc(t.art)}</b></div><i>к товару ›</i></button>`;
   if(r.bud!=null&&r.bud<300&&st.w)h+=`<div class="note w">Бюджета осталось ${rub(r.bud)} — кампания скоро встанет.</div>`;
   if(ostNet(t)&&st.w)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.</div>';
@@ -1768,7 +1771,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='bally'){const t=TOV[ds.nm];if(t&&t.bl)openBally(t.bl.id);else actBally(+ds.nm)}else if(a==='ballystop')actBallyStop(+ds.id);
   else if(a==='unlock')unlock();else if(a==='lockupr'){UPR=null;RS.del('upr');if(ES){ES.close();ES=null}render(true);toast('Управление на этом устройстве выключено')}
   else if(a==='ref-read'){closeAll();$('#refBtn').classList.add('spin');reload().then(()=>toast('Показаны данные на '+D.at.slice(11,16)+' МСК')).catch(e=>toast(e.message)).then(()=>$('#refBtn').classList.remove('spin'))}
-  else if(a==='ref-fast')actRefresh('fast');else if(a==='ref-full')actRefresh('full');else if(a==='ref-mesta')actRefresh('mesta');
+  else if(a==='ref-fast'||a==='rkref')actRefresh('fast');else if(a==='ref-full')actRefresh('full');else if(a==='ref-mesta')actRefresh('mesta');
   else if(a==='nstsave'){if(!need())return;const n=nst();$$('[data-nst]').forEach(b=>{const k=b.dataset.nst,v=b.getAttribute('aria-checked')==='true';if(k==='on')n.on=v;else n[k].on=v});
     $$('[data-nstv]').forEach(i=>{const [k,f]=i.dataset.nstv.split('.'),v=parseFloat(i.value);if(isFinite(v))n[k][f]=v});
     sheet(()=>({t:'Сохранить настройки уведомлений?',s:'',h:`<div class="note">Сторож начнёт присылать по новым правилам со следующей проверки.</div>${RUNBOX('Сохранить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'nst',nst:n})}}),true)}}
@@ -1823,7 +1826,7 @@ async function onMsg(m){if(!m||m.event!=='message'||SEEN.has(m.id))return;SEEN.a
   try{const [a,b]=String(m.message).split('.'),r=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(a)},await ckey(),b64u8(b))));if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch)applyPatch(r.patch)}catch(e){}}
 function listen(){if(ES||!UPR)return;try{ES=new EventSource('https://ntfy.sh/'+UPR.res+'/sse');ES.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch(x){}};ES.onerror=()=>{}}catch(e){ES=null}}
 async function pollRes(){try{const r=await fetch('https://ntfy.sh/'+UPR.res+'/json?poll=1&since=3m',{cache:'no-store'});if(!r.ok)return;for(const l of (await r.text()).split('\n'))if(l.trim())try{await onMsg(JSON.parse(l))}catch(e){}}catch(e){}}
-async function run(cmd,done){const box=$('#runbox');if(!box)return;
+async function run(cmd,done){const box=$('#runbox');if(!box)return;const my=SHS[SHS.length-1];   /* 14.11 Андрей: «после включения РК выкинуло в раздел» — помним свой лист подтверждения */
   box.innerHTML='<div class="prog"><span class="sp"></span><span id="runtx">Отправляю команду…</span></div>';
   try{listen();const id=await send(cmd);const tx=$('#runtx');if(tx)tx.textContent='Жду сторожа…';
     const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{cl();rej(new Error('Сторож не ответил за '+(cmd.k==='refresh'?'время сбора':/^bally/.test(cmd.k)?'5 минут':'2 минуты')+'. Команда могла выполниться — загляните в журнал правок чуть позже.'))},cmd.k==='refresh'?(cmd.mode==='full'?50:8)*60000:/^bally/.test(cmd.k)?300000:120000);
@@ -1831,7 +1834,7 @@ async function run(cmd,done){const box=$('#runbox');if(!box)return;
       WAIT[id]=m=>{if(m.st==='work'){const e=$('#runtx');if(e)e.textContent=m.msg||'Выполняю…';return}cl();res(m)}});
     if(r.st!=='done')throw new Error(r.msg||'Не получилось');
     const b2=$('#runbox');if(b2)b2.innerHTML=`<div class="note g">✓ ${esc(r.msg||'Готово')}</div>`;
-    applyPatch(r.patch);toast(r.msg||'Готово');setTimeout(()=>{if(done)done(r);else{back()}},1300)
+    applyPatch(r.patch);toast(r.msg||'Готово');setTimeout(()=>{if(done)done(r);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},1300)
   }catch(e){const b2=$('#runbox');if(b2)b2.innerHTML=`<div class="note b">${esc(e.message)}</div><div class="acts" style="grid-template-columns:1fr"><button class="btn gray press" type="button" data-act="back">Закрыть</button></div>`}}
 /* команда без листа «было → стало»: заметка и замер места ничего в кабинете не меняют — ответ ждём прямо на месте */
 async function quick(cmd,onWork,ms){listen();const id=await send(cmd);
@@ -1970,7 +1973,7 @@ function actRefresh(mode){if(!need())return;
     sheet(()=>({t:'Снять места сейчас',s:'ручной замер, как «прожим» в Марпле',h:`<div class="note">Сторож откроет выдачу ВБ в фоновой вкладке и снимет места по всем главным фразам живых кампаний — обычно это 150–200 фраз. Сам такой замер идёт раз в 3 часа, а по фразам биддера — каждый час. Идёт в фоне около 20 минут: страницу можно закрыть, места появятся сами; сколько фраз и минут выйдет в этот раз, сторож ответит сразу. В кабинетах ничего не меняется.</div>${RUNBOX('Запустить замер')}`,
       after:()=>{$('#okBtn').onclick=()=>run({k:'mesta'},()=>closeAll())}}),true);return}
   sheet(()=>({t:mode==='full'?'Собрать всё заново':'Собрать сейчас',s:esc(D.kab.kab1?'оба кабинета':K.name),h:`<div class="note">${mode==='full'?'Полный сбор: 31 день статистики, запросы с местами, минус-фразы, воронка, акции, остатки. Идёт 15–30 минут — страницу можно закрыть.':'Быстрый сбор: статусы, ставки, бюджеты, лимиты, цены, статистика и запросы за 3 дня. Около двух минут.'} Заодно в журнал попадёт то, что меняли в кабинете ВБ. Сам такой сбор идёт каждые 30 минут.</div>${RUNBOX('Запустить сбор')}`,
-    after:()=>{$('#okBtn').onclick=()=>{$('#refBtn').classList.add('spin');run({k:'refresh',mode},()=>{$('#refBtn').classList.remove('spin');reload().then(()=>{closeAll();toast('Данные обновлены')}).catch(()=>{closeAll()})})}}}),true)}
+    after:()=>{$('#okBtn').onclick=()=>{$('#refBtn').classList.add('spin');const my=SHS[SHS.length-1];run({k:'refresh',mode},()=>{$('#refBtn').classList.remove('spin');const fin=()=>{const i=SHS.indexOf(my);if(i>=0)SHS.splice(i,1);const u=SHS[SHS.length-1];if(u&&u.ref){SHS.pop()}try{drawSheet()}catch(e){closeAll()}};reload().then(()=>{fin();toast('Данные обновлены')}).catch(fin)})}}}),true)}
 
 /* ───────── баллы за отзывы (Каб 1): акции читаются из кабинета; создать и остановить — сторож через кабинет, после подтверждения ───────── */
 const BLK=1.2806;   // 1 балл покупателю = 1,2806 ₽: комиссия ВБ 23% и НДС 22% от комиссии
