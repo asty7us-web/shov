@@ -1597,6 +1597,13 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .tw.dtw tr.dsub td{font-size:13px;color:var(--ink3);background:color-mix(in srgb,var(--acc) 4%,transparent)}
 .tw.dtw .dsl{padding-left:16px}
 
+/* 15.11 Андрей: товары склейки свёрнуты, стрелка справа раскрывает; вторая строка общих — по панели */
+.skc .skhw{display:flex;align-items:center;gap:4px}.skc .skhw .skh{flex:1;min-width:0}
+.skc .skx{flex:none;display:grid;place-items:center;width:40px;height:40px;margin-right:-6px;border:0;border-radius:12px;background:var(--fill);cursor:pointer;color:var(--ink3)}
+.skc .skx svg{transform:rotate(90deg);transition:transform .2s ease}.skc.skop .skx svg{transform:rotate(-90deg)}
+.skc .skls{display:none}.skc.skop .skls{display:block}
+.skc .kpi.skpn{margin-top:6px}.skc .skpl{font-size:12px;margin:4px 2px 2px}
+
 </style>
 </head>
 <body>
@@ -2497,6 +2504,12 @@ function dayTbl(kind,ix,get,spl){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['
 /* ───────── Склейки ───────── */
 function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0,a:0};for(const t of L){const x=pAgg(t,ix);a.s+=x.s;a.or+=x.or;a.oq+=x.oq;a.q+=x.q;a.c+=x.c;a.v+=x.v;a.sp+=x.sp;a.a+=x.a}   // a — корзины (для таблицы по дням)
   a.drr=a.or?100*a.s/a.or:(a.s?Infinity:null);a.drrk=a.sp?100*a.s/a.sp:(a.s?Infinity:null);a.cpa=a.oq?a.s/a.oq:null;return a}
+/* 15.11: панель склейки — ДРР и маржа по продажам товаров, продажи суммой; выкуп по воронке карточки за выбранный период */
+function sklPan(g){const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w');let s=0,sd=0,dd=0,sm=0,mm=0;
+  for(const x of g.L){const z=x.t.pan&&x.t.pan[k];if(!z||!(z[0]>0))continue;s+=z[0];if(z[1]!=null){sd+=z[0];dd+=z[0]*z[1]}if(z[2]!=null){sm+=z[0];mm+=z[0]*z[2]}}
+  if(!s)return null;const lb=D.pan?(k==='m'?D.pan.ml:k==='w2'?D.pan.w2l:D.pan.wl):'';
+  return {s,d:sd?dd/sd:null,m:sm?mm/sm:null,l:(k==='m'?'':'')+(typeof panWk==='function'&&k!=='m'?panWk(lb):lb||(k==='m'?'месяц':k==='w2'?'2 недели':'неделя'))}}
+function sklVyk(g){let o=0,b=0;const ix=PI();for(const x of g.L){const f=x.t.f;if(!f||!f.o||!f.b)continue;for(const i of ix)if(f.has?f.has[i]:1){o+=f.o[i]||0;b+=f.b[i]||0}}return o?100*b/o:null}
 function sklGroups(){const ix=PI(),G=new Map();
   for(const t of K.tov){if(!t.imt)continue;let g=G.get(t.imt);if(!g)G.set(t.imt,g={imt:t.imt,L:[]});g.L.push({t,a:pAgg(t,ix),w:wrk(t).length})}
   const out=[];
@@ -2517,12 +2530,21 @@ function vSkl(){const rows=sklRows();let h=fresh();
   if(!rows.length)return h+'<div class="empty"><b>Склеек нет</b>В этом кабинете нет склеек из двух и больше товаров — или поиск ничего не нашёл.</div>';
   h+='<div class="list">';
   for(const g of rows){const a=g.a;
-    h+=`<div class="card skc"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
-        <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽')}</div></div>${CHEV}</button>
+    /* 15.11 Андрей (кадр «Склейки»): «изначально все ниже товары склейки свёрнуты и стрелочку справа раскрыть список, также добавь дрр по панели, маржа по панели,
+       продажи и проц выкупа в общие». Шапка (фото, название) — лист склейки; стрелка справа — раскрыть / свернуть товары (S.sklOp, на время открытой страницы).
+       Вторая строка общих цифр: ДРР и маржа по панели (лист «SKU»: t.pan.w|w2|m = [продажи ₽, ДРР доля, маржа доля], среднее по продажам товаров склейки;
+       период — как в листе товара: «30 дн» — месяц, «14 дн» — 2 недели, иначе неделя), продажи по панели, ₽; выкуп — выкупили ÷ заказали за выбранный период
+       по воронке карточки (свежие заказы ещё не выкуплены, поэтому за короткий период ниже настоящего) */
+    const op=!!(S.sklOp&&S.sklOp.has(String(g.imt))),pz=sklPan(g),vk=sklVyk(g);
+    h+=`<div class="card skc${op?' skop':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
+        <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽')}</div></div></button>
+        <button class="skx press" type="button" data-act="sklx" data-imt="${g.imt}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></div>
       <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num">${kr(a.s)} ₽</b><span>реклама</span></div><div><b class="num">${f0(a.oq)} шт</b><span>заказы</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
-      <table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>ВБ · свой, шт</th></tr></thead><tbody>`
+      <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
+      <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп за '+S.per+' дн. по воронке карточки'}</div>
+      <div class="skls"><table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>ВБ · свой, шт</th></tr></thead><tbody>`
       +g.L.map(x=>`<tr data-nm="${x.t.nm}"><td>${tcell(x.t,esc(x.t.art)+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))}</td><td class="num ${dcls(x.a.drr)}"><b>${x.a.s||x.a.or?drrT(x.a.drr):'—'}</b></td><td class="num">${x.a.s?f0(x.a.s):'—'}</td><td class="num">${f0(x.a.oq)}</td><td class="num">${ostCell(x.t.fbo)}<span class="muted"> · </span>${ostCell(x.t.fbs)}</td></tr>`).join('')
-      +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div>`}
+      +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div></div>`}
   return h+'</div>'}
 function openSkl(imt){if(typeof shMark==='function')shMark('skl',imt);sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===String(imt));if(!g)return {t:'Склейка',s:'',h:'<div class="empty">Склейки нет в данных.</div>'};
   const L=g.L.map(x=>x.t),ix=PI(),pp=PP(),a=g.a,b=pp?sklAgg(L,pp):null,td=sklAgg(L,[T]),memo={},gm=i=>memo[i]||(memo[i]=sklAgg(L,[i]));
