@@ -1370,6 +1370,10 @@ table.zon tr:last-child td{font-weight:700}
 /* 15.11 Андрей «значки которых не увидел»: значок ВБ на «Кампания ↗» / «Товар ↗» — свой элемент (у <i> в плашке правило .pill i рисовало белый кружок) */
 .rkchips a.rklk .rkw{display:inline-block;width:13px;height:13px;margin-right:4px;flex:none;background:var(--wbi) center/contain no-repeat}
 
+/* 15.11 «Отзывы» в листах товара и кампании: три плитки в один ряд */
+.tiles.otz3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.tiles.otz3 .tile .d{white-space:normal}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2241,9 +2245,17 @@ function vCeny(){if(typeof SEGCB==='object')SEGCB.cns=v=>{S.cns=v;RS.set('cns',v
 /* ───────── записи журнала ───────── */
 const WHO={'сервис':['s','сервис'],'кабинет':['k','кабинет'],'чат':['z','чат'],'марпла':['','заметка'],'заметка':['','заметка']};
 function istRows(nm,cid){return (D.ist||[]).filter(z=>z.kab===S.kab&&(S.ist.avto||!z.avto)&&(nm?z.nm===nm:true)&&(cid?z.cid===cid:true))}
-function evHtml(z,full,bez){const w=WHO[z.kto]||['',z.kto||''],t=z.nm&&TOV[z.nm],r=z.cid&&RK[z.cid];
-  const ch=z.bylo&&z.stalo?` <span class="muted">${esc(z.bylo)}</span> → <b>${esc(z.stalo)}</b>`:z.stalo?` <b>${esc(z.stalo)}</b>`:z.bylo?` <span class="muted">${esc(z.bylo)}</span>`:'';
-  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(z.chto)}${ch}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small>${esc(r.name)}</small>`:''}</div></div>`}
+/* 15.11 Андрей на кадр заметок: «Вот это все надо короче проще и яснее» — запись короче: без скобок «(до скидки…, скидка…)», копейки цены округлены,
+   «вход в акцию «…»» — мелко после стрелки, «перенос из Марплы … → свой …» — «Из Марплы: лимит 155 ₽», метки «сервис» нет (это и так наш сайт) */
+const evCut=v=>String(v||'').replace(/\s*\([^)]*\)/g,'').replace(/(\d[\d\s]*),\d+\s*₽/g,m=>f0(Math.round(parseFloat(m.replace(/[\s₽]/g,'').replace(',','.'))))+' ₽').trim();
+function evShort(z){let ch=String(z.chto||''),by=evCut(z.bylo),st=evCut(z.stalo),tl='';
+  const m=ch.match(/^(.+?)\s+—\s+(.+)$/);if(m){ch=m[1];tl=m[2]}
+  if(/^перенос из Марплы/i.test(ch)){ch='Из Марплы';by='';st=st.replace(/(^|;\s*)сво[йяеё]\s+/gi,'$1')}
+  ch=ch.replace(/^ставка \(([^)]*)\)/i,'ставка, $1');
+  return {ch:ch.charAt(0).toUpperCase()+ch.slice(1),by,st,tl}}
+function evHtml(z,full,bez){const w=WHO[z.kto]||['',z.kto||''],t=z.nm&&TOV[z.nm],r=z.cid&&RK[z.cid],e=evShort(z),sv=z.kto==='сервис';
+  const ch=e.by&&e.st?` <span class="muted">${esc(e.by)}</span> → <b>${esc(e.st)}</b>`:e.st?` <b>${esc(e.st)}</b>`:e.by?` <span class="muted">${esc(e.by)}</span>`:'';
+  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez||sv?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(e.ch)}${ch}${e.tl?` <small class="muted">${esc(e.tl)}</small>`:''}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small>${esc(r.name)}</small>`:''}</div></div>`}
 /* ───────── Ещё ───────── */
 const NST_DEF={on:false,bud:{on:true,v:150},   // как в strazh.py: пока человек не включил — бот молчит
 lim:{on:true},stop:{on:true},pos:{on:true,v:10},drr:{on:true,v:30,min:500},klik:{on:true,v:60},lk:{on:false},ak:{on:true},tok:{on:true}};
@@ -2619,7 +2631,8 @@ function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i}
 /* последние правки — сразу в листе, без перехода в отдельный раздел; «показать ещё» раскрывает тут же */
 /* 15.11 Андрей «что меняли просил не выводить пополнения сюда», «и совет там тоже не надо, только реальные изменения»: в «Что меняли» листов товара и кампании
    нет пополнений бюджета и включения биддера «советом» (ставку он не меняет); весь журнал — по-прежнему в разделе «Ещё» */
-const chgReal=z=>!/пополн/i.test(z.chto||'')&&!(/^биддер$/i.test(z.chto||'')&&/^совет/i.test(String(z.stalo||'')));
+/* 15.11 (позже) Андрей на кадр заметок: «советы не надо тем более такие» — любая запись биддера, где «совет» до или после, не показывается */
+const chgReal=z=>!/пополн/i.test(z.chto||'')&&!(/^биддер$/i.test(z.chto||'')&&/совет/i.test(String(z.stalo||'')+' '+String(z.bylo||'')));
 function chgBlock(nm,cid){const L=istOf(nm,cid,0).filter(chgReal),key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:4;
   return `<div class="hrw"><h3>Что меняли</h3>${L.length>4?`<button class="lnk" type="button" data-act="chgmore" data-key="${key}">${open?'свернуть':'показать ещё '+Math.min(L.length-4,36)}</button>`:''}</div>`
     +(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'   /* в листе кампании её название под каждой правкой не повторяем (стиль .evrk) */+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок за 4 месяца не было.</div>')}
@@ -2680,7 +2693,7 @@ function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(chgReal).map(z=>[z,0]
     +(L.length?`<div${cid?' class="evrk"':''}>${h}</div>`+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок и заметок пока нет.</div>')}
 function openNotes(nm,cid){if(!nm&&!cid){openIst();return}   // общего списка заметок всех товаров нет — открываем журнал правок
   let draft='';SEGCB.ntf=v=>{S.ntf=v;redraw()};
-  sheet(()=>{const my=istOf(nm,cid,1),hi=istOf(nm,cid,0),f=S.ntf||'my',r=cid&&RK[cid],t=nm&&TOV[nm],isN=z=>z.kto==='заметка'||z.kto==='марпла';
+  sheet(()=>{const my=istOf(nm,cid,1),hi=istOf(nm,cid,0).filter(chgReal),f=S.ntf||'all',r=cid&&RK[cid],t=nm&&TOV[nm],isN=z=>z.kto==='заметка'||z.kto==='марпла';
     const L=(f==='my'?my:f==='ist'?hi:my.concat(hi)).slice().sort((a,b)=>a.t<b.t?1:a.t>b.t?-1:0),show=L.slice(0,80);
     return {t:'Заметки',s:esc(r?r.name:t?t.art:K.name),h:`<div class="ntrow"><input class="inp" id="nt" maxlength="300" placeholder="Написать заметку" autocomplete="off" value="${esc(draft)}"><button class="btn press" type="button" id="ntgo"${draft.trim()?'':' disabled'}>Добавить</button></div>
       <div id="ntst" class="muted tnote" style="min-height:16px"></div>
@@ -2689,7 +2702,7 @@ function openNotes(nm,cid){if(!nm&&!cid){openIst();return}   // общего с�
         :`<div class="note" style="margin-top:8px">${f==='ist'?'Правок за 4 месяца не было.':'Заметок пока нет — напишите первую в поле выше.'}</div>`),
       after:()=>{const inp=$('#nt'),go=$('#ntgo');
         const save=tx=>{tx=String(tx||'').trim();if(!tx||!need())return;const st=$('#ntst');st.className='muted tnote';st.textContent='Сохраняю…';go.disabled=true;
-          quick({k:'note',nm:nm?+nm:null,cid:cid?+cid:null,text:tx.slice(0,300)}).then(()=>{draft='';if(S.ntf==='ist')S.ntf='my';toast('Заметка сохранена');redraw()}).catch(e=>{const s2=$('#ntst'),g2=$('#ntgo');if(g2)g2.disabled=false;if(s2){s2.textContent=e.message;s2.className='bad tnote'}})};
+          quick({k:'note',nm:nm?+nm:null,cid:cid?+cid:null,text:tx.slice(0,300)}).then(()=>{draft='';if(S.ntf==='ist')S.ntf='all';toast('Заметка сохранена');redraw()}).catch(e=>{const s2=$('#ntst'),g2=$('#ntgo');if(g2)g2.disabled=false;if(s2){s2.textContent=e.message;s2.className='bad tnote'}})};
         inp.oninput=()=>{draft=inp.value;go.disabled=!inp.value.trim()};go.onclick=()=>save(inp.value);
         inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();save(inp.value)}}}}},true)}
 
@@ -3003,7 +3016,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 Андрей: «помимо представленности статистика в гистограммах надо еще показать табличного типа как в марпле» — таблица по дням под гистограммой
      (dayTbl пишет сосед в d_tabl.js: свои столбцы и сортировка) */
   if(typeof dayTbl==='function')h+=dayTbl('tov',cx,i=>{const x=gm(i);return {v:x.v,c:x.c,a:x.a,q:x.q,s:x.s,sp:x.sp,or:x.or,oq:x.oq}});
-  h+=chgBlock(nm,0);
+  h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
+  h+=chgNtBlock(nm,0);   // 15.11 Андрей «наружу тогда давай вместе»: правки и заметки товара одним списком, как в кампании
   const sk=t.imt?K.tov.filter(z=>z.imt===t.imt):[];
   if(sk.length>1){const sa=sklAgg(sk,ix);h+=`<div class="hrw"><h3>Склейка</h3></div><button class="akr press" type="button" data-skl="${t.imt}" style="width:100%;border:0;background:var(--card2);border-radius:14px;padding:11px 13px;text-align:left;cursor:pointer"><div><b>${sk.length} товаров в склейке</b><span class="num">реклама ${kr(sa.s)} ₽ · заказы ${f0(sa.oq)} шт ${perZa()}</span></div><div class="pr num ${dcls(sa.drr)}">${pc(sa.drr)}<small>ДРР склейки</small></div></button>`}
   /* 14.11 Андрей 08:05: «над акции динамику цен» — «Цена по дням» прямо над «Акции ВБ» (прежние два блока ниже — «Скидка ВБ (СПП)» и строка цен — сведены в него) */
@@ -3030,7 +3044,6 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
      ${K.bally?`<button class="ab press${UPR||t.bl?'':' nolk'}" type="button" data-act="bally" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><b>Баллы за отзывы</b><span>${t.bl?'идёт: '+(t.bl.got||0)+' из '+t.bl.cnt+' отзывов':'баллы покупателю за отзыв'}</span></button>`:''}</div>`;
-  h+=notesBlock(nm,0);
   return {ph:`<span class="shph"><span class="ph"${foto(t)}></span></span>`,t:esc(t.art),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+`${esc(t.subj||'товар')} · № ${t.nm} · ${esc(K.name).replace(/ /g,'&nbsp;')}`,h}}   // 14.11 (четвёртый заход): фото и в шапке — «Всегда картинка должна быть»
 /* кампании в листе товара (14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее»): работающие — сразу под главными цифрами, заголовок крупный,
    с числом; строки рисует rkRow (e_sheets.js). Сводка «все работающие вместе» — только когда она отличается от главных цифр над ней (часть трат за период
@@ -3135,7 +3148,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   const buy=i=>pdm[i]?` · у покупателя <b>${rub(pdm[i][2])}</b>`:' · заказов не было';
   /* 15.11 Андрей «тускло, непонятно вообще ничего»: столбики яркие, цена дня — внутри каждого столбика (вертикально), день смены цены — оранжевый со стрелкой,
      день без данных — серый; столбики выше, самый низкий — не короче половины */
-  const ch=chart({ix:cx,h:HL.length?124:150,inn:i=>{const v=vOf(i);return v==null?'':f0(v)},mh:HL.length?MHp:undefined,mxv:HL.length?top0:undefined,hl,val:i=>{const v=vOf(i);return v==null?null:v-base},col,dot:i=>!!chg(i),
+  const ch=chart({ix:cx,h:HL.length?124:128,inn:i=>{const v=vOf(i);return v==null?'':f0(v)},mh:HL.length?MHp:88,mxv:HL.length?top0:undefined,hl,val:i=>{const v=vOf(i);return v==null?null:v-base},col,dot:i=>!!chg(i),
     top:i=>{if(vOf(i)==null)return '';const c=md==='f'?chg(i):0,k=cx.indexOf(i),l=(i===iMx||i===iMn)&&!(Math.abs(iMx-iMn)===1&&i===Math.min(iMx,iMn))?   /* наибольшая и наименьшая в соседних днях — подпись одна, у позднего дня (кадр 14.11: «6 4006 350») */`<span class="${k<2?'e0':k>cx.length-3?'e1':''}">${fv(vOf(i))}</span>`:'';return (c?`<span class="pca">${c<0?'▼':'▲'}</span>`:'')},   // у крайних дней подпись сдвинута внутрь — не наезжает на шкалу
     ax:md==='s'?undefined:{f:v=>{const x=v+base;return x>=10000?axNum(x):f0(x)},int:true},
     read:i=>{const c=chg(i),o=ov[i];
@@ -3261,6 +3274,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spl);
   /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
   if(t)h+=rkCenaAk(t,nm,cx);
+  if(t)h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
   /* 15.11 Андрей «пики трат по часам … в рекламу сервис» → «Да»: траты по часам — сразу за таблицей по дням (d_chasy.js) */
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
@@ -3283,7 +3297,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Кампания ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
@@ -3358,7 +3372,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='istall'){S.ist.k='all';S.ist.q='';openIst()}
   else if(a==='blnew'){S.blf='no';S.q='';sync();render()}
   else if(a==='rkvn'){S.rkf.vn=S.rkf.vn===ds.v?'':(ds.v||'');unfz();render(true)}   // «Требуют внимания»: показать только эти кампании / снова все
-  else if(a==='adinfo'){const m=(RK[rk[0]]||{}).mar||{};toast(m.ad?'Автопополнение ведёт Марпла: +'+f0(m.ad.add)+' ₽, когда остаток ниже '+f0(m.ad.min)+' ₽. Меняется в Марпле.':S.kab==='kab1'?'Автопополнение своё: каждые 5 минут, если кампания идёт и в бюджете 205 ₽ или меньше, кладём 1 000 ₽ и проверяем, что она идёт.':'Автопополнения у кампании нет. Пополнить — плитка «Остаток бюджета».')}
+  else if(a==='adinfo')openAdInfo(rk);   // 15.11 Андрей «Автопополнение не реагирует кнопка»: было всплывающее сообщение внизу — теперь лист, как у других плиток
   else if(a==='frmore'){FR.all=true;redraw()}
   else if(a==='frjam'){FR.jam=!FR.jam;redraw()}
   else if(a==='frclr'){FR.sel=new Set();redraw()}
@@ -3401,6 +3415,33 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
   new MutationObserver(()=>{const b=el.querySelector('.pseg .seg [aria-pressed="true"]'),s=b&&b.parentNode;if(s&&s.scrollWidth>s.clientWidth+2)s.scrollLeft=Math.max(0,b.offsetLeft-(s.clientWidth-b.offsetWidth)/2)}).observe(el,{childList:true});
   /* «Требуют внимания» в «Кампаниях»: нажали «Работают / На паузе / Все» в шапке — отбор снимается (раньше общего обработчика, он перерисует список) */
   document.addEventListener('click',e=>{if(S.rkf.vn&&e.target.closest&&e.target.closest('[data-seg="rkf"] button')){S.rkf.vn='';unfz()}},true)})();
+
+/* 15.11 Андрей «Автопополнение не реагирует кнопка»: плитка открывает лист — как работает, остаток сейчас, последние пополнения кампании, «Пополнить сейчас».
+   Сумму и порог сайт не меняет (их держит wb_rk_popolnenie, правит К по слову Андрея) — так и пишем */
+function openAdInfo(rk){const r=RK[rk[0]];if(!r)return;const nm=rk[1]||Object.keys(r.nm)[0],m=r.mar||{},key=r.id+'|'+nm;
+  sheet(()=>{const L=istOf(0,r.id,0).filter(z=>/пополн/i.test(z.chto||'')).slice(0,5);
+    let kv,nt;
+    if(m.ad){kv=[['Кто пополняет','Марпла'],['Сколько','+'+f0(m.ad.add)+' ₽'],['Когда','остаток ниже '+f0(m.ad.min)+' ₽']];nt='Сумма и порог меняются в Марпле.'}
+    else if(S.kab==='kab1'){kv=[['Кто пополняет','наш сервис, сам'],['Сколько','+1 000 ₽'],['Когда','остаток 205 ₽ и меньше'],['Как часто','проверка каждые 5 минут'],['Какие кампании','только идущие, паузу не трогает']];nt='Поменять сумму или порог — напишите в «К».'}
+    else{kv=[['Автопополнение','нет'],['Почему','в Каб 2 не включали']];nt='Включить — только по вашему слову в «К».'}
+    kv.push(['Остаток сейчас',r.bud==null?'—':rub(r.bud)]);
+    const h=`<div class="kv">${kv.map(x=>`<span>${x[0]}</span><b>${x[1]}</b>`).join('')}</div>
+      <div class="hrw"><h3>Последние пополнения</h3></div>${L.length?'<div class="evrk">'+L.map(z=>evX(z,1)).join('')+'</div>':'<div class="note" style="margin-top:0">Пополнений этой кампании пока не было.</div>'}
+      <div class="note">${nt}</div>
+      <button class="btn press" type="button" data-act="dep" data-rk="${key}" style="width:100%;margin-top:12px">Пополнить сейчас</button>`;
+    return {t:'Автопополнение',s:esc(r.name),h}})}
+
+/* 15.11 Андрей «Ни в рк ни в товаре не наблюдаю ситуацию с отзывами в рекламе»: блок «Отзывы» в листах товара и кампании — оценка склейки,
+   сколько отзывов, плохих (1–3★) за 14 дней, плохих в первых трёх ленты, два последних отзыва. Данные — t.ot (sbor.py ← otzyvy.py ← кэш задачи
+   wb-otzyvy-negativ, раз в сутки ночью). Красным — плохой в первых трёх или 5+ плохих за 14 дней (как в отчётах маркетолога) */
+function otzBlock(t){const o=t&&t.ot;if(!o)return '';
+  const tp=o.top||0,b=o.b14||0,warn=tp>0||b>=5,st=v=>'★'.repeat(Math.max(0,Math.min(5,v)));
+  const tl=(l,v,sub,c)=>`<div class="tile${c||''}"><div class="l">${l}</div><div class="v num">${v}</div><div class="d num">${sub||'&nbsp;'}</div></div>`;
+  const last=(o.last||[]).map(x=>`<div class="ntl"><time class="num">${dm(x[1])}</time><span><b class="${x[0]<=3?'bad':'good'}">${st(x[0])}</b> ${esc(x[2])}</span></div>`).join('');
+  return `<div class="hrw"><h3>Отзывы</h3><span class="muted" style="font-size:12px">на ${o.at?dm(o.at.slice(0,10))+' '+o.at.slice(11,16):'—'}</span></div>`
+    +`<div class="tiles k4 otz3">${tl('Оценка',o.r!=null?String(o.r).replace('.',','):'—',o.n!=null?f0(o.n)+' отзывов':'')}${tl('Плохих',f0(b),'за 14 дн, 1–3★',b>=5?' b':'')}${tl('В топ-3',f0(tp),'плохих в начале',tp>0?' b':'')}</div>`
+    +(warn?`<div class="note b" style="margin:8px 0 0">${tp>0?'Плохой отзыв виден первым — реклама ведёт на него.':'Много плохих за 2 недели.'}</div>`:'')
+    +(last?`<div style="margin-top:8px">${last}</div>`:'')}
 
 /* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
    Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
@@ -3897,6 +3938,7 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
     return {t:'Ставка',s:esc(r.name),h:`${pls.length>1?seg('bidpl',pls.map(p=>[p,PLN[p]||p]),pl,'sm'):''}
      ${mn!=null?`<div class="mnl">мин. ставка <b class="num">${kop(mn)}</b><span>${cpm?'за 1000 показов':'за клик'}${cur<=mn?' · ставка сейчас такая':''}</span></div>`:''}
      <label class="fld"><span>Новая ставка, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ${kop(cur)}</span><input class="inp num" id="bv" inputmode="decimal" value="${f2(cur/100).replace(/\s/g,'')}"></label>
+     ${cur!=null&&!cpm?`<div class="chips">${[30,40,50,60,100].map(k=>`<button class="chip press" type="button" data-bv="${cur+k}">+ ${k<100?'0,'+k:'1 ₽'}</button>`).join('')}</div>`:''}<!-- 15.11 Андрей «Добавь варианты 30 40 50 60 1р + к ставке»: прибавка к ставке сейчас -->
      <div class="chips">${mn!=null?`<button class="chip press" type="button" data-bv="${mn}">мин. ставка ${kop(mn)}</button><button class="chip press" type="button" data-bv="${mn+(cpm?100:100)}">мин. + 1 ₽</button>`:''}${Object.entries(rc).filter(([k,v])=>v&&RL[k]).map(([k,v])=>`<button class="chip press" type="button" data-bv="${v}">${RL[k]} ${kop(v)}</button>`).join('')}</div>
      <div class="cmp"><div><small>Было</small><b class="num">${kop(cur)}</b></div><div class="ar">→</div><div><small>Станет</small><b class="num" id="bnew">${kop(cur)}</b></div></div>
      ${mb?'<div class="note w">Ставку ведёт биддер Марплы — он вернёт свою через несколько минут. Чтобы держалась ваша, выключите его в Марпле.</div>':bdOn(e.bd)&&e.bd.src==='svoi'&&e.bd.mode==='sam'?'<div class="note w">Ставку ведёт наш биддер в режиме «Сам» — при следующем расчёте он может поставить свою.</div>':''}
