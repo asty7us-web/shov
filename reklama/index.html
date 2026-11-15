@@ -1374,6 +1374,9 @@ table.zon tr:last-child td{font-weight:700}
 .tiles.otz3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .tiles.otz3 .tile .d{white-space:normal}
 
+/* 15.11 Андрей «дёргается»: «порядок прежний · пересортировать» висит над нижним меню и не сдвигает страницу (раньше вставал строкой над списком, всё съезжало на ряд вниз) */
+.chip.frz{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:40;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.28)}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2086,10 +2089,12 @@ function sync(){
   rb.title='Обновить данные · собраны '+(old2?dm(D.at.slice(0,10))+' в '+D.at.slice(11,16)+' МСК ('+ago+')':'в '+D.at.slice(11,16)+' МСК');rb.setAttribute('aria-label',rb.title);
   rb.querySelectorAll('.dot').forEach(e=>e.remove());if(warnN)rb.insertAdjacentHTML('beforeend','<i class="dot"></i>');
 }
-function render(keep){const y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
+function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card');for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
   $('#view').innerHTML=`<div class="view"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`
     +({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)()+'</div>';twFit();
-  if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
+  if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}
+    /* 15.11 Андрей «если сроки менять дёргается»: первая видимая карточка остаётся на том же месте экрана (порядок при смене срока держит FRZ) */
+    if(an){const c=document.querySelectorAll('#view .card')[an[0]];if(c){const d=c.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
 /* смена раздела: вперёд — страница уезжает влево, назад — вправо */
 function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render();return}const d=TABS.indexOf(tab)-TABS.indexOf(S.tab);
   smooth(d>0?'fwd':'back',()=>{S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();render()});K3.call('go',K3MAP[tab])}
@@ -2303,7 +2308,7 @@ function vEsh(){const n=nst(),w=(D.warn||[]).concat(K.mar_warn||[]),b=K.bal||{};
 const TBL={},FRZ={};
 const unfz=()=>{for(const k in FRZ)delete FRZ[k]};
 /* период сменили — строки остаются там же, где были: запоминаем порядок показанного списка; сбрасывается сортировкой, отбором, поиском */
-function freeze(){if(S.tab==='tov')FRZ.tov=tovRows().map(x=>x.t.nm);else if(S.tab==='rk')FRZ.rk=rkRows().map(x=>x.r.id+'|'+x.nm);else if(S.tab==='skl')FRZ.skl=sklRows().map(g=>g.imt)}
+function freeze(){if(S.tab==='tov')FRZ.tov=tovRows().map(x=>x.t.nm);else if(S.tab==='rk')FRZ.rk=rkRows().map(x=>x.r.id+'|'+x.nm);else if(S.tab==='skl'){const R=sklRows();FRZ.skl=R.map(g=>g.imt);FRZ.sklIn=new Map(R.map(g=>[g.imt,g.L.map(x=>x.t.nm)]))}}   // 15.11 Андрей «порядок все равно меняется»: товары внутри склейки тоже на своих местах
 function tblSt(id){const T0=TBL[id],s=RS.get('tb.'+id,null)||{},all=T0.cols.map(c=>c.k),kn=new Set(s.kn||[]),fx=all[0];
   const ord=(s.ord||[]).filter(k=>all.includes(k));for(const k of all)if(!ord.includes(k))ord.push(k);
   const hid=new Set((s.hid||[]).filter(k=>all.includes(k)));
@@ -2514,7 +2519,7 @@ function sklGroups(){const ix=PI(),G=new Map();
   for(const t of K.tov){if(!t.imt)continue;let g=G.get(t.imt);if(!g)G.set(t.imt,g={imt:t.imt,L:[]});g.L.push({t,a:pAgg(t,ix),w:wrk(t).length})}
   const out=[];
   for(const g of G.values()){if(g.L.length<2)continue;g.a=sklAgg(g.L.map(x=>x.t),ix);
-    g.L.sort((x,y)=>y.a.or-x.a.or||y.a.s-x.a.s);for(const x of g.L)x.sh=g.a.oq?100*x.a.oq/g.a.oq:null;
+    const fz=FRZ.skl&&FRZ.sklIn&&FRZ.sklIn.get(g.imt);if(fz){const o=new Map(fz.map((n,k)=>[n,k]));g.L.sort((x,y)=>(o.has(x.t.nm)?o.get(x.t.nm):1e9)-(o.has(y.t.nm)?o.get(y.t.nm):1e9))}else g.L.sort((x,y)=>y.a.or-x.a.or||y.a.s-x.a.s);for(const x of g.L)x.sh=g.a.oq?100*x.a.oq/g.a.oq:null;
     g.top=g.L[0].t;g.nw=g.L.filter(x=>x.w>0).length;g.bez=g.L.filter(x=>!x.a.s).reduce((z,x)=>z+x.a.oq,0);out.push(g)}   // bez — заказы товаров склейки, на которые реклама не тратилась
   return out}
 function sklRows(){let L=sklGroups();if(FRZ.skl){const m=new Map(L.map(g=>[g.imt,g]));return FRZ.skl.map(i=>m.get(i)).filter(Boolean)}
@@ -2705,9 +2710,11 @@ const ntRow=(z,mark)=>`<div class="ev nte"><time>${dm(z.t.slice(0,10))}<br>${z.t
 function notesBlock(nm,cid){const L=istOf(nm,cid,1);
   return `<div class="hrw"><h3>Заметки</h3><button class="lnk" type="button" data-act="notes" data-nm="${nm||''}" data-cid="${cid||''}">${L.length?'все '+L.length+' · написать':'написать'}</button></div>`
     +(L.length?'<div>'+L.slice(0,4).map(z=>`<div class="ntl"><time class="num">${dm(z.t.slice(0,10))}</time><span>${esc(z.chto)}</span></div>`).join('')+'</div>':'<div class="note" style="margin-top:0">Заметок пока нет.</div>')}
+/* 15.11 Андрей «и историю пополнений при открытии тоже»: в листе кампании пополнения бюджета тоже в этом списке (в листе товара — нет:
+   там автопополнение всех его кампаний забило бы список) */
 /* 15.11 Андрей (кадр листа кампании, «Что меняли» и «Заметки» друг под другом): «вместе просто по датам разделить» — один список «Что меняли и заметки»:
    правки и заметки вперемешку по времени, свежие сверху, над каждым днём — строка с датой; в строке только время. «показать ещё» — как у «Что меняли» */
-function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(chgReal).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
+function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(z=>chgReal(z)||(cid&&/пополн/i.test(z.chto||''))).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
   const key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:6,nn=istOf(nm,cid,1).length;let h='',dd='';
   for(const [z,nt] of L.slice(0,n)){const d=z.t.slice(0,10);if(d!==dd){dd=d;h+=`<div class="evday num">${dm(d)}</div>`}
     h+=(nt?ntRow(z,1):evX(z,1)).replace(/<time>[^<]*<br>/,'<time>')}
@@ -3401,7 +3408,8 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='frminus')actFrMinus(fk[0],fk[1],ds.add==='1');
   else if(a==='frmes'){const z=frShown(fk[0],fk[1]);frMeasure(fk[0],fk[1],FR.sel.size?[...FR.sel]:z.show.map(e=>e.t))}
   else if(a==='pickprod')pickProd();
-  else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}   // 14.11: «На паузе · N ›» — раскрыть / свернуть
+  else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}
+  else if(a==='sklx'){S.sklOp=S.sklOp||new Set();const k=String(ds.imt);if(S.sklOp.has(k))S.sklOp.delete(k);else S.sklOp.add(k);render(true)}   // 15.11 Андрей: товары склейки свёрнуты, стрелка справа — раскрыть   // 14.11: «На паузе · N ›» — раскрыть / свернуть
   else if(a==='st')actStatus(+rk[0],rk[1],ds.to);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
   else if(a==='price')actPrice(+ds.nm);else if(a==='note'||a==='notes')openNotes(+ds.nm||0,+ds.cid||0);else if(a==='create')actCreate(+ds.nm);
   else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
