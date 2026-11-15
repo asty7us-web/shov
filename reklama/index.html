@@ -1058,12 +1058,12 @@ html,body{overscroll-behavior-y:contain}
 .sheet{--shbg:var(--card)}
 :root:is([data-theme="kosmos"],[data-theme="space"]) .sheet{--shbg:#0a0d2c}
 #sbody .pseg{position:sticky;top:0;z-index:7;display:block;margin:0 -16px;padding:6px 16px 8px;background:var(--shbg);box-shadow:0 .5px 0 var(--line);font-size:12.5px}
-#sbody .pseg .seg{display:flex;width:100%;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
-#sbody .pseg .seg::-webkit-scrollbar{display:none}
-#sbody .pseg .seg button{flex:1 0 auto;justify-content:center;padding:7px 6px;font-size:13px}
+:is(#sbody,.shh) .pseg .seg{display:flex;touch-action:pan-x;width:100%;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+:is(#sbody,.shh) .pseg .seg::-webkit-scrollbar{display:none}
+:is(#sbody,.shh) .pseg .seg button{flex:1 0 auto;justify-content:center;padding:7px 6px;font-size:13px}
 .psegl{font-size:12px;margin:7px 3px 0}
 .psegl+.prh{margin-top:10px}
-@media (min-width:900px){#sbody .pseg .seg button{padding:7px 10px}}
+@media (min-width:900px){:is(#sbody,.shh) .pseg .seg button{padding:7px 10px}}
 
 /* ── лист кампании: фото товара первым (нажатие — лист товара), ряд ссылок с кнопкой «Товар здесь» ── */
 .rkh{display:flex;gap:12px;align-items:center;margin-top:12px}
@@ -1329,6 +1329,10 @@ body.mjob #runp{display:none}
 
 /* 15.11: плашки кампании в шапке листа под названием (rkHead в d_novoe.js) */
 .shh .tt span.rkh.rkhs{display:flex;margin-top:6px}.shh .tt span.rkhs span.m{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;margin:0}.shh .tt span.rkhs .pill{display:inline-flex;width:auto;margin:0;height:20px;font-size:11.5px;padding:0 8px}
+
+/* 15.11: период в шапке листа (e_sheets drawSheet переносит .pseg в #shh) */
+.shh{flex-wrap:wrap}.shh>.pseg{flex:1 0 100%;order:9;display:block;margin:2px 0 0;font-size:12.5px}
+.shh>.pseg+.x{display:none}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -2618,12 +2622,14 @@ const wbq=q=>`<a class="wbq press" href="https://www.wildberries.ru/catalog/0/se
 /* 15.11 Андрей «показы и клики и выбор самому что ставить, как уже делали»: столбцы таблицы фраз — как у общих таблиц (TBL, openCols без сортировки);
    показы, клики, клик из показа, цена клика — из той же статистики кластеров ВБ (e.a.v / e.a.c), корзины — по умолчанию скрыты */
 const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'CPC',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'Цена заказа',dn:'Места по дням'};
-function frCols(man){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
-  return tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man))}
+/* 15.11 Андрей «почему CTR пустой в запросах» → «да»: у кампаний за клик ВБ по запросам показов не отдаёт (normquery/stats — только клики, траты,
+   заказы; проверено на «тетрис» 14.11) — столбцы «Показы» и CTR там не рисуем */
+function frCols(man,cpc){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
+  return tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man)&&!(cpc&&(k==='v'||k==='ctr')))}
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
-  const z=frShown(id,nm),all=z.all,L=z.L,show=z.show,rr=RK[id],man=rr&&rr.pay==='cpm'&&rr.bt==='manual',fc=frCols(man),dn=fc.includes('dn'),bs=man?((rr.nm[nm]||{}).b||{}).search:null,lkb=UPR?'':' nolk',canMin=!rr||rr.pay!=='cpc';
+  const z=frShown(id,nm),all=z.all,L=z.L,show=z.show,rr=RK[id],man=rr&&rr.pay==='cpm'&&rr.bt==='manual',fc=frCols(man,rr&&rr.pay==='cpc'),dn=fc.includes('dn'),bs=man?((rr.nm[nm]||{}).b||{}).search:null,lkb=UPR?'':' nolk',canMin=!rr||rr.pay!=='cpc';
   const nx=all.filter(e=>e.xall).length,days=[];for(let i=T;i>T-7&&i>=0;i--)days.push(i);
   const sn=k=>FR.sort2&&FR.sort2!==FR.sort?(FR.sort===k?'<i class="sn">1</i>':FR.sort2===k?'<i class="sn">2</i>':''):'',th=(k,l)=>`<th data-fs="${k}"${FR.sort===k?` aria-sort="${FR.dir<0?'descending':'ascending'}"`:FR.sort2===k?` data-s2="${FR.dir2<0?'d':'a'}"`:''}>${l}${sn(k)}</th>`,allOn=show.length>0&&show.every(e=>FR.sel.has(e.t));
   let h=`<div class="chips" style="margin:0 0 8px"><button class="chip press" type="button" data-frf="act" aria-pressed="${FR.f==='act'}">Активные · ${all.length-nx}</button><button class="chip press" type="button" data-frf="x" aria-pressed="${FR.f==='x'}">Исключённые · ${nx}</button><button class="chip press" type="button" data-frf="all" aria-pressed="${FR.f==='all'}">Все · ${all.length}</button>${tblBtn('fr')}</div>`;
@@ -3111,7 +3117,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* управление и настройки — после цифр (15.11). Блок управления — один; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же.
      14.11 Андрей: «бидер пусть сразу будет открыт» — биддер раскрыт под управлением, график показа — тут же, когда он есть (свой или Марплы) */
   h+=`<div class="hrw"><h3>Управление и настройки</h3></div>`+rkCtl(r,nm);
-  h+=bdBlock(r,nm);
+  /* 15.11 Андрей «не нужно, есть же выше»: отдельный блок «Биддер» убран — плитка «Биддер» в управлении открывает его лист */
   if((ourGr(r)&&ourGr(r).on)||(r.mar&&r.mar.gr))h+=grBlock(r,nm);
   h+=chgBlock(nm,id);
   h+=notesBlock(nm,id);
@@ -3423,7 +3429,7 @@ function drawSheet(keep){const top=SHS[SHS.length-1],w=$('#shw');shSave();if(WQ.
   $('#shh').innerHTML=`<button class="bk press" type="button" data-act="back" aria-label="${one?'Закрыть':'Назад'}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button>`
     /* 14.11 (утро, четвёртый заход) Андрей: «Всегда картинка должна быть» — o.ph: фото товара в шапке листа (листы кампании и товара), шапка не уезжает при прокрутке */
     +(o.ph||'')+`<div class="tt"><b>${o.t}</b>${o.s?`<span>${o.s}</span>`:''}</div><button class="x" type="button" data-act="close" aria-label="Закрыть" tabindex="-1" hidden></button>`;
-  $('#sbody').innerHTML=o.h;$('#sbody').scrollTop=st;$$('#sbody .tws').forEach((e,i)=>{if(tw[i]){e.scrollTop=tw[i][0];e.scrollLeft=tw[i][1]}});w.classList.add('on');document.body.style.overflow='hidden';if(o.after)o.after()}
+  $('#sbody').innerHTML=o.h;{/* 15.11 Андрей «выбор периода тоже удобно» (стрелка на снимке): кнопки периода — в шапке листа под плашками, не прилипают поверх содержимого */const ps=$('#sbody>.pseg');if(ps){$('#shh').appendChild(ps);const b=ps.querySelector('[aria-pressed="true"]'),q=b&&b.parentNode;if(q&&q.scrollWidth>q.clientWidth+2)q.scrollLeft=Math.max(0,b.offsetLeft-(q.clientWidth-b.offsetWidth)/2)}}$('#sbody').scrollTop=st;$$('#sbody .tws').forEach((e,i)=>{if(tw[i]){e.scrollTop=tw[i][0];e.scrollLeft=tw[i][1]}});w.classList.add('on');document.body.style.overflow='hidden';if(o.after)o.after()}
 const redraw=()=>{if(SHS.length)drawSheet(true)};
 function back(){SHS.pop();if(SHS.length)shNav('b',()=>drawSheet());else{drawSheet();K3.call('zoom',false)}}
 function closeAll(){SHS.length=0;drawSheet();K3.call('zoom',false);return true}
