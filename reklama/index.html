@@ -2727,8 +2727,13 @@ async function frJob(nm,qs){const n=qs.length,t0=Date.now(),nrm=q=>String(q).tri
     if(n>1){FR.job={k:Math.min(k,n),n,tx:op&&!k?'Открываю выдачу ВБ…':'Снимаю места · '+Math.min(k,n)+' из '+n};mBtnUpd()}mprog(tx)};
   show(0,1);
   for(let i=0;i<n;i+=15){const p=qs.slice(i,i+15);
-    try{const r=await quick({k:'mesto',nm:+nm,qs:p},m=>{const x=/(\d+)\s+из\s+(\d+)/.exec(m||'');if(x)show(base+Math.max(0,+x[1]-1));else show(base,1)},260000);
-      FR.fresh=FR.fresh||new Set();for(const q of Object.keys((((r.patch||{}).ms||{})[nm])||{})){got.add(nrm(q));FR.fresh.add(nm+'|'+q);for(const x of p)if(nrm(x)===nrm(q))FR.fresh.add(nm+'|'+x)}one=r.msg||'';
+    /* 15.11 Андрей «ускорить погрузку мест и сразу отображать те, кто прогрузились»: сторож снимает по 3 фразы сразу и шлёт снятые места с ходом работы —
+       они сразу встают в таблицу, остальные фразы ещё грузятся */
+    const take=pt=>{const o=(((pt||{}).ms||{})[nm])||{},ks=Object.keys(o);if(!ks.length)return 0;FR.fresh=FR.fresh||new Set();
+      for(const q of ks){got.add(nrm(q));FR.fresh.add(nm+'|'+q);for(const x of p)if(nrm(x)===nrm(q)){FR.fresh.add(nm+'|'+x);FR.busy.delete(nm+'|'+x)}}return ks.length};
+    try{const r=await quick({k:'mesto',nm:+nm,qs:p},(m,full)=>{const x=/(\d+)\s+из\s+(\d+)/.exec(m||'');if(x)show(base+Math.max(0,+x[1]));else show(base,1);
+        if(full&&full.patch&&take(full.patch)){applyPatch(full.patch);redraw()}},260000);
+      take(r.patch);one=r.msg||'';
       setTimeout(()=>{if(FR.fresh)FR.fresh.clear()},2600)}
     catch(e){err=e.message}
     base+=p.length;for(const q of p)FR.busy.delete(nm+'|'+q);if(i+15<n){show(base);redraw()}}
@@ -3603,7 +3608,7 @@ function wqStart(){if(!WQT)WQT=setInterval(()=>{const now=Date.now();if(!WQ.leng
 function waitRes(cmd,id,ms,o){o=o||{};return new Promise((res,rej)=>{const e={id,cmd,t0:Date.now(),ms,dl:Date.now()+ms,msg:'',q:0,my:o.my||null};
   const fin=()=>{const i=WQ.indexOf(e);if(i>=0)WQ.splice(i,1);delete WAIT[id];wqDraw()};
   e.out=()=>{fin();const mn=Math.max(1,Math.round((Date.now()-e.t0)/60000)),er=new Error(o.late?o.late(mn):'Сервис не ответил за '+mn+' мин — попробуйте ещё раз чуть позже');er.late=1;rej(er)};
-  WAIT[id]=m=>{if(m.st==='work'){e.msg=m.msg||'';if(o.onWork)o.onWork(e.msg);wqDraw();return}fin();res(m)};WQ.push(e);wqStart()})}
+  WAIT[id]=m=>{if(m.st==='work'){e.msg=m.msg||'';if(o.onWork)o.onWork(e.msg,m);wqDraw();return}fin();res(m)};WQ.push(e);wqStart()})}
 /* o.ok(r,box) — необязательно: дописать в лист подтверждения своё после ответа «готово» (например, кнопку «открыть» у новой кампании) */
 async function run(cmd,done,o){const box=$('#runbox');if(!box)return false;const my=SHS[SHS.length-1],keep=[...box.childNodes];   /* 14.11 Андрей: «после включения РК выкинуло в раздел» — помним свой лист подтверждения */
   const mine=()=>SHS[SHS.length-1]===my?$('#runbox'):null;let sent=false;box.innerHTML=runProg(0);const t0=Date.now();
@@ -3662,7 +3667,7 @@ function pmemMerge(){const L=RS.get(PMEMK,null);if(!Array.isArray(L)||!D)return 
 function pmemKl(){const L=RS.get(PMEMK,null);if(!Array.isArray(L))return;for(const x of L)if(x&&x.p&&x.p.kl)try{applyPatch({kab:x.p.kab,kl:x.p.kl},1)}catch(e){}}
 function applyPatch(p,quiet){if(!p)return;const Kk=D.kab[p.kab||S.kab];
   if(Kk&&p.rkn&&rknPut(Kk,p.rkn)){rknSave(p.kab||S.kab,p.rkn);delete FRZ.rk}   // 14.11 (четвёртый заход): список «Кампаний», придержанный после смены периода (FRZ), новую кампанию не прятал бы — отпускаем его
-  if(p.ms){D.ms=D.ms||{};for(const nm in p.ms){const o=D.ms[nm]||(D.ms[nm]={});for(const q in p.ms[nm]){const v=p.ms[nm][q];(o[q]||(o[q]=[])).push(v.length>4?[T,v[0],v[1],v[2],v[3],v[4],v[5]]:[T,v[0],v[1],v[2],v[3]]);
+  if(p.ms){D.ms=D.ms||{};for(const nm in p.ms){const o=D.ms[nm]||(D.ms[nm]={});for(const q in p.ms[nm]){const v=p.ms[nm][q];{const L=o[q]||(o[q]=[]),e=v.length>4?[T,v[0],v[1],v[2],v[3],v[4],v[5]]:[T,v[0],v[1],v[2],v[3]],z=L[L.length-1];if(z&&z[0]===T&&z[1]===v[0])L[L.length-1]=e;else L.push(e)}   /* 15.11: те же места приходят с ходом замера и в итоге — второй раз не дописываем */
     if(v[4]>0||(!v[2]&&v[1])){D.mo=D.mo||{};(D.mo[nm]||(D.mo[nm]={}))[q]=[T,v[0],v[4]>0?v[4]:v[1]]}}}}
   if(Kk&&p.rk)for(const id in p.rk){const r=Kk.rk.find(x=>String(x.id)===String(id));if(!r)continue;const u=p.rk[id];for(const k in u){if(k==='nm'){for(const n in u.nm){const e=r.nm[n]=Object.assign(r.nm[n]||{},u.nm[n]);
       /* 14.11 «обновить РК» (сторож rkref): td — статистика кампании за день p.day [показы, клики, корзины, заказы, штуки, траты, сумма заказов] → в ряды по дням */
