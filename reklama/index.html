@@ -2140,7 +2140,7 @@ function vAk(){const rows=akRows();let h=fresh(1);
     h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="akp"><b class="num">${rub2(t.pr.f)}</b><span class="num">наша цена · скидка ${t.pr.d}%</span></div></div></button>
       <div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div><div style="margin-top:4px">`;
     for(const a of L)h+=`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
-      <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">участвуем</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
+      <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">'+(a.nw?'вошли, ВБ отметит':'участвуем')+'</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
     h+='</div></div>'}
   return h+'</div>'}
 
@@ -2246,7 +2246,7 @@ function tblHtml(id,rows,attr,cls){const st=tblSt(id),cols=tblCols(id);   // cls
   for(const r of rows)h+=`<tr ${attr(r)}>`+cols.map((c,i)=>`<td class="${i?'num':'t1'}${c.cls?' '+(c.cls(r)||''):''}">${c.h(r)}</td>`).join('')+'</tr>';
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
-function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k)st.dir=-st.dir;else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
+function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k){st.dir=-st.dir;st.sort2=null}else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
 function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
   const row=(k,i)=>{const c=T0.cols.find(x=>x.k===k),on=!st.hid.has(k);
     return `<div class="opt colr"><div><b>${c.l}${c.sub?' · '+c.sub:''}</b>${c.t?`<span>${esc(c.t)}</span>`:''}</div>${i===0?'<span class="muted" style="font-size:12.5px;flex:none">всегда первый</span>'
@@ -2649,7 +2649,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   if(!show.length)return h+`<div class="note" style="margin-top:0">${FR.f==='x'?'Исключённых фраз у кампании нет.':'Фраз с показами за период нет.'}</div>`;
   h+=`<div class="tw tws frw"><table class="fr"><thead><tr><th class="q"><div class="qw"><label class="ck"><input type="checkbox" id="frall"${allOn?' checked':''} aria-label="Выбрать все"></label><span data-fs="t" class="fsq">Фраза${FR.sort==='t'?(FR.dir<0?' ▾':' ▴'):FR.sort2==='t'?(FR.dir2<0?' ▿':' ▵'):''}${sn('t')}</span></div></th>`
     +fc.map(k=>k==='dn'?'':th(k,FRL[k])).join('')
-    +(!dn?'':days.slice(1).map(i=>`<th class="dh${FR.tm===i?' on':''}" data-frd="${i}" title="Нажмите — время замеров">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join(''))+'</tr></thead><tbody>';
+    +(!dn?'':days.slice(1).map(i=>`<th class="dh">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join(''))+'</tr></thead><tbody>';
   /* 14.11 Андрей 08:10: «Кластеры кликабельные как в марпле» — нажатие на название кластера раскрывает под строкой, из каких запросов он состоит
      (klRow / klToggle ниже); лист фразы (места по дням, ставка, исключить по одной) — кнопкой в раскрытом составе. Места, выбор и исключение — как были */
   const ncol=1+fc.filter(k=>k!=='dn').length+(dn?days.length-1:0);
@@ -3655,8 +3655,8 @@ function rknMerge(){if(!D||!D.kab)return;const now=Date.now();
    и после любой загрузки накладываем снова, пока сбор его не догонит (время данных ≥ времени правки) или не пройдёт 3 часа */
 const PMEM_TTL=3*3600e3,PMEMK='pmem';
 const atMs=()=>{try{return new Date(D.at+':00+03:00').getTime()}catch(e){return 0}};
-function pmemSave(p,nmT){if(!p)return;let c;try{c=JSON.parse(JSON.stringify(p))}catch(e){return}delete c.ms;delete c.ist;
-  if(!c.rk&&!c.tov&&!c.lim&&!c.gr&&!c.grt&&!c.kl&&!c.bally&&!c.nst)return;
+function pmemSave(p,nmT){if(!p)return;let c;try{c=JSON.parse(JSON.stringify(p))}catch(e){return}delete c.ms;   /* 15.11 Андрей «почему в заметках не отражается сразу»: запись в «Что меняли» и отметку акции тоже держим до сбора */
+  if(!c.ist&&!c.aku&&!c.rk&&!c.tov&&!c.lim&&!c.gr&&!c.grt&&!c.kl&&!c.bally&&!c.nst)return;
   const now=Date.now(),L=RS.get(PMEMK,[]);RS.set(PMEMK,(Array.isArray(L)?L:[]).filter(x=>x&&now-x.t<PMEM_TTL).concat([{t:now,p:c,n:nmT||''}]).slice(-40))}
 /* после загрузки данных: наложить то, чего в данных ещё нет; вернуть названия наложенного — для плашки после перезагрузки */
 function pmemMerge(){const L=RS.get(PMEMK,null);if(!Array.isArray(L)||!D)return [];const now=Date.now(),at=atMs();
@@ -3673,7 +3673,8 @@ function applyPatch(p,quiet){if(!p)return;const Kk=D.kab[p.kab||S.kab];
       /* 14.11 «обновить РК» (сторож rkref): td — статистика кампании за день p.day [показы, клики, корзины, заказы, штуки, траты, сумма заказов] → в ряды по дням */
       if(e.td){const i=D.days.indexOf(p.day),d=e.d||(e.d={});if(i>=0)['v','c','a','o','q','s','sp'].forEach((f,j)=>{(d[f]||(d[f]=D.days.map(()=>0)))[i]=e.td[j]});delete e.td}}}else r[k]=u[k]}}
   if(Kk&&p.tov)for(const nm in p.tov){const t=Kk.tov.find(x=>String(x.nm)===String(nm));if(t)Object.assign(t,p.tov[nm])}
-  if(p.ist)D.ist=p.ist.concat(D.ist||[]);
+  if(p.ist){const ky=z=>[z.t,z.chto,z.nm,z.cid].join('|'),have=new Set((D.ist||[]).map(ky));D.ist=p.ist.filter(z=>!have.has(ky(z))).concat(D.ist||[])}
+  if(Kk&&p.aku)for(const nm in p.aku){const t=Kk.tov.find(x=>String(x.nm)===String(nm));if(t)for(const id in p.aku[nm]){const a=(t.ak||[]).find(x=>String(x.id)===String(id));if(a&&a.uch!==(p.aku[nm][id]?1:0)){a.uch=p.aku[nm][id]?1:0;a.nw=1}}}   // 15.11: вошли / вышли ценой — видно сразу, пока ВБ не отметит сам
   if(p.lim)D.lim=Object.assign(D.lim||{},p.lim);
   if(p.gr)D.gr=Object.assign(D.gr||{},p.gr);
   if(p.grt)D.grt=p.grt;
@@ -3790,7 +3791,7 @@ function actPrice(nm,target,ak,out){if(!need())return;const t=TOV[nm];if(!t||!t.
          <div class="hint">Нижняя цена для автоакций не меняется.</div>`;
         const m1=$('#dm1'),p1=$('#dp1');if(m1)m1.onclick=()=>{dF=Math.max(c.dmin,c.d-1);up()};if(p1)p1.onclick=()=>{dF=Math.min(95,c.d+1);up()};
         $('#perr').textContent=c.p<=0?'Не получается посчитать цену.':'';$('#okBtn').disabled=c.p<=0;
-        $('#okBtn').onclick=()=>run({k:'price',nm:+nm,price:c.p,disc:c.d,target:v,was:[P,Dc],ak:ak&&!out?ak.id:null,akn:ak&&!out?ak.name:null,akout:ak&&out?ak.name:null})};
+        $('#okBtn').onclick=()=>run({k:'price',nm:+nm,price:c.p,disc:c.d,target:v,was:[P,Dc],ak:ak&&!out?ak.id:null,akn:ak&&!out?ak.name:null,akout:ak&&out?ak.name:null,akid:ak?ak.id:null})};
        $('#pv').oninput=()=>{dF=null;up()};up()}}),true)}
 /* новая кампания товара; названия — как принято в кабинете: «СПС» — за клик, «ПОИСК» — за показы, «АВТО» — единая ставка */
 function actCreate(nm){if(!need())return;const t=TOV[nm];if(!t)return;const b=K.bal||{},mt=(K.cfg.minTopUp||100000)/100,td=D.today.slice(8,10)+'.'+D.today.slice(5,7)+'.'+D.today.slice(0,4);
@@ -4080,7 +4081,7 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
   if(x=c('[data-frm1]')){const [cid,nm,...q]=x.dataset.frm1.split('|');if(!FR.key)FR.key=cid+'|'+nm;frMeasure(cid,nm,[q.join('|')]);return}
   if(x=c('[data-frf]')){FR.f=x.dataset.frf;FR.all=false;redraw();return}
   if(x=c('[data-frd]')){const i=+x.dataset.frd;FR.tm=FR.tm===i?null:i;redraw();return}
-  if(x=c('[data-fs]')){const k=x.dataset.fs;if(FR.sort===k)FR.dir=-FR.dir;else{FR.sort2=FR.sort;FR.dir2=FR.dir;FR.sort=k;FR.dir=k==='t'||k==='p'?1:-1}redraw();return}
+  if(x=c('[data-fs]')){const k=x.dataset.fs;if(FR.sort===k){FR.dir=-FR.dir;FR.sort2=null}else{FR.sort2=FR.sort;FR.dir2=FR.dir;FR.sort=k;FR.dir=k==='t'||k==='p'?1:-1}redraw();return}
   if(x=c('[data-kwo]')){const [cid,nm,...q]=x.dataset.kwo.split('|');openKw(+nm,+cid,q.join('|'));return}
   if(x=c('th[data-ts]')){const p=x.dataset.ts.split('|');tblClick(p[0],p[1]);return}
   if(x=c('[data-skl]')){openSkl(x.dataset.skl);return}
