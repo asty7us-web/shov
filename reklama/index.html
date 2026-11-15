@@ -2710,11 +2710,11 @@ const ntRow=(z,mark)=>`<div class="ev nte"><time>${dm(z.t.slice(0,10))}<br>${z.t
 function notesBlock(nm,cid){const L=istOf(nm,cid,1);
   return `<div class="hrw"><h3>Заметки</h3><button class="lnk" type="button" data-act="notes" data-nm="${nm||''}" data-cid="${cid||''}">${L.length?'все '+L.length+' · написать':'написать'}</button></div>`
     +(L.length?'<div>'+L.slice(0,4).map(z=>`<div class="ntl"><time class="num">${dm(z.t.slice(0,10))}</time><span>${esc(z.chto)}</span></div>`).join('')+'</div>':'<div class="note" style="margin-top:0">Заметок пока нет.</div>')}
-/* 15.11 Андрей «и историю пополнений при открытии тоже»: в листе кампании пополнения бюджета тоже в этом списке (в листе товара — нет:
-   там автопополнение всех его кампаний забило бы список) */
+/* 15.11 Андрей «и историю пополнений при открытии тоже»: в листе кампании пополнения бюджета тоже в этом списке;
+   следом «тут внизу изменения вообще по всем рк и ценам и тп» — и в листе товара: правки всех его кампаний, цены и пополнения */
 /* 15.11 Андрей (кадр листа кампании, «Что меняли» и «Заметки» друг под другом): «вместе просто по датам разделить» — один список «Что меняли и заметки»:
    правки и заметки вперемешку по времени, свежие сверху, над каждым днём — строка с датой; в строке только время. «показать ещё» — как у «Что меняли» */
-function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(z=>chgReal(z)||(cid&&/пополн/i.test(z.chto||''))).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
+function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(z=>chgReal(z)||/пополн/i.test(z.chto||'')).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
   const key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:6,nn=istOf(nm,cid,1).length;let h='',dd='';
   for(const [z,nt] of L.slice(0,n)){const d=z.t.slice(0,10);if(d!==dd){dd=d;h+=`<div class="evday num">${dm(d)}</div>`}
     h+=(nt?ntRow(z,1):evX(z,1)).replace(/<time>[^<]*<br>/,'<time>')}
