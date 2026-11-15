@@ -3073,6 +3073,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
      ${K.bally?`<button class="ab press${UPR||t.bl?'':' nolk'}" type="button" data-act="bally" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><b>Баллы за отзывы</b><span>${t.bl?'идёт: '+(t.bl.got||0)+' из '+t.bl.cnt+' отзывов':'баллы покупателю за отзыв'}</span></button>`:''}</div>`;
+  h+=tovHist(t,nm);   // 15.11 Андрей: «тут внизу изменения вообще по всем рк и ценам и тп»
   return {ph:`<span class="shph"><span class="ph"${foto(t)}></span></span>`,t:esc(t.art),s:(ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+`${esc(t.subj||'товар')} · № ${t.nm} · ${esc(K.name).replace(/ /g,'&nbsp;')}`,h}}   // 14.11 (четвёртый заход): фото и в шапке — «Всегда картинка должна быть»
 /* кампании в листе товара (14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее»): работающие — сразу под главными цифрами, заголовок крупный,
    с числом; строки рисует rkRow (e_sheets.js). Сводка «все работающие вместе» — только когда она отличается от главных цифр над ней (часть трат за период
@@ -3473,6 +3474,12 @@ function otzBlock(t){const o=t&&t.ot;if(!o)return '';
     +(warn?`<div class="note b" style="margin:8px 0 0">${tp>0?'Плохой отзыв виден первым — реклама ведёт на него.':'Много плохих за 2 недели.'}</div>`:'')
     +(last?`<div style="margin-top:8px">${last}</div>`:'')}
 
+/* 15.11 Андрей (лист товара): «тут внизу изменения вообще по всем рк и ценам и тп» — в самом низу листа товара вся история правок по товару:
+   цена, акции, баллы, и все его кампании (ставки, бюджет, лимит, биддер, график, пауза). Ежечасные «свой график: час показа / вне часов» не берём — их сотни */
+function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(String(z.nm)===String(nm)||(z.cid&&rk.includes(+z.cid)))
+    &&!/^свой график: (час показа|вне часов)/.test(z.chto||''));
+  return `<div class="hrw" style="margin-top:22px"><h3>История изменений</h3></div>`+(L.length?'<div>'+L.slice(0,30).map(z=>evX(z,1)).join('')+'</div>'
+    +(L.length>30?`<div class="muted tnote">Последние 30 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений по товару пока не было.</div>')}
 /* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
    Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
    трата за час = разница замеров. Режимы: «В среднем за день» (последние до 7 полных дней) | «Сегодня». Три самых дорогих часа — красным.
