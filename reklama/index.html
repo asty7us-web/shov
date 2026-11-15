@@ -1918,7 +1918,11 @@ const foto=t=>{const u=t?(t.foto||fotoNm(t.nm)):'';return u?` style="background-
 /* остатки — везде одним видом (13.11 Андрей: «где-то показаны остатки, где-то не указано, и если 0, то указывай»): ноль пишем явно и красным,
    «нет данных» — только если отчёт ВБ не прочитался */
 const ost1=(l,v)=>`<span class="pill num${v==null?'':v>0?'':' b'}">${l}: ${v==null?'нет данных':f0(v)+' шт'}</span>`;
-const ostPills=t=>t?ost1('склады ВБ',t.fbo)+ost1('свой склад',t.fbs):'';
+const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
+/* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
+   поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
+const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
+const akSt=(nm,x)=>{const z=akZhd(nm,x);return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
 const ostNet=t=>!!t&&(t.fbo===0||t.fbo==null)&&(t.fbs===0||t.fbs==null)&&(t.fbo===0||t.fbs===0);   // нигде нет — и это известно точно
 const ostCell=v=>v==null?'<span class="muted">—</span>':v>0?f0(v):'<b class="bad">0</b>';
 const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
@@ -2546,7 +2550,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
       <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num">${kr(a.s)} ₽</b><span>реклама</span></div><div><b class="num">${f0(a.oq)} шт</b><span>заказы</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
       <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
       <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп — '+esc(D.pan&&D.pan.ml||'месяц').toLowerCase()}</div>
-      <div class="skls"><table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>ВБ · свой, шт</th></tr></thead><tbody>`
+      <div class="skls"><table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>FBO · FBS, шт</th></tr></thead><tbody>`
       +g.L.map(x=>`<tr data-nm="${x.t.nm}"><td>${tcell(x.t,esc(x.t.art)+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))}</td><td class="num ${dcls(x.a.drr)}"><b>${x.a.s||x.a.or?drrT(x.a.drr):'—'}</b></td><td class="num">${x.a.s?f0(x.a.s):'—'}</td><td class="num">${f0(x.a.oq)}</td><td class="num">${ostCell(x.t.fbo)}<span class="muted"> · </span>${ostCell(x.t.fbs)}</td></tr>`).join('')
       +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div></div>`}
   return h+'</div>'}
@@ -3066,7 +3070,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
       +prcBlock(t,nm,cx)
       +`<div class="akl">`
       +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
-        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':'<i>не участвуем</i>'}</small></div></button>`}).join('')+'</div>'
+        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`}).join('')+'</div>'
 }
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
@@ -3082,7 +3086,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
 function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
   if(!aks.length&&!pb)return '';
   let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?`<div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`:'')+pb;
-  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':'<i>не участвуем</i>'}</small></div></button>`).join('')+'</div>';
+  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
@@ -3326,7 +3330,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
