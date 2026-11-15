@@ -2286,7 +2286,7 @@ TBL.tov={sort:['drr',-1],cols:[
   {k:'c',l:'Клики',v:x=>x.a.c,h:x=>f0(x.a.c)},
   {k:'ctr',l:'Клик из показа',v:x=>x.a.ctr,h:x=>pc(x.a.ctr)},
   {k:'cr',l:'Заказ из клика',t:'заказы с рекламы ÷ клики',v:x=>x.a.cr,h:x=>pc(x.a.cr)},
-  {k:'cpc',l:'Цена клика, ₽',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
+  {k:'cpc',l:'CPC, ₽',t:'цена клика: затраты ÷ клики',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
   {k:'mar',l:'Маржа, панель',v:x=>pmar(x.t),h:x=>{const m=pmar(x.t);return m==null?'—':pc(m)},cls:x=>mcls(pmar(x.t))},
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
@@ -2311,7 +2311,7 @@ TBL.rk={sort:['s',-1],cols:[
   {k:'ctr',l:'Клик из показа',v:x=>x.a.ctr,h:x=>pc(x.a.ctr)},
   {k:'cr',l:'Заказ из клика',v:x=>x.a.cr,h:x=>pc(x.a.cr)},
   {k:'v',l:'Показы',def:0,v:x=>x.a.v,h:x=>f0(x.a.v)},
-  {k:'cpc',l:'Цена клика, ₽',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
+  {k:'cpc',l:'CPC, ₽',t:'цена клика: затраты ÷ клики',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
   /* 14.11 Андрей 08:10: «…от 1000 показов какие» — под ставкой словами, за что она: «за 1000 показов» (кампании «за показы», и единая ставка) или «за клик» */
   {k:'bid',l:'Ставка, ₽',t:'у кампаний «за показы» — за 1000 показов, у кампаний «за клик» — за клик; мин. — меньше ВБ не принимает',v:x=>bid1(x),
     h:x=>{const e=x.r.nm[x.nm]||{},b=Object.values(e.b||{}),m=minTxt(e);return b.length?b.map(v=>f2(v/100)).join(' / ')+`<small>${x.r.pay==='cpc'?'за клик':'за 1000 показов'}</small>`+(m?`<small>мин. ставка ${m}</small>`:''):'—'}},
@@ -2617,7 +2617,7 @@ function frShown(id,nm){const all=frAll(id,nm)||[],L=frSort(FR.f==='act'?all.fil
 const wbq=q=>`<a class="wbq press" href="https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Выдача ВБ по запросу «${esc(q)}»" aria-label="Открыть выдачу ВБ по запросу">${WBL}<i aria-hidden="true">↗</i></a>`;
 /* 15.11 Андрей «показы и клики и выбор самому что ставить, как уже делали»: столбцы таблицы фраз — как у общих таблиц (TBL, openCols без сортировки);
    показы, клики, клик из показа, цена клика — из той же статистики кластеров ВБ (e.a.v / e.a.c), корзины — по умолчанию скрыты */
-const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'Цена клика',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'Цена заказа',dn:'Места по дням'};
+const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'CPC',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'Цена заказа',dn:'Места по дням'};
 function frCols(man){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
   return tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man))}
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
@@ -3057,7 +3057,7 @@ function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.ke
    что в листе товара (четыре цифры крупно, светофор только у «ДРР от всего», кнопка «Пауза» / «Запустить»); класс rko оставлен — по нему ищет тест */
 function rkOther(id,nm){const t=TOV[nm];if(!t)return '';const ix=PI(),L=t.rk.map(k=>RK[k]).filter(r=>r&&r.id!==+id&&rkSt(r).w);if(!L.length)return '';
   return `<div class="hrw"><h3>Ещё работают у товара · ${L.length}</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div><div class="rows">`
-    +L.map(r=>rkRow(r,nm,ix).replace('class="rk rkr ','class="rk rkr rko ')).join('')+'</div>'}
+    +L.map(r=>rkRow(r,nm,ix).replace('class="rk rkr ','class="rk rkr rko ').replace(/<span class="rkgo[^"]*"[^>]*>[\s\S]*?<\/span>/g,'')).join('')+'</div>'}   // 15.11 Андрей «Убери» (кадр): кнопок «Пауза»/«Запустить»/«Стоп» в этом блоке нет — управление в листе самой кампании
 function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rkAgg(r,nm,ix),td=rkAgg(r,nm,[T]),st=rkSt(r),t=TOV[nm],ol=ourLim(r);
   const d=e.d||{},g=i=>{const x={s:d.s?d.s[i]:0,c:d.c?d.c[i]:0,v:d.v?d.v[i]:0,q:d.q?d.q[i]:0,a:d.a?d.a[i]:0,sp:d.sp?d.sp[i]:0};x.cpo=x.q?x.s/x.q:(x.s?Infinity:null);x.ctr=x.v?100*x.c/x.v:null;
     x.or=t&&t.o?t.o.r[i]||0:0;x.oq=t&&t.o?t.o.q[i]||0:0;x.drr=x.or?100*x.s/x.or:(x.s?Infinity:null);return x};
@@ -3086,7 +3086,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
-    ${tl('Цена клика',rub2(a.cpc),'расход ÷ клики')}${tl('Цена заказа',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
+    ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('Цена заказа',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''}</div>`;
   if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
