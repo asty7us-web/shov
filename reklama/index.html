@@ -4314,13 +4314,15 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
      ${o.mode==='off'?'':`<label class="fld"><span>Цель — место в поиске</span><input class="inp num" id="bdc" inputmode="numeric" value="${esc(o.cel)}"></label>
      <label class="fld"><span>Потолок ставки, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ставка ${kop(cur)}${mn!=null?' · мин. ставка '+kop(mn):''}</span><input class="inp num" id="bdx" inputmode="decimal" value="${esc(o.max)}"></label>
      <label class="fld"><span>По какому запросу смотреть место</span><select class="inp" id="bdq" style="width:100%;font-size:16px"><option value="">Главный запрос кампании</option>${qs.map(q=>`<option value="${esc(q)}"${q===o.q?' selected':''}>${esc(q)}</option>`).join('')}</select></label>`}
-     <div class="cmp"><div><small>Сейчас</small><b style="font-size:15px;white-space:normal">${bdName(b)}</b></div><div class="ar">→</div><div><small>Станет</small><b style="font-size:15px;white-space:normal" id="bdnew">—</b></div></div>
+     <div class="cmp" id="bdcmp" hidden><div><small>Сейчас</small><b style="font-size:15px;white-space:normal" id="bdcur">${bdName(b)}</b></div><div class="ar">→</div><div><small>Станет</small><b style="font-size:15px;white-space:normal" id="bdnew">—</b></div></div>
      ${mb&&o.mode==='sam'?'<div class="note b">Ставку ведёт биддер Марплы. Отсюда он не выключается — сначала выключите его в Марпле, иначе сервис откажет.</div>':mb&&o.mode==='sovet'?'<div class="note">Ставку сейчас ведёт биддер Марплы. Совет покажет, что поставил бы наш.</div>':''}
-     ${o.mode==='sam'?'<div class="note w">Режим «Сам» на живом кабинете ещё не проверялся — первый раз включайте на одной кампании.</div>':''}
+     ${''/* 15.11 Андрей «непонятно зачем» (обвёл «Сейчас → Станет» и предупреждение): предупреждение «Сам ещё не проверялся» убрано — с 14.11 21:43 «Сам» ставит ставки в Каб 1;
+        «Сейчас → Станет» видно, только когда настройки отличаются от нынешних (bdcmp в up) */}
      <div id="bderr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить')}${secHist('bidder',id)}`,
-     after:()=>{const up=()=>{if(o.mode==='off'){$('#bdnew').textContent='выключен';$('#okBtn').disabled=!bdOn(b);return}
+     after:()=>{const up=()=>{if(o.mode==='off'){$('#bdnew').textContent='выключен';$('#bdcmp').hidden=!bdOn(b);$('#okBtn').disabled=!bdOn(b);return}
         const c=numv('bdc'),x=numv('bdx'),k=Math.round(x*100),okc=isFinite(c)&&c>=1&&c<=50&&c===Math.round(c),okx=isFinite(x)&&k>0&&k<=top&&(mn==null||k>=mn)&&(!cpm||k%100===0);
         $('#bdnew').textContent=okc&&okx?(o.mode==='sam'?'сам':'совет')+' · цель '+c+' · до '+kop(k):'—';
+        {const nw=$('#bdnew').textContent,cb=$('#bdcmp');if(cb)cb.hidden=nw==='—'||nw===$('#bdcur').textContent}
         $('#bderr').textContent=!isFinite(c)||!isFinite(x)?'':!okc?'Цель — целое место от 1 до 50.':mn!=null&&k<mn?'Потолок ниже минимальной ставки ВБ ('+kop(mn)+').':cpm&&k%100?'У кампаний за показы ставка — целым числом рублей.':!okx?'Потолок вне границ ВБ.':cur&&k<cur?'Потолок ниже нынешней ставки — биддер опустит её до потолка.':'';
         $('#okBtn').disabled=!(okc&&okx)};
        const c0=$('#bdc'),x0=$('#bdx');if(c0)c0.oninput=up;if(x0)x0.oninput=up;up();
