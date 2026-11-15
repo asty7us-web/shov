@@ -1367,6 +1367,9 @@ table.zon tr:last-child td{font-weight:700}
 .evday:first-child{padding-top:0}
 .hrwb{white-space:nowrap}
 
+/* 15.11 Андрей «значки которых не увидел»: значок ВБ на «Кампания ↗» / «Товар ↗» — свой элемент (у <i> в плашке правило .pill i рисовало белый кружок) */
+.rkchips a.rklk .rkw{display:inline-block;width:13px;height:13px;margin-right:4px;flex:none;background:var(--wbi) center/contain no-repeat}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2406,7 +2409,7 @@ TBL.rk={sort:['s',-1],cols:[
   {k:'drr',l:'ДРР',t:'расход кампании к заказам товара, ₽',v:x=>x.drr,h:x=>`<b>${drrT(x.drr)}</b>`,cls:x=>dcls(x.drr)},
   {k:'s',l:'Расход, ₽',v:x=>x.a.s,h:x=>f0(x.a.s),cls:x=>sbad(x.a.s,x.a.q)},
   {k:'q',l:'Заказы РК',t:'заказы, которые ВБ отнёс к этой кампании, шт',v:x=>x.a.q,h:x=>f0(x.a.q)},
-  {k:'cpo',l:'Цена заказа',t:'расход ÷ заказы РК, ₽',v:x=>x.a.cpo,h:x=>cpoTx(x.a.cpo)},
+  {k:'cpo',l:'CPO',t:'цена заказа: расход ÷ заказы РК, ₽',v:x=>x.a.cpo,h:x=>cpoTx(x.a.cpo)},
   {k:'oq',l:'Заказы товара',t:'все заказы товара за период, шт',v:x=>x.oq,h:x=>f0(x.oq)},
   {k:'c',l:'Клики',v:x=>x.a.c,h:x=>f0(x.a.c)},
   {k:'ctr',l:'Клик из показа',v:x=>x.a.ctr,h:x=>pc(x.a.ctr)},
@@ -2736,7 +2739,7 @@ function frShown(id,nm){const all=frAll(id,nm)||[],L=frSort(FR.f==='act'?all.fil
 const wbq=q=>`<a class="wbq press" href="https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Выдача ВБ по запросу «${esc(q)}»" aria-label="Открыть выдачу ВБ по запросу">${WBL}<i aria-hidden="true">↗</i></a>`;
 /* 15.11 Андрей «показы и клики и выбор самому что ставить, как уже делали»: столбцы таблицы фраз — как у общих таблиц (TBL, openCols без сортировки);
    показы, клики, клик из показа, цена клика — из той же статистики кластеров ВБ (e.a.v / e.a.c), корзины — по умолчанию скрыты */
-const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'CPC',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'Цена заказа',dn:'Места по дням'};
+const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частота',v:'Показы',c:'Клики',ctr:'CTR',cpc:'CPC',s:'Траты, ₽',a:'Корзины',o:'Заказы',cpo:'CPO',dn:'Места по дням'};
 /* 15.11 Андрей «почему CTR пустой в запросах» → «да»: у кампаний за клик ВБ по запросам показов не отдаёт (normquery/stats — только клики, траты,
    заказы; проверено на «тетрис» 14.11) — столбцы «Показы» и CTR там не рисуем */
 function frCols(man,cpc){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
@@ -3235,7 +3238,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
-    ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('Цена заказа',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
+    ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('CPO',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','цена заказа: расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''}</div>`;
   if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
@@ -3280,7 +3283,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener">${WBL}Кампания ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Кампания ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
