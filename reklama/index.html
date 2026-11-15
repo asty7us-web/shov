@@ -2514,7 +2514,7 @@ function sklPan(g){const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2
   for(const x of g.L){const z=x.t.pan&&x.t.pan[k];if(!z||!(z[0]>0))continue;s+=z[0];if(z[1]!=null){sd+=z[0];dd+=z[0]*z[1]}if(z[2]!=null){sm+=z[0];mm+=z[0]*z[2]}}
   if(!s)return null;const lb=D.pan?(k==='m'?D.pan.ml:k==='w2'?D.pan.w2l:D.pan.wl):'';
   return {s,d:sd?dd/sd:null,m:sm?mm/sm:null,l:(k==='m'?'':'')+(typeof panWk==='function'&&k!=='m'?panWk(lb):lb||(k==='m'?'месяц':k==='w2'?'2 недели':'неделя'))}}
-function sklVyk(g){let o=0,b=0;const ix=PI();for(const x of g.L){const f=x.t.f;if(!f||!f.o||!f.b)continue;for(const i of ix)if(f.has?f.has[i]:1){o+=f.o[i]||0;b+=f.b[i]||0}}return o?100*b/o:null}
+function sklVyk(g){let s=0,v=0;for(const x of g.L){const z=x.t.pan&&x.t.pan.m;if(!z||!(z[0]>0)||z[4]==null)continue;s+=z[0];v+=z[0]*z[4]}return s?100*v/s:null}   // 15.11: «% выкупа» листа «SKU» панели за месяц, среднее по продажам (воронка за 7 дн. давала 21% — свежие заказы ещё не выкуплены)
 function sklGroups(){const ix=PI(),G=new Map();
   for(const t of K.tov){if(!t.imt)continue;let g=G.get(t.imt);if(!g)G.set(t.imt,g={imt:t.imt,L:[]});g.L.push({t,a:pAgg(t,ix),w:wrk(t).length})}
   const out=[];
@@ -2538,15 +2538,14 @@ function vSkl(){const rows=sklRows();let h=fresh();
     /* 15.11 Андрей (кадр «Склейки»): «изначально все ниже товары склейки свёрнуты и стрелочку справа раскрыть список, также добавь дрр по панели, маржа по панели,
        продажи и проц выкупа в общие». Шапка (фото, название) — лист склейки; стрелка справа — раскрыть / свернуть товары (S.sklOp, на время открытой страницы).
        Вторая строка общих цифр: ДРР и маржа по панели (лист «SKU»: t.pan.w|w2|m = [продажи ₽, ДРР доля, маржа доля], среднее по продажам товаров склейки;
-       период — как в листе товара: «30 дн» — месяц, «14 дн» — 2 недели, иначе неделя), продажи по панели, ₽; выкуп — выкупили ÷ заказали за выбранный период
-       по воронке карточки (свежие заказы ещё не выкуплены, поэтому за короткий период ниже настоящего) */
+       период — как в листе товара: «30 дн» — месяц, «14 дн» — 2 недели, иначе неделя), продажи по панели, ₽; выкуп — «% выкупа» панели за месяц (лист «SKU») */
     const op=!!(S.sklOp&&S.sklOp.has(String(g.imt))),pz=sklPan(g),vk=sklVyk(g);
     h+=`<div class="card skc${op?' skop':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
         <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽')}</div></div></button>
         <button class="skx press" type="button" data-act="sklx" data-imt="${g.imt}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></div>
       <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num">${kr(a.s)} ₽</b><span>реклама</span></div><div><b class="num">${f0(a.oq)} шт</b><span>заказы</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
       <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
-      <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп за '+S.per+' дн. по воронке карточки'}</div>
+      <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп — '+esc(D.pan&&D.pan.ml||'месяц').toLowerCase()}</div>
       <div class="skls"><table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>ВБ · свой, шт</th></tr></thead><tbody>`
       +g.L.map(x=>`<tr data-nm="${x.t.nm}"><td>${tcell(x.t,esc(x.t.art)+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))}</td><td class="num ${dcls(x.a.drr)}"><b>${x.a.s||x.a.or?drrT(x.a.drr):'—'}</b></td><td class="num">${x.a.s?f0(x.a.s):'—'}</td><td class="num">${f0(x.a.oq)}</td><td class="num">${ostCell(x.t.fbo)}<span class="muted"> · </span>${ostCell(x.t.fbs)}</td></tr>`).join('')
       +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div></div>`}
