@@ -942,8 +942,11 @@ html,body{overscroll-behavior-y:contain}
 .gbr i{flex:1;min-width:0;border-radius:4px 4px 2px 2px;background:var(--fill)}
 .gbr i.on{background:linear-gradient(180deg,color-mix(in srgb,var(--good) 78%,#fff),var(--good))}
 .gbr i.nw{box-shadow:0 0 0 1.5px var(--ink)}
-.gbx{position:relative;height:15px;margin-top:3px;font-size:10px;color:var(--ink3)}
-.gbx span{position:absolute;transform:translateX(-50%)}
+.gbx{display:flex;gap:2px;margin-top:3px;font-size:9.5px;line-height:13px;letter-spacing:-.05em;color:var(--ink3)}
+.gbx span{flex:1;min-width:0;text-align:center}.gbx span.on{color:var(--good);font-weight:700}.gbx span.nw{color:var(--ink);font-weight:700}
+.gbg{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);margin-top:6px}
+.gbg i{width:10px;height:10px;border-radius:3px;background:var(--fill);margin-left:6px}.gbg i:first-child{margin-left:0}
+.gbg i.on{background:var(--good)}.gbg i.nw{background:none;box-shadow:inset 0 0 0 1.5px var(--ink)}
 
 /* 14.11 Андрей в «К»: «тему космоса в рекламе не полноценно, ниче не движется, аффирмаций нет, надо как везде».
    «Космос» как в Склейках и Юнитке (код перенесён из skleykipp.html): по фону мерцают звёзды и пролетают метеоры (#spDeco),
@@ -3964,7 +3967,8 @@ const GR_LEG='<div class="muted" style="font-size:12px;margin-top:5px">Зелё�
 /* 15.11 Андрей: «блок графика — много лишних слов, места занимает; график поднять, как современные гистограммы, но не сильно».
    В листе кампании (только просмотр) часы — столбиками: высота = в сколько дней недели час включён, текущий час подсвечен; одна строка подписи. Правка — по-прежнему полоса grStrip */
 function grBars(h){const m=new Date(Date.now()+3*3600e3),hr=m.getUTCHours(),c=Array.from({length:24},(_,i)=>h.reduce((z,x)=>z+(x[i]==='1'?1:0),0));
-  return `<div class="gbr">${c.map((n,i)=>`<i class="${n?'on':''}${i===hr?' nw':''}" style="height:${n?Math.round(30+70*n/7):10}%" title="${i}:00 — ${n?n+' дн. из 7':'пауза'}"></i>`).join('')}</div><div class="gbx num">${[0,3,6,9,12,15,18,21].map(i=>`<span style="left:${(i+.5)/24*100}%">${i}</span>`).join('')}</div>`}
+  return `<div class="gbr">${c.map((n,i)=>`<i class="${n?'on':''}${i===hr?' nw':''}" style="height:${n?Math.round(30+70*n/7):10}%" title="${i}:00 — ${n?n+' дн. из 7':'пауза'}"></i>`).join('')}</div><div class="gbx num">${c.map((n,i)=>`<span class="${n?'on':''}${i===hr?' nw':''}">${i}</span>`).join('')}</div><div class="gbg"><i class="on"></i>реклама идёт<i></i>пауза<i class="nw"></i>сейчас · время МСК</div>`}
+/* 15.11 Андрей «красивее, но ничего не понятно, цифры через раз» — цифра под каждым часом, у часов показа она зелёная; строка-пояснение цветов */
 const grLine=(t,ch)=>`<div class="gbl">${t}${ch?` · <span class="num">сверено ${esc(ch)}</span>`:''}</div>`;
 function grBlock(r,nm){const g=ourGr(r),on=g&&g.on,mg=r.mar&&r.mar.gr,mw=mg&&mg.w&&mg.w.length===7?mg.w:null;
   let h=`<div class="hrw"><h3>График показа</h3><button class="lnk" type="button" data-act="gr" data-rk="${r.id}|${nm}">${on?'настроить':'включить'}</button></div>`;
