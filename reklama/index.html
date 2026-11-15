@@ -503,6 +503,8 @@ textarea.inp{height:96px;padding:12px 14px;font-size:16px;font-weight:500;resize
 .dbxs.x3 .dbx{padding:10px 10px 9px;border-radius:15px}.dbxs.x3 .dbx b.num{font-size:25px}.dbxs.x3 .dbx .l{font-size:11.5px}.dbxs.x3 .dbx .d{font-size:11.5px}
 .panl{display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12.5px;color:var(--ink2);margin-top:10px}
 .tdl{font-size:13px;color:var(--ink2);margin:10px 2px 0;line-height:1.45}
+.tdlb{font:inherit;font-size:13px;padding:0;white-space:nowrap}.tdlb i{display:inline-block;font-style:normal;margin-left:3px;transition:transform .2s}.tdlb.on i{transform:rotate(90deg)}
+.tdlh{display:none;margin:6px 0 0;overflow-anchor:none}.tdlh.on{display:block}
 .fnl{font-size:13.5px;line-height:1.5;margin:11px 2px 0}
 .bars .col i em{display:block;font-style:normal;font-size:10.5px;font-weight:750;color:#fff;text-align:center;line-height:1;padding-top:4px;overflow:hidden}
 .bars .col .tp .t0{display:block;font-weight:600;color:var(--ink3);margin-bottom:2px;font-size:9.5px;letter-spacing:-.02em}
@@ -2723,6 +2725,14 @@ function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(z=>chgReal(z)||/по�
     h+=(nt?ntRow(z,1):evX(z,1)).replace(/<time>[^<]*<br>/,'<time>')}
   return `<div class="hrw"><h3>Что меняли и заметки</h3><span class="hrwb">${L.length>6?`<button class="lnk" type="button" data-act="chgmore" data-key="${key}">${open?'свернуть':'ещё '+Math.min(L.length-6,34)}</button> · `:''}<button class="lnk" type="button" data-act="notes" data-nm="${nm||''}" data-cid="${cid||''}">${nn?'заметки '+nn+' · написать':'написать заметку'}</button></span></div>`
     +(L.length?`<div${cid?' class="evrk"':''}>${h}</div>`+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок и заметок пока нет.</div>')}
+/* 15.11 Андрей (кадр листа кампании, обведено место справа в строке «Сегодня: траты …»): «сделай тут слово история и по клику раскрывает последние 7 записей.
+   Ничего не двигай просто аккуратно добавь» — в конце строки ссылка «история ›», нажатие раскрывает под строкой 7 последних записей того же списка,
+   что «Что меняли и заметки» (правки, пополнения, заметки), раскрывает на месте, без перерисовки листа */
+let TDLH=false;
+function tdlHist(nm,cid){const L=istOf(nm,cid,0).filter(z=>chgReal(z)||/пополн/i.test(z.chto||'')).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
+  if(!L.length)return '<div class="tdlh'+(TDLH?' on':'')+'"><div class="note" style="margin-top:0">Правок и заметок пока нет.</div></div>';
+  let h='',dd='';for(const [z,nt] of L.slice(0,7)){const d=z.t.slice(0,10);if(d!==dd){dd=d;h+=`<div class="evday num">${dm(d)}</div>`}h+=(nt?ntRow(z,1):evX(z,1)).replace(/<time>[^<]*<br>/,'<time>')}
+  return `<div class="tdlh${TDLH?' on':''}"><div${cid?' class="evrk"':''}>${h}</div></div>`}
 function openNotes(nm,cid){if(!nm&&!cid){openIst();return}   // общего списка заметок всех товаров нет — открываем журнал правок
   let draft='';SEGCB.ntf=v=>{S.ntf=v;redraw()};
   sheet(()=>{const my=istOf(nm,cid,1),hi=istOf(nm,cid,0).filter(chgReal),f=S.ntf||'all',r=cid&&RK[cid],t=nm&&TOV[nm],isN=z=>z.kto==='заметка'||z.kto==='марпла';
@@ -3285,7 +3295,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
     ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('CPO',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','цена заказа: расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
-  h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''}</div>`;
+  h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''} · <button class="lnk tdlb${TDLH?' on':''}" type="button" data-tdlh>история<i>›</i></button></div>`+tdlHist(nm,id);
   if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
   /* гистограмма: высота — то, что выбрано (ДРР к заказам товара, ДРР к заказам с этой рекламы или расход), над столбиком одна цифра; день с тратами без заказов —
@@ -3442,6 +3452,8 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-klo],[data-klm]');if(x){e.stopPropagation();klToggle(x)}});
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-seg="prd"] button');if(x){e.stopPropagation();if(x.getAttribute('aria-pressed')!=='true')prcSwap(x.dataset.v)}});
   el.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('klhow'))KLHOW=e.target.open},true);   // «Что такое кластер» — помним, открыто ли
+  /* 15.11: «история ›» в строке «Сегодня» листа кампании — 7 последних записей раскрыть / свернуть на месте */
+  el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-tdlh]');if(!x)return;e.stopPropagation();TDLH=!TDLH;x.classList.toggle('on',TDLH);const w=x.closest('.tdl'),n=w&&w.nextElementSibling;if(n&&n.classList.contains('tdlh'))n.classList.toggle('on',TDLH)});
   /* 14.11: сводная запись «Что меняли» — раскрыть / свернуть список на месте, без перерисовки листа */
   el.addEventListener('click',e=>{const v=e.target.closest&&e.target.closest('.evx>.ev'),w=v&&v.parentNode;if(!w)return;e.stopPropagation();
     const k=w.dataset.evx,on=!w.classList.contains('on');w.classList.toggle('on',on);if(on)EVX.add(k);else EVX.delete(k)});
