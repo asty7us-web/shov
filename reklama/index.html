@@ -1537,6 +1537,12 @@ body.mjob #runp{display:none}
 /* ── 14.11 Андрей 08:10: «…от 1000 показов какие» — вторая строка шапки столбца словами («за клик», «за 1000 показов»; sub в TBL, d_tabl.js) ── */
 th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spacing:0;line-height:1.15;color:var(--ink3);opacity:.85;white-space:normal}
 
+/* 15.11: день смешанной кампании раскрывается на поиск и рекомендации */
+.tw.dtw tr.dex{cursor:pointer}
+.tw.dtw .dar{font-style:normal;color:var(--acc);margin-right:5px;font-size:11px}
+.tw.dtw tr.dsub td{font-size:13px;color:var(--ink3);background:color-mix(in srgb,var(--acc) 4%,transparent)}
+.tw.dtw .dsl{padding-left:16px}
+
 </style>
 </head>
 <body>
@@ -2368,7 +2374,7 @@ function dRow(i,g){g=g||{};const x={i};for(const k of DFL)x[k]=typeof g[k]==='nu
 const dNum=(k,l,o)=>Object.assign({k,l,v:x=>x[k],h:x=>x[k]==null?'—':f0(x[k])},o||{});
 const dDrr=(k,l,t)=>({k,l,t,v:x=>x[k],h:x=>x[k]==null?'—':`<b>${drrT(x[k])}</b>`,cls:x=>dcls(x[k])});
 const DCOLS=[
-  {k:'d',l:'Дата',v:x=>x.i,h:x=>x.tot?`<b>За период</b><small>${x.lab}</small>`:dlab(x.i)+(x.i===T?'<small>сегодня, день идёт</small>':'')},
+  {k:'d',l:'Дата',v:x=>x.i,h:x=>x.sub?`<span class="dsl">${x.sub}</span>`:(x.ex?`<i class="dar">${x.op?'▾':'▸'}</i>`:'')+(x.tot?`<b>За период</b><small>${x.lab}</small>`:dlab(x.i)+(x.i===T?'<small>сегодня, день идёт</small>':''))},
   dNum('v','Показы'),dNum('c','Клики'),
   {k:'ctr',l:'CTR',t:'клик из показа: клики ÷ показы',v:x=>x.ctr,h:x=>pc(x.ctr)},
   /* 14.11 Андрей 08:10: «…от 1000 показов какие» — под CPC и CPM словами: «за клик», «за 1000 показов» (sub — вторая строка шапки, a_css_v.css .ths) */
@@ -2382,11 +2388,18 @@ const DCOLS=[
   dDrr('drr','ДРР','затраты ÷ все заказы товара, ₽'),
   dNum('sp','Заказы РК, ₽',{t:'сумма заказов, которые ВБ отнёс к рекламе',def:0}),
   dNum('or','Заказы товара, ₽',{t:'сумма всех заказов товара',def:0})];
-function dayTbl(kind,ix,get){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['d',-1],cols:DCOLS};
+/* 15.11 Андрей «в марпла можно было раскрыть … по смешанным кампаниям откуда поиск, рек»: spl(i) → {p: поиск, r: рекомендации} — строка дня раскрывается
+   двумя строками под ней (нажатие по строке); поиск — статистика кластеров, рекомендации — остальное, по расчёту */
+function dayTbl(kind,ix,get,spl){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['d',-1],cols:DCOLS};
   const R=ix.map(i=>dRow(i,get(i))),tt={};
   for(const k of DFL){let s=null;for(const r of R)if(r[k]!=null)s=(s||0)+r[k];tt[k]=s}
   const tot=Object.assign(dRow(-1,tt),{tot:1,lab:ix.length?dm(D.days[ix[0]])+'–'+dm(D.days[ix[ix.length-1]]):''});
-  return `<div class="hrw dth"><h3>По дням таблицей</h3>${tblBtn(id)}</div>`+tblHtml(id,[tot].concat(tblSort(id,R)),x=>x.tot?'class="dtot"':'class="dtr"','dtw')}
+  let rows=[tot].concat(tblSort(id,R));
+  if(spl){const ex=S.dtx||(S.dtx=new Set()),ss=L=>{const o={p:{},r:{}};for(const s of L)if(s)for(const w of ['p','r'])for(const k in s[w])if(s[w][k]!=null)o[w][k]=(o[w][k]||0)+s[w][k];return o};
+    rows=rows.flatMap(x=>{const s=x.tot?ss(ix.map(spl)):spl(x.i);if(!s)return [x];const k=kind+'|'+(x.tot?-1:x.i);x.ex=k;x.op=ex.has(k);
+      return x.op?[x,Object.assign(dRow(x.i,s.p),{sub:'поиск',tot:x.tot}),Object.assign(dRow(x.i,s.r),{sub:'рекомендации',tot:x.tot})]:[x]})}
+  const at=x=>x.sub?'class="dsub"':(x.ex?`data-act="dtx" data-k="${x.ex}" `:'')+(x.tot?'class="dtot'+(x.ex?' dex':'')+'"':'class="dtr'+(x.ex?' dex':'')+'"');
+  return `<div class="hrw dth"><h3>По дням таблицей</h3>${tblBtn(id)}</div>`+tblHtml(id,rows,at,'dtw')+(spl?'<div class="muted tnote">Нажмите на день — раскроется: поиск и рекомендации. Поиск — по статистике запросов, рекомендации — остальное, по расчёту.</div>':'')}
 
 /* ───────── Склейки ───────── */
 function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0,a:0};for(const t of L){const x=pAgg(t,ix);a.s+=x.s;a.or+=x.or;a.oq+=x.oq;a.q+=x.q;a.c+=x.c;a.v+=x.v;a.sp+=x.sp;a.a+=x.a}   // a — корзины (для таблицы по дням)
@@ -2521,9 +2534,12 @@ function kpi4(o){const ok=v=>v!=null&&isFinite(v),d=ok(o.drr)&&ok(o.pdrr)?o.drr-
     +tl('ДРР РК',inf(o.drrk)?'нет заказов':pc(o.drrk),'траты к заказам с рекламы',inf(o.drrk)?'bad tx':'')
     +tl('Траты',rub(o.s),o.ps!=null?perPr()+': '+rub(o.ps):'',sbad(o.s,o.z))
     +tl(o.ql||'Заказы, шт',f0(o.q)+' шт',o.qd||'')+'</div>'}
-function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
+function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0).filter(chgReal)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
 /* последние правки — сразу в листе, без перехода в отдельный раздел; «показать ещё» раскрывает тут же */
-function chgBlock(nm,cid){const L=istOf(nm,cid,0),key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:4;
+/* 15.11 Андрей «что меняли просил не выводить пополнения сюда», «и совет там тоже не надо, только реальные изменения»: в «Что меняли» листов товара и кампании
+   нет пополнений бюджета и включения биддера «советом» (ставку он не меняет); весь журнал — по-прежнему в разделе «Ещё» */
+const chgReal=z=>!/пополн/i.test(z.chto||'')&&!(/^биддер$/i.test(z.chto||'')&&/^совет/i.test(String(z.stalo||'')));
+function chgBlock(nm,cid){const L=istOf(nm,cid,0).filter(chgReal),key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:4;
   return `<div class="hrw"><h3>Что меняли</h3>${L.length>4?`<button class="lnk" type="button" data-act="chgmore" data-key="${key}">${open?'свернуть':'показать ещё '+Math.min(L.length-4,36)}</button>`:''}</div>`
     +(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'   /* в листе кампании её название под каждой правкой не повторяем (стиль .evrk) */+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок за 4 месяца не было.</div>')}
 /* 14.11 Андрей: «то меняли если нажимаю на нее скажем ставки кластеров то открываются какие что» — сводная запись («ставки кластеров: изменено N»,
@@ -3127,7 +3143,11 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе.':'ДРР общий — расход к заказам всего товара.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
-  if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g);
+  const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
+    return {p,r:{v:m('v'),c:m('c'),a:m('a'),q:m('q'),s:Math.round(100*m('s'))/100}}}:null;   // 15.11: смешанная кампания — день раскрывается на поиск и рекомендации
+  if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spl);
+  /* 15.11 Андрей «пики трат по часам … в рекламу сервис» → «Да»: траты по часам — сразу за таблицей по дням (d_chasy.js) */
+  if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
   if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div>${klHow(r)}<div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
@@ -3211,6 +3231,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='ref')openRef();
   else if(a==='pnp'){S.pnp=ds.k;redraw()}
   else if(a==='rkdm'){S.rkdm=ds.k;redraw()}
+  else if(a==='dtx'){const X=S.dtx||(S.dtx=new Set());if(X.has(ds.k))X.delete(ds.k);else X.add(ds.k);redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
@@ -3260,6 +3281,30 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
   new MutationObserver(()=>{const b=el.querySelector('.pseg .seg [aria-pressed="true"]'),s=b&&b.parentNode;if(s&&s.scrollWidth>s.clientWidth+2)s.scrollLeft=Math.max(0,b.offsetLeft-(s.clientWidth-b.offsetWidth)/2)}).observe(el,{childList:true});
   /* «Требуют внимания» в «Кампаниях»: нажали «Работают / На паузе / Все» в шапке — отбор снимается (раньше общего обработчика, он перерисует список) */
   document.addEventListener('click',e=>{if(S.rkf.vn&&e.target.closest&&e.target.closest('[data-seg="rkf"] button')){S.rkf.vn='';unfz()}},true)})();
+
+/* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
+   Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
+   трата за час = разница замеров. Режимы: «В среднем за день» (последние до 7 полных дней) | «Сегодня». Три самых дорогих часа — красным.
+   Нажатие на час — траты, клики, корзины, заказы с рекламы и цена клика за этот час. Только показывает, ничего не меняет. ── */
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-chm]');if(!b)return;S.chm=b.dataset.chm;redraw()});
+function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
+  const hd=x=>`<div class="hrw"><h3>Траты по часам</h3>${x||''}</div>`;
+  if(!z)return hd('')+`<div class="muted tnote">Копим траты по часам: сервис каждые 30 минут запоминает, сколько кампания потратила с начала дня. Первая картинка — через сутки, судить о часах — через 5–7 дней.</div>`;
+  const n=z.n||0,hasT=!!(z.t&&z.t.some(v=>v>0));let m=S.chm==='t'&&hasT?'t':n?'a':hasT?'t':'a';
+  const bt=(v,l,on)=>on?`<button type="button" class="press" data-chm="${v}" aria-pressed="${m===v}">${l}</button>`:'';
+  const H=[...Array(24).keys()],g=h=>{if(m==='t')return {s:z.t[h]||0,c:(z.tc||[])[h]||0,a:null,o:null};const k=n||1;return {s:(z.s[h]||0)/k,c:(z.c[h]||0)/k,a:(z.a[h]||0)/k,o:(z.o[h]||0)/k}};
+  const V=H.map(h=>g(h).s),top=[...H].filter(h=>V[h]>=1).sort((a,b)=>V[b]-V[a]).slice(0,3),mx=Math.max(1,...V),tot=V.reduce((a,b)=>a+b,0);
+  const id='ch'+(++CHN),MH=64;let b='',x='';
+  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,red=top.includes(h);
+    b+=`<div class="col${h===23?' sel':''}" data-ch="${id}" data-i="${h}">${red?`<span class="tp num">${ksh(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(red?'var(--bad)':'var(--acc)'):'var(--bar)'}"></i></div>`;
+    x+=`<span>${h%3===0?h:''}</span>`});
+  CHR[id]=h=>{const q=g(h),cpc=q.c?q.s/q.c:null;return `<b>${h}:00–${h+1}:00</b> · траты <b>${rub(q.s)}</b>${tot?' ('+pc(100*q.s/tot)+' дня)':''} · клики ${f1(q.c)}${cpc!=null?' · клик '+rub2(cpc):''}${q.a!=null?' · корзины '+f1(q.a)+' · заказы РК '+f1(q.o):''}`};
+  const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
+  const tl=top.length?'Дороже всего: '+top.map(h=>`<b>${h} ч</b> — ${rub(V[h])}`).join(', ')+'. ':'';
+  const pod=m==='t'?`Сегодня по часам${z.tp?' (копим не с полуночи — часы до первого замера пустые)':''}. `:`В среднем за день, ${n} ${n===1?'день':n<5?'дня':'дней'} с ${z.d0?dm(z.d0):"—"}${n<5?' — мало, судить рано':''}. `;
+  return hd(`<span class="pnqs">${bt('a','В среднем',n>0)}${bt('t','Сегодня',hasT)}</span>`)
+    +`<div class="ch ax" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
+    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа. Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
    Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
