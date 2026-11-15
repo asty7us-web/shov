@@ -1380,6 +1380,18 @@ table.zon tr:last-child td{font-weight:700}
 :root[data-lite="1"] .mbtn .mbf{transition:none}:root[data-lite="1"] .mbtn .mbf::after,:root[data-lite="1"] .plb .mwait i,:root[data-lite="1"] .plb .mwt,:root[data-lite="1"] .plb .mfresh{animation:none}
 @media (prefers-reduced-motion:reduce){.mbtn .mbf{transition:none}.mbtn .mbf::after,.plb .mwait i,.plb .mwt,.plb .mfresh{animation:none}}
 
+/* 15.11 Андрей «неудобно с этими стрелками, размашисто всё»: лист «Столбцы» компактный — ручка ⠿ вместо стрелок, строки ниже, пояснение в одну строку, переключатель меньше */
+.colr{gap:10px;padding:7px 0}
+.colr b{font-size:14.5px}
+.colr div span{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.colr .sw{width:44px;height:26px}
+.colr .sw:after{width:22px;height:22px}
+.colr .sw[aria-checked="true"]:after{transform:translateX(18px)}
+.dh{flex:none;width:22px;font-style:normal;font-size:18px;line-height:1;color:var(--ink3);text-align:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;padding:6px 0}
+.dh0{visibility:hidden}
+.colr.drg{position:relative;z-index:5;background:var(--card,var(--bg));border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.28);transition:none}
+.colr.drg .dh{cursor:grabbing;color:var(--ink)}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -2265,10 +2277,24 @@ function tblHtml(id,rows,attr,cls){const st=tblSt(id),cols=tblCols(id);   // cls
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
 function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k){st.dir=-st.dir;st.sort2=null}else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
+/* перетаскивание строки столбца за ручку ⠿: строка едет за пальцем, соседи меняются местами на половине высоты; у края листа — прокрутка; отпустил — порядок сохранён */
+function colDrag(id,ap){$$('[data-drag]').forEach(h=>h.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();e.stopPropagation();
+  const r=h.closest('.colr'),sc=$('#sbody');let y0=e.clientY,ly=e.clientY,tm=0;try{h.setPointerCapture(e.pointerId)}catch(x){}r.classList.add('drg');
+  const step=()=>{const dy=ly-y0;r.style.transform=`translateY(${dy}px)`;
+    const nx=r.nextElementSibling,pv=r.previousElementSibling;
+    if(nx&&nx.dataset&&nx.dataset.ck&&dy>nx.offsetHeight/2){nx.after(r);y0+=nx.offsetHeight;r.style.transform=`translateY(${ly-y0}px)`}
+    else if(pv&&pv.querySelector&&pv.querySelector('[data-drag]')&&dy<-pv.offsetHeight/2){pv.before(r);y0-=pv.offsetHeight;r.style.transform=`translateY(${ly-y0}px)`}};
+  const edge=()=>{if(!sc){tm=0;return}const b=sc.getBoundingClientRect(),d=ly<b.top+60?-9:ly>b.bottom-60?9:0;if(d){const t0=sc.scrollTop;sc.scrollTop+=d;y0-=sc.scrollTop-t0;step()}tm=d?requestAnimationFrame(edge):0};
+  const mv=ev=>{ly=ev.clientY;step();if(!tm)edge()};
+  const up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);if(tm)cancelAnimationFrame(tm);tm=0;
+    r.classList.remove('drg');r.style.transform='';const z=tblSt(id),o=[...r.parentNode.querySelectorAll('.colr[data-ck]')].map(x=>x.dataset.ck);
+    if(o.join()!==z.ord.join()&&o.length===z.ord.length){z.ord=o;tblSave(id,z);ap()}};
+  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)})}
 function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
+  /* 15.11 Андрей «неудобно с этими стрелками, размашисто всё»: стрелки ↑↓ убраны — столбец перетаскивается за ручку ⠿ слева, строки ниже, пояснение в одну строку */
   const row=(k,i)=>{const c=T0.cols.find(x=>x.k===k),on=!st.hid.has(k);
-    return `<div class="opt colr"><div><b>${c.l}${c.sub?' · '+c.sub:''}</b>${c.t?`<span>${esc(c.t)}</span>`:''}</div>${i===0?'<span class="muted" style="font-size:12.5px;flex:none">всегда первый</span>'
-      :`<button class="mvb press" type="button" data-colmv="${k}|-1"${i<=1?' disabled':''} aria-label="Выше">↑</button><button class="mvb press" type="button" data-colmv="${k}|1"${i===st.ord.length-1?' disabled':''} aria-label="Ниже">↓</button><button class="sw" type="button" role="switch" data-colsw="${k}" aria-checked="${on}" aria-label="${c.l}"></button>`}</div>`};
+    return `<div class="opt colr" data-ck="${k}">${i===0?'<i class="dh dh0"></i>':'<i class="dh" data-drag aria-label="Перетащить">⠿</i>'}<div><b>${c.l}${c.sub?' · '+c.sub:''}</b>${c.t?`<span>${esc(c.t)}</span>`:''}</div>${i===0?'<span class="muted" style="font-size:12px;flex:none">всегда первый</span>'
+      :`<button class="sw" type="button" role="switch" data-colsw="${k}" aria-checked="${on}" aria-label="${c.l}"></button>`}</div>`};
   const opts=(cur,none)=>(none?`<option value=""${cur?'':' selected'}>— нет —</option>`:'')+T0.cols.map(c=>`<option value="${c.k}"${c.k===cur?' selected':''}>${esc(String(c.l+(c.sub?' '+c.sub:'')).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim())}</option>`).join('');
   const dirB=(n,d)=>`<button class="mvb press" type="button" data-sdir="${n}" aria-label="${d<0?'По убыванию':'По возрастанию'}" title="${d<0?'по убыванию':'по возрастанию'}">${d<0?'↓':'↑'}</button>`;
   const srt=`<div class="hrw" style="margin-top:2px"><h3>Сортировка</h3></div>
@@ -2280,14 +2306,14 @@ function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
     +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>',
     after:()=>{const ap=()=>{redraw();render(true)};
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
-      $$('[data-colmv]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),p=b.dataset.colmv.split('|'),i=s2.ord.indexOf(p[0]),j=i+(+p[1]);if(i<1||j<1||j>=s2.ord.length)return;s2.ord.splice(i,1);s2.ord.splice(j,0,p[0]);tblSave(id,s2);ap()});
+      colDrag(id,ap);
       const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()}}};
   return {t:'Столбцы и сортировка',s:'что показывать, в каком порядке и как сортировать · запоминается на этом устройстве',h:srt+st.ord.map(row).join('')
     +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>'
     +'<div class="muted tnote">В самой таблице: нажмите на название столбца — сортировка по нему; прежний столбец остаётся вторым (цифры 1 и 2 в шапке).</div>',   // 14.11: пояснение из-под таблиц — только здесь
     after:()=>{const ap=()=>{redraw();render(true)};
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
-      $$('[data-colmv]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),p=b.dataset.colmv.split('|'),i=s2.ord.indexOf(p[0]),j=i+(+p[1]);if(i<1||j<1||j>=s2.ord.length)return;s2.ord.splice(i,1);s2.ord.splice(j,0,p[0]);tblSave(id,s2);ap()});
+      colDrag(id,ap);
       const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()};
       const s1=$('#sso1'),s2=$('#sso2');
       if(s1)s1.onchange=()=>{const z=tblSt(id),c=T0.cols.find(x=>x.k===s1.value);if(!c)return;if(z.sort2===c.k)z.sort2=null;z.sort=c.k;z.dir=c.asc?1:-1;tblSave(id,z);unfz();ap()};
@@ -3298,7 +3324,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
    (13.11 Андрей: «свайп плохо работает между разделами») — разделы переключаются нижними кнопками ── */
 function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false;const j=top.nav.i+d;if(j<0||j>=top.nav.n){toast(d>0?'Это последняя в списке':'Это первая в списке');return false}
   SHS.pop();SWK=d>0?'shf':'shb';top.nav.to(j);SWK=null;return true}
-(()=>{const HS='.scx,.tw,.tws,.mxw,.sub,.chips,.bars,.grw,.seg,.selbar,.prs,input,textarea,select';let s=null;const el=$('#sbody');
+(()=>{const HS='.scx,.tw,.tws,.mxw,.sub,.chips,.bars,.grw,.seg,.selbar,.prs,input,textarea,select,.dh';let s=null;const el=$('#sbody');
   el.addEventListener('touchstart',e=>{if(e.touches.length!==1){s=null;return}const t=e.touches[0];s={x:t.clientX,y:t.clientY,t:Date.now(),el:e.target}},{passive:true});
   el.addEventListener('touchend',e=>{if(!s)return;const t=e.changedTouches[0],dx=t.clientX-s.x,dy=t.clientY-s.y,o=s;s=null;
     if(Date.now()-o.t>600||Math.abs(dx)<90||Math.abs(dx)<Math.abs(dy)*2.5)return;
@@ -4224,7 +4250,7 @@ function ptrDo(){try{sessionStorage.setItem(PTRK,String(Date.now()))}catch(e){}c
     ind.style.opacity=String(Math.min(1,d/38));ind.classList.toggle('rdy',d>=PTR_TH)};
   const hide=()=>{ind.classList.add('go');ind.classList.remove('rdy','spin');ind.style.setProperty('--py','-46px');ind.style.opacity='0';setTimeout(()=>ind.classList.remove('go'),260)};
   document.addEventListener('touchstart',e=>{g=null;if(PTRB||!D||e.touches.length!==1)return;const t=e.target;
-    if(!t||!t.closest||t.closest('input,textarea,select,[contenteditable],.tabs,.lock,.runres,#runp,#toast,.gst.ed'))return;
+    if(!t||!t.closest||t.closest('input,textarea,select,[contenteditable],.tabs,.lock,.runres,#runp,#toast,.gst.ed,.dh'))return;
     let sc,top;
     if(shOn()){const u=SHS[SHS.length-1],sb=$('#sbody');if(!u.adr||!sb.contains(t)||sb.scrollTop>0||inner(t,sb))return;sc=sb;top=sb.getBoundingClientRect().top;
       const ps=sb.querySelector('.pseg'),pb=ps?ps.getBoundingClientRect().bottom:0;if(pb>top&&pb<top+100)top=pb}   // стрелка — из-под прилипшего периода, а не поверх него
