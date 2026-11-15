@@ -1362,6 +1362,11 @@ table.zon tr:last-child td{font-weight:700}
 .shh .tt span.rkchips a.rklk .wbl{width:13px;height:13px;margin-right:4px;vertical-align:0;background:var(--wbi) center/contain no-repeat;border-radius:0;box-shadow:none;animation:none}
 .shh .tt span.rkchips a.rklk{padding:0 7px 0 5px;gap:0}
 
+/* 15.11: «Что меняли и заметки» одним списком — строка даты над каждым днём (chgNtBlock в d_novoe.js) */
+.evday{font-size:12px;font-weight:700;color:var(--ink3);padding:10px 0 2px;letter-spacing:.02em}
+.evday:first-child{padding-top:0}
+.hrwb{white-space:nowrap}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -1405,6 +1410,11 @@ table.zon tr:last-child td{font-weight:700}
 /* 15.11 Андрей «на всю клетку и плавно»: тянется вся строка столбца — без выделения текста, поднятая строка чуть крупнее */
 .colr[data-ck]{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
 .colr.drg{scale:1.02;cursor:grabbing}
+
+/* 15.11 Андрей «тускло, непонятно»: в «Цене по дням» цена дня — вертикально внутри столбика */
+.prc .bars .col i{display:flex;align-items:flex-start;justify-content:center}
+.prc .bars .col i em{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;padding:5px 0 0;line-height:1;white-space:nowrap}
+.prc .bars .col .tp .in0{writing-mode:vertical-rl;transform:rotate(180deg);margin:0 auto 2px}
 
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
@@ -2657,6 +2667,14 @@ const ntRow=(z,mark)=>`<div class="ev nte"><time>${dm(z.t.slice(0,10))}<br>${z.t
 function notesBlock(nm,cid){const L=istOf(nm,cid,1);
   return `<div class="hrw"><h3>Заметки</h3><button class="lnk" type="button" data-act="notes" data-nm="${nm||''}" data-cid="${cid||''}">${L.length?'все '+L.length+' · написать':'написать'}</button></div>`
     +(L.length?'<div>'+L.slice(0,4).map(z=>`<div class="ntl"><time class="num">${dm(z.t.slice(0,10))}</time><span>${esc(z.chto)}</span></div>`).join('')+'</div>':'<div class="note" style="margin-top:0">Заметок пока нет.</div>')}
+/* 15.11 Андрей (кадр листа кампании, «Что меняли» и «Заметки» друг под другом): «вместе просто по датам разделить» — один список «Что меняли и заметки»:
+   правки и заметки вперемешку по времени, свежие сверху, над каждым днём — строка с датой; в строке только время. «показать ещё» — как у «Что меняли» */
+function chgNtBlock(nm,cid){const L=istOf(nm,cid,0).filter(chgReal).map(z=>[z,0]).concat(istOf(nm,cid,1).map(z=>[z,1])).sort((a,b)=>a[0].t<b[0].t?1:a[0].t>b[0].t?-1:0);
+  const key=(nm||0)+'|'+(cid||0),open=S.chgOpen===key,n=open?40:6,nn=istOf(nm,cid,1).length;let h='',dd='';
+  for(const [z,nt] of L.slice(0,n)){const d=z.t.slice(0,10);if(d!==dd){dd=d;h+=`<div class="evday num">${dm(d)}</div>`}
+    h+=(nt?ntRow(z,1):evX(z,1)).replace(/<time>[^<]*<br>/,'<time>')}
+  return `<div class="hrw"><h3>Что меняли и заметки</h3><span class="hrwb">${L.length>6?`<button class="lnk" type="button" data-act="chgmore" data-key="${key}">${open?'свернуть':'ещё '+Math.min(L.length-6,34)}</button> · `:''}<button class="lnk" type="button" data-act="notes" data-nm="${nm||''}" data-cid="${cid||''}">${nn?'заметки '+nn+' · написать':'написать заметку'}</button></span></div>`
+    +(L.length?`<div${cid?' class="evrk"':''}>${h}</div>`+(open&&L.length>40?`<div class="muted tnote">Показаны последние 40 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Правок и заметок пока нет.</div>')}
 function openNotes(nm,cid){if(!nm&&!cid){openIst();return}   // общего списка заметок всех товаров нет — открываем журнал правок
   let draft='';SEGCB.ntf=v=>{S.ntf=v;redraw()};
   sheet(()=>{const my=istOf(nm,cid,1),hi=istOf(nm,cid,0),f=S.ntf||'my',r=cid&&RK[cid],t=nm&&TOV[nm],isN=z=>z.kto==='заметка'||z.kto==='марпла';
@@ -3101,7 +3119,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   if(!has.length)return hd('нет заказов')+'<div class="note prnz" style="margin-top:6px">За период не было заказов — цены у покупателя нет.</div>'+inTx;
   const vs=has.map(vOf),mn0=Math.min(...vs),mx=Math.max(...vs),iMx=has.filter(i=>vOf(i)===mx).pop(),iMn=has.filter(i=>vOf(i)===mn0).pop(),HL=md==='f'?AK:[];
   const mn=HL.length?Math.min(mn0,...HL.map(x=>x.plan)):mn0,mxL=HL.length?Math.max(mx,...HL.map(x=>x.plan)):mx;
-  let base=0;if(md!=='s'){const R=Math.max(mxL-mn,mxL*0.04,1),p=Math.pow(10,Math.floor(Math.log10(R)));let st=p;for(const k of [1,2,5,10]){st=k*p;if(R/st<=2.5)break}base=Math.max(0,Math.floor((mn-R*0.6)/st)*st)}
+  let base=0;if(md!=='s'){const R=Math.max(mxL-mn,mxL*0.04,1),p=Math.pow(10,Math.floor(Math.log10(R)));let st=p;for(const k of [1,2,5,10]){st=k*p;if(R/st<=2.5)break}base=Math.max(0,Math.floor((mn-R*1.4)/st)*st)}
   /* подписи линий: близкие (меньше ~13 точек по высоте) — одной подписью у самой верхней линии группы (ближе всех к нашей цене): «Чёрная пятница 6 350 +2»;
      подпись над линией, слева — справа над последними днями стоят числа столбиков */
   const MHp=70,top0=Math.max(mx,mxL)-base,hl=[];
@@ -3110,10 +3128,12 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
     for(const g of G){const hi=g.i[g.i.length-1];g.i.forEach(l=>hl.push({v:l.v,c:l.c,t:l===hi?esc(hi.n)+' '+f0(hi.p)+(g.i.length>1?' +'+(g.i.length-1):''):''}))}}
   const fv=v=>md==='s'?f0(v)+'%':f0(v);
   const col=i=>{if(md==='b')return 'var(--wb)';if(md==='s'){const p=prv(i),v=pdm[i][3];return !p||Math.round(p[3])===Math.round(v)?'var(--warn)':v>p[3]?'var(--good)':'var(--bad)'}
-    return chg(i)?'var(--acc)':unc(i)?'color-mix(in srgb,var(--acc) 22%,transparent)':'color-mix(in srgb,var(--acc) 50%,transparent)'};
+    return chg(i)?'var(--warn)':unc(i)?'color-mix(in srgb,var(--ink3) 45%,transparent)':'var(--acc)'};
   const buy=i=>pdm[i]?` · у покупателя <b>${rub(pdm[i][2])}</b>`:' · заказов не было';
-  const ch=chart({ix:cx,h:HL.length?124:92,mh:HL.length?MHp:undefined,mxv:HL.length?top0:undefined,hl,val:i=>{const v=vOf(i);return v==null?null:v-base},col,dot:i=>!!chg(i),
-    top:i=>{if(vOf(i)==null)return '';const c=md==='f'?chg(i):0,k=cx.indexOf(i),l=(i===iMx||i===iMn)&&!(Math.abs(iMx-iMn)===1&&i===Math.min(iMx,iMn))?   /* наибольшая и наименьшая в соседних днях — подпись одна, у позднего дня (кадр 14.11: «6 4006 350») */`<span class="${k<2?'e0':k>cx.length-3?'e1':''}">${fv(vOf(i))}</span>`:'';return (c?`<span class="pca">${c<0?'▼':'▲'}</span>`:'')+l},   // у крайних дней подпись сдвинута внутрь — не наезжает на шкалу
+  /* 15.11 Андрей «тускло, непонятно вообще ничего»: столбики яркие, цена дня — внутри каждого столбика (вертикально), день смены цены — оранжевый со стрелкой,
+     день без данных — серый; столбики выше, самый низкий — не короче половины */
+  const ch=chart({ix:cx,h:HL.length?124:150,inn:i=>{const v=vOf(i);return v==null?'':f0(v)},mh:HL.length?MHp:undefined,mxv:HL.length?top0:undefined,hl,val:i=>{const v=vOf(i);return v==null?null:v-base},col,dot:i=>!!chg(i),
+    top:i=>{if(vOf(i)==null)return '';const c=md==='f'?chg(i):0,k=cx.indexOf(i),l=(i===iMx||i===iMn)&&!(Math.abs(iMx-iMn)===1&&i===Math.min(iMx,iMn))?   /* наибольшая и наименьшая в соседних днях — подпись одна, у позднего дня (кадр 14.11: «6 4006 350») */`<span class="${k<2?'e0':k>cx.length-3?'e1':''}">${fv(vOf(i))}</span>`:'';return (c?`<span class="pca">${c<0?'▼':'▲'}</span>`:'')},   // у крайних дней подпись сдвинута внутрь — не наезжает на шкалу
     ax:md==='s'?undefined:{f:v=>{const x=v+base;return x>=10000?axNum(x):f0(x)},int:true},
     read:i=>{const c=chg(i),o=ov[i];
       /* день до начала журнала: цена «как потом», а по заказам она могла быть другой (акция, скидка ВБ Клуба) — её показываем словами, не столбиком */
@@ -3253,8 +3273,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<div class="hrw"><h3>Управление и настройки</h3></div>`+rkCtl(r,nm);
   /* 15.11 Андрей «не нужно, есть же выше»: отдельный блок «Биддер» убран — плитка «Биддер» в управлении открывает его лист */
   if((ourGr(r)&&ourGr(r).on)||(r.mar&&r.mar.gr))h+=grBlock(r,nm);
-  h+=chgBlock(nm,id);
-  h+=notesBlock(nm,id);
+  h+=chgNtBlock(nm,id);   // 15.11 Андрей «вместе просто по датам разделить»: правки и заметки кампании — одним списком по дням
   /* блоков «Настройки сейчас», «Ставка» (минимум и советы ВБ — в листе «Ставка»), биддера и графика внизу больше нет — всё в блоке управления сверху.
      Фразы — последним блоком листа: при «Активные / Исключённые / Все» высота меняется только в самом низу (FR.mh держит её, см. frSwitch) */
   const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
@@ -3915,9 +3934,10 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
    сейчас, одной кнопкой подставляется такой же свой лимит (сохранение — прежней кнопкой с подтверждением), и одной строкой — что выключить в Марпле */
 /* 15.11 Андрей: «пусть пишет историю изменений по разделу» — под кнопками каждого листа управления (лимит, пополнение, ставка, биддер, график, цена,
    пауза) — «История изменений» этого раздела: только записи журнала (D.ist) этой кампании (цена — этого товара) и этого вида. Автоматика берётся там,
-   где она и есть изменение раздела (лимит дня: «выбран — пауза», «новый день — запуск»); ежечасные «час показа — запуск» графика не берём — их сотни */
+   где она и есть изменение раздела (лимит дня: «выбран — пауза», «новый день — запуск»); ежечасные «час показа — запуск» графика не берём — их сотни;
+   «перенос из Марплы» относим к разделу по тому, что перенесли (лимит / график) */
 const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0]};
-function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto)&&rx.test(z.chto||'')
+function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto)&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
     &&(cid?z.cid===+cid:String(z.nm)===String(nm)&&!z.cid)&&(kind!=='status'||!/лимит|график/i.test(z.chto||'')));
   return `<div class="hrw" style="margin-top:18px"><h3>История изменений</h3></div>`+(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,15).map(z=>evX(z,1)).join('')+'</div>'
     +(L.length>15?`<div class="muted tnote">Последние 15 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений пока не было.</div>')}
