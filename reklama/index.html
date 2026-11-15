@@ -2958,6 +2958,12 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
    с числом; строки рисует rkRow (e_sheets.js). Сводка «все работающие вместе» — только когда она отличается от главных цифр над ней (часть трат за период
    пришлась на кампании, что сейчас на паузе), иначе это те же числа второй раз подряд. На паузе — одна свёрнутая строка «На паузе · N ›»: нажатие
    раскрывает список, «свернуть» — обратно */
+/* 15.11: цены и акции товара в листе кампании — те же «Цена по дням» и список акций, что в листе товара (нажатие на акцию — как там) */
+function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
+  if(!aks.length&&!pb)return '';
+  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?`<div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`:'')+pb;
+  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${x.uch?'<span class="akok">участвуем</span>':'<i>не участвуем</i>'}</small></div></button>`).join('')+'</div>';
+  return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
   let h=`<div class="rkbox"><div class="rkcap">Рекламные кампании</div><div class="hrw rkhd"><h3>Работают <b class="num">${W.filter(r=>rkSt(r).w).length}</b>${W.some(r=>!rkSt(r).w)?` <small class="muted">· на паузе ${W.filter(r=>!rkSt(r).w).length}</small>`:''}</h3><span class="muted num">${perZa()}</span></div>`;
@@ -3097,7 +3103,8 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   else h+=til('График показа','круглые сутки','включить по часам','gr');
   if(srch)h+=own?til('Биддер','цель '+b.cel+' место','до '+kop(b.max),'bidder','o',b.mode==='sam'?'свой, сам ставит':'свой, советует')
     :mb?til('Биддер','цель '+mb.cel+' место','до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
-  h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):til('Автопополнение','нет','пополняется вручную','adinfo');
+  /* 15.11 Андрей «не настроено автопополнение»: в Каб 1 пополняет наш wb_rk_popolnenie (каждые 5 мин идущие РК, остаток ≤ 205 ₽ → +1000) — плитка показывает его */
+  h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):S.kab==='kab1'?til('Автопополнение','+1 000 ₽','когда остаток 205 ₽ и меньше','adinfo','o'):til('Автопополнение','нет','пополняется вручную','adinfo');
   return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button>${r.st===11&&st.w?`<button class="ctgo pz press${lk}" type="button" data-act="st" data-to="stop" data-rk="${key}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Остановить</button>`:''}</div>
     <div class="ctg">${h}</div>${lcLine(r.id)}
     <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button></div>`}
@@ -3158,7 +3165,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     val:i=>{const x=g(i);if(dmo==='s')return x.s>=1?x.s:null;return zk(x)?Infinity:x.s>=1?dv(x):null},cap:dmo==='s'?0:60,line:dmo==='s'?0:NORMA,
     ax:dmo==='s'?{f:axNum}:{f:v=>f0(v)+'%'},
     col:i=>{const x=g(i);return zk(x)?'var(--bad)':dcol(dmo==='s'?x.drr:dv(x))},dot:i=>cd.has(i),
-    top:i=>{const x=g(i);if(x.s<1)return '';if(zk(x))return '<span class="z0">0 зак</span>';return dmo==='s'?ksh(x.s):f0(dv(x))+'%'},
+    top:i=>{const x=g(i);if(x.s<1)return '';if(dmo==='s')return zk(x)?`<span class="t0 bd">${ksh(x.s)}</span><span class="z0">0 зак</span>`:ksh(x.s);if(zk(x))return '<span class="z0">0 зак</span>';return f0(dv(x))+'%'},   // 15.11 Андрей «расход не виден цифры»: в «Расход» сумма над каждым столбиком
     read:i=>{const x=g(i),dk=x.sp?100*x.s/x.sp:(x.s>=1?Infinity:null),nz=v=>v!=null&&!isFinite(v);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · ДРР общий <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · ДРР РК <b class="${nz(dk)?'bad':dcls(dk)}">${nz(dk)?'заказов нет':pc(dk)}</b> · заказы товара <b>${f0(x.oq)} шт</b>, с этой рекламы <b>${f0(x.q)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
     +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе.':'ДРР общий — расход к заказам всего товара.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
@@ -3166,6 +3173,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
     return {p,r:{v:m('v'),c:m('c'),a:m('a'),q:m('q'),s:Math.round(100*m('s'))/100}}}:null;   // 15.11: смешанная кампания — день раскрывается на поиск и рекомендации
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spl);
+  /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
+  if(t)h+=rkCenaAk(t,nm,cx);
   /* 15.11 Андрей «пики трат по часам … в рекламу сервис» → «Да»: траты по часам — сразу за таблицей по дням (d_chasy.js) */
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
@@ -3264,7 +3273,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='istall'){S.ist.k='all';S.ist.q='';openIst()}
   else if(a==='blnew'){S.blf='no';S.q='';sync();render()}
   else if(a==='rkvn'){S.rkf.vn=S.rkf.vn===ds.v?'':(ds.v||'');unfz();render(true)}   // «Требуют внимания»: показать только эти кампании / снова все
-  else if(a==='adinfo'){const m=(RK[rk[0]]||{}).mar||{};toast(m.ad?'Автопополнение ведёт Марпла: +'+f0(m.ad.add)+' ₽, когда остаток ниже '+f0(m.ad.min)+' ₽. Меняется в Марпле.':'Автопополнения у кампании нет. Пополнить — плитка «Остаток бюджета».')}
+  else if(a==='adinfo'){const m=(RK[rk[0]]||{}).mar||{};toast(m.ad?'Автопополнение ведёт Марпла: +'+f0(m.ad.add)+' ₽, когда остаток ниже '+f0(m.ad.min)+' ₽. Меняется в Марпле.':S.kab==='kab1'?'Автопополнение своё: каждые 5 минут, если кампания идёт и в бюджете 205 ₽ или меньше, кладём 1 000 ₽ и проверяем, что она идёт.':'Автопополнения у кампании нет. Пополнить — плитка «Остаток бюджета».')}
   else if(a==='frmore'){FR.all=true;redraw()}
   else if(a==='frjam'){FR.jam=!FR.jam;redraw()}
   else if(a==='frclr'){FR.sel=new Set();redraw()}
