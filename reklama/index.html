@@ -1328,11 +1328,19 @@ body.mjob #runp{display:none}
 .pnqv b{font:700 20px/1.15 var(--fd);letter-spacing:-.02em}
 
 /* 15.11: плашки кампании в шапке листа под названием (rkHead в d_novoe.js) */
-.shh .tt span.rkh.rkhs{display:flex;margin-top:6px}.shh .tt span.rkhs span.m{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;margin:0}.shh .tt span.rkhs .pill{display:inline-flex;width:auto;margin:0;height:20px;font-size:11.5px;padding:0 8px}
+/* 15.11 Андрей «верни какая была тут» (кадр 03:28): плашки снова столбиком, как в 03:20 — строчный вид убран. Было: */
+/* .shh .tt span.rkh.rkhs{display:flex;margin-top:6px}.shh .tt span.rkhs span.m{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;margin:0}.shh .tt span.rkhs .pill{display:inline-flex;width:auto;margin:0;height:20px;font-size:11.5px;padding:0 8px} */
 
 /* 15.11: период в шапке листа (e_sheets drawSheet переносит .pseg в #shh) */
 .shh{flex-wrap:wrap}.shh>.pseg{flex:1 0 100%;order:9;display:block;margin:2px 0 0;font-size:12.5px}
 .shh>.pseg+.x{display:none}
+
+/* 15.11 Андрей «сделай читабельно чётко»: шапка листа кампании — серая строка, плашки мелкие одной строкой, фото крупнее */
+.shh .tt span.rkmeta{display:block;font-size:12.5px;color:var(--ink3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shh .tt span.rkchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.shh .tt span.rkchips .pill{display:inline-flex;align-items:center;width:auto;margin:0;height:21px;padding:0 7px;font-size:11.5px;line-height:1;border-radius:7px;white-space:nowrap}
+.shh .shph.rkph{width:54px;height:72px;align-self:flex-start;margin-top:2px}
+@media (max-width:379px){.shh .shph.rkph{width:46px;height:61px}}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -1805,7 +1813,9 @@ function pzWhy(r){if(!r||r.st!==11||rkSt(r).w)return '';
   const z=(D.ist||[]).find(x=>x.cid===r.id&&/пауз|запуск|стоп|останов/i.test(x.chto||''));
   if(z&&!/запуск/i.test(z.chto)){const t=String(z.t||'');return 'поставили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
   return 'кто поставил — в журнале нет'}
-function rkLive(r){if(!r)return 0;if(rkSt(r).w)return 1;if(r.st!==11)return 0;
+/* 15.11 Андрей «тут перебор, всё было нормально… верни блок»: ручная пауза снова в блоке «На паузе», причина паузы видна там же */
+function rkLive(r){return r&&rkSt(r).w?1:0}
+function rkLive3(r){if(!r)return 0;if(rkSt(r).w)return 1;if(r.st!==11)return 0;
   if(String(r.upd||'').slice(0,10)>=D.days[Math.max(0,T-2)])return 1;
   const ix=[T,T-1,T-2].filter(i=>i>=0);for(const nm in r.nm)if(rkAgg(r,nm,ix).s>0)return 1;return 0}
 const stHtml=r=>{const s=rkSt(r);return `<span class="stt ${s.c}"><i></i>${s.t}</span>`};
@@ -3125,7 +3135,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      Фразы — последним блоком листа: при «Активные / Исключённые / Все» высота меняется только в самом низу (FR.mh держит её, см. frSwitch) */
   const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
-  const rkHead=`№ ${r.id} · с ${dm(r.cr)}${r.start?' · запуск '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}<span class="rkh rkhs"><span class="m"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${ostPills(t)}</span></span>`;
+  /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
+  const rkHead=`<span class="rkmeta">№ ${r.id} · с ${dm(r.cr)}${r.start?' · запуск '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}</span><span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}</span>`;
   return {ph,t:esc(r.name),s:((ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&srch)loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm)}).catch(()=>{})}}}
 
