@@ -1670,7 +1670,7 @@ const u8b64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i])
 let D=null,KL=null,DKC=null,UPR=RS.get('upr',null),K=null,TOV={},RK={},N=0,T=0,UPASS=null;
 const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),off:RS.get('off',0),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),
   chm:RS.get('chm','drr'),kw:{nm:RS.get('kwnm',0),cid:0,sort:'s',dir:-1,src:'rk',x:false},ak:{f:RS.get('akf','can')},ist:{f:'all',avto:false,nm:0}};
-const NORMA=15;   // доля рекламы от заказов, % — как в отчётах маркетолога
+const NORMA=12;   // доля рекламы от заказов, % — как в отчётах маркетолога
 
 async function pbk(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
@@ -1725,9 +1725,9 @@ const rub2=v=>v==null||!isFinite(v)?'—':(Math.abs(v)<100?f2(v):f0(v))+' ₽';
 /* 14.11 Андрей: «Тыс заменить на к» — тысячи везде буквой «к» вплотную к числу: «97,7к ₽», «22к»; «млн» — как было */
 const kr=v=>v==null||!isFinite(v)?'—':Math.abs(v)>=1e6?f1(v/1e6)+' млн':Math.abs(v)>=1e4?f1(v/1e3)+'к':f0(v);
 const pc=v=>v==null?'—':!isFinite(v)?'∞':(Math.abs(v)<10?f1(v):f0(v))+'%';
-const dcls=v=>v==null?'':v<=NORMA?'good':v<=25?'warnc':'bad';
+const dcls=v=>v==null?'':v<NORMA?'good':'bad';
 const drrT=v=>v!=null&&!isFinite(v)?'нет зак.':pc(v);   // реклама шла, а заказов не было — словами, не значком ∞
-const dcol=v=>v==null?'var(--bar)':v<=NORMA?'var(--good)':v<=25?'var(--warn)':'var(--bad)';
+const dcol=v=>v==null?'var(--bar)':v<NORMA?'var(--good)':'var(--bad)';
 const mcls=v=>v==null?'':v>=10?'good':v>=0?'warnc':'bad';   // маржа: от 10% зелёная, 0–10 жёлтая, минус красная (Андрей 12.11)
 const kop=v=>v==null?'—':f2(v/100)+' ₽';
 /* 14.11 Андрей: «если нет заказов, то траты красным везде в этом поле» — деньги ушли, а заказов рядом ноль */
@@ -2040,7 +2040,7 @@ function drrChart(ix,get,o){o=o||{};let mxS=0,mxD=NORMA/3;const cap=o.cap||60;
     inn:i=>get(i).oq||'',
     top:i=>{const g=get(i);return noz(g)?`<span class="t0 bd">${ksh(g.s)}</span><span class="z0">0 зак</span>`:(g.s>=1?`<span class="t0">${ksh(g.s)}</span>`:'')+(g.or>0&&g.drr!=null?pc(g.drr):'')},
     read:i=>{const g=get(i);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · реклама ${rub(g.s)} · заказы ${f0(g.oq)} шт на ${rub(g.or)} · ДРР <b class="${noz(g)?'bad':dcls(g.drr)}">${noz(g)?'заказов нет':pc(g.drr)}</b>${g.q?' · из них с рекламы '+f0(g.q)+' шт':''}${o.dot&&o.dot(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})}
-const CHLG='<div class="lg" style="margin-top:6px"><span><i style="background:var(--good)"></i>до '+NORMA+'%</span><span><i style="background:var(--warn)"></i>'+NORMA+'–25%</span><span><i style="background:var(--bad)"></i>выше 25% или без заказов</span><span>в столбике — заказы, шт</span><span>шкала слева — ДРР</span></div>';
+const CHLG='<div class="lg" style="margin-top:6px"><span><i style="background:var(--good)"></i>до '+NORMA+'%</span><span><i style="background:var(--bad)"></i>от '+NORMA+'% или без заказов</span><span>в столбике — заказы, шт</span><span>шкала слева — ДРР</span></div>';
 function dayChart(get,mode){   // get(i)→{s,or,oq,q,c,v,cpo,drr}
   const ix=PIc();if(mode==='drr')return drrChart(ix,get,{h:136})+CHLG;
   const M={s:{val:i=>get(i).s,col:()=>'var(--wb)',top:i=>get(i).s?kr(get(i).s):''},
