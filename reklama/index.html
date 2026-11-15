@@ -1345,6 +1345,14 @@ body.mjob #runp{display:none}
 .shh .shph.rkph{width:54px;height:72px;align-self:flex-start;margin-top:2px}
 @media (max-width:379px){.shh .shph.rkph{width:46px;height:61px}}
 
+/* 15.11: «Зоны показа» в листе кампании (zonBlock в d_novoe.js) */
+.zonw{overflow-x:auto;margin-top:6px}
+table.zon{width:100%;border-collapse:collapse;font-size:13.5px}
+table.zon th{font-weight:600;font-size:12px;color:var(--ink3);text-align:right;padding:6px 6px;white-space:nowrap}
+table.zon td{text-align:right;padding:8px 6px;border-top:.5px solid var(--line);white-space:nowrap}
+table.zon td:first-child,table.zon th:first-child{text-align:left;padding-left:0}
+table.zon tr:last-child td{font-weight:700}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -1685,7 +1693,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const b64u8=s=>{const b=atob(s),n=b.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=b.charCodeAt(i);return u};
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)};
 let D=null,KL=null,DKC=null,UPR=RS.get('upr',null),K=null,TOV={},RK={},N=0,T=0,UPASS=null;
-const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),off:RS.get('off',0),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),
+const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),off:RS.get('off',0),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),ost:RS.get('ost',false),
   chm:RS.get('chm','drr'),kw:{nm:RS.get('kwnm',0),cid:0,sort:'s',dir:-1,src:'rk',x:false},ak:{f:RS.get('akf','can')},ist:{f:'all',avto:false,nm:0}};
 const NORMA=12;   // доля рекламы от заказов, % — как в отчётах маркетолога
 
@@ -2041,6 +2049,7 @@ const fresh=bez=>{const a=D.at.replace('T',' '),ago=atAgo();   // bez — без
 function tovRows(){const ix=PI();let a=K.tov.map(t=>({t,a:pAgg(t,ix),w:wrk(t).length}));
   if(FRZ.tov){const m=new Map(a.map(x=>[x.t.nm,x]));return FRZ.tov.map(n=>m.get(n)).filter(Boolean)}   // период сменили — товары остаются на своих местах
   if(S.only)a=a.filter(x=>x.w>0||x.a.s>0);
+  if(S.ost)a=a.filter(x=>(x.t.fbo||0)+(x.t.fbs||0)>0);   // 15.11 Андрей «тут ещё выбор с остатками товары дать»: есть на складах ВБ или на своём
   if(S.q){const q=S.q.toLowerCase();a=a.filter(x=>(x.t.art+' '+x.t.nm).toLowerCase().includes(q))}
   if(S.view==='table')return tblSort('tov',a);
   const inf=v=>v==null?-1:v,key=({drr:x=>inf(x.a.drr),s:x=>x.a.s,or:x=>x.a.or})[S.sort]||(x=>x.a.s);
@@ -2079,7 +2088,7 @@ function vTov(){
    <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт / ${kr(td.or)} ₽ · работает ${nW} РК</div></div></div>`;
   const memo={};const gm=i=>memo[i]||(memo[i]=kabAgg([i])),cm=['drr','s','or'].includes(S.chm)?S.chm:'drr';
   h+=`<div class="card" style="margin-top:10px"><div class="hrw" style="margin:0 0 8px"><h3 class="h3wb">${WBL}${esc(K.name)} по дням</h3>${seg('chm',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],cm,'sm')}</div>${dayChart(gm,cm)}</div>`+dayTbl('kab',PIc(),gm);   // 14.11 Андрей 06:40: «…табличного типа, как в Марпле» — те же дни, что у гистограммы
-  h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}${viewSeg('view',S.view)}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button>
+  h+=`<div class="hrw"><h3>Товары · ${rows.length}</h3>${frzChip('tov')}${viewSeg('view',S.view)}<button class="chip press" type="button" data-act="only" aria-pressed="${S.only}">${S.only?'С рекламой':'Все товары'}</button><button class="chip press" type="button" data-act="ostf" aria-pressed="${S.ost}">${S.ost?'С остатками':'Любые остатки'}</button>
       ${S.view==='cards'?seg('sort',[['drr','ДРР'],['s','Реклама'],['or','Заказы']],S.sort,'sm'):tblBtn('tov')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или покажите все товары.</div>';
   /* 14.11 Андрей: «снизу куча текста непонятного» — пояснение про сортировку и столбцы живёт только в листе «Столбцы» (openCols) */
@@ -3098,6 +3107,13 @@ function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.ke
 function rkOther(id,nm){const t=TOV[nm];if(!t)return '';const ix=PI(),L=t.rk.map(k=>RK[k]).filter(r=>r&&r.id!==+id&&rkSt(r).w);if(!L.length)return '';
   return `<div class="hrw"><h3>Ещё работают у товара · ${L.length}</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div><div class="rows">`
     +L.map(r=>rkRow(r,nm,ix).replace('class="rk rkr ','class="rk rkr rko ').replace(/<span class="rkgo[^"]*"[^>]*>[\s\S]*?<\/span>/g,'')).join('')+'</div>'}   // 15.11 Андрей «Убери» (кадр): кнопок «Пауза»/«Запустить»/«Стоп» в этом блоке нет — управление в листе самой кампании
+function zonBlock(id,nm){const r=RK[id],t=TOV[nm];if(!KL)return '<div class="muted tnote">Загружаю запросы…</div>';
+  const a=rkAgg(r,nm,PI()),q={v:0,c:0,s:0,o:0};for(const e of kwData(t,id)){q.v+=e.a.v;q.c+=e.a.c;q.s+=e.a.s;q.o+=e.a.o}
+  const nv=a.v>0&&q.v>0,p={v:Math.max(0,a.v-q.v),c:Math.max(0,a.c-q.c),s:Math.max(0,a.s-q.s),o:Math.max(0,a.q-q.o)};
+  const row=(l,x,tot)=>`<tr><td>${l}</td><td>${nv||tot?f0(x.v):'—'}</td><td>${f0(x.c)}</td><td>${x.v&&(nv||tot)?f1(100*x.c/x.v)+'%':'—'}</td><td>${rub(x.s)}</td><td>${f0(x.o)}</td></tr>`;
+  return `<div class="zonw"><table class="zon num"><thead><tr><th></th><th>Показы</th><th>Клики</th><th>CTR</th><th>Траты</th><th>Заказы</th></tr></thead><tbody>`
+    +row('Поиск',q)+row('Полки',p)+row('Всего',{v:a.v,c:a.c,s:a.s,o:a.q},1)+`</tbody></table></div>`
+    +`<div class="muted tnote">Поиск — сумма по запросам кампании, полки и рекомендации — остальное.${nv?'':' Показов по запросам ВБ у этой кампании не отдаёт.'}</div>`}
 function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rkAgg(r,nm,ix),td=rkAgg(r,nm,[T]),st=rkSt(r),t=TOV[nm],ol=ourLim(r);
   const d=e.d||{},g=i=>{const x={s:d.s?d.s[i]:0,c:d.c?d.c[i]:0,v:d.v?d.v[i]:0,q:d.q?d.q[i]:0,a:d.a?d.a[i]:0,sp:d.sp?d.sp[i]:0};x.cpo=x.q?x.s/x.q:(x.s?Infinity:null);x.ctr=x.v?100*x.c/x.v:null;
     x.or=t&&t.o?t.o.r[i]||0:0;x.oq=t&&t.o?t.o.q[i]||0:0;x.drr=x.or?100*x.s/x.or:(x.s?Infinity:null);return x};
@@ -3150,6 +3166,10 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
+  /* 15.11 Андрей «да» на разбивку по зонам показа (как вкладка «Статистика» Марплы): ВБ зон в статистике кампании не отдаёт — поиск = сумма по запросам
+     кампании, полки и рекомендации = всё остальное (по расчёту). Только у кампаний, которые показываются и в поиске, и в рекомендациях */
+  const zon=(r.pl||[]).includes('combined')||((r.pl||[]).includes('search')&&(r.pl||[]).includes('recommendations'));
+  if(zon)h+=`<div class="hrw"><h3>Зоны показа</h3><span class="muted" style="font-size:12.5px">по расчёту · ${perZa()}</span></div><div id="rkzon">${zonBlock(id,nm)}</div>`;
   if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div>${klHow(r)}<div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
   h+=rkOther(id,nm);
   /* управление и настройки — после цифр (15.11). Блок управления — один; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же.
@@ -3166,7 +3186,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   const rkHead=`<span class="rkmeta">№ ${r.id} · с ${dm(r.cr)}${r.start?' · запуск '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}</span><span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}</span>`;
   return {ph,t:esc(r.name),s:((ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
-    after:()=>{if(!KL&&srch)loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm)}).catch(()=>{})}}}
+    after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
 /* ── фраза: места по дням и все замеры, ставка фразы, минус ── */
 function openKw(nm,cid,q){sheet(()=>{const t=TOV[nm],e=kwData(t,cid).find(x=>x.t===q);
@@ -3226,6 +3246,7 @@ function openRef(){sheet(()=>{const lk=UPR?'':' nolk',a=D.at||'',ago=agoMin(),ol
 function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk=FR.key.split('|');
   if(a==='back')back();else if(a==='close')closeAll();else if(a==='navback')navBack();
   else if(a==='only'){S.only=!S.only;RS.set('only',S.only);unfz();render(true)}
+  else if(a==='ostf'){S.ost=!S.ost;RS.set('ost',S.ost);unfz();render(true)}
   else if(a==='unfz'){unfz();render(true)}
   else if(a==='cols')openCols(ds.id);
   else if(a==='ref')openRef();
