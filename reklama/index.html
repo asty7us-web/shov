@@ -3184,8 +3184,9 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
-  const rkHead=`<span class="rkmeta">№ ${r.id} · с ${dm(r.cr)}${r.start?' · запуск '+dm(r.start.slice(0,10))+' '+r.start.slice(11,16):''}</span><span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}</span>`;
-  return {ph,t:esc(r.name),s:((ctx?(ci+1)+' из '+ctx.length+' · листайте вбок · ':'')+rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
+  /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}</span>`;
+  return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
 /* ── фраза: места по дням и все замеры, ставка фразы, минус ── */
