@@ -1392,6 +1392,10 @@ table.zon tr:last-child td{font-weight:700}
 .colr.drg{position:relative;z-index:5;background:var(--card,var(--bg));border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.28);transition:none}
 .colr.drg .dh{cursor:grabbing;color:var(--ink)}
 
+/* 15.11 Андрей «по панели ср. чек также покажи»: в «По панели» четыре цифры — маржа, ДРР, продажи, средний чек */
+.pnqv{grid-template-columns:.85fr .85fr 1.15fr 1.1fr;gap:6px}
+.pnqv b{font-size:18px}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -2928,9 +2932,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 Андрей: «в товаре плашка „ДРР вчера“ завис, зачем, если период выше — выбор»: плашки «вчера» нет, «Вчера» — кнопкой периода */
   h+=kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.oq)}">${rub(td.s)}</b> · заказы <b>${f0(td.oq)} шт</b> на ${kr(td.or)} ₽ · цена заказа с рекламы ${perZa()} <b>${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет заказов'}</b></div>`;
-  /* 14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее» — кампании товара сразу под главными цифрами (раньше стояли после гистограмм,
-     таблицы по дням и «Что меняли»), заголовок крупный, с числом; кампании на паузе — свёрнутой строкой «На паузе · N ›» под работающими */
-  h+=prodRk(t,nm,ix,pp,a,W,P,rctx);
+  /* 15.11 Андрей (кадр «СТИК», обвёл кампании и графики, стрелка вверх): «поменяй пожалуйста местами» — продажи и ДРР по дням стоят над кампаниями */
   /* 14.11 Андрей: «гистограмма продаж как в лк вб только в 1 ряд прям такой же дизайн возьми просто не размашисто» — продажи по дням сразу под главными
      цифрами, низко (100 px); это прежний блок «Карточка по дням: заказали, шт» (он стоял внизу листа) — перенесён сюда, второго нет.
      Нет счёта карточки за день — заказы по отчёту ВБ (t.o.q), подпись под столбиками говорит об этом */
@@ -2948,6 +2950,9 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   const nzs=!cx.some(i=>(gm(i).s||0)>=1),nzo=!cx.some(i=>(gm(i).oq||0)>0);
   h+='<div class="hrw"><h3>По дням: ДРР и заказы</h3></div>'+(nzo&&nzs?`<div class="note nzq" style="margin-top:0">За период не было ни трат, ни заказов <span class="muted num">· ${cx.length} дн.</span></div>`
     :(nzo?`<div class="note b nzq nzo" style="margin:0 0 8px">Заказов за период не было — столбики показывают траты <span class="num">· ${cx.length} дн.</span></div>`:'')+drrChart(cx,gm,{dot:i=>cd.has(i)})+CHLG);
+  /* 14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее» — кампании товара сразу под главными цифрами (раньше стояли после гистограмм,
+     таблицы по дням и «Что меняли»), заголовок крупный, с числом; кампании на паузе — свёрнутой строкой «На паузе · N ›» под работающими */
+  h+=prodRk(t,nm,ix,pp,a,W,P,rctx);
   /* 14.11 Андрей: «помимо представленности статистика в гистограммах надо еще показать табличного типа как в марпле» — таблица по дням под гистограммой
      (dayTbl пишет сосед в d_tabl.js: свои столбцы и сортировка) */
   if(typeof dayTbl==='function')h+=dayTbl('tov',cx,i=>{const x=gm(i);return {v:x.v,c:x.c,a:x.a,q:x.q,s:x.s,sp:x.sp,or:x.or,oq:x.oq}});
@@ -3022,9 +3027,9 @@ function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,w2=pn.w2,has=x=>!!(x&&x[
   const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w'),x=k==='m'?m:k==='w2'?w2:w;
   const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'',w2l=D.pan&&D.pan.w2l?panWk(D.pan.w2l):'';
   const mg=has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
-    sl=has(x)?`<b class="num">${kr(x[0])} ₽</b>`:no,bt=(v,l)=>`<button type="button" class="press" data-act="pnp" data-k="${v}" aria-pressed="${k===v}">${l}</button>`;
+    sl=has(x)?`<b class="num">${kr(x[0])} ₽</b>`:no,ch=has(x)&&x[3]>0?`<b class="num">${f0(x[3])} ₽</b>`:no,bt=(v,l)=>`<button type="button" class="press" data-act="pnp" data-k="${v}" aria-pressed="${k===v}">${l}</button>`;
   return `<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><span class="pnqs">${bt('w','неделя')}${D.pan&&D.pan.w2l?bt('w2','2 недели'):''}${bt('m','месяц')}</span><small class="pnqd">${esc(k==='m'?ml:k==='w2'?w2l:wl)}</small></div>`
-    +`<div class="pnqv"><div data-pn="m"><small>Маржа</small>${mg}</div><div data-pn="d"><small>ДРР</small>${dr}</div><div data-pn="s"><small>Продажи</small>${sl}</div></div></div>`}
+    +`<div class="pnqv"><div data-pn="m"><small>Маржа</small>${mg}</div><div data-pn="d"><small>ДРР</small>${dr}</div><div data-pn="s"><small>Продажи</small>${sl}</div><div data-pn="c"><small>Ср. чек</small>${ch}</div></div></div>`}   /* 15.11 Андрей «по панели ср. чек также покажи» — четвёртая цифра, средний чек листа панели (x[3]) */
 /* 14.11 Андрей 08:05: «над акции динамику цен» — «Цена по дням» над блоком «Акции ВБ»: компактная гистограмма (общая chart, ось слева) по дням с заказами
    (t.pd — [день, наша цена, у покупателя, скидка ВБ %], медиана по заказам дня); день без заказов — пустой. Переключатель «Наша цена | У покупателя | Скидка ВБ»
    (прежний отдельный блок «Скидка ВБ (СПП)» — третьей кнопкой), нажатие на день — строка над графиком со всеми тремя. Столбики цен — от нижней круглой
@@ -3210,7 +3215,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      кампании, полки и рекомендации = всё остальное (по расчёту). Только у кампаний, которые показываются и в поиске, и в рекомендациях */
   const zon=(r.pl||[]).includes('combined')||((r.pl||[]).includes('search')&&(r.pl||[]).includes('recommendations'));
   if(zon)h+=`<div class="hrw"><h3>Зоны показа</h3><span class="muted" style="font-size:12.5px">по расчёту · ${perZa()}</span></div><div id="rkzon">${zonBlock(id,nm)}</div>`;
-  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div>${klHow(r)}<div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
+  if(srch)h+=`<div class="hrw"><h3>Фразы и места</h3><span class="muted" style="font-size:12.5px">траты и заказы — ${perZa()}</span></div><div id="rkkw"${FR.key===id+'|'+nm&&FR.mh?` style="min-height:${FR.mh}px"`:''}>${frBlock(id,nm)}</div>`;
   h+=rkOther(id,nm);
   /* управление и настройки — после цифр (15.11). Блок управления — один; кнопка «⟳ Обновить» (перечитать одну эту кампанию, actRkRef в e_sheets.js) — в нём же.
      14.11 Андрей: «бидер пусть сразу будет открыт» — биддер раскрыт под управлением, график показа — тут же, когда он есть (свой или Марплы) */
@@ -3366,7 +3371,27 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
   const pod=m==='t'?`Сегодня по часам${z.tp?' (копим не с полуночи — часы до первого замера пустые)':''}. `:`В среднем за день, ${n} ${n===1?'день':n<5?'дня':'дней'} с ${z.d0?dm(z.d0):"—"}${n<5?' — мало, судить рано':''}. `;
   return hd(`<span class="pnqs">${bt('a','В среднем',n>0)}${bt('t','Сегодня',hasT)}</span>`)
     +`<div class="ch ax" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
-    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа. Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`}
+    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа. Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`+zakBlock(z,m,n)}
+
+/* ── 15.11 Андрей («К»): «надо снизу тогда по заказам и корзинам гистограмму ниже» — тот же режим (в среднем / сегодня), переключатель Заказы | Корзины.
+   Заказы и корзины — с этой рекламы (статистика кампании), по тем же замерам раз в 30 минут. Лучшие три часа — зелёным: по ним видно, какие часы держать в графике показа. ── */
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-chz]');if(!b)return;S.chz=b.dataset.chz;redraw()});
+function zakBlock(z,m,n){const isT=m==='t',A=isT?z.ta:z.a,O=isT?z.to:z.o;
+  if(!A||!O)return `<div class="hrw"><h3>Заказы и корзины по часам</h3></div><div class="muted tnote">За сегодня заказы и корзины по часам начнём копить со следующего сбора — через полчаса.</div>`;
+  const k=isT?1:(n||1),w=S.chz==='a'?'a':'o',Z=w==='a'?A:O,H=[...Array(24).keys()],V=H.map(h=>(Z[h]||0)/k),S2=H.map(h=>(z.s[h]||0)/k);
+  const sp=isT?(z.t||[]):S2,tot=V.reduce((a,b)=>a+b,0),mx=Math.max(isT?1:0.5,...V);
+  const top=[...H].filter(h=>V[h]>0).sort((a,b)=>V[b]-V[a]).slice(0,3),nm=w==='a'?'корзины':'заказы РК';
+  const bt=(v,l)=>`<button type="button" class="press" data-chz="${v}" aria-pressed="${w===v}">${l}</button>`;
+  const id='ch'+(++CHN),MH=64;let b='',x='';
+  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,gr=top.includes(h);
+    b+=`<div class="col" data-ch="${id}" data-i="${h}">${gr?`<span class="tp num">${f1(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(gr?'var(--good)':'var(--acc)'):'var(--bar)'}"></i></div>`;
+    x+=`<span>${h%3===0?h:''}</span>`});
+  CHR[id]=h=>{const q=V[h],s=sp[h]||0;return `<b>${h}:00–${h+1}:00</b> · ${nm} <b>${f1(q)}</b>${tot?' ('+pc(100*q/tot)+' дня)':''} · траты ${rub(s)}${q>0?' · на 1 — '+rub(s/q):''}`};
+  const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
+  const tl=top.length?'Больше всего: '+top.map(h=>`<b>${h} ч</b> — ${f1(V[h])}`).join(', ')+'. ':'Пока ни одного — судить рано. ';
+  return `<div class="hrw"><h3>Заказы и корзины по часам</h3><span class="pnqs">${bt('o','Заказы')}${bt('a','Корзины')}</span></div>`
+    +`<div class="ch ax" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:12)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
+    +`<div class="muted tnote">${isT?'Сегодня':'В среднем за день'}, с этой рекламы. ${tl}Зелёным — три лучших часа: их держать в графике показа. Час примерный.</div>`}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
    Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
