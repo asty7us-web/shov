@@ -676,7 +676,14 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .tg{flex:none;width:44px;height:27px;border-radius:14px;background:var(--bar);position:relative;transition:background-color .25s var(--ease)}
 .tg::after{content:"";position:absolute;left:2px;top:2px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.28);transition:transform .32s var(--out)}
 .tg.on{background:var(--good)}.tg.on::after{transform:translateX(17px)}
-.row[data-col] .nm small{white-space:normal;line-height:1.3}
+.colr .nm small{white-space:normal;line-height:1.3}
+/* 15.11 перетаскивание столбцов, как в «Рекламе» */
+.colr{padding:7px 16px;gap:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.colr .nm b{font-size:14.5px}
+.dh{flex:none;width:22px;font-style:normal;font-size:18px;line-height:1;color:var(--ink2);opacity:.7;text-align:center;touch-action:none;cursor:grab;padding:6px 0}
+.tgb .tg{display:block}.tgb{flex:0 0 auto!important;width:auto!important;padding:4px 0 4px 6px;background:none;border:0;cursor:pointer}
+.colr.drg{z-index:5;background:var(--card);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.28);scale:1.02;cursor:grabbing}
+.colr.drg::before{display:none}
 .cpp{margin:0 0 4px!important;padding:2px 0!important;flex-wrap:wrap}
 .cfb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:14px}
 .cfb .tbtn{height:46px;border-radius:13px;padding:0 18px}
@@ -747,7 +754,7 @@ addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок дл
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
 // столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели, svcTheme(5, …) — у Рекламы)
-const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space',null],['jim','jim',null,null,null,null],
+const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space','space'],['jim','jim',null,null,null,null],
   ['farcry','farcry','farcry',null,null,null],['sonic','sonic','sonic',null,null,null],['solitaire','solitaire','solitaire',null,null,null],['birds','birds','birds',null,null,null]],
   KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme','rek.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
@@ -1404,7 +1411,7 @@ function list(tbl){
     const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:key==='buy'?buyP(cards):tm[key];
     return head+`<div class="tw" id="tw"><table class="tb${mb?' m':''}"><thead><tr><th data-sort="name" class="${S.sort==='name'?'on':''}">Товар</th>${cols.map(c=>`<th data-sort="${c[0]}" class="${S.sort===c[0]?'on':''}">${c[1].replace('#',pl)}${S.sort===c[0]?`<span class="a">${S.dir<0?'▼':'▲'}</span>`:''}</th>`).join('')}${mb?'':'<th class="tl">Категория</th><th class="tl">Склейка</th>'}</tr></thead>
 <tbody><tr class="tot"><td>Итого · ${its.length}</td>${cols.map(c=>tcell(tv(c[0]),c)).join('')}${mb?'':'<td></td><td></td>'}</tr>
-${its.map(it=>{const why=reason(it,g,k,mb);return `<tr data-open="${pid(it)}"${it.m.profit<0?' class="neg"':''}><td>${mb?`<span class="nm2">${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${ico(it)}${why?esc(why):(it.parts?it.parts.length+' карт.':kabT(it.r,it.mp))}</small>`:`<span class="nm2">${ico(it)}${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${why?esc(why):subT(it)}</small>`}</td>${cols.map(c=>tcell(gv(it,c[0]),c,it)).join('')}${mb?'':`<td class="tl">${esc(it.r.c)}</td><td class="tl">${esc(sklT(it))}</td>`}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
+${its.map(it=>{const why=reason(it,g,k,mb);return `<tr data-open="${pid(it)}"${it.m.profit<0?' class="neg"':''}><td><div class="tn"><div class="tx">${mb?`<span class="nm2">${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${pic(imOf(it),'display:inline-block;vertical-align:middle;margin-right:4px')}${ico(it)}${why?esc(why):(it.parts?it.parts.length+' карт.':kabT(it.r,it.mp))}</small>`:`<span class="nm2">${ico(it)}${hl(it.r.a,q)}</span><small${why?' class="why"':''}>${why?esc(why):subT(it)}</small>`}</div>${mb?'':pic(imOf(it))}</div></td>${cols.map(c=>tcell(gv(it,c[0]),c,it)).join('')}${mb?'':`<td class="tl">${esc(it.r.c)}</td><td class="tl">${esc(sklT(it))}</td>`}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
   }
   const n=list.n||60;
   return head+`<div class="pcs">${its.slice(0,n).map(it=>{const m=it.m,d=itDelta(it,g,k,fS),why=reason(it,g,k);
@@ -1443,7 +1450,7 @@ function colApply(){if(S.tab==='prod'||S.tab==='skl')render(true);colSheet()}
 function colTog(key){
   if(!CD[key])return;const ord=mob()?ORD_M:ORD_D,a=colSel().slice(),i=a.indexOf(key);
   if(i>=0){if(a.length<2){toast('Хотя бы один столбец должен остаться');return}a.splice(i,1)}
-  else{let at=0;for(let j=ord.indexOf(key)-1;j>=0;j--){const q=a.indexOf(ord[j]);if(q>=0){at=q+1;break}}a.splice(at,0,key)}   // новый столбец встаёт на своё место по общему порядку
+  else a.push(key)   /* 15.11: порядок задаётся перетаскиванием — новый столбец встаёт последним из показанных */   // новый столбец встаёт на своё место по общему порядку
   PS.set(colKey(),a);colApply()}
 function colPre(p){if(p==='def')PS.del(colKey());else PS.set(colKey(),(p==='pan'?PAN_L:mob()?ORD_M:ORD_D).slice());colApply()}
 function colSheet(){
@@ -1452,8 +1459,34 @@ function colSheet(){
   openSheet('<h2>Столбцы таблицы<small>Отметьте, что показывать в «Товарах» и «Склейках». Выбор запоминается на этом устройстве: у телефона и у компьютера — свой.</small></h2>',
    `<div class="pills cpp">${[['def','Как было'],['pan','Как в панели'],['all','Все']].map(([x,t])=>`<button class="pill${pre===x?' on':''}" data-colpre="${x}">${t}</button>`).join('')}</div>
 <div class="cnt">Показано ${sel.length} из ${ORD_D.length}. Названия — как на листе «SKU» панели.</div>
-<div class="card"><div class="rows" style="margin-top:-8px">${ORD_D.map(x=>{const on=sel.indexOf(x)>=0;return `<button class="row" data-col="${x}" aria-pressed="${on}"><div class="nm"><b>${CD[x][0].replace('#',pl)}</b>${CDN[x]?`<small>${CDN[x]}</small>`:''}</div><i class="tg${on?' on':''}"></i></button>`}).join('')}</div></div>`,'cols');
-}
+<div class="cnt" style="margin-top:-2px">Порядок — перетащите строку за ⠿ или подержите её и тяните.</div>
+<div class="card"><div class="rows" id="colRows" style="margin-top:-8px">${sel.concat(ORD_D.filter(x=>sel.indexOf(x)<0)).map(x=>{const on=sel.indexOf(x)>=0;return `<div class="row colr" data-ck="${x}"><i class="dh" data-drag aria-label="Перетащить">⠿</i><div class="nm"><b>${CD[x][0].replace('#',pl)}</b>${CDN[x]?`<small>${CDN[x]}</small>`:''}</div><button class="tgb" type="button" data-col="${x}" aria-pressed="${on}" aria-label="Показывать"><i class="tg${on?' on':''}"></i></button></div>`}).join('')}</div></div>`,'cols');
+  colDrag()}
+/* 15.11 Андрей «кастомизацию столбцов как в рекламе»: перетаскивание строк листа «Столбцы» (тот же приём, что в сервисе «Реклама»): мышью — сразу,
+   пальцем — за ⠿ сразу или подержать строку 0,2 с; соседи плавно уступают; отпустил — новый порядок показанных столбцов запоминается */
+function colDrag(){const box=$('#colRows');if(!box)return;box.querySelectorAll('.colr[data-ck]').forEach(r=>{
+  r.onpointerdown=e=>{if(e.button>0||e.target.closest('.tgb'))return;
+    const sc=$('#sbody'),onH=!!e.target.closest('[data-drag]'),ms=e.pointerType==='mouse',sx=e.clientX,sy=e.clientY,DOC=document;let y0=sy,ly=sy,tm=0,act=false,hold=0;
+    const glide=(el,fn)=>{const t1=el.getBoundingClientRect().top;fn();const t2=el.getBoundingClientRect().top;if(Math.abs(t1-t2)<1)return;
+      el.style.transition='none';el.style.transform=`translateY(${t1-t2}px)`;el.getBoundingClientRect();el.style.transition='transform .18s cubic-bezier(.2,.8,.2,1)';el.style.transform='';
+      setTimeout(()=>{if(!el.classList.contains('drg'))el.style.transition=''},220)};
+    const step=()=>{const dy=ly-y0;r.style.transform=`translateY(${dy}px)`;const nx=r.nextElementSibling,pv=r.previousElementSibling;
+      if(nx&&nx.dataset&&nx.dataset.ck&&dy>nx.offsetHeight/2){const hh=nx.offsetHeight;glide(nx,()=>nx.after(r));y0+=hh;r.style.transform=`translateY(${ly-y0}px)`}
+      else if(pv&&pv.dataset&&pv.dataset.ck&&dy<-pv.offsetHeight/2){const hh=pv.offsetHeight;glide(pv,()=>pv.before(r));y0-=hh;r.style.transform=`translateY(${ly-y0}px)`}};
+    const edge=()=>{if(!sc||!act){tm=0;return}const b=sc.getBoundingClientRect(),d=ly<b.top+60?-9:ly>b.bottom-60?9:0;if(d){const t0=sc.scrollTop;sc.scrollTop+=d;y0-=sc.scrollTop-t0;step()}tm=d?requestAnimationFrame(edge):0};
+    const tb=ev=>{if(act&&ev.cancelable)ev.preventDefault()};
+    const start=()=>{if(act)return;act=true;hold=0;try{r.setPointerCapture(e.pointerId)}catch(x){}r.classList.add('drg');if(!ms&&navigator.vibrate)try{navigator.vibrate(12)}catch(x){}};
+    const off=()=>{DOC.removeEventListener('pointermove',mv);DOC.removeEventListener('pointerup',up);DOC.removeEventListener('pointercancel',up);DOC.removeEventListener('touchmove',tb,{passive:false})};
+    const end=skip=>{clearTimeout(hold);off();if(tm)cancelAnimationFrame(tm);tm=0;if(!act)return;act=false;
+      r.classList.remove('drg');const dy=parseFloat((r.style.transform.match(/-?[\d.]+/)||[0])[0])||0;r.style.transition='none';r.style.transform=`translateY(${dy}px)`;r.getBoundingClientRect();
+      r.style.transition='transform .16s ease-out';r.style.transform='';
+      setTimeout(()=>{r.style.transition='';if(skip)return;const sel=colSel(),o=[...box.querySelectorAll('.colr[data-ck]')].map(x=>x.dataset.ck).filter(x=>sel.indexOf(x)>=0);
+        if(o.length===sel.length&&o.join()!==sel.join()){PS.set(colKey(),o);if(S.tab==='prod'||S.tab==='skl')render(true)}},170)};
+    const mv=ev=>{ly=ev.clientY;if(!act){const d=Math.hypot(ev.clientX-sx,ev.clientY-sy);if(ms&&d>3)start();else if(!ms&&d>8){end(true);return}else return}
+      if(ev.cancelable)ev.preventDefault();step();if(!tm)edge()};
+    const up=()=>end(false);
+    DOC.addEventListener('pointermove',mv,{passive:false});DOC.addEventListener('pointerup',up);DOC.addEventListener('pointercancel',up);DOC.addEventListener('touchmove',tb,{passive:false});
+    if(onH){e.preventDefault();start()}else if(!ms)hold=setTimeout(start,200)}})}
 
 /* ───────── СПП ───────── */
 function sppIdx(mp){if(SP[mp])return SP[mp];const X=(D.spp||{})[mp]||{s:[],v:[]},by={};
