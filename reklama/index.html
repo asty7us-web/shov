@@ -3863,7 +3863,7 @@ function actStatus(id,nm,to0){if(!need())return;const r=RK[id],to=to0==='stop'?'
    ${to!=='start'&&rkHold(r)?'<div class="note">Свой график и лимит дня её сами не включат, пока не нажмёте «Запустить».</div>':''}
    ${to==='start'&&r.bud!=null&&r.bud<50?`<div class="note w">Бюджет ${rub(r.bud)} — ВБ может не запустить. Сначала пополните.</div>`:''}${r.mar&&r.mar.gr?'<div class="note w">Кампания в графике Марплы: он включит или выключит её по своим часам.</div>':''}
    ${to!=='start'||!noLim(r)?'':`<div class="marb"><b>У кампании нет лимита расхода в день</b><span>Задайте лимит, чтобы после запуска она не потратила лишнего.</span><button class="btn sm press" type="button" id="slim">Задать лимит</button></div>`}
-   ${RUNBOX(to==='stop'?'Остановить':to==='pause'?'Поставить на паузу':'Запустить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to});const sl=$('#slim');if(sl)sl.onclick=()=>actLim(id,nm)}}),true)}
+   ${RUNBOX(to==='stop'?'Остановить':to==='pause'?'Поставить на паузу':'Запустить')}${secHist('status',id)}`,after:()=>{$('#okBtn').onclick=()=>run({k:'status',cid:id,nm:+nm,to});const sl=$('#slim');if(sl)sl.onclick=()=>actLim(id,nm)}}),true)}
 /* 14.11 Андрей: «те, кто без трат, — чтобы когда начать её, показало: задай лимит». Лимита нет ни своего, ни ВБ, ни в Марпле */
 function noLim(r){const ol=ourLim(r);return !(ol&&ol.on)&&!(r.lw&&r.lw.on)&&!(r.mar&&r.mar.lim&&r.mar.lim.max>0)}
 function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Object.keys(e.b||{});let pl=pls[0];
@@ -3876,7 +3876,7 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
      <div class="cmp"><div><small>Было</small><b class="num">${kop(cur)}</b></div><div class="ar">→</div><div><small>Станет</small><b class="num" id="bnew">${kop(cur)}</b></div></div>
      ${mb?'<div class="note w">Ставку ведёт биддер Марплы — он вернёт свою через несколько минут. Чтобы держалась ваша, выключите его в Марпле.</div>':bdOn(e.bd)&&e.bd.src==='svoi'&&e.bd.mode==='sam'?'<div class="note w">Ставку ведёт наш биддер в режиме «Сам» — при следующем расчёте он может поставить свою.</div>':''}
      ${mn==null?'<div class="note">Минимальная ставка ВБ ещё не собрана — ниже минимума сервис поставить не даст.</div>':''}
-     <div id="berr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Поставить ставку')}`,
+     <div id="berr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Поставить ставку')}${secHist('bid',id)}`,
      after:()=>{const up=()=>{const v=numv('bv'),k=Math.round(v*100),ok=isFinite(v)&&k>0&&(mn==null||k>=mn)&&k<=(cpm?(K.cfg.cpmMaxBid||2999900):(K.cfg.cpcMaxBid||15000));
         $('#bnew').textContent=isFinite(v)?kop(k):'—';$('#berr').textContent=!isFinite(v)?'':mn!=null&&k<mn?'Ниже минимума ВБ ('+kop(mn)+').':!ok?'Ставка вне допустимых границ ВБ.':k>cur*3&&cur?'Внимание: больше прежней в '+f1(k/cur)+' раза.':'';$('#okBtn').disabled=!ok||k===cur};
        $('#bv').oninput=up;up();$('#okBtn').onclick=()=>run({k:'bid',cid:id,nm:+nm,pl,kop:Math.round(numv('bv')*100),was:cur})}}},true);
@@ -3902,7 +3902,7 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
      ${depHtml(b,src)}
      <div class="opt"><div><b>Запустить после пополнения</b><span>сейчас: ${rkSt(r).t}</span></div><button class="sw" type="button" role="switch" id="dst" aria-checked="${st}"></button></div>
      <div class="cmp"><div><small>Бюджет сейчас</small><b class="num">${r.bud==null?'—':rub(r.bud)}</b></div><div class="ar">→</div><div><small>Станет</small><b class="num" id="dnew">—</b></div></div>
-     ${r.mar&&r.mar.ad?`<div class="note">В Марпле включено автопополнение: +${f0(r.mar.ad.add)} ₽ при остатке ниже ${f0(r.mar.ad.min)} ₽.</div>`:''}<div id="derr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Пополнить')}`,
+     ${r.mar&&r.mar.ad?`<div class="note">В Марпле включено автопополнение: +${f0(r.mar.ad.add)} ₽ при остатке ниже ${f0(r.mar.ad.min)} ₽.</div>`:''}<div id="derr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Пополнить')}${secHist('deposit',id)}`,
      after:()=>{const up=()=>{const v=numv('dv'),have=depHave(b,src),ok=isFinite(v)&&v>=mt&&v<=50000&&v===Math.round(v);sm=$('#dv').value;$('#dnew').textContent=isFinite(v)?rub((r.bud||0)+v):'—';
         $('#derr').textContent=!isFinite(v)?'':v<mt?'ВБ принимает от '+f0(mt)+' ₽.':v>50000?'Больше 50 000 ₽ за раз сервис не пополняет.':v>have?'На '+depName(src)+' столько нет — ВБ откажет.':'';$('#okBtn').disabled=!ok};
        $('#dv').oninput=up;up();$('#dst').onclick=e=>{st=!st;e.currentTarget.setAttribute('aria-checked',st)};
@@ -3910,6 +3910,14 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
        $('#okBtn').onclick=()=>run({k:'deposit',cid:id,nm:+nm,sum:numv('dv'),src,start:st})}}),true)}
 /* 14.11 Андрей: «лимит вижу марпла, что в итоге — когда я могу управлять, надо работать в ней». Лимит держит Марпла — сверху прямо сказано, кто его держит
    сейчас, одной кнопкой подставляется такой же свой лимит (сохранение — прежней кнопкой с подтверждением), и одной строкой — что выключить в Марпле */
+/* 15.11 Андрей: «пусть пишет историю изменений по разделу» — под кнопками каждого листа управления (лимит, пополнение, ставка, биддер, график, цена,
+   пауза) — «История изменений» этого раздела: только записи журнала (D.ist) этой кампании (цена — этого товара) и этого вида. Автоматика берётся там,
+   где она и есть изменение раздела (лимит дня: «выбран — пауза», «новый день — запуск»); ежечасные «час показа — запуск» графика не берём — их сотни */
+const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0]};
+function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto)&&rx.test(z.chto||'')
+    &&(cid?z.cid===+cid:String(z.nm)===String(nm)&&!z.cid)&&(kind!=='status'||!/лимит|график/i.test(z.chto||'')));
+  return `<div class="hrw" style="margin-top:18px"><h3>История изменений</h3></div>`+(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,15).map(z=>evX(z,1)).join('')+'</div>'
+    +(L.length>15?`<div class="muted tnote">Последние 15 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений пока не было.</div>')}
 function actLim(id,nm){if(!need())return;const r=RK[id],ol=ourLim(r),cpc=r.pay==='cpc',mdl=(K.cfg.minDailyLimit||100000)/100,ml=r.mar&&r.mar.lim&&r.mar.lim.max>0?Math.round(r.mar.lim.max):0;
   let kind=ol&&ol.on?'our':r.lw&&r.lw.on?'wb':'our',on=true,val=null;
   sheet(()=>{const own=!!(ol&&ol.on),cur=kind==='our'?(own?ol.sum:null):(r.lw&&r.lw.on?r.lw.sum:null);return {t:'Лимит расхода в день',s:esc(r.name),h:`${!ml?'':own?`<div class="marb"><b>В Марпле тоже стоит лимит ${f0(ml)} ₽ в день</b><span>Работают оба — сработает меньший. Лимит в Марпле отсюда не выключается: выключите его в Марпле.</span></div>`
@@ -3918,7 +3926,7 @@ function actLim(id,nm){if(!need())return;const r=RK[id],ol=ourLim(r),cpc=r.pay==
      <div class="opt"><div><b>Лимит включён</b><span>сейчас: ${cur?(kind==='our'?'свой ':'ВБ ')+f0(cur)+' ₽ в день':kind==='our'?'своего нет':'лимита ВБ нет'}</span></div><button class="sw" type="button" role="switch" id="lon" aria-checked="${on}"></button></div>
      <label class="fld"><span>Не больше, ₽ в день</span><input class="inp num" id="lv" inputmode="numeric" value="${esc(val!=null?val:String(cur||(kind==='wb'?mdl:300)))}"></label>
      <div class="hint">${kind==='our'?'Сервис сверяет расход раз в 10 минут: дошёл до лимита — пауза, после полуночи запустит снова.':'Показы при достижении суммы останавливает сам ВБ.'}</div>
-     <div id="lerr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить лимит')}`,
+     <div id="lerr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить лимит')}${secHist('limit',id)}`,
      after:()=>{const up=()=>{const v=numv('lv'),ok=!on||(isFinite(v)&&v>=(kind==='wb'?mdl:50)&&v<=100000);val=$('#lv').value;$('#lerr').textContent=on&&isFinite(v)&&kind==='wb'&&v<mdl?'ВБ принимает лимит от '+f0(mdl)+' ₽ — для меньшей суммы выберите «Свой лимит».':on&&isFinite(v)&&v<50?'Меньше 50 ₽ не ставим.':'';$('#okBtn').disabled=!ok;$('#lv').disabled=!on};
        $('#lv').oninput=up;up();$('#lon').onclick=e=>{on=!on;e.currentTarget.setAttribute('aria-checked',on);up()};
        const lm=$('#lmar');if(lm)lm.onclick=()=>{kind='our';on=true;val=String(ml);redraw();const i=$('#lv');if(i)i.scrollIntoView({block:'center',behavior:shMove()?'smooth':'auto'})};
@@ -3935,7 +3943,7 @@ function actPrice(nm,target,ak,out){if(!need())return;const t=TOV[nm];if(!t||!t.
   /* 14.11 Андрей: «по акциям уточни, как будет делать… способ подъёма и снижения надо понимать» — вход и выход одним листом, способ словами */
   sheet(()=>({t:ak?(out?'Выйти из акции ценой':'Войти в акцию ценой'):'Изменить цену',s:esc(t.art),h:`${ak?`<div class="note">«${esc(ak.name)}», ${ak.s<=D.today?'идёт до '+dm(ak.e):dm(ak.s)+'–'+dm(ak.e)}. Плановая цена ${rub(ak.plan)}. ${out?'Выйти — поднять цену выше плановой. Участие ВБ снимет сам.':'Войти — снизить цену до плановой. Участие ВБ отметит сам.'}</div>`:''}
      <label class="fld"><span>Цена после скидки продавца, ₽ · сейчас ${rub2(cur)}</span><input class="inp num" id="pv" inputmode="numeric" value="${tg}"></label>
-     <div id="pcalc"></div><div id="perr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Поставить цену')}`,
+     <div id="pcalc"></div><div id="perr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Поставить цену')}${secHist('price',0,nm)}`,
      after:()=>{const up=()=>{const v=numv('pv');tg=v;const box=$('#pcalc'),ok0=isFinite(v)&&v>=1&&v===Math.round(v);
         if(!ok0){box.innerHTML='';$('#perr').textContent=isFinite(v)?'Цена — целым числом рублей.':'';$('#okBtn').disabled=true;return}
         if(Math.abs(v-cur)<0.5){box.innerHTML='<div class="note">Цена уже такая.</div>';$('#perr').textContent='';$('#okBtn').disabled=true;return}
@@ -4161,7 +4169,7 @@ function actGr(id,nm){if(!need())return;const r=RK[id],g=ourGr(r),mg=r.mar&&r.ma
      ${seg('grm',[['same','Каждый день одинаково'],['day','По дням недели']],byDay?'day':'same','sm')}
      ${grid}<div class="note" id="gsum" style="margin-top:10px"></div>
      <div class="hint">Зелёные часы — показ, в остальные сервис ставит паузу. Время московское. Ручную паузу график не снимает.</div>
-     <div id="gerr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить график')}`,
+     <div id="gerr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить график')}${secHist('grafik',id)}`,
      after:()=>{const all=q=>Array.from(document.querySelectorAll(q)),gc=b=>b.dataset.gc.split('|').map(Number);
        const paint=()=>all('[data-gc]').forEach(b=>{const [d,i]=gc(b);b.classList.toggle('on',!!H[d][i])});
        const up=()=>{const n=tot(),m=new Date(Date.now()+3*3600e3),wd=(m.getUTCDay()+6)%7,hr=m.getUTCHours(),want=!!H[wd][hr],k=str().join();
@@ -4204,7 +4212,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
      <div class="cmp"><div><small>Сейчас</small><b style="font-size:15px;white-space:normal">${bdName(b)}</b></div><div class="ar">→</div><div><small>Станет</small><b style="font-size:15px;white-space:normal" id="bdnew">—</b></div></div>
      ${mb&&o.mode==='sam'?'<div class="note b">Ставку ведёт биддер Марплы. Отсюда он не выключается — сначала выключите его в Марпле, иначе сервис откажет.</div>':mb&&o.mode==='sovet'?'<div class="note">Ставку сейчас ведёт биддер Марплы. Совет покажет, что поставил бы наш.</div>':''}
      ${o.mode==='sam'?'<div class="note w">Режим «Сам» на живом кабинете ещё не проверялся — первый раз включайте на одной кампании.</div>':''}
-     <div id="bderr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить')}`,
+     <div id="bderr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить')}${secHist('bidder',id)}`,
      after:()=>{const up=()=>{if(o.mode==='off'){$('#bdnew').textContent='выключен';$('#okBtn').disabled=!bdOn(b);return}
         const c=numv('bdc'),x=numv('bdx'),k=Math.round(x*100),okc=isFinite(c)&&c>=1&&c<=50&&c===Math.round(c),okx=isFinite(x)&&k>0&&k<=top&&(mn==null||k>=mn)&&(!cpm||k%100===0);
         $('#bdnew').textContent=okc&&okx?(o.mode==='sam'?'сам':'совет')+' · цель '+c+' · до '+kop(k):'—';
