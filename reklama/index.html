@@ -3164,10 +3164,11 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<div class="hrw"><h3>По дням</h3><span class="pnqs">${dbt('o','ДРР общий')}${dbt('k','ДРР РК')}${dbt('s','Расход')}</span></div>`+chart({ix:cx,h:176,mh:72,
     val:i=>{const x=g(i);if(dmo==='s')return x.s>=1?x.s:null;return zk(x)?Infinity:x.s>=1?dv(x):null},cap:dmo==='s'?0:60,line:dmo==='s'?0:NORMA,
     ax:dmo==='s'?{f:axNum}:{f:v=>f0(v)+'%'},
-    col:i=>{const x=g(i);return zk(x)?'var(--bad)':dcol(dmo==='s'?x.drr:dv(x))},dot:i=>cd.has(i),
+    col:i=>{const x=g(i);return zk(x)?'var(--bad)':dcol(dmo==='s'?x.drr:dv(x))},dot:i=>cd.has(i),inn:i=>{const x=g(i),q=dmo==='k'?x.q:x.oq;return x.s>=1&&q?f0(q):''},   // 15.11 Андрей «заказы внутри как в маркетологе»: внутри столбика заказы, шт (в «ДРР РК» — с этой рекламы, иначе — товара)
+    
     top:i=>{const x=g(i);if(x.s<1)return '';if(dmo==='s')return zk(x)?`<span class="t0 bd">${ksh(x.s)}</span><span class="z0">0 зак</span>`:ksh(x.s);if(zk(x))return '<span class="z0">0 зак</span>';return f0(dv(x))+'%'},   // 15.11 Андрей «расход не виден цифры»: в «Расход» сумма над каждым столбиком
     read:i=>{const x=g(i),dk=x.sp?100*x.s/x.sp:(x.s>=1?Infinity:null),nz=v=>v!=null&&!isFinite(v);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · ДРР общий <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · ДРР РК <b class="${nz(dk)?'bad':dcls(dk)}">${nz(dk)?'заказов нет':pc(dk)}</b> · заказы товара <b>${f0(x.oq)} шт</b>, с этой рекламы <b>${f0(x.q)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
-    +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе.':'ДРР общий — расход к заказам всего товара.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
+    +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий, внутри — заказы товара, шт.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе; внутри — эти заказы, шт.':'ДРР общий — расход к заказам всего товара; внутри — заказы товара, шт.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
