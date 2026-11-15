@@ -1356,6 +1356,10 @@ table.zon tr:last-child td{font-weight:700}
 /* 15.11 Андрей «кнопку ВБ убери, стрелочку слева чуть дорисуй — понятно, что кликабельно»: стрелка кластера кружком */
 .fr .qn .kla{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc);font:700 19px/1 var(--fd);padding:0 0 2px 1px;margin-left:4px}
 
+/* 15.11 Андрей «ссылки перенеси выше, аккуратно»: «Кампания ↗» и «Товар ↗» — плашками в шапке листа кампании, рядом с плашками кампании */
+.shh .tt span.rkchips a.rklk{display:inline-flex;align-items:center;gap:0;height:21px;padding:0 8px 0 6px;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--card2,var(--fill));text-decoration:none;box-shadow:0 0 0 .5px var(--line)}
+.shh .tt span.rkchips a.rklk .wbl{width:13px;height:13px;margin-right:4px;vertical-align:0}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -1395,6 +1399,10 @@ table.zon tr:last-child td{font-weight:700}
 /* 15.11 Андрей «по панели ср. чек также покажи»: в «По панели» четыре цифры — маржа, ДРР, продажи, средний чек */
 .pnqv{grid-template-columns:.85fr .85fr 1.15fr 1.1fr;gap:6px}
 .pnqv b{font-size:18px}
+
+/* 15.11 Андрей «на всю клетку и плавно»: тянется вся строка столбца — без выделения текста, поднятая строка чуть крупнее */
+.colr[data-ck]{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.colr.drg{scale:1.02;cursor:grabbing}
 
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
@@ -1818,7 +1826,7 @@ const perTx=()=>perD1()||S.per+' дн';                                         
 const perZa=()=>perD1()?'за '+perD1():'за '+S.per+' дн.';                            // «за 7 дн.» | «за вчера»
 const perDn=()=>perD1()||S.per+' дней';                                              // «ДРР 7 дней» | «ДРР вчера»
 const perPr=()=>S.per===1?'днём раньше':'прошлые '+S.per+' дн.';                     // с чем сравниваем
-const PERS=l=>[['v0','Сегодня'],['v1','Вчера'],['v2','Позавчера'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
+const PERS=l=>[['v0','Сегодня'],['v1','Вчера'],['v2','Позавчера'],[3,l?'3 дня':'3 дн'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
 
 function prep(){
   if(!D.kab[S.kab])S.kab=Object.keys(D.kab)[0];
@@ -2281,19 +2289,34 @@ function tblHtml(id,rows,attr,cls){const st=tblSt(id),cols=tblCols(id);   // cls
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
 function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k){st.dir=-st.dir;st.sort2=null}else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
-/* перетаскивание строки столбца за ручку ⠿: строка едет за пальцем, соседи меняются местами на половине высоты; у края листа — прокрутка; отпустил — порядок сохранён */
-function colDrag(id,ap){$$('[data-drag]').forEach(h=>h.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();e.stopPropagation();
-  const r=h.closest('.colr'),sc=$('#sbody');let y0=e.clientY,ly=e.clientY,tm=0;try{h.setPointerCapture(e.pointerId)}catch(x){}r.classList.add('drg');
-  const step=()=>{const dy=ly-y0;r.style.transform=`translateY(${dy}px)`;
-    const nx=r.nextElementSibling,pv=r.previousElementSibling;
-    if(nx&&nx.dataset&&nx.dataset.ck&&dy>nx.offsetHeight/2){nx.after(r);y0+=nx.offsetHeight;r.style.transform=`translateY(${ly-y0}px)`}
-    else if(pv&&pv.querySelector&&pv.querySelector('[data-drag]')&&dy<-pv.offsetHeight/2){pv.before(r);y0-=pv.offsetHeight;r.style.transform=`translateY(${ly-y0}px)`}};
-  const edge=()=>{if(!sc){tm=0;return}const b=sc.getBoundingClientRect(),d=ly<b.top+60?-9:ly>b.bottom-60?9:0;if(d){const t0=sc.scrollTop;sc.scrollTop+=d;y0-=sc.scrollTop-t0;step()}tm=d?requestAnimationFrame(edge):0};
-  const mv=ev=>{ly=ev.clientY;step();if(!tm)edge()};
-  const up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);if(tm)cancelAnimationFrame(tm);tm=0;
-    r.classList.remove('drg');r.style.transform='';const z=tblSt(id),o=[...r.parentNode.querySelectorAll('.colr[data-ck]')].map(x=>x.dataset.ck);
-    if(o.join()!==z.ord.join()&&o.length===z.ord.length){z.ord=o;tblSave(id,z);ap()}};
-  h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)})}
+/* перетаскивание строки столбца: строка едет за пальцем, соседи плавно уступают место на половине высоты; у края листа — прокрутка; отпустил — порядок сохранён.
+   15.11 Андрей «чтобы не только слева нажать а на всю клетку и столбцом двигать плавно»: тянется вся строка (кроме переключателя). Палец: подержать ~0,2 с и тянуть
+   (сразу повёл — это прокрутка листа, не перетаскивание); за ⠿ — сразу. Мышь — сразу, как только сдвинулась */
+function colDrag(id,ap){$$('#sbody .colr[data-ck]').forEach(r=>{if(!r.querySelector('[data-drag]'))return;
+  r.onpointerdown=e=>{if(e.button>0||e.target.closest('.sw,select'))return;e.stopPropagation();
+    const sc=$('#sbody'),onH=!!e.target.closest('[data-drag]'),ms=e.pointerType==='mouse',sx=e.clientX,sy=e.clientY,DOC=document;let y0=sy,ly=sy,tm=0,act=false,hold=0;
+    const glide=(el,fn)=>{const t1=el.getBoundingClientRect().top;fn();const t2=el.getBoundingClientRect().top;if(Math.abs(t1-t2)<1)return;
+      el.style.transition='none';el.style.transform=`translateY(${t1-t2}px)`;el.getBoundingClientRect();el.style.transition='transform .18s cubic-bezier(.2,.8,.2,1)';el.style.transform='';
+      setTimeout(()=>{if(!el.classList.contains('drg'))el.style.transition=''},220)};
+    const step=()=>{const dy=ly-y0;r.style.transform=`translateY(${dy}px)`;
+      const nx=r.nextElementSibling,pv=r.previousElementSibling;
+      if(nx&&nx.dataset&&nx.dataset.ck&&dy>nx.offsetHeight/2){const hh=nx.offsetHeight;glide(nx,()=>nx.after(r));y0+=hh;r.style.transform=`translateY(${ly-y0}px)`}
+      else if(pv&&pv.querySelector&&pv.querySelector('[data-drag]')&&dy<-pv.offsetHeight/2){const hh=pv.offsetHeight;glide(pv,()=>pv.before(r));y0-=hh;r.style.transform=`translateY(${ly-y0}px)`}};
+    const edge=()=>{if(!sc||!act){tm=0;return}const b=sc.getBoundingClientRect(),d=ly<b.top+60?-9:ly>b.bottom-60?9:0;if(d){const t0=sc.scrollTop;sc.scrollTop+=d;y0-=sc.scrollTop-t0;step()}tm=d?requestAnimationFrame(edge):0};
+    const tb=ev=>{if(act&&ev.cancelable)ev.preventDefault()};
+    const start=()=>{if(act)return;act=true;hold=0;try{r.setPointerCapture(e.pointerId)}catch(x){}r.classList.add('drg');if(!ms&&navigator.vibrate)try{navigator.vibrate(12)}catch(x){}};
+    const off=()=>{['pointermove','pointerup','pointercancel'].forEach((n,k)=>DOC.removeEventListener(n,[mv,up,up][k]));DOC.removeEventListener('touchmove',tb,{passive:false})};
+    const end=skip=>{clearTimeout(hold);off();if(tm)cancelAnimationFrame(tm);tm=0;if(!act)return;act=false;
+      r.classList.remove('drg');const dy=parseFloat((r.style.transform.match(/-?[\d.]+/)||[0])[0])||0;r.style.transition='none';r.style.transform=`translateY(${dy}px)`;r.getBoundingClientRect();
+      r.style.transition='transform .16s ease-out';r.style.transform='';
+      setTimeout(()=>{r.style.transition='';if(skip)return;const z=tblSt(id),o=[...r.parentNode.querySelectorAll('.colr[data-ck]')].map(x=>x.dataset.ck);
+        if(o.join()!==z.ord.join()&&o.length===z.ord.length){z.ord=o;tblSave(id,z);ap()}},170)};
+    const mv=ev=>{ly=ev.clientY;if(!act){const d=Math.hypot(ev.clientX-sx,ev.clientY-sy);if(ms&&d>3)start();else if(!ms&&d>8){end(true);return}else return}
+      if(ev.cancelable)ev.preventDefault();step();if(!tm)edge()};
+    const up=()=>end(false);
+    DOC.addEventListener('pointermove',mv,{passive:false});DOC.addEventListener('pointerup',up);DOC.addEventListener('pointercancel',up);
+    DOC.addEventListener('touchmove',tb,{passive:false});
+    if(onH){e.preventDefault();start()}else if(!ms)hold=setTimeout(start,200)}})}
 function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
   /* 15.11 Андрей «неудобно с этими стрелками, размашисто всё»: стрелки ↑↓ убраны — столбец перетаскивается за ручку ⠿ слева, строки ниже, пояснение в одну строку */
   const row=(k,i)=>{const c=T0.cols.find(x=>x.k===k),on=!st.hid.has(k);
@@ -3059,9 +3082,12 @@ function prcBlock(t,nm,cx){const n=(t.pd||[]).filter(x=>cx.includes(x[0])).lengt
 function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3}[md],pdm={};for(const x of t.pd||[])pdm[x[0]]=x;
   const prv=i=>{for(let j=i-1;j>=0;j--)if(pdm[j])return pdm[j];return null};
   /* наша цена: по журналу (O) — каждый день; нет нынешней цены — как раньше, по заказам */
-  const O=prOur(t,cx),ov=O?O.v:{},hasO=!!O;if(!O)for(const i of cx)if(pdm[i])ov[i]=pdm[i][1];
+  const O=prOur(t,cx),ov=O?O.v:{},hasO=!!O,OZ={};if(!O)for(const i of cx)if(pdm[i])ov[i]=pdm[i][1];
+  /* 15.11 Андрей (кадр «СТИК», «разные показатели а я вижу всё ровно»): до начала журнала цена «как потом» давала ровные столбики — в такие дни
+     с заказами столбик = наша цена по заказам дня (медиана), бледный остаётся только день без заказов */
+  if(O)for(const i of cx)if(O.unc(i)&&pdm[i]){ov[i]=pdm[i][1];OZ[i]=1}
   const chg=i=>{if(hasO)return O.chg[i]||0;const x=pdm[i],p=x&&prv(i);return p&&Math.round(x[1])!==Math.round(p[1])?(x[1]<p[1]?-1:1):0};
-  const was=i=>hasO?O.was[i]:(prv(i)||[])[1],unc=i=>hasO&&md==='f'&&O.unc(i);
+  const was=i=>hasO?O.was[i]:(prv(i)||[])[1],unc=i=>hasO&&md==='f'&&O.unc(i)&&!OZ[i];
   const vOf=i=>md==='f'?(ov[i]!=null?ov[i]:null):pdm[i]?pdm[i][K]:null;
   const has=cx.filter(i=>vOf(i)!=null),dl=i=>`<b>${dlab(i)}${i===T?' (сегодня)':''}</b>`;
   const hd=r=>`<div class="hrw prch"><h3>Цена по дням</h3><span class="muted num">${r}</span></div>`+seg('prd',PRM,md,'sm prsg');
@@ -3088,6 +3114,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
     ax:md==='s'?undefined:{f:v=>{const x=v+base;return x>=10000?axNum(x):f0(x)},int:true},
     read:i=>{const c=chg(i),o=ov[i];
       /* день до начала журнала: цена «как потом», а по заказам она могла быть другой (акция, скидка ВБ Клуба) — её показываем словами, не столбиком */
+      if(md==='f'&&OZ[i])return dl(i)+` · наша по заказам <b>${rub(o)}</b>`+buy(i)+` · <span class="muted">${O.l0?'до '+dm(O.l0)+' и':'И'}зменения цены не записывались</span>`;
       if(md==='f'&&o!=null)return dl(i)+` · наша <b>${rub(o)}</b>${c?` <span class="pcc">${c<0?'▼':'▲'} было ${rub(was(i))}</span>`:''}`+buy(i)
         +(unc(i)?(pdm[i]&&Math.round(pdm[i][1])!==Math.round(o)?` · по заказам наша <b>${rub(pdm[i][1])}</b>`:'')+` · <span class="muted">${O.l0?'до '+dm(O.l0)+' и':'И'}зменения цены не записывались</span>`:'');
       const x=pdm[i];if(!x){const p=prv(i);return dl(i)+' · заказов не было'+(o!=null?' · наша '+rub(o):p?' — последняя цена '+dm(D.days[p[0]])+': наша '+rub(p[1])+' · у покупателя '+rub(p[2]):' — цены нет')}
@@ -3096,7 +3123,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
   const rng=mn0===mx?fv(mx)+(md==='s'?'':' ₽')+(md==='f'&&hasO&&!O.n?(O.nu?(O.l0?' · не менялась с '+dm(O.l0):''):' · не менялась'):''):'от '+fv(mn0)+' до '+fv(mx)+(md==='s'?'':' ₽');
   const lg=(md==='s'?'<span><i style="background:var(--good)"></i>подняли</span><span><i style="background:var(--bad)"></i>урезали</span><span><i style="background:var(--warn)"></i>так же</span>':'')
     +'<span><i class="pcd"></i>меняли нашу цену</span>'
-    +(md==='f'?(hasO&&O.nu?`<span>бледные — до ${O.l0?dm(O.l0):'начала журнала'} не записывали</span>`:''):'<span>пусто — не было заказов</span>');
+    +(md==='f'?(hasO&&O.nu?`<span>до ${O.l0?dm(O.l0):'начала журнала'} — по заказам дня${cx.some(i=>O.unc(i)&&!OZ[i])?', бледные — без заказов':''}</span>`:''):'<span>пусто — не было заказов</span>');
   return hd(rng)+ch+inTx+`<div class="lg prlg">${lg}</div>`}
 /* короткое имя акции для подписи линии: «Чёрная пятница: выгодные предложения» → «ЧП: выгодные…» */
 function akShort(n){n=String(n||'').replace(/\s+/g,' ').trim();if(n.length<=15)return n;const m=n.match(/^([^:]+):\s*(.+)$/);
@@ -3171,7 +3198,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      нажатие — лист товара); здесь второго фото нет */
   /* 15.11 Андрей (кадр, стрелка от строки «№ · с · запуск» и плашек вверх к названию): «это сюда перемести и поменьше слов» — номер, даты и плашки
      (тип ставки, где показ, склады) стоят в шапке под названием (rkHead ниже), в теле листа их нет */
-  h+=`<div class="wbln">${t?`<button class="totov press" type="button" data-nm2="${nm}"><span class="ph"${foto(t)}></span>Товар здесь ›</button>`:''}<a class="press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener">${WBL}Кампания ↗</a>${t?`<a class="press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар ↗</a>`:''}</div>`;
+  /* 15.11 Андрей (кадр «Стик СПС», «Товар здесь» зачёркнут, стрелка от ссылок вверх): «слева это дубль убери и ссылки перенеси выше … аккуратно» — кнопки «Товар здесь» нет
+     (в товар ведёт фото в шапке), ссылки «Кампания ↗» и «Товар ↗» — маленькими плашками в шапке за плашками кампании (rkHead ниже) */
   /* отдельной жёлтой строки «бюджета осталось … — кампания скоро встанет» больше нет: то же говорит красная плитка «Остаток бюджета» (не дублируем) */
   if(ostNet(t)&&st.w)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.</div>';
   /* 15.11 Андрей: «по блокам внутри рк не правильная логика надо сначала показатели по рк + панель показатели тоже надо. Статистика гистограмма по дрр …
@@ -3230,7 +3258,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('ВБ',t.fbo)+ost1('свой',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener">${WBL}Кампания ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
