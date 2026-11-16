@@ -1152,7 +1152,9 @@ html,body{overscroll-behavior-y:contain}
 @media (prefers-reduced-motion:reduce){#rkkw.frin>:not(.chips){animation:none}}
 
 /* ── ход замера мест — плашка внизу экрана, над сообщением ── */
-#mprog{position:fixed;left:12px;right:12px;margin:0 auto;width:fit-content;max-width:calc(100vw - 24px);bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 72px);z-index:199;display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:14px;background:rgba(28,28,30,.94);color:#fff;font-weight:600;font-size:14px;box-shadow:var(--sh2);pointer-events:none}
+#mprog{position:fixed;left:12px;right:12px;margin:0 auto;width:fit-content;max-width:calc(100vw - 24px);bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 72px);z-index:199;display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:14px;background:rgba(28,28,30,.94);color:#fff;font-weight:600;font-size:14px;box-shadow:var(--sh2);pointer-events:auto;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s}
+#mprog.mini{bottom:auto;top:calc(env(safe-area-inset-top) + 6px);padding:5px 11px;gap:7px;font-size:12.5px;border-radius:999px;opacity:.92}
+#mprog.mini .sp{width:12px;height:12px;border-width:2px}
 body.mjob #runp{display:none}
 #mprog .sp{width:16px;height:16px;border-radius:50%;border:2.4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:rot .7s linear infinite;flex:none}
 
@@ -2270,6 +2272,18 @@ function evShort(z){let ch=String(z.chto||''),by=evCut(z.bylo),st=evCut(z.stalo)
   const m=ch.match(/^(.+?)\s+—\s+(.+)$/);if(m){ch=m[1];tl=m[2]}
   if(/^перенос из Марплы/i.test(ch)){ch='Из Марплы';by='';st=st.replace(/(^|;\s*)сво[йяеё]\s+/gi,'$1')}
   ch=ch.replace(/^ставка \(([^)]*)\)/i,'ставка, $1');
+  /* 16.11 Андрей (кадр истории товара): «про биддер так длинно не пишем — коротко, но понятно», «остановка по какой причине была: биддер, лимит по тратам,
+     график — нужно понимать, но кратко». Биддер: «совет → сам», условия одной строкой; пауза — причина серым рядом */
+  if(/^биддер$/i.test(ch)){const P=s=>{s=String(s||'');const c=(s.match(/цель (\d+) место/)||[])[1],p=(s.match(/потолок ([\d,.]+) ?₽/)||[])[1],q=(s.match(/запрос («[^»]*»)/)||[])[1];
+      return {m:s.split(',')[0].trim(),x:[c&&c+' место',p&&'до '+p+' ₽',q].filter(Boolean).join(', ')}};
+    const a=P(z.bylo),b=P(z.stalo);ch='Биддер';by=a.m;st=b.m;tl=b.x||a.x;if(a.m===b.m&&a.x!==b.x){by=a.x;st=b.x;tl=''}}
+  else if(/^биддер: ставка/i.test(ch)){const m2=tl.match(/[Мм]есто (\d+)\D+цели (\d+)/);ch='Биддер: ставка';
+    tl=m2?'место '+m2[1]+', цель '+m2[2]+(/потолок/.test(tl)?', дальше потолок':''):/нет места|не видно/i.test(tl)?'места нет':tl.replace(/\.$/,'')}
+  else if(/^свой лимит дня выбран/i.test(ch)){ch='Пауза до завтра';tl='лимит дня: потрачено '+String(z.bylo||'')+' ₽';by=st=''}
+  else if(/^свой график: вне часов/i.test(ch)){ch='Пауза';tl='по графику, вне часов показа';by=st=''}
+  else if(/^свой график: час показа/i.test(ch)){ch='Запуск';tl='по графику';by=st=''}
+  else if(/^пауза$/i.test(ch)){ch='Пауза';tl=tl||(z.kto==='сервис'&&!z.avto?'остановили командой: с сайта или из чата':'в кабинете ВБ, причина не записана');by=st=''}
+  else if(/^запуск$/i.test(ch)){ch='Запуск';by=st=''}
   return {ch:ch.charAt(0).toUpperCase()+ch.slice(1),by,st,tl}}
 function evHtml(z,full,bez){const w=WHO[z.kto]||['',z.kto||''],t=z.nm&&TOV[z.nm],r=z.cid&&RK[z.cid],e=evShort(z),sv=z.kto==='сервис';
   const ch=e.by&&e.st?` <span class="muted">${esc(e.by)}</span> → <b>${esc(e.st)}</b>`:e.st?` <b>${esc(e.st)}</b>`:e.by?` <span class="muted">${esc(e.by)}</span>`:'';
@@ -2868,9 +2882,18 @@ function klToggle(x){const k=FR.key.split('|'),tr=x.closest('tr');if(!tr||!k[1])
    («Места сняты: 8 из 8», что не снялось), оно показывается и когда лист уже закрыт. Замеры идут по очереди; крутилки в ячейках снимаются всегда — и при ошибке */
 let MQ=Promise.resolve();
 function mprog(tx){let e=$('#mprog');document.body.classList.toggle('mjob',!!tx);   // пока идёт замер, общая плашка команд (#runp из e_sheets.js) скрыта стилем — на экране одна плашка, а не две
-  if(!tx){if(e)e.remove();return}
-  if(!e){e=document.createElement('div');e.id='mprog';e.setAttribute('role','status');document.body.appendChild(e)}
-  e.innerHTML='<span class="sp"></span><span class="num">'+esc(tx)+'</span>'}
+  if(!tx){if(e)e.remove();MPMIN=false;return}
+  if(!e){e=document.createElement('div');e.id='mprog';e.setAttribute('role','status');document.body.appendChild(e);mprogDrag(e)}
+  const m=String(tx).match(/(\d+) из (\d+)/);e.classList.toggle('mini',MPMIN);e.title=tx;
+  e.innerHTML='<span class="sp"></span><span class="num">'+esc(MPMIN?(m?m[1]+' / '+m[2]:'…'):tx)+'</span>'}
+/* 16.11 Андрей: «мешает, не сдвинуть» — плашка закрывала нижние строки листа. Теперь её можно смахнуть или нажать: она сворачивается
+   в маленькую капсулу «2 / 12» сверху по центру; нажал на капсулу — снова полная. Выбор держится до конца замера */
+let MPMIN=false;
+function mprogDrag(e){let x0=0,y0=0,on=false;
+  e.addEventListener('pointerdown',v=>{on=true;x0=v.clientX;y0=v.clientY;try{e.setPointerCapture(v.pointerId)}catch(_){}});
+  e.addEventListener('pointermove',v=>{if(!on||MPMIN)return;e.style.transform='translate('+(v.clientX-x0)+'px,'+(v.clientY-y0)+'px)'});
+  const up=v=>{if(!on)return;on=false;e.style.transform='';MPMIN=!MPMIN;const t=e.title;if(t)mprog(t)};
+  e.addEventListener('pointerup',up);e.addEventListener('pointercancel',()=>{on=false;e.style.transform=''})}
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, и зелёным наливается по мере поступления данных, как в Эпл; на каждую фразу — как было,
    и там эффект ожидания красивый плавный». Кнопка «Прожать места» крупная зелёная; пока идёт замер, она наливается зелёным по доле снятых фраз
    (FR.job: k — готово, n — всего), текст «Снимаю места · 5 из 20». Ячейка фразы в ожидании — мягко дышащая капсула; пришло место — плавно проявляется */
@@ -3489,12 +3512,14 @@ function otzBlock(t){const o=t&&t.ot;if(!o)return '';
     +(warn?`<div class="note b" style="margin:8px 0 0">${tp>0?'Плохой отзыв виден первым — реклама ведёт на него.':'Много плохих за 2 недели.'}</div>`:'')
     +(last?`<div style="margin-top:8px">${last}</div>`:'')}
 
-/* 15.11 Андрей (лист товара): «тут внизу изменения вообще по всем рк и ценам и тп» — в самом низу листа товара вся история правок по товару:
-   цена, акции, баллы, и все его кампании (ставки, бюджет, лимит, биддер, график, пауза). Ежечасные «свой график: час показа / вне часов» не берём — их сотни */
+/* 16.11 Андрей (кадр истории товара): «снизу оставляй примерно столько (6), а остальное по кнопке развернуть, и не надо пополнения показывать».
+   Пополнения бюджета убраны; паузы по графику видны (причина остановки), ежечасные «час показа» — нет */
 function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(String(z.nm)===String(nm)||(z.cid&&rk.includes(+z.cid)))
-    &&!/^свой график: (час показа|вне часов)/.test(z.chto||''));
-  return `<div class="hrw" style="margin-top:22px"><h3>История изменений</h3></div>`+(L.length?'<div>'+L.slice(0,30).map(z=>evX(z,1)).join('')+'</div>'
-    +(L.length>30?`<div class="muted tnote">Последние 30 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений по товару пока не было.</div>')}
+    &&!/^свой график: час показа/.test(z.chto||'')&&!/пополн/i.test(z.chto||''));
+  const key='th|'+nm,open=S.chgOpen===key,n=open?30:6;
+  return `<div class="hrw" style="margin-top:22px"><h3>История изменений</h3></div>`+(L.length?'<div>'+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'
+    +(L.length>6?`<button class="btn press" type="button" data-act="chgmore" data-key="${key}" style="width:100%;margin-top:10px">${open?'Свернуть':'Развернуть, ещё '+Math.min(L.length-6,24)}</button>`:'')
+    +(open&&L.length>30?`<div class="muted tnote">Последние 30 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений по товару пока не было.</div>')}
 /* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
    Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
    трата за час = разница замеров. Режимы: «В среднем за день» (последние до 7 полных дней) | «Сегодня». Три самых дорогих часа — красным.
