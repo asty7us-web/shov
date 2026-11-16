@@ -2263,7 +2263,7 @@ function vCeny(){if(typeof SEGCB==='object')SEGCB.cns=v=>{S.cns=v;RS.set('cns',v
   return h+'<div class="list">'+rows.map(cnCard).join('')+'</div>'}
 
 /* ───────── записи журнала ───────── */
-const WHO={'сервис':['s','сервис'],'кабинет':['k','кабинет'],'чат':['z','чат'],'марпла':['','заметка'],'заметка':['','заметка']};
+const WHO={'сервис':['s','сервис'],'кабинет':['k','кабинет'],'чат':['z','чат'],'марпла':['','заметка'],'Марпла':['','Марпла'],'заметка':['','заметка']};
 function istRows(nm,cid){return (D.ist||[]).filter(z=>z.kab===S.kab&&(S.ist.avto||!z.avto)&&(nm?z.nm===nm:true)&&(cid?z.cid===cid:true))}
 /* 15.11 Андрей на кадр заметок: «Вот это все надо короче проще и яснее» — запись короче: без скобок «(до скидки…, скидка…)», копейки цены округлены,
    «вход в акцию «…»» — мелко после стрелки, «перенос из Марплы … → свой …» — «Из Марплы: лимит 155 ₽», метки «сервис» нет (это и так наш сайт) */
@@ -4065,7 +4065,9 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
    где она и есть изменение раздела (лимит дня: «выбран — пауза», «новый день — запуск»); ежечасные «час показа — запуск» графика не берём — их сотни;
    «перенос из Марплы» относим к разделу по тому, что перенесли (лимит / график) */
 const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0]};
-function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto)&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
+/* 16.11 Андрей «историю можно в Марпле всю взять и по всем»: записи журнала Марплы (kto «Марпла», mar_log.py) — в каждом разделе, и её автоматика:
+   биддер Марплы — одна запись за день («ставка — биддер Марплы, смен N»), лимит дня Марплы — пауза/запуск */
+function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto||z.kto==='Марпла')&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
     &&(cid?z.cid===+cid:String(z.nm)===String(nm)&&!z.cid)&&(kind!=='status'||!/лимит|график/i.test(z.chto||'')));
   return `<div class="hrw" style="margin-top:18px"><h3>История изменений</h3></div>`+(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,15).map(z=>evX(z,1)).join('')+'</div>'
     +(L.length>15?`<div class="muted tnote">Последние 15 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений пока не было.</div>')}
