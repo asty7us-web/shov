@@ -2716,7 +2716,7 @@ function vBl(){const b=K.bally;
 const TABS=['tov','rk','skl','ceny','ak','bl','esh'];
 const LITE=document.documentElement.dataset.lite==='1';   // компьютер без видеокарты (ставит скрипт в шапке) — без переходов и без движения сцены
 if(!TABS.includes(S.tab))S.tab='tov';
-S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s')};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.sklb=RS.get('sklb','');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
+S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s'),zd:+RS.get('zasd',5)||5,zl:+RS.get('zasl',100)||100};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.sklb=RS.get('sklb','');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
 let PEND=null,LASTA=null,SWK=null;
 
 /* плавная смена: разделы и листы уезжают вбок; на слабом компьютере, на широком экране и при «меньше движения» — сразу */
@@ -3039,15 +3039,18 @@ function frSwitch(f){const kw=$('#rkkw'),k=FR.key.split('|'),sb=$('#sbody');if(F
    bud — «Бюджет 0»: кампания идёт или на паузе, остаток 0, за последние 7 дней были траты. zas — «Крутятся вхолостую», правило задачи по расписанию
    wb_rk_zastoy\zastoy.py: живая (идёт сейчас либо показы были хотя бы в 3 из 5 последних полных дней), запущена больше 5 дней назад, за 5 последних
    полных дней траты в среднем не больше 100 ₽ в день; кампании, которые правили вчера или сегодня, не считаются */
-function rkVnim(){const z={bud:new Set(),zas:new Set()};if(!K||T<5)return z;const d5=[],d7=[],edge=D.days[T-5];
-  for(let i=T-5;i<T;i++)d5.push(i);for(let i=Math.max(0,T-7);i<=T;i++)d7.push(i);
+/* 17.11 Андрей: «раздел такой сделай … забытых и сделай чтобы можно было выбирать параметры забытости» — дни подряд (S.rkf.zd) и потолок трат в день (S.rkf.zl) выбираются в разделе; по умолчанию 5 дней и 100 ₽, как у отчёта 02:00 */
+const ZDN=[3,5,7,10,14],ZLM=[30,50,100,200,300,500];
+function zasD(){const d=+S.rkf.zd||5;return Math.min(d,Math.max(1,T))}
+function rkVnim(){const z={bud:new Set(),zas:new Set()};const ZD=zasD(),ZL=+S.rkf.zl||100;if(!K||T<ZD)return z;const d5=[],d7=[],edge=D.days[T-ZD];
+  for(let i=T-ZD;i<T;i++)d5.push(i);for(let i=Math.max(0,T-7);i<=T;i++)d7.push(i);
   const ruki=new Set((D.ist||[]).filter(x=>x.kab===S.kab&&x.cid&&!x.avto&&x.kto!=='заметка'&&x.kto!=='марпла'&&x.t.slice(0,10)>=D.days[T-1]).map(x=>x.cid));
   for(const r of K.rk){if(r.st!==9&&r.st!==11)continue;let s7=0,s5=0,on=0;
     for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){v+=(d.v&&d.v[i])||0;s5+=(d.s&&d.s[i])||0}}if(v>0)on++}
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
-    if(st&&st<edge&&(r.st===9||on>=3)&&s5/5<=100&&!ruki.has(r.id))z.zas.add(r.id)}
+    if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id))z.zas.add(r.id)}
   return z}
 const VNL={bud:'Бюджет 0',zas:'Крутятся вхолостую'};
 function rkRows(){const ix=PI(),q=(S.q||'').toLowerCase(),vn=VNL[S.rkf.vn]?rkVnim()[S.rkf.vn]:null;let L=[];
@@ -3064,11 +3067,13 @@ function rkCard(x){const r=x.r,e=r.nm[x.nm]||{},a=x.a,g=ourGr(r);
   return `<button class="rk pg press" type="button" data-rk="${r.id}|${x.nm}" data-ctx="rk"><div class="t"><span class="ph"${foto(x.t||{nm:x.nm})}></span><b>${esc(r.name)}</b>${stHtml(r)}<span class="rkgw">${rkGoB(r,x.nm)}</span></div>
    <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
    <div class="k kpi"><div><b class="num ${dcls(x.drr)}">${drrT(x.drr)}</b><span>ДРР</span></div><div><b class="num ${sbad(a.s,a.q)}">${rub(a.s)}</b><span>траты</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div></div></button>`}
-function vRk(){const VN=rkVnim();if(S.rkf.vn&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
+function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('zasd',+v);unfz();render(true)};SEGCB.zasl=v=>{S.rkf.zl=+v;RS.set('zasl',+v);unfz();render(true)}}
+  const VN=rkVnim();if(S.rkf.vn&&S.rkf.vn!=='zas'&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
   const rows=rkRows(),nW=K.rk.filter(r=>rkLive(r)).length,tot=rows.reduce((z,x)=>{z.s+=x.a.s;z.q+=x.a.q;return z},{s:0,q:0});
   let h=fresh();
-  if(VN.bud.size||VN.zas.size){const vr=(k,sub)=>VN[k].size?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
-    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas','живые, но 5 дней тратят меньше 100 ₽ в день')}</div>`}
+  const zsub=`живые, но ${zasD()} ${zasD()%10===1&&zasD()%100!==11?'день':zasD()%10>=2&&zasD()%10<=4&&(zasD()%100<10||zasD()%100>=20)?'дня':'дней'} тратят до ${f0(+S.rkf.zl||100)} ₽ в день`;
+  if(K){const vr=(k,sub)=>VN[k].size||S.rkf.vn===k||k==='zas'?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
+    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas',zsub)}</div>`}
   h+=`<div class="tiles c4"><div class="tile"><div class="l">Работает</div><div class="v num">${nW} <small>из ${K.rk.length}</small></div></div>
     <div class="tile"><div class="l">Расход</div><div class="v num">${kr(tot.s)} <small>₽</small></div></div>
     <div class="tile"><div class="l">Заказы РК</div><div class="v num">${f0(tot.q)}</div></div>
@@ -3077,6 +3082,7 @@ function vRk(){const VN=rkVnim();if(S.rkf.vn&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size)
     /* 14.11 Андрей: «по переносу там написано — я не понял, чем грозит» — простыми словами: что это, что нажатие ничего не меняет, подробности в листе */
     const kn=n=>n+' '+(n%10===1&&n%100!==11?'кампании':'кампаний');
     h+=`<button class="note w press" type="button" data-act="perenos" style="display:block;width:100%;text-align:left;cursor:pointer;font:inherit;font-size:13px;line-height:1.4;border:0">Сейчас ${nl?'лимит трат на день у '+kn(nl):''}${nl&&ng?' и ':''}${ng?'включение по часам у '+kn(ng):''} держит Марпла. Чтобы они работали и без её подписки, такие же можно завести у себя. В Марпле при этом ничего не выключится. <b>Что произойдёт и чем это может помешать ›</b><br><span style="opacity:.8">Это нажатие ничего не меняет — откроется объяснение и список.</span></button>`}
+  if(S.rkf.vn==='zas')h+=`<div class="note zasp" style="margin:10px 0 0"><div style="font-size:13px;margin-bottom:6px">Сколько дней подряд кампания почти не тратит</div>${seg('zasd',ZDN.map(d=>[d,d+' дн']),zasD(),'sm')}<div style="font-size:13px;margin:10px 0 6px">Тратит в среднем не больше, ₽ в день</div>${seg('zasl',ZLM.map(v=>[v,f0(v)+' ₽']),+S.rkf.zl||100,'sm')}<div class="muted" style="font-size:12px;margin-top:8px">Кампания идёт или на паузе, но показы были в большинстве этих дней. Правленные вчера и сегодня не попадают. Отчёт в 02:00 по-прежнему считает 5 дней и 100 ₽.</div></div>`;
   h+=`<div class="hrw"><h3>${S.rkf.vn?VNL[S.rkf.vn]:'Кампании'} · ${rows.length}</h3>${S.rkf.vn?'<button class="chip press" type="button" data-act="rkvn" data-v="">✕ показать все</button>':''}${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или выберите «Все».</div>';
   if(S.rkv==='table')return h+tblHtml('rk',rows,x=>`data-rk="${x.r.id}|${x.nm}" data-ctx="rk"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2 в шапке). «Столбцы» — выбрать оба столбца сортировки, скрыть лишние, переставить. ${ostAt()}</div>`;
