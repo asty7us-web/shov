@@ -1613,6 +1613,19 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .skc .skx svg{transform:rotate(90deg);transition:transform .2s ease}.skc.skop .skx svg{transform:rotate(-90deg)}
 .skc .skls{display:none}.skc.skop .skls{display:block}
 .skc .kpi.skpn{margin-top:6px}.skc .skpl{font-size:12px;margin:4px 2px 2px}
+/* 17.11 товары раскрытой склейки — общая таблица со своими столбцами и сортировкой (TBL.skc) */
+.skbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 2px 6px;font-size:12px}
+.tw.skw{max-height:none;background:var(--card2);box-shadow:none;border-radius:14px}
+.tw.skw th{white-space:normal;line-height:1.15;vertical-align:bottom;max-width:86px;box-shadow:inset 0 -1px 0 var(--line);cursor:pointer}
+.tw.skw th,.tw.skw td:first-child{background:var(--card2)}
+:root:is([data-theme="kosmos"],[data-theme="space"]) .tw.skw,:root:is([data-theme="kosmos"],[data-theme="space"]) .tw.skw th,:root:is([data-theme="kosmos"],[data-theme="space"]) .tw.skw td:first-child{background:#1a1f52}
+.tw.skw th,.tw.skw td{padding:8px 7px}
+.tw.skw td.t1{min-width:140px;max-width:42vw;font-size:13.5px;line-height:1.25}
+.tw.skw td.t1 small{display:block;font-size:11px;font-weight:500;color:var(--ink3);margin-top:1px}
+.tw.skw .tf{gap:7px}.tw.skw .tph{width:24px;height:32px;border-radius:6px}
+@keyframes skin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.skc.skan .skls{animation:skin .3s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.skc.skan .skls{animation:none}}
 
 </style>
 </head>
@@ -2100,12 +2113,13 @@ function sync(){
   rb.title='Обновить данные · собраны '+(old2?dm(D.at.slice(0,10))+' в '+D.at.slice(11,16)+' МСК ('+ago+')':'в '+D.at.slice(11,16)+' МСК');rb.setAttribute('aria-label',rb.title);
   rb.querySelectorAll('.dot').forEach(e=>e.remove());if(warnN)rb.insertAdjacentHTML('beforeend','<i class="dot"></i>');
 }
-function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card');for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
+function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card'),cy=innerHeight*.45;for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.top<=cy&&r.bottom>cy){let b=[k,r.top,null],bd=Math.abs(r.top-cy);for(const tr of C[k].querySelectorAll('tr[data-nm]')){const q=tr.getBoundingClientRect(),dd=Math.abs(q.top-cy);if(dd<bd){bd=dd;b=[k,q.top,tr.dataset.nm]}}return b}}for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top,null]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
   $('#view').innerHTML=`<div class="view"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`
     +({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)()+'</div>';twFit();
   if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}
     /* 15.11 Андрей «если сроки менять дёргается»: первая видимая карточка остаётся на том же месте экрана (порядок при смене срока держит FRZ) */
-    if(an){const c=document.querySelectorAll('#view .card')[an[0]];if(c){const d=c.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
+    /* 17.11 Андрей «при смене срока … как-то дёргано»: держим на месте то, что в середине экрана — строку товара открытой склейки или карточку, а не первую карточку сверху (у неё менялась высота, и всё ниже прыгало) */
+    if(an){const c=document.querySelectorAll('#view .card')[an[0]],e=c&&(an[2]?c.querySelector('tr[data-nm="'+an[2]+'"]'):c);if(e){const d=e.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
 /* смена раздела: вперёд — страница уезжает влево, назад — вправо */
 function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render();return}const d=TABS.indexOf(tab)-TABS.indexOf(S.tab);
   smooth(d>0?'fwd':'back',()=>{S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();render()});K3.call('go',K3MAP[tab])}
@@ -2351,7 +2365,7 @@ function tblHtml(id,rows,attr,cls){const st=tblSt(id),cols=tblCols(id);   // cls
   for(const r of rows)h+=`<tr ${attr(r)}>`+cols.map((c,i)=>`<td class="${i?'num':'t1'}${c.cls?' '+(c.cls(r)||''):''}">${c.h(r)}</td>`).join('')+'</tr>';
   return h+'</tbody></table></div>'}
 const tblBtn=id=>`<button class="chip press" type="button" data-act="cols" data-id="${id}">Столбцы</button>`;
-function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k){st.dir=-st.dir;st.sort2=null}else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();if(SHS.length)redraw();render(true)}
+function tblClick(id,k){const st=tblSt(id),c=TBL[id].cols.find(x=>x.k===k);if(!c)return;if(st.sort===k){st.dir=-st.dir;st.sort2=null}else{st.sort2=st.sort;st.dir2=st.dir;st.sort=k;st.dir=c.asc?1:-1}tblSave(id,st);unfz();tblFlip(id,()=>{if(SHS.length)redraw();render(true)})}
 /* перетаскивание строки столбца: строка едет за пальцем, соседи плавно уступают место на половине высоты; у края листа — прокрутка; отпустил — порядок сохранён.
    15.11 Андрей «чтобы не только слева нажать а на всю клетку и столбцом двигать плавно»: тянется вся строка (кроме переключателя). Палец: подержать ~0,2 с и тянуть
    (сразу повёл — это прокрутка листа, не перетаскивание); за ⠿ — сразу. Мышь — сразу, как только сдвинулась */
@@ -2488,6 +2502,41 @@ TBL.skl={sort:['or',-1],cols:[
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
   {k:'pr',l:'Цена наша, ₽',def:0,v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'}]};
+/* 17.11 Андрей (кадр раскрытой склейки): «тут надо больше наших параметров и кастомизация + сортировка внутри склейки удобно плавно» —
+   товары в раскрытой карточке склейки: свои столбцы (кнопка «Столбцы»), сортировка нажатием на шапку (вторая — как у общих таблиц), строки переезжают плавно.
+   Панель (лист «SKU»): t.pan.<w|w2|m> = [продажи ₽, ДРР доля, маржа доля, …, выкуп доля] — период как у шапки склейки (sklPk) */
+const sklPk=()=>S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w');
+const pnv=(x,i,k)=>{const z=x.t.pan&&x.t.pan[k||sklPk()];return z&&z[0]>0&&z[i]!=null?z[i]:null};
+TBL.skc={sort:['or',-1],cols:[
+  {k:'art',l:'Товар',asc:1,v:x=>x.t.art.toLowerCase(),h:x=>tcell(x.t,`<span class="tn">${esc(x.t.art)}</span>`+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))},
+  {k:'drr',l:'ДРР',t:'реклама товара ÷ заказы товара, ₽',v:x=>x.a.s||x.a.or?x.a.drr:null,h:x=>x.a.s||x.a.or?`<b>${drrT(x.a.drr)}</b>`:'—',cls:x=>dcls(x.a.drr)},
+  {k:'s',l:'Реклама, ₽',v:x=>x.a.s,h:x=>x.a.s?f0(x.a.s):'—',cls:x=>sbad(x.a.s,x.a.oq)},
+  {k:'oq',l:'Заказы, шт',v:x=>x.a.oq,h:x=>f0(x.a.oq)},
+  {k:'or',l:'Заказы, ₽',v:x=>x.a.or,h:x=>f0(x.a.or)},
+  {k:'sh',l:'Доля в склейке',t:'доля заказов склейки, шт',v:x=>x.sh,h:x=>pc(x.sh)},
+  {k:'cpa',l:'На 1 заказ, ₽',t:'реклама ÷ все заказы товара',v:x=>x.a.cpoAll,h:x=>x.a.cpoAll==null?'—':f0(x.a.cpoAll)},
+  {k:'pd',l:'ДРР панели',t:'по листу «SKU» панели, за период шапки склейки',v:x=>pnv(x,1),h:x=>{const v=pnv(x,1);return v==null?'—':pc(100*v)},cls:x=>{const v=pnv(x,1);return v==null?'':dcls(100*v)}},
+  {k:'pm',l:'Маржа панели',t:'по листу «SKU» панели',v:x=>pnv(x,2),h:x=>{const v=pnv(x,2);return v==null?'—':pc(100*v)},cls:x=>{const v=pnv(x,2);return v==null?'':v>=.1?'good':v>=0?'warnc':'bad'}},
+  {k:'ps',l:'Продажи панели, ₽',v:x=>pnv(x,0),h:x=>{const v=pnv(x,0);return v==null?'—':f0(v)}},
+  {k:'vk',l:'Выкуп',t:'«% выкупа» листа «SKU» панели за месяц',v:x=>pnv(x,4,'m'),h:x=>{const v=pnv(x,4,'m');return v==null?'—':pc(100*v)}},
+  {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
+  {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
+  {k:'pr',l:'Цена, ₽',t:'наша цена на витрине',v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'},
+  {k:'q',l:'Заказы РК, шт',t:'заказы, которые ВБ отнёс к рекламе',def:0,v:x=>x.a.q,h:x=>f0(x.a.q)},
+  {k:'drrk',l:'ДРР РК',t:'реклама ÷ сумма заказов с рекламы',def:0,v:x=>x.a.s?x.a.drrk:null,h:x=>x.a.s?`<b>${drrT(x.a.drrk)}</b>`:'—',cls:x=>dcls(x.a.drrk)},
+  {k:'v',l:'Показы',def:0,v:x=>x.a.v,h:x=>f0(x.a.v)},
+  {k:'c',l:'Клики',def:0,v:x=>x.a.c,h:x=>f0(x.a.c)},
+  {k:'ctr',l:'CTR',t:'клики ÷ показы',def:0,v:x=>x.a.ctr,h:x=>pc(x.a.ctr)},
+  {k:'cpc',l:'CPC, ₽',sub:'за клик',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
+  {k:'a',l:'Корзины',def:0,v:x=>x.a.a,h:x=>f0(x.a.a)},
+  {k:'w',l:'РК работает',def:0,v:x=>x.w,h:x=>x.w?f0(x.w):'—'}]};
+/* плавная пересортировка: до перерисовки запомнить, где была каждая строка таблицы id, после — довести строки с прежнего места на новое */
+function tblFlip(id,fn){const key=r=>r.dataset.nm||r.dataset.nm2||r.dataset.id||'',pos=new Map();
+  document.querySelectorAll(`[data-tbl="${id}"] tbody tr`).forEach((r,i)=>{const k=key(r);if(k&&i<400)pos.set(r.closest('[data-tbl]').dataset.grp+'|'+k,r.getBoundingClientRect().top)});
+  fn();if(!pos.size||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.querySelectorAll(`[data-tbl="${id}"] tbody tr`).forEach(r=>{const p=pos.get(r.closest('[data-tbl]').dataset.grp+'|'+key(r));if(p==null)return;const d=p-r.getBoundingClientRect().top;if(Math.abs(d)<1)return;
+    r.style.transition='none';r.style.transform=`translateY(${d}px)`;r.getBoundingClientRect();r.style.transition='transform .32s cubic-bezier(.2,.8,.2,1)';r.style.transform='';
+    setTimeout(()=>{r.style.transition=''},360)})}
 
 /* ───────── 14.11 Андрей 06:40: «помимо представленности статистика в гистограммах надо ещё показать табличного типа как в Марпле, тоже там важны показатели —
    показы, клики, СПМ, СПС, ДРР РК, ДРР, затраты, заказы кол-во, корзины, и также выбор фильтров и прочее как делал» — таблица по дням под гистограммой:
@@ -2536,14 +2585,15 @@ function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0,a:0};for(const t o
 function sklPan(g){const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w');let s=0,sd=0,dd=0,sm=0,mm=0;
   for(const x of g.L){const z=x.t.pan&&x.t.pan[k];if(!z||!(z[0]>0))continue;s+=z[0];if(z[1]!=null){sd+=z[0];dd+=z[0]*z[1]}if(z[2]!=null){sm+=z[0];mm+=z[0]*z[2]}}
   if(!s)return null;const lb=D.pan?(k==='m'?D.pan.ml:k==='w2'?D.pan.w2l:D.pan.wl):'';
-  return {s,d:sd?dd/sd:null,m:sm?mm/sm:null,l:(k==='m'?'':'')+(typeof panWk==='function'&&k!=='m'?panWk(lb):lb||(k==='m'?'месяц':k==='w2'?'2 недели':'неделя'))}}
+  return {s,d:sd?dd/sd:null,m:sm?mm/sm:null,mr:sm?mm:null,l:(k==='m'?'':'')+(typeof panWk==='function'&&k!=='m'?panWk(lb):lb||(k==='m'?'месяц':k==='w2'?'2 недели':'неделя'))}}
 function sklVyk(g){let s=0,v=0;for(const x of g.L){const z=x.t.pan&&x.t.pan.m;if(!z||!(z[0]>0)||z[4]==null)continue;s+=z[0];v+=z[0]*z[4]}return s?100*v/s:null}   // 15.11: «% выкупа» листа «SKU» панели за месяц, среднее по продажам (воронка за 7 дн. давала 21% — свежие заказы ещё не выкуплены)
 function sklGroups(){const ix=PI(),G=new Map();
   for(const t of K.tov){if(!t.imt)continue;let g=G.get(t.imt);if(!g)G.set(t.imt,g={imt:t.imt,L:[]});g.L.push({t,a:pAgg(t,ix),w:wrk(t).length})}
   const out=[];
   for(const g of G.values()){if(g.L.length<2)continue;g.a=sklAgg(g.L.map(x=>x.t),ix);
     const fz=FRZ.skl&&FRZ.sklIn&&FRZ.sklIn.get(g.imt);if(fz){const o=new Map(fz.map((n,k)=>[n,k]));g.L.sort((x,y)=>(o.has(x.t.nm)?o.get(x.t.nm):1e9)-(o.has(y.t.nm)?o.get(y.t.nm):1e9))}else g.L.sort((x,y)=>y.a.or-x.a.or||y.a.s-x.a.s);for(const x of g.L)x.sh=g.a.oq?100*x.a.oq/g.a.oq:null;
-    g.top=g.L[0].t;g.nw=g.L.filter(x=>x.w>0).length;g.bez=g.L.filter(x=>!x.a.s).reduce((z,x)=>z+x.a.oq,0);out.push(g)}   // bez — заказы товаров склейки, на которые реклама не тратилась
+    g.top=g.L.reduce((m,x)=>x.a.or>m.a.or?x:m,g.L[0]).t;if(!fz)g.L=tblSort('skc',g.L);   // 17.11: внутри склейки — своя сортировка (шапка таблицы), фото склейки — товар с наибольшими заказами
+    g.nw=g.L.filter(x=>x.w>0).length;g.bez=g.L.filter(x=>!x.a.s).reduce((z,x)=>z+x.a.oq,0);out.push(g)}   // bez — заказы товаров склейки, на которые реклама не тратилась
   return out}
 function sklRows(){let L=sklGroups();if(FRZ.skl){const m=new Map(L.map(g=>[g.imt,g]));return FRZ.skl.map(i=>m.get(i)).filter(Boolean)}
   const q=(S.q||'').toLowerCase();if(q)L=L.filter(g=>g.L.some(x=>(x.t.art+' '+x.t.nm).toLowerCase().includes(q)));
@@ -2558,21 +2608,23 @@ function vSkl(){const rows=sklRows();let h=fresh();
   if(!rows.length)return h+'<div class="empty"><b>Склеек нет</b>В этом кабинете нет склеек из двух и больше товаров — или поиск ничего не нашёл.</div>';
   h+='<div class="list">';
   for(const g of rows){const a=g.a;
+    /* 17.11 Андрей (кадр «Склейки»): «слева маржа заказы, справа чистая маржа в руб по панели» — вместо «реклама ₽» и «заказы шт» (они ушли в строку под названием):
+       маржа заказов = заказы склейки ₽ × маржа панели (доля, по расчёту); чистая маржа панели = Σ продажи × маржа по листу «SKU» за период панели, ₽ */
     /* 15.11 Андрей (кадр «Склейки»): «изначально все ниже товары склейки свёрнуты и стрелочку справа раскрыть список, также добавь дрр по панели, маржа по панели,
        продажи и проц выкупа в общие». Шапка (фото, название) — лист склейки; стрелка справа — раскрыть / свернуть товары (S.sklOp, на время открытой страницы).
        Вторая строка общих цифр: ДРР и маржа по панели (лист «SKU»: t.pan.w|w2|m = [продажи ₽, ДРР доля, маржа доля], среднее по продажам товаров склейки;
        период — как в листе товара: «30 дн» — месяц, «14 дн» — 2 недели, иначе неделя), продажи по панели, ₽; выкуп — «% выкупа» панели за месяц (лист «SKU») */
-    const op=!!(S.sklOp&&S.sklOp.has(String(g.imt))),pz=sklPan(g),vk=sklVyk(g);
-    h+=`<div class="card skc${op?' skop':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
-        <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽')}</div></div></button>
+    const op=!!(S.sklOp&&S.sklOp.has(String(g.imt))),pz=sklPan(g),vk=sklVyk(g),an=op&&S.sklAn===String(g.imt);
+    h+=`<div class="card skc${op?' skop':''}${an?' skan':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
+        <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽, '+f0(a.oq)+' шт','реклама '+kr(a.s)+' ₽')}</div></div></button>
         <button class="skx press" type="button" data-act="sklx" data-imt="${g.imt}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></div>
-      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num">${kr(a.s)} ₽</b><span>реклама</span></div><div><b class="num">${f0(a.oq)} шт</b><span>заказы</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
+      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=0?'':'bad'):''}">${pz&&pz.m!=null&&a.or?kr(a.or*pz.m)+' ₽':'—'}</b><span>маржа заказов</span></div><div><b class="num ${pz&&pz.mr!=null?(pz.mr>=0?'':'bad'):''}">${pz&&pz.mr!=null?kr(pz.mr)+' ₽':'—'}</b><span>чистая маржа панели</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
       <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
       <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп — '+esc(D.pan&&D.pan.ml||'месяц').toLowerCase()}</div>
-      <div class="skls"><table class="skt"><thead><tr><th>Товар</th><th>ДРР</th><th>Реклама</th><th>Заказы</th><th>FBO · FBS, шт</th></tr></thead><tbody>`
-      +g.L.map(x=>`<tr data-nm="${x.t.nm}"><td>${tcell(x.t,esc(x.t.art)+(x.w?'':`<small>${x.a.s?'реклама на паузе':'без своей рекламы'}</small>`))}</td><td class="num ${dcls(x.a.drr)}"><b>${x.a.s||x.a.or?drrT(x.a.drr):'—'}</b></td><td class="num">${x.a.s?f0(x.a.s):'—'}</td><td class="num">${f0(x.a.oq)}</td><td class="num">${ostCell(x.t.fbo)}<span class="muted"> · </span>${ostCell(x.t.fbs)}</td></tr>`).join('')
-      +`</tbody></table>${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div></div>`}
-  return h+'</div>'}
+      <div class="skls"><div class="skbar"><span class="muted">Нажмите на столбец — сортировка</span>${tblBtn('skc')}</div>`
+      +tblHtml('skc',g.L,x=>`data-nm="${x.t.nm}"`,'skw').replace('data-tbl="skc"',`data-tbl="skc" data-grp="${g.imt}"`)
+      +`${g.bez&&g.a.s?`<div class="muted tnote">Товары без рекламы дали ${f0(g.bez)} из ${f0(a.oq)} заказов склейки.</div>`:''}</div></div>`}
+  S.sklAn=null;return h+'</div>'}
 function openSkl(imt){if(typeof shMark==='function')shMark('skl',imt);sheet(()=>{const g=sklGroups().find(x=>String(x.imt)===String(imt));if(!g)return {t:'Склейка',s:'',h:'<div class="empty">Склейки нет в данных.</div>'};
   const L=g.L.map(x=>x.t),ix=PI(),pp=PP(),a=g.a,b=pp?sklAgg(L,pp):null,td=sklAgg(L,[T]),memo={},gm=i=>memo[i]||(memo[i]=sklAgg(L,[i]));
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
@@ -3455,7 +3507,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='frmes'){const z=frShown(fk[0],fk[1]);frMeasure(fk[0],fk[1],FR.sel.size?[...FR.sel]:z.show.map(e=>e.t))}
   else if(a==='pickprod')pickProd();
   else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}
-  else if(a==='sklx'){S.sklOp=S.sklOp||new Set();const k=String(ds.imt);if(S.sklOp.has(k))S.sklOp.delete(k);else S.sklOp.add(k);render(true)}   // 15.11 Андрей: товары склейки свёрнуты, стрелка справа — раскрыть   // 14.11: «На паузе · N ›» — раскрыть / свернуть
+  else if(a==='sklx'){S.sklOp=S.sklOp||new Set();const k=String(ds.imt);if(S.sklOp.has(k))S.sklOp.delete(k);else{S.sklOp.add(k);S.sklAn=k}render(true)}   // 15.11 Андрей: товары склейки свёрнуты, стрелка справа — раскрыть   // 14.11: «На паузе · N ›» — раскрыть / свернуть
   else if(a==='st')actStatus(+rk[0],rk[1],ds.to);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
   else if(a==='price')actPrice(+ds.nm);else if(a==='note'||a==='notes')openNotes(+ds.nm||0,+ds.cid||0);else if(a==='create')actCreate(+ds.nm);
   else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
@@ -4384,7 +4436,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 const SEGCB={};
 function onSeg(id,v){smooth('fade',()=>onSeg0(id,v))}
 function onSeg0(id,v){
-  if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze)
+  if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
   else if(id==='skls'){S.skls=v;RS.set('skls',v);unfz();render(true)}
