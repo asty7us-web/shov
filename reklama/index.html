@@ -1740,6 +1740,18 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .zlt.all .zlsc{display:none}
 .zlt .zlft{font-size:12px;margin-top:10px}
 
+/* 18.11 плавное переключение (d_zch.js zchSwap): подложка кнопки едет, содержимое мягко сменяется */
+.zsg{position:relative;isolation:isolate}
+.zsg>.zth{position:absolute;top:2px;bottom:2px;left:0;border-radius:9px;background:var(--thumb);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04);z-index:-1;transition:transform .34s cubic-bezier(.32,.72,0,1),width .34s cubic-bezier(.32,.72,0,1);pointer-events:none}
+.zsg>button,.zsg>button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important;transition:color .25s}
+.zch .zout,.zlt .zout{opacity:0;transform:translateY(3px);transition:opacity .13s ease,transform .13s ease}
+.zch .zin,.zlt .zin{opacity:0;transform:translateY(-3px)}
+.zch .zdt,.zch .zbig,.zch .zcm,.zch .zwr,.zch .zrd,.zlt .zlbody{transition:opacity .26s cubic-bezier(.32,.72,0,1),transform .26s cubic-bezier(.32,.72,0,1)}
+@media (prefers-reduced-motion:reduce){.zsg>.zth{transition:none}}
+.zch .zb i{transform-origin:50% 100%;transition:transform .38s cubic-bezier(.32,.72,0,1)}
+.zch .zwr.zin .zb i{transform:scaleY(.35)}
+@media (prefers-reduced-motion:reduce){.zch .zb i{transition:none}}
+
 </style>
 </head>
 <body>
@@ -3893,8 +3905,34 @@ function zltBlock(){const L=K.zch&&K.zch.lt;if(!L)return '';
   let cols='';for(let i=0;i<it.length;i+=3)cols+=`<div class="zlc">${it.slice(i,i+3).map(row).join('')}</div>`;
   return `<div class="card zlt"><div class="hrw zlh"><b>Лента заказов</b>${it.length>3?'<button type="button" class="chip press zle">Ещё</button>':''}</div>
     <div class="zlseg">${seg('zlt',[['o','Заказы'],['v','Выкупы'],['c','Отказы'],['r','Возвраты']],m,'sm')}</div>
-    ${it.length?`<div class="zlsc">${cols}</div><div class="zlall">${it.map(row).join('')}</div>`:`<div class="muted" style="padding:10px 0">За последние дни ${nm} нет</div>`}
+    <div class="zlbody">${it.length?`<div class="zlsc">${cols}</div><div class="zlall">${it.map(row).join('')}</div>`:`<div class="muted" style="padding:10px 0">За последние дни ${nm} нет</div>`}</div>
     <div class="muted zlft">Данные на сегодня, ${D.at.slice(11,16)}</div></div>`}
+
+/* 18.11 Андрей («когда переключаешь — дёргается, нужно больше эпл плавности»): «Заказы | Выкупы», «День | Неделя» и вкладки ленты
+   не перерисовывают страницу — меняется только свой блок: подложка кнопки плавно едет к нажатой, содержимое мягко сменяется,
+   высота блока перетекает, прокрутка страницы на месте. */
+const ZRM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function zThumb(sg,anim){if(!sg)return;let th=sg.querySelector('.zth');if(!th){th=document.createElement('i');th.className='zth';sg.prepend(th);sg.classList.add('zsg')}
+  const b=sg.querySelector('button[aria-pressed="true"]');if(!b)return;if(!anim)th.style.transition='none';
+  th.style.width=b.offsetWidth+'px';th.style.transform='translateX('+b.offsetLeft+'px)';if(!anim){th.offsetWidth;th.style.transition=''}}
+function zThumbs(){document.querySelectorAll('.zch [data-seg],.zlt [data-seg]').forEach(sg=>zThumb(sg,false))}
+function zchSwap(id){const sel=id==='zlt'?'.zlt':'.zch',old=document.querySelector(sel);if(!old)return false;
+  const tp=document.createElement('template');tp.innerHTML=zchBlock();const nw=tp.content.querySelector(sel);if(!nw)return false;
+  // кнопки: подложка едет, остальное не трогаем
+  old.querySelectorAll('[data-seg]').forEach(sg=>{const v=String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
+  const parts=id==='zlt'?['.zlbody']:['.zdt','.zbig','.zcm','.zwr','.zrd'];
+  const h0=old.offsetHeight;
+  const go=()=>{parts.forEach(q=>{const a=old.querySelector(q),b=nw.querySelector(q);if(a&&b)a.replaceWith(b);else if(a&&!b)a.remove()});
+    if(id!=='zlt'){const s=old.querySelector('.zft .muted'),s2=nw.querySelector('.zft .muted');if(s&&s2)s.textContent=s2.textContent;zchScroll()}
+    if(id==='zlt'){const e=old.querySelector('.zle'),e2=nw.querySelector('.zle');old.classList.remove('all');if(e&&!e2)e.style.visibility='hidden';else if(e){e.style.visibility='';e.textContent='Ещё'}}
+    if(ZRM)return;const h1=old.offsetHeight;
+    parts.forEach(q=>{const x=old.querySelector(q);if(x){x.classList.add('zin');requestAnimationFrame(()=>requestAnimationFrame(()=>x.classList.remove('zin')))}});
+    if(h1!==h0){old.style.height=h0+'px';old.style.overflow='hidden';old.offsetHeight;old.style.transition='height .32s cubic-bezier(.32,.72,0,1)';old.style.height=h1+'px';
+      setTimeout(()=>{old.style.height='';old.style.overflow='';old.style.transition=''},340)}};
+  if(ZRM){go();return true}
+  parts.forEach(q=>{const x=old.querySelector(q);if(x)x.classList.add('zout')});setTimeout(go,130);return true}
+new MutationObserver(()=>{if(document.querySelector('.zch [data-seg]:not(.zsg),.zlt [data-seg]:not(.zsg)'))zThumbs()}).observe(document.documentElement,{childList:true,subtree:true});
+addEventListener('resize',zThumbs);
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
    Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
@@ -4738,7 +4776,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 
 /* ───────── события ───────── */
 const SEGCB={};
-function onSeg(id,v){smooth('fade',()=>onSeg0(id,v))}
+function onSeg(id,v){if(id==='zcm'||id==='zcp'||id==='zlt'){onSeg0(id,v);return}smooth('fade',()=>onSeg0(id,v))}
 function onSeg0(id,v){
   if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
@@ -4749,7 +4787,7 @@ function onSeg0(id,v){
   else if(id==='sort'){S.sort=v;S.dir=-1;RS.set('sort',v);RS.set('dir',-1);unfz();render(true)}
   else if(id==='chm'){S.chm=v;RS.set('chm',v);if(SHS.length)redraw();else render(true)}
   else if(id==='chm2'){S.chm2=v;redraw()}
-  else if(id==='zcm'||id==='zcp'||id==='zlt'){S[id]=v;RS.set(id,v);render(true)}   // 17.11 «Заказы | Выкупы», «День | Неделя» — блок как на главной приложения ВБ (d_zch.js)
+  else if(id==='zcm'||id==='zcp'||id==='zlt'){S[id]=v;RS.set(id,v);if(!zchSwap(id))render(true)}   // 18.11 Андрей «дёргается, нужно больше эпл плавности»: меняем только свой блок, плавно (d_zch.js)   // 17.11 «Заказы | Выкупы», «День | Неделя» — блок как на главной приложения ВБ (d_zch.js)
   else if(id==='akf'){S.ak.f=v;RS.set('akf',v);sync();render(true)}
   else if(id==='rkf'){S.rkf.f=v;RS.set('rkf',v);unfz();sync();render(true)}
   else if(id==='rks'){S.rkf.sort=v;RS.set('rks',v);unfz();render(true)}
