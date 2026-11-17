@@ -3192,9 +3192,12 @@ function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* только что созданная с сайта кампания (r.nov, applyPatch) трат ещё не имеет — её не прячем в свёрнутую строку, она стоит сразу под работающими */
   const Pn=P.filter(r=>r.nov),Po=P.filter(r=>!r.nov);
   if(Pn.length)h+=`<div class="rows" data-rctx="${rctx}" style="margin-top:8px">`+Pn.map(r=>rkRow(r,nm,ix)).join('')+'</div>';
-  if(Po.length){const op=+S.openP===+nm,n30=Po.filter(r=>rkAgg(r,nm,PI(30)).s>0).length;
-    h+=op?`<div class="hrw pzh"><h3>На паузе · ${Po.length}</h3><button class="lnk" type="button" data-act="allp" data-nm="${nm}">свернуть</button></div><div class="rows" data-rctx="${rctx}">`+Po.map(r=>rkRow(r,nm,ix)).join('')+'</div>'
-      :`<button class="pzr press" type="button" data-act="allp" data-nm="${nm}" aria-expanded="false"><span><b>На паузе · ${Po.length}</b><small>${n30?'тратили за 30 дней: '+n30:'за 30 дней расхода не было'}</small></span><i aria-hidden="true">›</i></button>`}
+  /* 17.11 Андрей «завершена… на паузе только есть»: завершённые (ВБ, статус 7 — запустить нельзя) — своим разделом «Завершены», не в «На паузе» */
+  if(Po.length){const op=+S.openP===+nm,n30=Po.filter(r=>rkAgg(r,nm,PI(30)).s>0).length,isD=r=>rkSt(r).t==='завершена',Pz=Po.filter(r=>!isD(r)),Pd=Po.filter(isD);
+    const lbl=(Pz.length?'На паузе · '+Pz.length:'')+(Pd.length?(Pz.length?' · завершены ':'Завершены · ')+Pd.length:'');
+    const sec=(L,t,b)=>`<div class="hrw pzh"><h3>${t} · ${L.length}</h3>${b?`<button class="lnk" type="button" data-act="allp" data-nm="${nm}">свернуть</button>`:''}</div><div class="rows" data-rctx="${rctx}">`+L.map(r=>rkRow(r,nm,ix)).join('')+'</div>';
+    h+=op?(Pz.length?sec(Pz,'На паузе',1):'')+(Pd.length?sec(Pd,'Завершены',!Pz.length):'')
+      :`<button class="pzr press" type="button" data-act="allp" data-nm="${nm}" aria-expanded="false"><span><b>${lbl}</b><small>${n30?'тратили за 30 дней: '+n30:'за 30 дней расхода не было'}</small></span><i aria-hidden="true">›</i></button>`}
   /* 14.11 Андрей: «места по фразам только внутри рк соотв» — в листе товара мест по фразам нет, только в таблице фраз своей кампании */
   if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+='<div class="muted tnote pmxh">Места по фразам — в листе кампании: нажмите на кампанию выше.</div>';
   return h+'</div>'}
