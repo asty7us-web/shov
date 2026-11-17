@@ -3046,7 +3046,7 @@ function rkVnim(){const z={bud:new Set(),zas:new Set()};const ZD=zasD(),ZL=+S.rk
   for(let i=T-ZD;i<T;i++)d5.push(i);for(let i=Math.max(0,T-7);i<=T;i++)d7.push(i);
   const ruki=new Set((D.ist||[]).filter(x=>x.kab===S.kab&&x.cid&&!x.avto&&x.kto!=='заметка'&&x.kto!=='марпла'&&x.t.slice(0,10)>=D.days[T-1]).map(x=>x.cid));
   for(const r of K.rk){if(r.st!==9&&r.st!==11)continue;let s7=0,s5=0,on=0;
-    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){v+=(d.v&&d.v[i])||0;s5+=(d.s&&d.s[i])||0}}if(v>0)on++}
+    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){const x=(d.s&&d.s[i])||0;v+=x;s5+=x}}if(v>0)on++}   // 17.11 Андрей «поставил на паузу, а она в холостых»: после паузы ВБ ещё дни шлёт 1–5 показов без трат — живой день только с тратами
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
@@ -3975,7 +3975,7 @@ async function send(cmd){cmd.id=cmd.id||rid();cmd.ts=Date.now();if(!cmd.kab)cmd.
 async function onMsg(m){if(!m||m.event!=='message'||SEEN.has(m.id))return;SEEN.add(m.id);
   try{const [a,b]=String(m.message).split('.'),r=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(a)},await ckey(),b64u8(b))));
     const dk=r.id+'|'+r.st+'|'+(r.msg||'');if(DONE.has(dk))return;DONE.add(dk);   /* тот же ответ приходит с каждого сервера связи — берём первый */
-    wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch){pmemSave(r.patch,'');applyPatch(r.patch)}}catch(e){}}
+    wqAlive(r.id);if(WAIT[r.id])WAIT[r.id](r);else if(r.st==='done'&&r.patch){pmemSave(r.patch,'');applyPatch(r.patch);if(SHS.length){if(!$('#runbox'))redraw()}else render(true)}}catch(e){}}
 function listen(){if(ES||!UPR)return;const L=[];for(const h of NH)try{const s=new EventSource(h+'/'+UPR.res+'/sse');s.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch(x){}};s.onerror=()=>{};L.push(s)}catch(e){}
   ES=L.length?{L,close(){L.forEach(s=>{try{s.close()}catch(e){}})}}:null}
 async function pollRes(){await Promise.all(NH.map(async h=>{try{const r=await fetch(h+'/'+UPR.res+'/json?poll=1&since=3m',{cache:'no-store',signal:nhSig()});if(!r.ok)return;for(const l of (await r.text()).split('\n'))if(l.trim())try{await onMsg(JSON.parse(l))}catch(e){}}catch(e){}}))}
@@ -4044,7 +4044,11 @@ async function run(cmd,done,o){const box=$('#runbox');if(!box)return false;const
     if(r.st!=='done'){const er=new Error(r.msg||'Не получилось');er.no=1;throw er}
     const b2=mine(),fact=r.msg||'Готово';
     if(b2)b2.innerHTML=runSteps(2)+`<div class="rfact g"><b>✓ ${esc(fact)}</b><small>ответ сервиса · ${mmss(Date.now()-t0)}</small></div>`;
-    pmemSave(r.patch,RUNNM[cmd.k]||'');applyPatch(r.patch);if(b2&&o&&o.ok)try{o.ok(r,b2)}catch(x){}runRes(cmd,'g',fact);setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},b2?2200:300);return true
+    pmemSave(r.patch,RUNNM[cmd.k]||'');applyPatch(r.patch);
+    /* 17.11 Андрей (кадр: «Пополнение — готово, запущена», а плитки «пауза, кончился бюджет, 0 ₽»): «статус должен соответствовать» — лист подтверждения закрыли
+       до ответа, данные обновились, а открытый лист / раздел остались прежними. Перерисовываем то, что сейчас на экране (форму с полями ввода не трогаем) */
+    if(!b2){if(SHS.length){if(!$('#runbox'))redraw()}else render(true)}
+    if(b2&&o&&o.ok)try{o.ok(r,b2)}catch(x){}runRes(cmd,'g',fact);setTimeout(()=>{if(done)done(r,SHS[SHS.length-1]!==my);else{const i=SHS.indexOf(my);if(i<0)return;if(i===SHS.length-1)back();else SHS.splice(i,1)}},b2?2200:300);return true
   }catch(e){const b2=mine(),msg=sent?e.message:'Команда не ушла — нет связи. В кабинете ничего не изменилось: проверьте интернет и попробуйте ещё раз.';
     /* отказ сторожа или не ушло — можно поправить и повторить (кнопки возвращаются на место); сторож молчит — повторять вслепую нельзя */
     if(b2){b2.innerHTML=runSteps(sent?1:0,sent?1:0)+`<div class="rfact ${e.late?'w':'b'}"><b>${esc(msg)}</b><small>${e.late?'сервис молчит':sent?'ответ сервиса':'команда не ушла'} ·${mmss(Date.now()-t0)}</small></div><div class="acts" style="grid-template-columns:${e.late?'1fr':'1fr 1.6fr'}"><button class="btn gray press" type="button" data-act="back">${e.late?'Закрыть':'Назад'}</button>${e.late?'':`<button class="btn press" type="button" id="runagain">${sent?'Изменить и повторить':'Попробовать ещё раз'}</button>`}</div>`;
