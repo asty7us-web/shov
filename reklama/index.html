@@ -2601,13 +2601,14 @@ function sklGroups(){const ix=PI(),G=new Map();
 function sklRows(){let L=sklGroups();if(FRZ.skl){const m=new Map(L.map(g=>[g.imt,g]));return FRZ.skl.map(i=>m.get(i)).filter(Boolean)}
   const q=(S.q||'').toLowerCase();if(q)L=L.filter(g=>g.L.some(x=>(x.t.art+' '+x.t.nm).toLowerCase().includes(q)));
   const key=({s:g=>g.a.s,drr:g=>g.a.drr==null?-1:isFinite(g.a.drr)?g.a.drr:1e9,or:g=>g.a.or})[S.skls]||(g=>g.a.s);
-  return L.sort((x,y)=>key(y)-key(x)||y.a.or-x.a.or)}
+  const sg=S.sklInv?-1:1,nul=g=>S.skls==='drr'&&g.a.drr==null;   // без рекламы — всегда внизу
+  return L.sort((x,y)=>(nul(x)-nul(y))||sg*(key(y)-key(x))||y.a.or-x.a.or)}
 const sklName=g=>esc(g.top.art)+` <span class="muted" style="font-weight:500">и ещё ${g.L.length-1}</span>`;
 const CHEV='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink3);flex:none"><path d="m9 6 6 6-6 6"/></svg>';
 function vSkl(){const rows=sklRows();let h=fresh();
   /* 14.11 Андрей: «снизу куча текста непонятного» — пояснение одной строкой; «Остаток: склады ВБ · свой склад» под каждой карточкой убрано — это теперь название столбца */
   h+='<div class="muted tnote" style="margin:0 3px 2px">Реклама одной карточки ведёт на всю склейку — здесь реклама и заказы всех её товаров вместе.</div>';
-  h+=`<div class="hrw"><h3>Склейки · ${rows.length}</h3>${frzChip('skl')}${seg('skls',[['s','Реклама'],['drr','ДРР'],['or','Заказы']],S.skls,'sm')}</div>`;
+  h+=`<div class="hrw"><h3>Склейки · ${rows.length}</h3>${frzChip('skl')}${seg('skls',[['s','Реклама'],['drr','ДРР'],['or','Заказы']].map(([v,l])=>[v,v===S.skls?l+(S.sklInv?' ↑':' ↓'):l]),S.skls,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Склеек нет</b>В этом кабинете нет склеек из двух и больше товаров — или поиск ничего не нашёл.</div>';
   h+='<div class="list">';
   for(const g of rows){const a=g.a;
@@ -4449,7 +4450,7 @@ function onSeg0(id,v){
   if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
-  else if(id==='skls'){S.skls=v;RS.set('skls',v);unfz();render(true)}
+  else if(id==='skls'){S.sklInv=(v===S.skls)?!S.sklInv:false;S.skls=v;RS.set('skls',v);unfz();render(true)}   // 17.11 Андрей: повторное нажатие — обратный порядок
   else if(id==='blf'){S.blf=v;sync();render(true)}
   else if(id==='sort'){S.sort=v;S.dir=-1;RS.set('sort',v);RS.set('dir',-1);unfz();render(true)}
   else if(id==='chm'){S.chm=v;RS.set('chm',v);if(SHS.length)redraw();else render(true)}
