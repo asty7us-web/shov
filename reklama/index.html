@@ -1433,6 +1433,8 @@ table.zon tr:last-child td{font-weight:700}
 .fr .kbe small{font-size:10.5px;color:var(--ink3);white-space:nowrap}
 .kbl{display:flex;flex-direction:column;gap:6px;margin:10px 0;max-height:40vh;overflow:auto}
 .kbl>div{display:flex;justify-content:space-between;gap:10px;font-size:14px}.kbl>div span{min-width:0;overflow-wrap:anywhere}.kbl>div b{white-space:nowrap}
+/* 17.11 корзины на графике трат по часам */
+.bars .col .kzd{position:absolute;left:50%;transform:translate(-50%,50%);width:8px;height:8px;border-radius:50%;background:var(--good);z-index:3;pointer-events:none;box-shadow:0 0 0 2px var(--card,#fff)}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -3755,11 +3757,14 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
   if(!z)return hd('')+`<div class="muted tnote">Копим траты по часам: сервис каждые 30 минут запоминает, сколько кампания потратила с начала дня. Первая картинка — через сутки, судить о часах — через 5–7 дней.</div>`;
   const n=z.n||0,hasT=!!(z.t&&z.t.some(v=>v>0));let m=S.chm==='t'&&hasT?'t':n?'a':hasT?'t':'a';
   const bt=(v,l,on)=>on?`<button type="button" class="press" data-chm="${v}" aria-pressed="${m===v}">${l}</button>`:'';
-  const H=[...Array(24).keys()],g=h=>{if(m==='t')return {s:z.t[h]||0,c:(z.tc||[])[h]||0,a:null,o:null};const k=n||1;return {s:(z.s[h]||0)/k,c:(z.c[h]||0)/k,a:(z.a[h]||0)/k,o:(z.o[h]||0)/k}};
+  const H=[...Array(24).keys()],g=h=>{if(m==='t')return {s:z.t[h]||0,c:(z.tc||[])[h]||0,a:z.ta?(z.ta[h]||0):null,o:z.to?(z.to[h]||0):null};const k=n||1;return {s:(z.s[h]||0)/k,c:(z.c[h]||0)/k,a:(z.a[h]||0)/k,o:(z.o[h]||0)/k}};
   const V=H.map(h=>g(h).s),top=[...H].filter(h=>V[h]>=1).sort((a,b)=>V[b]-V[a]).slice(0,3),mx=Math.max(1,...V),tot=V.reduce((a,b)=>a+b,0);
   const id='ch'+(++CHN),MH=64;let b='',x='';
-  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,red=top.includes(h);
-    b+=`<div class="col${h===23?' sel':''}" data-ch="${id}" data-i="${h}">${red?`<span class="tp num">${ksh(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(red?'var(--bad)':'var(--acc)'):'var(--bar)'}"></i></div>`;
+  /* 17.11 Андрей («К», скрин «Траты по часам»): «надо добавить по корзинам» — корзины с рекламы за час зелёной точкой прямо на графике трат (своя шкала, число в точке) */
+  const KA=H.map(h=>g(h).a||0),kmx=Math.max(...KA),kok=KA.some(v=>v>0);
+  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,red=top.includes(h),ka=KA[h];
+    const dot=ka>0?`<b class="kzd" style="bottom:${(4+MH*ka/kmx).toFixed(1)}%"></b>`:'';
+    b+=`<div class="col${h===23?' sel':''}" data-ch="${id}" data-i="${h}">${red?`<span class="tp num">${ksh(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(red?'var(--bad)':'var(--acc)'):'var(--bar)'}"></i>${dot}</div>`;
     x+=`<span>${h%3===0?h:''}</span>`});
   CHR[id]=h=>{const q=g(h),cpc=q.c?q.s/q.c:null;return `<b>${h}:00–${h+1}:00</b> · траты <b>${rub(q.s)}</b>${tot?' ('+pc(100*q.s/tot)+' дня)':''} · клики ${f1(q.c)}${cpc!=null?' · клик '+rub2(cpc):''}${q.a!=null?' · корзины '+f1(q.a)+' · заказы РК '+f1(q.o):''}`};
   const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
@@ -3767,7 +3772,7 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
   const pod=m==='t'?`Сегодня по часам${z.tp?' (копим не с полуночи — часы до первого замера пустые)':''}. `:`В среднем за день, ${n} ${n===1?'день':n<5?'дня':'дней'} с ${z.d0?dm(z.d0):"—"}${n<5?' — мало, судить рано':''}. `;
   return hd(`<span class="pnqs">${bt('a','В среднем',n>0)}${bt('t','Сегодня',hasT)}</span>`)
     +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
-    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа. Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`+zakBlock(z,m,n)}
+    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа.${kok?' Зелёные точки — корзины с этой рекламы: чем выше точка, тем больше корзин в этот час (число — нажмите на час).':(g(0).a!=null?' Корзин с рекламы пока нет.':'')} Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`+zakBlock(z,m,n)}
 
 /* ── 15.11 Андрей («К»): «надо снизу тогда по заказам и корзинам гистограмму ниже» — тот же режим (в среднем / сегодня), переключатель Заказы | Корзины.
    Заказы и корзины — с этой рекламы (статистика кампании), по тем же замерам раз в 30 минут. Лучшие три часа — зелёным: по ним видно, какие часы держать в графике показа. ── */
