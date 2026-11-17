@@ -2612,7 +2612,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
   h+='<div class="list">';
   for(const g of rows){const a=g.a;
     /* 17.11 Андрей (кадр «Склейки»): «слева маржа заказы, справа чистая маржа в руб по панели» — вместо «реклама ₽» и «заказы шт» (они ушли в строку под названием):
-       маржа заказов = заказы склейки ₽ × маржа панели (доля, по расчёту); чистая маржа панели = Σ продажи × маржа по листу «SKU» за период панели, ₽ */
+       маржа заказов — в процентах (Андрей 17.11 «проц»): маржа панели склейки, %; чистая маржа панели = Σ продажи × маржа по листу «SKU» за период панели, ₽ */
     /* 15.11 Андрей (кадр «Склейки»): «изначально все ниже товары склейки свёрнуты и стрелочку справа раскрыть список, также добавь дрр по панели, маржа по панели,
        продажи и проц выкупа в общие». Шапка (фото, название) — лист склейки; стрелка справа — раскрыть / свернуть товары (S.sklOp, на время открытой страницы).
        Вторая строка общих цифр: ДРР и маржа по панели (лист «SKU»: t.pan.w|w2|m = [продажи ₽, ДРР доля, маржа доля], среднее по продажам товаров склейки;
@@ -2621,7 +2621,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
     h+=`<div class="card skc${op?' skop':''}${an?' skan':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
         <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽, '+f0(a.oq)+' шт','реклама '+kr(a.s)+' ₽')}</div></div></button>
         <button class="skx press" type="button" data-act="sklx" data-imt="${g.imt}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></div>
-      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=0?'':'bad'):''}">${pz&&pz.m!=null&&a.or?kr(a.or*pz.m)+' ₽':'—'}</b><span>маржа заказов</span></div><div><b class="num ${pz&&pz.mr!=null?(pz.mr>=0?'':'bad'):''}">${pz&&pz.mr!=null?kr(pz.mr)+' ₽':'—'}</b><span>чистая маржа</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
+      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=0?'':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа заказов</span></div><div><b class="num ${pz&&pz.mr!=null?(pz.mr>=0?'':'bad'):''}">${pz&&pz.mr!=null?kr(pz.mr)+' ₽':'—'}</b><span>чистая маржа</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
       <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
       <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп — '+esc(D.pan&&D.pan.ml||'месяц').toLowerCase()}</div>
       <div class="skls"><div class="skbar"><span class="muted">Нажмите на столбец — сортировка</span>${tblBtn('skc')}</div>`
