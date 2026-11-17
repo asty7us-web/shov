@@ -1384,6 +1384,9 @@ table.zon tr:last-child td{font-weight:700}
 /* 16.11 Андрей «помечай значком такое»: значок ВБ на кнопках-подсказках ставки от ВБ */
 .chip .wbc{display:inline-block;width:12px;height:12px;margin-right:4px;vertical-align:-1.5px;flex:none;background:var(--wbi) center/contain no-repeat}
 
+/* 17.11 Андрей «ВБ значок белый — это в РК, а обычный — на сайт»: у «Товар ↗» значок как вверху у «Каб 1» */
+.rkchips a.rklk .rkw.rkw0{background-image:var(--wbi0)}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -3439,7 +3442,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
@@ -3455,7 +3458,17 @@ function openKw(nm,cid,q){sheet(()=>{const t=TOV[nm],e=kwData(t,cid).find(x=>x.t
   else if(c&&c.od)h+=`<div class="note">Без рекламы товар стоит глубже ${f0(c.od)}-го места (тот же замер в ${c.ohm}). С рекламой — ${cellTx(c)}-е: в выдаче его держит реклама.</div>`;
   else if(c&&c.src==='s'&&!c.ad&&!c.deep&&c.org&&c.org<c.v)h+=`<div class="note">Если бы в выдаче не было рекламы, товар стоял бы ${f0(c.org)}-м: чужая реклама сдвигает его на ${f0(c.v-c.org)} ${mestW(c.v-c.org)}.</div>`;
   h+=`<div class="acts" style="grid-template-columns:1fr"><button class="btn gray press${lk}" type="button" data-frm1="${cid||e.rk[0]}|${nm}|${esc(q)}"${busy?' disabled':''}>${busy?'Снимаю место…':'Снять место сейчас'}</button></div>`;
-  h+=`<div class="hrw"><h3>Места по дням</h3></div>`+matrix([e],()=>'style="cursor:default"')+MXLG;
+  /* 17.11 Андрей «так непонятно, давай за 2 недели максимум и как в склейках вид»: места по дням — гистограммой за 14 дней. Столбик — среднее место
+     среди замеров, где товар нашли (выше — лучше, шкала логарифмом до 300); не нашли ни разу — серый «нет»; нажатие на день — среднее, «нашли N из M», часы */
+  {const md=e.md||{},gi=[];for(let i=Math.max(0,T-13);i<=T;i++)gi.push(i);const sd=i=>md[i]||null,G=MG();
+   if(gi.some(i=>sd(i)))h+=`<div class="hrw"><h3>Места по дням</h3></div>`+chart({ix:gi,h:150,mh:78,ax:false,val:i=>{const x=sd(i);return x?1:null},
+     hf:i=>{const x=sd(i);if(!x)return 0;if(!x[1])return .06;return Math.max(.08,1-Math.log10(x[0])/Math.log10(G+1))},
+     col:i=>{const x=sd(i);return !x||!x[1]?'var(--bar)':x[0]<=10?'var(--good)':x[0]<=50?'var(--acc)':'var(--bad)'},
+     top:i=>{const x=sd(i);return !x?'':x[1]?f0(x[0]):'нет'},
+     read:i=>{const x=sd(i);if(!x)return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · замеров не было`;
+       return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · ${x[1]?'среднее место <b>'+f0(x[0])+'</b> · нашли '+x[1]+' из '+x[2]+' замеров, '+(x[3]===x[4]?'в '+x[3]:'с '+x[3]+' до '+x[4]):'не нашли в первых '+G+' ни в одном из '+x[2]+' замеров'}`}})
+     +`<div class="muted tnote">Столбик — среднее место за день среди замеров, где товар нашли: выше — ближе к началу выдачи. Серый — не нашли. Нажмите на день — сколько раз нашли и во сколько.</div>`;
+   else h+=`<div class="hrw"><h3>Места по дням</h3></div>`+matrix([e],()=>'style="cursor:default"')+MXLG}
   const own=(e.m||[]).slice(-6).reverse(),mr=(e.mr||[]).slice(-4).reverse(),dl=i=>i===T?'сегодня':dm(D.days[i]);
   if(own.length||mr.length){h+='<div class="hrw"><h3>Замеры: время и место</h3></div><div class="kv">'
     +own.map(x=>`<span>Наш · ${dl(x[0])} ${x[1]}</span><b class="num">${x[2]?f0(x[2])+' место':'глубже '+(x[4]||MG())}${x[2]?(x[3]?' · в рекламе':' · без рекламы'):''}${x[3]&&x[5]>0?' ← '+f0(x[5])+' без неё':x[3]&&x[5]===0?' ← глубже '+f0(x[6]||300)+' без неё':''}</b>`).join('')
