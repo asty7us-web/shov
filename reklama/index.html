@@ -1739,6 +1739,9 @@ window.svcBack=o=>{
   let last=n(),gu=location.href;   // gu — адрес текущей записи: страницы меняют в нём раздел (#skleyki) — после «назад» оставляем его
   history.replaceState=function(s,t,u){const k=n();if(k&&!(s&&s.svg))s=Object.assign({},s,{svg:k});rs(s,t,u);if(n())gu=location.href};
   const fill=()=>{try{let k=n();const s=history.state;
+    // 17.11 Андрей «при нажатии назад выкидывает в юнитку»: палец после прокрутки (touchend без нажатия) — не касание для Chrome;
+    // стражи, поставленные тогда, «назад» пропускал все разом, а настоящее касание их уже не доливало (запас полон) — ставим только при живом касании
+    const ua=navigator.userActivation;if(ua&&!ua.isActive)return;
     if(!k){if(s&&!s.svb&&Object.keys(s).length)return;rs(Object.assign({},s,{svb:1}),'')}   // своя запись страницы (карточка Юнитки) — не доливаем
     for(k++;k<=N;k++)ps({svg:k},'',location.href);last=n();gu=location.href}catch(e){}};
   ['click','touchend','keydown'].forEach(k=>document.addEventListener(k,fill,{capture:true,passive:true}));
@@ -3155,7 +3158,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 (четвёртый заход) Андрей 09:18: «И выше динамика цен гистограмма чтобы я понимал реально войти в акцию» — у товара с акциями «Цена по дням»
      стоит внутри блока «Акции ВБ»: под строкой «В акции / Без акции», прямо над списком акций, с линиями плановых цен; акций нет — отдельным блоком здесь же */
   const aks=(t.ak||[]).filter(x=>x.e>=D.today);
-  if(!(aks.length&&t.pr))h+=prcBlock(t,nm,cx);
+  /* 17.11 Андрей «почему не во всех есть раздел акции» → «да»: блок «Акции ВБ» у каждого товара; акций нет — «АКЦИЙ НЕТ» (у Каб 2 автоакций не видно: его кабинета в Opera нет) */
+  if(!(aks.length&&t.pr))h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`+akNet()+prcBlock(t,nm,cx);
   /* 14.11 Андрей (кадр блока «Акции ВБ», «Без акции» обведено): «Здесь показатели по панели добавь дрр цену маржу сюда» — под строкой «Без акции / В акции»
      три цифры: наша цена сейчас, ДРР за период (то же, что «ДРР от всего» вверху), маржа из панели (лист «SKU» за месяц, нет — недельный; подпись — какой).
      У каждой акции — на сколько её цена ниже нашей (₽ и %) и маржа по цене акции ПО РАСЧЁТУ: маржа панели в ₽ на штуку (доля × наша цена) минус разница цен,
@@ -3182,9 +3186,9 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
    пришлась на кампании, что сейчас на паузе), иначе это те же числа второй раз подряд. На паузе — одна свёрнутая строка «На паузе · N ›»: нажатие
    раскрывает список, «свернуть» — обратно */
 /* 15.11: цены и акции товара в листе кампании — те же «Цена по дням» и список акций, что в листе товара (нажатие на акцию — как там) */
+function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
 function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
-  if(!aks.length&&!pb)return '';
-  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?`<div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`:'')+pb;
+  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?`<div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`:akNet())+pb;
   if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
