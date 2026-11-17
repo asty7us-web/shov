@@ -3236,7 +3236,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
     const pz=pn.m&&pn.m[2]!=null?[pn.m,D.pan&&D.pan.ml]:pn.w&&pn.w[2]!=null?[pn.w,D.pan&&D.pan.wl]:null,mg=pz?pz[0][2]:null;
     const m2=pl=>mg==null||!pl||!P?null:(mg*P-(P-pl))/pl;let anyM=false;
     /* 14.11 (четвёртый заход): плиток «Цена / ДРР / Маржа» здесь больше нет — маржа и ДРР в блоке «Показатели» выше, цена — в «Цене по дням» */
-    h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`+akStat(aks)
+    h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`
       +prcBlock(t,nm,cx)
       +`<div class="akl">`
       +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
@@ -3255,13 +3255,14 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
 /* 15.11: цены и акции товара в листе кампании — те же «Цена по дням» и список акций, что в листе товара (нажатие на акцию — как там) */
 /* 17.11 Андрей (кадр: «БЕЗ АКЦИИ», а ниже «Чёрная пятница: максимум заказов — участвуем»): «Должно сразу актуальным быть» — товар уже вошёл в акцию,
    которая начнётся позже, — строка не «без акции», а «входит в акцию с ДД.ММ — …» (зелёная); идёт акция — как было «В АКЦИИ — …» */
+/* 17.11 Андрей «убрать это не нужно» (кадр со строкой «ВХОДИТ В АКЦИЮ…»): строку статуса над ценой больше не показываем — участие видно зелёной строкой в списке акций */
 function akStat(aks){const inA=aks.filter(x=>x.uch&&x.s<=D.today),fu=aks.filter(x=>x.uch&&x.s>D.today).sort((x,y)=>x.s<y.s?-1:1),dm=s=>s.slice(8,10)+'.'+s.slice(5,7);
   if(inA.length)return `<div class="akst g">В АКЦИИ — ${esc(inA.map(x=>x.name).join(', '))}</div>`;
   if(fu.length)return `<div class="akst g">ВХОДИТ В АКЦИЮ — ${fu.map(x=>esc(x.name)+' с '+dm(x.s)).join(', ')}</div>`;
   return `<div class="akst b">БЕЗ АКЦИИ</div>`}
 function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
 function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
-  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?akStat(aks):akNet())+pb;
+  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?'':akNet())+pb;
   if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
@@ -3356,6 +3357,7 @@ function prcIn(t,cx){const md=PRM.some(x=>x[0]===S.prd)?S.prd:'f',K={f:1,b:2,s:3
     for(const g of G){const hi=g.i[g.i.length-1];g.i.forEach(l=>hl.push({v:l.v,c:l.c,t:l===hi?esc(hi.n)+' '+f0(hi.p)+(g.i.length>1?' +'+(g.i.length-1):''):''}))}}
   const fv=v=>md==='s'?f0(v)+'%':f0(v);
   const col=i=>{if(md==='b')return 'var(--wb)';if(md==='s'){const p=prv(i),v=pdm[i][3];return !p||Math.round(p[3])===Math.round(v)?'var(--warn)':v>p[3]?'var(--good)':'var(--bad)'}
+    if(i===T)return 'var(--acc)';   /* 17.11 Андрей (кадр, столбик 17-го коричневый): «цену сейчас выделить нормальной цветом» — сегодня обычным цветом, даже если цену меняли (точка «меняли» внизу остаётся) */
     return chg(i)?'var(--warn)':unc(i)?'color-mix(in srgb,var(--ink3) 45%,transparent)':'var(--acc)'};
   const buy=i=>pdm[i]?` · у покупателя <b>${rub(pdm[i][2])}</b>`:' · заказов не было';
   /* 15.11 Андрей «тускло, непонятно вообще ничего»: столбики яркие, цена дня — внутри каждого столбика (вертикально), день смены цены — оранжевый со стрелкой,
