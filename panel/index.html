@@ -384,6 +384,16 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .tb td:first-child small.why,.pc small.why{color:var(--bad);white-space:normal;line-height:1.25;font-weight:500}
 .pc small.why{display:block;font-size:12.5px;margin-top:3px}
 .tb tr.neg td:first-child{box-shadow:inset 3px 0 0 var(--bad),.5px 0 0 var(--line)}
+/* раскрытие склейки (17.11): стрелка справа в названии, товары — строками под склейкой, с отступом и мельче */
+.tb .skx{flex:none;display:grid;place-items:center;width:30px;height:30px;margin:-4px -6px -4px 0;border:0;background:none;color:var(--ink3);cursor:pointer;border-radius:8px}
+.tb .skx .chev,.tb .skx svg{width:18px;height:18px;transition:transform .2s}
+.tb tr.sop .skx svg{transform:rotate(90deg)}.tb tr.sop .skx{color:var(--acc)}
+.tb tr.sub td{font-size:.94em;font-weight:400;background:var(--card2)}
+.tb tr.sub td:first-child{padding-left:22px;font-weight:500;background:var(--card2)}
+:root[data-theme="space"] .tb tr.sub td,:root[data-theme="space"] .tb tr.sub td:first-child{background:#171b48}
+.tb.m tr.sub td:first-child{padding-left:16px}
+.tb .skr{flex:none;display:flex;align-items:center;gap:6px}.tb.m .skr{flex-direction:column;gap:0}
+.tb.m .skx{width:26px;height:22px;margin:0}.tb.m .skx svg{width:15px;height:15px}
 .dl .li .sw{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:0}
 .dl .li b .chip{height:20px;padding:0 6px;font-size:11.5px;vertical-align:1px}
 /* телефон: плотная таблица «как лист SKU» — пять главных столбцов видны сразу, остальные листаются вбок */
@@ -1287,12 +1297,19 @@ function sklSort(arr){const key=S.gs,dir=S.gd;
   return arr.slice().sort((a,b)=>{const x=gv(a,key),y=gv(b,key);if(!ok(x)&&!ok(y))return b.m.sales-a.m.sales;if(!ok(x))return 1;if(!ok(y))return -1;return (x-y)*dir||b.m.sales-a.m.sales})}
 function sklRows(g,k){   // склейки периода в выбранном порядке, «Без склейки» — последней
   const live=sklsC(g,k).filter(sklLive);return sklSort(live.filter(s=>s.key!=='-')).concat(live.filter(s=>s.key==='-'))}
+const SKLOP=new Set();   // раскрытые склейки — на время открытой страницы
+function sklSub(s){   // товары склейки для раскрытия: с продажами в периоде или в прошлом, порядок — как выбран у склеек
+  const key=S.gs,dir=S.gd;return s.pr.filter(x=>act(x.v)||act(x.p)).sort((a,b)=>{const x=gv(a,key),y=gv(b,key);if(!ok(x)&&!ok(y))return b.m.sales-a.m.sales;if(!ok(x))return 1;if(!ok(y))return -1;return (x-y)*dir||b.m.sales-a.m.sales})}
 function sklTable(rows,g,k,T){
   const pk=prevK(g,k),pl=pk!=null?GP[g]:'',cols=colsNow(pl),tm=met(T.v),tp=met(T.p),mb=mob(),all=items(g,k);
   const tv=key=>key==='salesP'?tp.sales:key==='avgP'?tp.avg:key==='drrP'?tp.drr:key==='buy'?buyP(all):tm[key];
   return `<div class="tw" id="tw"><table class="tb sk${mb?' m':''}"><thead><tr><th>Склейка</th>${cols.map(c=>`<th data-gs="${c[0]}" class="${S.gs===c[0]?'on':''}">${c[1].replace('#',pl)}${S.gs===c[0]?`<span class="a">${S.gd<0?'▼':'▲'}</span>`:''}</th>`).join('')}</tr></thead>
 <tbody><tr class="tot"><td>Итого · ${plr(rows.filter(s=>s.key!=='-').length,W_SKL)}</td>${cols.map(c=>tcell(tv(c[0]),c)).join('')}</tr>
-${rows.map(s=>{const why=s.key==='-'?'':reason(s,g,k,mb),ic=S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):'';return `<tr data-skl="${esc(s.key)}"${s.m.profit<0?' class="neg"':''}><td><div class="tn"><div class="tx"><span class="nm2">${mb?'':ic}${esc(s.t)}</span><small>${mb?ic:''}${[nTov(s),s.k?'Каб '+s.k:''].filter(Boolean).join(' · ')}</small>${why?`<small class="why">${esc(why)}</small>`:''}</div>${phs(s,mb?1:3)}</div></td>${cols.map(c=>tcell(gv(s,c[0]),c,s)).join('')}</tr>`}).join('')}</tbody></table></div>${TNOTE}`;
+${rows.map(s=>{const why=s.key==='-'?'':reason(s,g,k,mb),ic=S.mp==='all'&&s.key!=='-'?s.mps.map(mpi).join(''):'',op=SKLOP.has(s.key);
+  /* 17.11 Андрей (кадр «Склейки» Панели): «список раскрывался как в рекламе по склейкам, только свои показатели» — стрелка справа в названии
+     раскрывает товары склейки строками под ней, с теми же выбранными столбцами; нажатие на название — лист склейки, на товар — лист товара */
+  const sub=op?sklSub(s).map(it=>{const w=reason(it,g,k,mb);return `<tr class="sub${it.m.profit<0?' neg':''}" data-open="${pid(it)}"><td><div class="tn"><div class="tx"><span class="nm2">${ico(it)}${esc(it.r.a)}</span><small${w?' class="why"':''}>${w?esc(w):(it.parts?plr(it.parts.length,W_KAR):kabT(it.r,it.mp))}</small></div>${mb?'':pic(imOf(it))}</div></td>${cols.map(c=>tcell(gv(it,c[0]),c,it)).join('')}</tr>`}).join(''):'';
+  return `<tr data-skl="${esc(s.key)}" class="${s.m.profit<0?'neg':''}${op?' sop':''}"><td><div class="tn"><div class="tx"><span class="nm2">${mb?'':ic}${esc(s.t)}</span><small>${mb?ic:''}${[nTov(s),s.k?'Каб '+s.k:''].filter(Boolean).join(' · ')}</small>${why?`<small class="why">${esc(why)}</small>`:''}</div><span class="skr">${phs(s,mb?1:3)}<button class="skx press" type="button" data-sklx="${esc(s.key)}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></span></div></td>${cols.map(c=>tcell(gv(s,c[0]),c,s)).join('')}</tr>${sub}`}).join('')}</tbody></table></div>${TNOTE}`;
 }
 function vSkl(){
   const g=S.g,k=curK(),all=sklsC(g,k),T=totals(g,k),tbl=tblOn();
@@ -1756,6 +1773,7 @@ document.addEventListener('click',e=>{
   if(t.closest('#shx')){closeSheet();return}
   if(t.closest('#shb')){const key=SHB.pop();if(!key||!openSh(key))closeSheet();return}
   if((b=t.closest('[data-open]'))){if(t.closest('th'))return;openFrom('p:'+b.dataset.open,b);return}
+  if((b=t.closest('[data-sklx]'))){const key=b.dataset.sklx,tw=$('#tw'),x=tw?tw.scrollLeft:0;if(SKLOP.has(key))SKLOP.delete(key);else SKLOP.add(key);render(true);const t2=$('#tw');if(t2)t2.scrollLeft=x;return}
   if((b=t.closest('[data-skl]'))){openFrom('s:'+b.dataset.skl,b);return}
   if((b=t.closest('[data-sklgo]'))){S.skl=b.dataset.sklgo;S.cat='';S.only=true;closeSheet();list.n=60;if(S.tab!=='prod')go('prod');else render();return}
   if((b=t.closest('[data-sklf]'))){S.skl=b.dataset.sklf;closeSheet();list.n=60;if(S.tab!=='prod')go('prod');else render();return}
