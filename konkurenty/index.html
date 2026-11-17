@@ -2265,7 +2265,7 @@ function vKeys(p){
 function chasyBlock(p){
   const C=p.chasy;if(!OZ||!C||!(C.r||[]).length||kwOf(p)!=='us')return '';
   const days=[...new Set(C.r.map(x=>x[0].slice(0,10)))].sort();
-  if(!S.chd||S.chdP!==p.sku||!days.includes(S.chd)){S.chd=days[days.length-1];S.chdP=p.sku}
+  if(!S.chd||S.chdP!==p.sku||!days.includes(S.chd)){const nh=d=>new Set(C.r.filter(x=>x[0].slice(0,10)===d).map(x=>x[0].slice(11,13))).size;S.chd=days.slice().reverse().find(d=>nh(d)>=6)||days[days.length-1];S.chdP=p.sku}
   const rows=C.r.filter(x=>x[0].slice(0,10)===S.chd);
   const qi=C.q.map((q,i)=>i).filter(i=>rows.some(x=>ok(x[1][i]))).slice(0,6);
   const med=a=>{a=a.filter(ok).sort((x,y)=>x-y);return a.length?a[Math.floor((a.length-1)/2)]:null};
