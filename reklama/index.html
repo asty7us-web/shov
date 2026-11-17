@@ -1681,6 +1681,7 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 @media (prefers-reduced-motion:reduce){.skc.skan .skls{animation:none}}
 /* 17.11 Андрей «справа накладка»: в склейках длинная подпись («чистая маржа панели») переносится на вторую строку, а не наезжает на соседнюю «на 1 заказ» */
 .skc .kpi span{white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+.akpn .pnq{margin-top:10px;padding:8px 10px 10px;border-radius:12px;background:var(--fill2);box-shadow:none}
 
 /* 17.11 блок «Заказы | Выкупы» как на главной приложения ВБ (d_zch.js) */
 .zch{margin-bottom:10px}
@@ -2323,7 +2324,7 @@ function vAk(){const rows=akRows();let h=fresh(1);
   const i30=PI(30);
   for(const {t,L} of rows){const q30=sum(t.o&&t.o.q,i30);
     h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="akp"><b class="num">${rub2(t.pr.f)}</b><span class="num">наша цена · скидка ${t.pr.d}%</span></div></div></button>
-      <div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div><div style="margin-top:4px">`;
+      ${(pb=>pb?`<div class="akpn">${pb}</div>`:`<div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div>`)(panBlock(t))}<div style="margin-top:4px">`;   /* 17.11 Андрей (кадр «Акции»): «вместо этого блока панель блок такой же короткий и сроки менять» — строка «По панели» как в листе товара (неделя | 2 недели | месяц); нет панели — прежний график заказов */
     for(const a of L)h+=`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
       <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">'+(a.nw?'вошли, ВБ отметит':'участвуем')+'</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
     h+='</div></div>'}
@@ -3669,7 +3670,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='unfz'){unfz();render(true)}
   else if(a==='cols')openCols(ds.id);
   else if(a==='ref')openRef();
-  else if(a==='pnp'){S.pnp=ds.k;redraw()}
+  else if(a==='pnp'){S.pnp=ds.k;if(SHS.length)redraw();else{freeze();render(true)}}   // 17.11: переключатель панели есть и в «Акциях» (главный экран, не лист)
   else if(a==='rkdm'){S.rkdm=ds.k;redraw()}
   else if(a==='dtx'){const X=S.dtx||(S.dtx=new Set());if(X.has(ds.k))X.delete(ds.k);else X.add(ds.k);redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
@@ -3835,14 +3836,14 @@ function zchBlock(){const Z=K.zch;if(!Z||!Z.o)return '';
   const td=new Date(D.today+'T12:00:00'),d0=new Date(td);d0.setDate(td.getDate()-Z.wd);
   const sum=dd?z.t.reduce((a,b)=>a+b,0):z.ws,qn=dd?z.tq.reduce((a,b)=>a+b,0):z.wn,ps=dd?z.ys:z.ps,pn=dd?z.yn:z.pn;
   const pill=(a,b,u)=>{const d=a-b;if(!b&&!d)return '';const up=d>=0;return `<span class="zpl ${up?'up':'dn'} num">${up?'▲':'▼'} ${f0(Math.abs(d))}${u}${b?' · '+Math.round(Math.abs(100*d/b))+'%':''}</span>`};
-  const hd=dd?`${td.getDate()} ${ZMS[td.getMonth()]}`:`Неделя с ${d0.getDate()} ${ZMS[d0.getMonth()]}`;
-  const cmpT=dd?'по сравнению со вчера к '+Z.hm:'по сравнению с прошлой неделей к '+ZWD[Z.wd]+' '+Z.hm;
-  const n=dd?24:7,A=dd?z.t:z.w,AQ=dd?z.tq:z.wq,B=dd?z.y:z.pw,BQ=dd?z.yq:z.pwq,nowI=dd?+Z.hm.slice(0,2):Z.wd,bl=dd?'вчера':'прошлая неделя';
+  const hd=dd?`${td.getDate()} ${ZMS[td.getMonth()]}`:`${d0.getDate()}${d0.getMonth()===td.getMonth()?'':' '+ZMS[d0.getMonth()]} — ${td.getDate()} ${ZMS[td.getMonth()]}`;
+  const cmpT=dd?'по сравнению со вчера к '+Z.hm:'по сравнению с прошлыми 7 днями к '+Z.hm;
+  const n=dd?24:7,A=dd?z.t:z.w,AQ=dd?z.tq:z.wq,B=dd?z.y:z.pw,BQ=dd?z.yq:z.pwq,nowI=dd?+Z.hm.slice(0,2):Z.wd,bl=dd?'вчера':'неделей раньше',wl=i=>ZWD[((Z.w0==null?0:Z.w0)+i)%7];
   const mx=Math.max(1,...A,...B),st=mx>=3e5?1e5:mx>=12e4?5e4:mx>=6e4?2e4:mx>=24e3?1e4:mx>=12e3?5e3:mx>=6e3?2e3:1e3,top=Math.ceil(mx/st/2)*st*2;
-  const ht=v=>v>0?Math.max(2,100*v/top).toFixed(1):0,per=i=>dd?i+':00–'+(i+1)+':00':ZWD[i];
+  const ht=v=>v>0?Math.max(2,100*v/top).toFixed(1):0,per=i=>dd?i+':00–'+(i+1)+':00':wl(i);
   const rdT=i=>`<b>${per(i)}</b> · ${i>nowI?'ещё не наступил':`сегодня <b>${rub(A[i])}</b>, ${f0(AQ[i])} шт`} · ${bl} ${rub(B[i])}, ${f0(BQ[i])} шт`;
   let cols='';for(let i=0;i<n;i++){const fut=i>nowI,a=A[i],b=B[i],col=a>=b?'var(--good)':'var(--bad)';
-    cols+=`<button type="button" class="zc${i===nowI?' sel':''}" data-i="${i}" data-r="${esc(rdT(i))}"><div class="zb">${fut||!a?'':`<i style="height:${ht(a)}%;background:${col}"></i>`}${b?`<i class="g" style="height:${ht(b)}%"></i>`:''}</div><span>${dd?i+':00':ZWD[i]}</span></button>`}
+    cols+=`<button type="button" class="zc${i===nowI?' sel':''}" data-i="${i}" data-r="${esc(rdT(i))}"><div class="zb">${fut||!a?'':`<i style="height:${ht(a)}%;background:${col}"></i>`}${b?`<i class="g" style="height:${ht(b)}%"></i>`:''}</div><span>${dd?i+':00':wl(i)}</span></button>`}
   const ax=[top,top/2,0].map(v=>`<div class="zy" style="bottom:${(100*v/top).toFixed(1)}%"><span class="num">${v?f0(v):'0'}</span></div>`).join('');
   setTimeout(zchScroll,0);
   return `<div class="card zch"><div class="hrw" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],m,'sm')}</div>
