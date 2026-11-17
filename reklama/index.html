@@ -1407,6 +1407,7 @@ table.zon tr:last-child td{font-weight:700}
 @keyframes mfr{from{opacity:0;transform:scale(.7)}60%{opacity:1;transform:scale(1.08)}to{transform:none}}
 :root[data-lite="1"] .mbtn .mbf{transition:none}:root[data-lite="1"] .mbtn .mbf::after,:root[data-lite="1"] .plb .mwait i,:root[data-lite="1"] .plb .mwt,:root[data-lite="1"] .plb .mfresh{animation:none}
 @media (prefers-reduced-motion:reduce){.mbtn .mbf{transition:none}.mbtn .mbf::after,.plb .mwait i,.plb .mwt,.plb .mfresh{animation:none}}
+.fr td small.mhm{display:block;text-align:center;margin-top:2px;font-size:10px;color:var(--ink3);font-weight:600;line-height:1}
 
 /* 15.11 Андрей «неудобно с этими стрелками, размашисто всё»: лист «Столбцы» компактный — ручка ⠿ вместо стрелок, строки ниже, пояснение в одну строку, переключатель меньше */
 .colr{gap:10px;padding:7px 0}
@@ -2889,7 +2890,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   function dH(){return !dn?'':days.slice(1).map(i=>`<th class="dh">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join('')}
   const ncol=1+fc.filter(k=>k!=='dn').length+(dn?days.length-1:0);
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
-    const dC=!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return mxCell(c,p,FR.tm===days[k+1])}).join('');
+    const dC=!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return FR.tm===days[k+1]?mxCell(c,p,true):'<td>'+cellIn(c,p)+(c?`<small class="num mhm">${c.src==='w'?'среднее':esc(c.hm||'')}</small>`:'')+'</td>'}).join('');   /* 17.11 Андрей «под датой писать во сколько было» — время замера под каждым прошлым днём, как у сегодняшнего */
     h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button></div></td>`
       +fc.map(k=>k==='p'?`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>\u0001`:k==='dn'?'\u0002':k==='b'?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:k==='f'?`<td class="num">${e.f?kr(e.f):'—'}</td>`:k==='v'?`<td class="num">${e.a.v?f0(e.a.v):'—'}</td>`:k==='c'?`<td class="num">${e.a.c?f0(e.a.c):'—'}</td>`:k==='ctr'?`<td class="num">${e.a.v?pc(100*e.a.c/e.a.v):'—'}</td>`:k==='cpc'?`<td class="num">${e.a.c?rub2(e.a.s/e.a.c):'—'}</td>`:k==='s'?`<td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td>`:k==='a'?`<td class="num">${e.a.a?f0(e.a.a):'—'}</td>`:k==='o'?`<td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td>`:k==='cpo'?`<td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`:'').join('').replace('\u0001',dC).replace('\u0002',fc.includes('p')?'':dC)+'</tr>'
       +(op?klRow(e.t,id,nm,ncol):'')}
@@ -4093,17 +4094,17 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
    кабинета (K.bal): счёт, баланс, бонусы — показываем все, где больше нуля, с остатком у каждого; новое незнакомое поле с деньгами тоже видно строкой.
    Сторож (worker.do_deposit, do_create) пока принимает только счёт (0) и баланс (1): бонусы (у ВБ это источник 3) видны, но выбрать их нельзя.
    Научится сторож — поставить DEP_BONUS=true, больше ничего менять не надо */
-const DEP_BONUS=true;   // 17.11 Андрей «у Марплы был выбор, даже если не было денег показывал»: сторож принимает бонусы (3), все три источника видны всегда
+const DEP_BONUS=false;
 const depHave=(b,src)=>src===0?(b.balance||0):src===3?(b.bonus||0):(b.net||0);
 const depName=src=>src===0?'счёте':src===3?'бонусном счёте':'балансе';
 function depSrc(b){b=b||{};const cb=(Array.isArray(b.cashbacks)?b.cashbacks:[]).reduce((z,x)=>z+(+(x&&x.sum)||0),0),X=[];
-  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
+  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);L=L.filter(x=>x.s>0||(!any&&x.v<2));   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
   if(cb>0)X.push(['Кэшбэк ВБ',cb]);for(const k in b)if(!['balance','net','bonus','currency','cashbacks'].includes(k)&&typeof b[k]==='number'&&b[k]>0)X.push(['Ещё у ВБ («'+k+'»)',b[k]]);
   return {L,X,any}}
 const depFirst=(b,mt)=>{const L=depSrc(b).L.filter(x=>x.ok);return (L.find(x=>x.s>=mt)||L.find(x=>x.s>0)||{v:(b.balance||0)>=mt?0:1}).v};
 function depHtml(b,src){const z=depSrc(b);
   return `<div class="fld"><span>Откуда</span><div class="srcs">${z.L.map(x=>`<button class="srcb press" type="button" ${x.ok?`data-src="${x.v}" aria-pressed="${x.v===src}"`:'disabled'}><i></i><b>${x.n}</b>${x.ok?'':'<small>пополнять ими сервис пока не умеет</small>'}<span class="num">${rub(x.s)}</span></button>`).join('')}</div>
-    ${z.any?'':'<div class="note w">По последним данным на счёте, балансе и бонусах пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
+    ${z.any?'':'<div class="note w">По последним данным на счёте и балансе пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
 function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.minTopUp||100000)/100;let src=depFirst(b,mt),st=r.st!==9,sm=String(mt);
   sheet(()=>({t:'Пополнить бюджет',s:esc(r.name),h:`<label class="fld"><span>Сумма, ₽ · не меньше ${f0(mt)}</span><input class="inp num" id="dv" inputmode="numeric" value="${esc(sm)}"></label>
      <div class="chips">${[1,2,3,5].map(x=>`<button class="chip press" type="button" data-dv="${x*1000}">${x} 000</button>`).join('')}</div>
