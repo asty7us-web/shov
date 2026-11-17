@@ -1397,6 +1397,19 @@ table.zon tr:last-child td{font-weight:700}
 .zasf .zsl{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mut,var(--ink));white-space:nowrap}
 .zasf .zsl span{opacity:.75}
 .zasf .ssel{height:34px;max-width:none;font-size:14px;font-weight:600}
+/* 17.11 «Где показ»: переключатели Поиск / Полки (лист actZony), как у Марплы */
+.ztgs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ztg{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.25));background:transparent;color:inherit;font:inherit;cursor:pointer}
+.ztg>i{flex:none;width:38px;height:22px;border-radius:11px;background:rgba(127,127,127,.35);position:relative;transition:background .2s}
+.ztg>i::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.ztg.on>i{background:var(--acc,#3b82f6)}.ztg.on>i::after{transform:translateX(16px)}
+.ztg span{display:flex;flex-direction:column;min-width:0}.ztg b{font-size:15px}.ztg small{font-size:12px;opacity:.7}
+.rkupd .lnk:first-of-type{margin-left:auto}.rkupd .lnk+.lnk{margin-left:6px}
+
+/* 17.11 Андрей: кампания стоит и сама не запустится — работающие плитки зелёные, но приглушены */
+.ctg.dim .ctt.on,.ctg.dim .ctt.mar{opacity:.5;filter:saturate(.55)}
+.ctg.dim .ctt.on .l i,.ctg.dim .ctt.mar .l i{box-shadow:none}
+.rncmp{display:grid;gap:3px;padding:12px 14px;border-radius:14px;background:var(--card2,rgba(127,127,127,.08));margin-top:10px}.rncmp small{opacity:.65;font-size:12px}.rncmp small+b{margin-bottom:6px}.rncmp b{font-size:15px;word-break:break-word}.rncmp #rnn{color:var(--acc,#3b82f6);margin-bottom:0}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -3363,6 +3376,7 @@ function prcSwap(v){S.prd=v;const b=$('#sbody .prc[data-prc]'),t=b&&TOV[b.datase
    настроек: подпись, значение крупно, нажатие — изменить. Прежних четырёх кнопок сверху и блока «Настройки сейчас» внизу больше нет.
    «если какой то штук работает светился» — то, что работает само, подсвечено: своё (и лимит ВБ) — зелёным с точкой, то, что ведёт Марпла, — синим с подписью
    «Марпла»; остаток бюджета красный, когда пусто или мало */
+/* 17.11 Андрей: «если РК на паузе мной или тобой и не встанет сама — зелёное оставить, но чуть приглушить; если по графику — так же горит»: .ctg.dim, когда кампания стоит и сама не запустится (rkSt.w=0) */
 function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourGr(r),st=rkSt(r),lk=UPR?'':' nolk',td=rkAgg(r,nm,[T]),key=r.id+'|'+nm,run9=r.st===9;
   const mb=(m.bid||[]).find(z=>z.zona==='search')||(m.bid||[])[0],own=!!(b&&b.mode&&b.mode!=='off'&&b.src==='svoi'),srch=!!(e.b&&(e.b.search!=null||e.b.combined!=null));
   /* плитка: l подпись, v значение, sub строка под ним, act действие, on: 'o' работает своё | 'm' ведёт Марпла | '' не работает, em — кто ведёт */
@@ -3372,6 +3386,7 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   /* 14.11 Андрей 08:10: «ставка писать на минимуме не надо просто мин ставка такая то заметнее» — под ставкой отдельной строкой «мин. ставка N ₽»,
      жирно цветом акцента; ставка равна минимуму — та же строка, без слов «на минимуме» */
   let h=til('Ставка',bv.length?bv.map(v=>f2(v/100)).join(' / ')+' ₽':'—',(r.pay==='cpm'?'за 1000 показов':'за клик')+(mt?`<b class="ctmin"><span class="sep"> · </span>мин. ставка ${mt}</b>`:''),'bid')   /* «·» виден только без стилей (текст листа читают тесты и сосед): строкой ниже его прячет a_css_n.css */
+    +(typeof zonyMozhno==='function'&&zonyMozhno(r)?til('Где показ',zonyTxt(['search','recommendations'].filter(p=>(r.pl||[]).includes(p))),'поиск / полки — переключить','zony'):'')   /* 17.11 Андрей: переключение «Поиск / Полки», как в Марпле */
     +til('Остаток бюджета',r.bud==null?'—':rub(r.bud),low?(r.bud<=0?'пусто — пополнить':'мало — пополнить'):'пополнить','dep','','',low?' low':'');
   h+=ol&&ol.on?til('Лимит дня',f0(ol.sum)+' ₽',spent+(m.lim?' · и лимит Марплы '+f0(m.lim.max)+' ₽':''),'lim','o')
     :r.lw&&r.lw.on?til('Лимит дня',f0(r.lw.sum)+' ₽',spent,'lim','o','ВБ'):m.lim?til('Лимит дня',f0(m.lim.max)+' ₽',spent,'lim','m'):til('Лимит дня','нет',spent,'lim');
@@ -3386,8 +3401,8 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   /* 15.11 Андрей «не настроено автопополнение»: в Каб 1 пополняет наш wb_rk_popolnenie (каждые 5 мин идущие РК, остаток ≤ 205 ₽ → +1000) — плитка показывает его */
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):S.kab==='kab1'?til('Автопополнение','+1 000 ₽','когда остаток 205 ₽ и меньше','adinfo','o'):til('Автопополнение','нет','пополняется вручную','adinfo');
   return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button>${r.st===11&&st.w?`<button class="ctgo pz press${lk}" type="button" data-act="st" data-to="stop" data-rk="${key}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Остановить</button>`:''}</div>
-    <div class="ctg">${h}</div>${lcLine(r.id)}
-    <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button></div>`}
+    <div class="ctg${r.st!==9&&!st.w?' dim':''}">${h}</div>${lcLine(r.id)}
+    <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button><button class="lnk press${lk}" type="button" data-act="rename" data-rk="${key}">✎ Название</button></div>`}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
   if(typeof shMark==='function')shMark('rk',id,nm);   // 14.11: обновление страницы возвращает в этот лист
   sheet(()=>rkBody(+id,nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openRk(ctx[j][0],ctx[j][1],ctx)}:null)}
@@ -3583,7 +3598,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='pickprod')pickProd();
   else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}
   else if(a==='sklx'){S.sklOp=S.sklOp||new Set();const k=String(ds.imt);if(S.sklOp.has(k))S.sklOp.delete(k);else{S.sklOp.add(k);S.sklAn=k}render(true)}   // 15.11 Андрей: товары склейки свёрнуты, стрелка справа — раскрыть   // 14.11: «На паузе · N ›» — раскрыть / свернуть
-  else if(a==='st')actStatus(+rk[0],rk[1],ds.to);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
+  else if(a==='st')actStatus(+rk[0],rk[1],ds.to);else if(a==='bid')actBid(+rk[0],rk[1]);else if(a==='zony')actZony(+rk[0],rk[1]);else if(a==='rename')actRename(+rk[0],rk[1]);else if(a==='dep')actDep(+rk[0],rk[1]);else if(a==='lim')actLim(+rk[0],rk[1]);
   else if(a==='price')actPrice(+ds.nm);else if(a==='note'||a==='notes')openNotes(+ds.nm||0,+ds.cid||0);else if(a==='create')actCreate(+ds.nm);
   else if(a==='minus')actMinus(kk[0],kk[1],kk.slice(2).join('|'));else if(a==='klbid')actKlBid(kk[0],kk[1],kk.slice(2).join('|'));
   else if(a==='perenos')actPerenos();else if(a==='bidder')actBidder(+rk[0],rk[1]);else if(a==='gr')actGr(+rk[0],rk[1]);
@@ -4006,7 +4021,7 @@ const RUNW={status:['Меняю статус кампании в кабинет�
   minus:['Меняю минус-фразы кампании','обычно до полминуты',45],klbid:['Ставлю ставку запроса','обычно до полминуты',45],grafik:['Сохраняю график показа','обычно до полминуты',45],bidder:['Сохраняю настройки биддера','обычно до полминуты',45],
   grtpl:['Сохраняю шаблон часов','несколько секунд',30],nst:['Сохраняю настройки уведомлений','несколько секунд',30],rkref:['Перечитываю кампанию из ВБ','обычно 5–20 секунд',40],mesto:['Снимаю место в выдаче ВБ','обычно до минуты',90],
   mesta:['Запускаю замер мест','ответ за несколько секунд, сам замер — около 20 минут в фоне',45],refresh_fast:['Собираю свежие данные из ВБ','около двух минут',200],refresh_full:['Собираю все данные заново','15–30 минут, страницу можно закрыть',2100],
-  bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240]};
+  bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240],zony:['Меняю места показа в ВБ','обычно до 20 секунд',60],rename:['Меняю название в ВБ','обычно до 10 секунд',45]};
 /* 14.11 Андрей (08:10): «сторож там не пиши» — на странице слова «сторож» нет: «Выполняется», «сервис», «ответ сервиса» */
 const runW=c=>RUNW[c.k==='refresh'?'refresh_'+(c.mode==='full'?'full':'fast'):c.k]||['Выполняю команду','обычно до полминуты',45];
 const mmss=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -4019,7 +4034,7 @@ const runSteps=(st,bad)=>'<div class="rsteps">'+['Отправлено','Вып�
 const runProg=st=>runSteps(st)+'<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">'+(st?'Выполняется…':'Отправляю команду…')+'</b><small id="runsub"></small></div></div>';
 const RUNPROG=runProg(0);
 const RUNNM={_ptr:'Страница обновлена',status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
-  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы'};
+  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы',zony:'Места показа',rename:'Название кампании'};
 /* итог команды вверху экрана: k — g (готово) / b (отказ) / w (сторож молчит); нажатие убирает */
 function runRes(cmd,k,msg){let w=$('#runres');if(!w){w=document.createElement('div');w.id='runres';w.className='runres';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w)}
   const r=RK[cmd.cid],t=cmd.nm&&TOV[cmd.nm],sub=r?r.name:t?t.art:'',el=document.createElement('button');el.type='button';el.className='rres '+k;
@@ -4169,6 +4184,25 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
         $('#bnew').textContent=isFinite(v)?kop(k):'—';$('#berr').textContent=!isFinite(v)?'':mn!=null&&k<mn?'Ниже минимума ВБ ('+kop(mn)+').':!ok?'Ставка вне допустимых границ ВБ.':k>cur*3&&cur?'Внимание: больше прежней в '+f1(k/cur)+' раза.':'';$('#okBtn').disabled=!ok||k===cur};
        $('#bv').oninput=up;up();$('#okBtn').onclick=()=>run({k:'bid',cid:id,nm:+nm,pl,kop:Math.round(numv('bv')*100),was:cur})}}},true);
   SEGCB.bidpl=v=>{pl=v;redraw()}}
+/* 17.11 Андрей (кадр Марплы «Поиск / Полки»): «сделай такое же переключение по зонам + также чтоб менять название рк». По справке ВБ места показа
+   меняются только у кампаний за показы с ручной ставкой (статусы 4, 9, 11) — сторож do_zony; название — в любой момент, до 100 знаков (do_rename) */
+const zonyMozhno=r=>r&&r.pay==='cpm'&&!(r.pl||[]).includes('combined')&&[4,9,11].includes(r.st);
+const zonyTxt=L=>L.length?L.map(p=>p==='search'?'поиск':'полки').join(' + '):'—';
+function actZony(id,nm){if(!need())return;const r=RK[id],e=(r.nm[nm]||{}),b=e.b||{},was=['search','recommendations'].filter(p=>(r.pl||[]).includes(p));let on=new Set(was);
+  sheet(()=>{const nw=['search','recommendations'].filter(p=>on.has(p)),same=nw.join()===was.join();
+    const sw=(p,l,s)=>`<button class="ztg press${on.has(p)?' on':''}" type="button" data-zp="${p}" aria-pressed="${on.has(p)}"><i aria-hidden="true"></i><span><b>${l}</b><small>${s}</small></span></button>`;
+    return {t:'Где показывать',s:esc(r.name),h:`<div class="ztgs">${sw('search','Поиск',b.search!=null?'ставка '+kop(b.search):'в выдаче по запросам')}${sw('recommendations','Полки',b.recommendations!=null?'ставка '+kop(b.recommendations):'рекомендации и карточки товаров')}</div>
+     <div class="cmp"><div><small>Было</small><b>${zonyTxt(was)}</b></div><div class="ar">→</div><div><small>Станет</small><b>${zonyTxt(nw)}</b></div></div>
+     ${!nw.length?'<div class="note w">Оставьте хотя бы одно место.</div>':''}${on.has('search')&&!was.includes('search')?'<div class="note">После включения поиска проверьте ставку поиска в плитке «Ставка».</div>':''}
+     <div id="berr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Сохранить')}${secHist('zony',id)}`,
+     after:()=>{document.querySelectorAll('[data-zp]').forEach(x=>x.onclick=()=>{const p=x.dataset.zp;if(on.has(p))on.delete(p);else on.add(p);redraw()});
+       const ok=$('#okBtn');ok.disabled=!nw.length||same;ok.onclick=()=>run({k:'zony',cid:id,nm:+nm,s:on.has('search')?1:0,r:on.has('recommendations')?1:0})}}},true)}
+function actRename(id,nm){if(!need())return;const r=RK[id];let v=r.name||'';
+  sheet(()=>({t:'Название кампании',s:esc(r.name),h:`<label class="fld"><span>Новое название · до 100 знаков</span><input class="inp" id="rnv" maxlength="100" autocomplete="off" value="${esc(v)}"></label>
+     <div class="rncmp"><small>Было</small><b>${esc(r.name)}</b><small>Станет</small><b id="rnn">${esc(v)}</b></div>
+     <div id="berr" class="bad" style="font-size:13px;min-height:18px;margin-top:8px"></div>${RUNBOX('Переименовать')}${secHist('rename',id)}`,
+     after:()=>{const i=$('#rnv'),up=()=>{v=i.value;const t=v.split(/\s+/).filter(Boolean).join(' ');$('#rnn').textContent=t||'—';$('#berr').textContent=t.length>100?'Длиннее 100 знаков — ВБ не примет.':'';$('#okBtn').disabled=!t||t===r.name||t.length>100};
+       i.oninput=up;up();$('#okBtn').onclick=()=>run({k:'rename',cid:id,nm:+nm,name:v.split(/\s+/).filter(Boolean).join(' ')})}}),true)}
 /* 14.11 Андрей: «если появляется бонусный счёт или если есть — подвяжи, мало ли появятся там». Источники пополнения — из ответа ВБ о деньгах рекламного
    кабинета (K.bal): счёт, баланс, бонусы — показываем все, где больше нуля, с остатком у каждого; новое незнакомое поле с деньгами тоже видно строкой.
    Сторож (worker.do_deposit, do_create) пока принимает только счёт (0) и баланс (1): бонусы (у ВБ это источник 3) видны, но выбрать их нельзя.
@@ -4202,7 +4236,7 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
    пауза) — «История изменений» этого раздела: только записи журнала (D.ist) этой кампании (цена — этого товара) и этого вида. Автоматика берётся там,
    где она и есть изменение раздела (лимит дня: «выбран — пауза», «новый день — запуск»); ежечасные «час показа — запуск» графика не берём — их сотни;
    «перенос из Марплы» относим к разделу по тому, что перенесли (лимит / график) */
-const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0]};
+const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0],zony:[/места показа/i,0],rename:[/название/i,0]};
 /* 16.11 Андрей «историю можно в Марпле всю взять и по всем»: записи журнала Марплы (kto «Марпла», mar_log.py) — в каждом разделе, и её автоматика:
    биддер Марплы — одна запись за день («ставка — биддер Марплы, смен N»), лимит дня Марплы — пауза/запуск */
 function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto||z.kto==='Марпла')&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
