@@ -1411,6 +1411,10 @@ table.zon tr:last-child td{font-weight:700}
 .ctg.dim .ctt.on .l i,.ctg.dim .ctt.mar .l i{box-shadow:none}
 .rncmp{display:grid;gap:3px;padding:12px 14px;border-radius:14px;background:var(--card2,rgba(127,127,127,.08));margin-top:10px}.rncmp small{opacity:.65;font-size:12px}.rncmp small+b{margin-bottom:6px}.rncmp b{font-size:15px;word-break:break-word}.rncmp #rnn{color:var(--acc,#3b82f6);margin-bottom:0}
 
+/* 17.11 тип ставки и место показа под строкой «Сегодня» листа кампании */
+.rktyp{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.rktyp .pill{display:inline-flex;align-items:center;width:auto;margin:0;height:24px;padding:0 9px;font-size:12.5px;border-radius:8px;white-space:nowrap}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -3402,7 +3406,7 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):S.kab==='kab1'?til('Автопополнение','+1 000 ₽','когда остаток 205 ₽ и меньше','adinfo','o'):til('Автопополнение','нет','пополняется вручную','adinfo');
   return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button>${r.st===11&&st.w?`<button class="ctgo pz press${lk}" type="button" data-act="st" data-to="stop" data-rk="${key}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Остановить</button>`:''}</div>
     <div class="ctg${r.st!==9&&!st.w?' dim':''}">${h}</div>${lcLine(r.id)}
-    <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button><button class="lnk press${lk}" type="button" data-act="rename" data-rk="${key}">✎ Название</button></div>`}
+    <div class="rkupd"><span class="muted num">${r.ref?'кампания перечитана в '+esc(r.ref)+' МСК':'данные на '+(D.at?D.at.slice(11,16)+' МСК':'—')}</span><button class="lnk press${lk}" type="button" id="rkrefb" data-act="rkref" data-rk="${key}"${RKREF===r.id?' disabled':''}>${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ Обновить'}</button><button class="lnk press${lk}" type="button" data-act="rename" data-rk="${key}">✎ Название</button><button class="lnk press" type="button" data-act="rkcopy" data-rk="${key}">⧉ Копировать</button></div>`}
 function openRk(id,nm,ctx){const r0=RK[id];if(!r0)return;nm=String(nm||Object.keys(r0.nm)[0]);const i=ctx?ctx.findIndex(x=>+x[0]===+id&&String(x[1])===nm):-1;
   if(typeof shMark==='function')shMark('rk',id,nm);   // 14.11: обновление страницы возвращает в этот лист
   sheet(()=>rkBody(+id,nm,i>=0?ctx:null,i),false,i>=0&&ctx.length>1?{i,n:ctx.length,to:j=>openRk(ctx[j][0],ctx[j][1],ctx)}:null)}
@@ -3453,6 +3457,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК',f0(a.q),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
     ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('CPO',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','цена заказа: расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''} · <button class="lnk tdlb${TDLH?' on':''}" type="button" data-tdlh>история<i>›</i></button></div>`+tdlHist(nm,id);
+  /* 17.11 Андрей «перенеси» (стрелка с кадра): тип ставки и место показа — из шапки листа под строку «Сегодня» */
+  h+=`<div class="rktyp"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span></div>`;
   if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
   /* гистограмма: высота — то, что выбрано (ДРР к заказам товара, ДРР к заказам с этой рекламы или расход), над столбиком одна цифра; день с тратами без заказов —
@@ -3500,7 +3506,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?(t.oh?`<button type="button" class="osbt rkos press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}" aria-label="Остатки по дням">${ostPills(t)}<span class="pill osar">${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips">${t?(t.oh?`<button type="button" class="osbt rkos press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}" aria-label="Остатки по дням">${ostPills(t)}<span class="pill osar">${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
@@ -3593,6 +3599,10 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='frcopy'){const t=[...FR.sel].join(String.fromCharCode(10)),ok=()=>toast(FR.sel.size>1?'Скопировал фраз: '+FR.sel.size:'Скопировал: «'+t.slice(0,60)+'»'),
       old=()=>{const x=document.createElement('textarea');x.value=t;x.setAttribute('readonly','');x.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(x);x.select();let r=false;try{r=document.execCommand('copy')}catch(_){}x.remove();r?ok():toast('Не получилось скопировать')};
     if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,old);else old()}
+  /* 17.11 Андрей «чтобы можно было копировать название рк» — без пароля, тем же способом, что фразы */
+  else if(a==='rkcopy'){const r=RK[+rk[0]],t=String(r&&r.name||''),ok=()=>toast('Скопировал: «'+t.slice(0,60)+'»'),
+      old=()=>{const x=document.createElement('textarea');x.value=t;x.setAttribute('readonly','');x.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(x);x.select();let q=false;try{q=document.execCommand('copy')}catch(_){}x.remove();q?ok():toast('Не получилось скопировать')};
+    if(!t)toast('Нет названия');else if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,old);else old()}
   else if(a==='frminus')actFrMinus(fk[0],fk[1],ds.add==='1');
   else if(a==='frmes'){const z=frShown(fk[0],fk[1]);frMeasure(fk[0],fk[1],FR.sel.size?[...FR.sel]:z.show.map(e=>e.t))}
   else if(a==='pickprod')pickProd();
