@@ -2617,9 +2617,20 @@ function sklRows(){let L=sklGroups();if(FRZ.skl){const m=new Map(L.map(g=>[g.imt
   return L.sort((x,y)=>(nul(x)-nul(y))||sg*(key(y)-key(x))||y.a.or-x.a.or)}
 const sklName=g=>esc(g.top.art)+` <span class="muted" style="font-weight:500">и ещё ${g.L.length-1}</span>`;
 const CHEV='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink3);flex:none"><path d="m9 6 6 6-6 6"/></svg>';
+/* 17.11 Андрей (кадр «Склейки»): «тут кнопку именно те товары, у которых нет склейки» — переключатель «Склейки | Без склейки» под пояснением;
+   «Без склейки» — товары кабинета, которые на ВБ ни с кем не склеены (нет imt или в склейке один), таблицей со столбцами раскрытой склейки, кроме «доли» */
+TBL.skb={sort:['or',-1],cols:TBL.skc.cols.filter(c=>c.k!=='sh')};
+function sklSolo(){const ix=PI(),n=new Map();for(const t of K.tov)if(t.imt)n.set(t.imt,(n.get(t.imt)||0)+1);
+  const q=(S.q||'').toLowerCase();
+  return K.tov.filter(t=>!(t.imt&&n.get(t.imt)>1)&&(!q||(t.art+' '+t.nm).toLowerCase().includes(q))).map(t=>({t,a:pAgg(t,ix),w:wrk(t).length,sh:null}))}
 function vSkl(){const rows=sklRows();let h=fresh();
   /* 14.11 Андрей: «снизу куча текста непонятного» — пояснение одной строкой; «Остаток: склады ВБ · свой склад» под каждой карточкой убрано — это теперь название столбца */
   h+='<div class="muted tnote" style="margin:0 3px 2px">Реклама одной карточки ведёт на всю склейку — здесь реклама и заказы всех её товаров вместе.</div>';
+  const solo=sklSolo();
+  h+=`<div style="margin:8px 0 2px">${seg('sklb',[['','Склейки · '+rows.length],['1','Без склейки · '+solo.length]],S.sklb||'','sm')}</div>`;
+  if(S.sklb==='1'){h+=`<div class="hrw"><h3>Товары без склейки · ${solo.length}</h3>${tblBtn('skb')}</div>`;
+    if(!solo.length)return h+'<div class="empty"><b>Таких товаров нет</b>Все товары кабинета в склейках — или поиск ничего не нашёл.</div>';
+    return h+tblHtml('skb',tblSort('skb',solo),x=>`data-nm="${x.t.nm}"`)+'<div class="muted tnote">Нажмите на столбец — сортировка, на товар — его лист.</div>'}
   h+=`<div class="hrw"><h3>Склейки · ${rows.length}</h3>${frzChip('skl')}${seg('skls',[['s','Реклама'],['drr','ДРР'],['or','Заказы']].map(([v,l])=>[v,v===S.skls?l+(S.sklInv?' ↑':' ↓'):l]),S.skls,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Склеек нет</b>В этом кабинете нет склеек из двух и больше товаров — или поиск ничего не нашёл.</div>';
   h+='<div class="list">';
@@ -2648,7 +2659,12 @@ function openSkl(imt){if(typeof shMark==='function')shMark('skl',imt);sheet(()=>
   const L=g.L.map(x=>x.t),ix=PI(),pp=PP(),a=g.a,b=pp?sklAgg(L,pp):null,td=sklAgg(L,[T]),memo={},gm=i=>memo[i]||(memo[i]=sklAgg(L,[i]));
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   /* 14.11: как в листе товара — четыре главные цифры kpi4 вместо плашек «ДРР вчера» и «ДРР период» («Вчера» — кнопкой периода) */
-  let h=perSeg()+kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
+  /* 17.11 Андрей «это склейка, там нет по панели данных, как внутри РК» — тот же блок «По панели», что в листе товара (panBlock), по всем товарам склейки:
+     продажи — сумма, ДРР и маржа — среднее по продажам, ср. чек — продажи ÷ штуки (штуки = продажи ÷ ср. чек товара) */
+  const spn={};for(const k of ['w','w2','m']){let s0=0,dd=0,ds=0,mm=0,ms=0,qq=0,qs=0;
+    for(const t of L){const z=t.pan&&t.pan[k];if(!z||!(z[0]>0))continue;s0+=z[0];if(z[1]!=null){dd+=z[0]*z[1];ds+=z[0]}if(z[2]!=null){mm+=z[0]*z[2];ms+=z[0]}if(z[3]>0){qq+=z[0]/z[3];qs+=z[0]}}
+    if(s0>0)spn[k]=[s0,ds?dd/ds:null,ms?mm/ms:null,qq?qs/qq:null]}
+  let h=perSeg()+panBlock({pan:spn},a)+kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
   /* 17.11 Андрей «товары склейки должны быть вверху сразу после первого блока данных» */
   const rows=tblSort('skl',g.L);
   h+=`<div class="hrw"><h3>Товары склейки · ${g.L.length}</h3>${tblBtn('skl')}</div>`+tblHtml('skl',rows,x=>`data-nm2="${x.t.nm}"`);
@@ -2700,7 +2716,7 @@ function vBl(){const b=K.bally;
 const TABS=['tov','rk','skl','ceny','ak','bl','esh'];
 const LITE=document.documentElement.dataset.lite==='1';   // компьютер без видеокарты (ставит скрипт в шапке) — без переходов и без движения сцены
 if(!TABS.includes(S.tab))S.tab='tov';
-S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s')};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
+S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s')};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.sklb=RS.get('sklb','');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
 let PEND=null,LASTA=null,SWK=null;
 
 /* плавная смена: разделы и листы уезжают вбок; на слабом компьютере, на широком экране и при «меньше движения» — сразу */
@@ -4491,6 +4507,7 @@ function onSeg0(id,v){
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
   else if(id==='skls'){S.sklInv=(v===S.skls)?!S.sklInv:false;S.skls=v;RS.set('skls',v);unfz();render(true)}   // 17.11 Андрей: повторное нажатие — обратный порядок
+  else if(id==='sklb'){S.sklb=v;RS.set('sklb',v);unfz();render(true)}   // 17.11 Андрей: «Склейки | Без склейки»
   else if(id==='blf'){S.blf=v;sync();render(true)}
   else if(id==='sort'){S.sort=v;S.dir=-1;RS.set('sort',v);RS.set('dir',-1);unfz();render(true)}
   else if(id==='chm'){S.chm=v;RS.set('chm',v);if(SHS.length)redraw();else render(true)}
