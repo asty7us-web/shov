@@ -1390,6 +1390,14 @@ table.zon tr:last-child td{font-weight:700}
 /* 17.11 Андрей «мин ставку чуть по-другому покрась»: кнопки от мин. ставки — своим цветом */
 .chip.mnc{background:color-mix(in srgb,#34c77b 16%,transparent);color:#34c77b;box-shadow:inset 0 0 0 1px color-mix(in srgb,#34c77b 45%,transparent)}
 
+/* 17.11 фильтр «Вхолостую» над таблицей кампаний — одна строка постоянной высоты */
+.zasf{display:flex;align-items:center;gap:8px;margin-top:14px;height:36px;overflow-x:auto;scrollbar-width:none}
+.zasf::-webkit-scrollbar{display:none}
+.zasf .chip{flex:none;height:34px}
+.zasf .zsl{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mut,var(--ink));white-space:nowrap}
+.zasf .zsl span{opacity:.75}
+.zasf .ssel{height:34px;max-width:none;font-size:14px;font-weight:600}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -3082,8 +3090,10 @@ function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('za
     /* 14.11 Андрей: «по переносу там написано — я не понял, чем грозит» — простыми словами: что это, что нажатие ничего не меняет, подробности в листе */
     const kn=n=>n+' '+(n%10===1&&n%100!==11?'кампании':'кампаний');
     h+=`<button class="note w press" type="button" data-act="perenos" style="display:block;width:100%;text-align:left;cursor:pointer;font:inherit;font-size:13px;line-height:1.4;border:0">Сейчас ${nl?'лимит трат на день у '+kn(nl):''}${nl&&ng?' и ':''}${ng?'включение по часам у '+kn(ng):''} держит Марпла. Чтобы они работали и без её подписки, такие же можно завести у себя. В Марпле при этом ничего не выключится. <b>Что произойдёт и чем это может помешать ›</b><br><span style="opacity:.8">Это нажатие ничего не меняет — откроется объяснение и список.</span></button>`}
-  if(S.rkf.vn==='zas')h+=`<div class="note zasp" style="margin:10px 0 0"><div style="font-size:13px;margin-bottom:6px">Сколько дней подряд кампания почти не тратит</div>${seg('zasd',ZDN.map(d=>[d,d+' дн']),zasD(),'sm')}<div style="font-size:13px;margin:10px 0 6px">Тратит в среднем не больше, ₽ в день</div>${seg('zasl',ZLM.map(v=>[v,f0(v)+' ₽']),+S.rkf.zl||100,'sm')}<div class="muted" style="font-size:12px;margin-top:8px">Кампания идёт или на паузе, но показы были в большинстве этих дней. Правленные вчера и сегодня не попадают. Отчёт в 02:00 по-прежнему считает 5 дней и 100 ₽.</div></div>`;
-  h+=`<div class="hrw"><h3>${S.rkf.vn?VNL[S.rkf.vn]:'Кампании'} · ${rows.length}</h3>${S.rkf.vn?'<button class="chip press" type="button" data-act="rkvn" data-v="">✕ показать все</button>':''}${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
+  /* 17.11 Андрей «аккуратный фильтр таких и его настройки без сдвигов»: строка фильтра всегда на месте (над «Кампании»), дни и ₽ — выпадающими списками; включение не раздвигает страницу */
+  if(K){const zo=S.rkf.vn==='zas';
+    h+=`<div class="zasf"><button class="chip press" type="button" data-act="rkvn" data-v="zas" aria-pressed="${zo}">Вхолостую · <span class="num">${VN.zas.size}</span></button><label class="zsl"><span>дней</span><select class="ssel zsel" data-k="zasd" aria-label="Сколько дней подряд почти не тратит">${ZDN.map(d=>`<option value="${d}"${d===zasD()?' selected':''}>${d}</option>`).join('')}</select></label><label class="zsl"><span>до, ₽/день</span><select class="ssel zsel" data-k="zasl" aria-label="Тратит в день не больше">${ZLM.map(v=>`<option value="${v}"${v===(+S.rkf.zl||100)?' selected':''}>${f0(v)}</option>`).join('')}</select></label></div>`}
+  h+=`<div class="hrw"><h3>${S.rkf.vn?VNL[S.rkf.vn]:'Кампании'} · ${rows.length}</h3>${S.rkf.vn&&S.rkf.vn!=='zas'?'<button class="chip press" type="button" data-act="rkvn" data-v="">✕ показать все</button>':''}${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или выберите «Все».</div>';
   if(S.rkv==='table')return h+tblHtml('rk',rows,x=>`data-rk="${x.r.id}|${x.nm}" data-ctx="rk"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2 в шапке). «Столбцы» — выбрать оба столбца сортировки, скрыть лишние, переставить. ${ostAt()}</div>`;
   return h+'<div class="list">'+rows.slice(0,150).map(rkCard).join('')+'</div>'+(rows.length>150?`<div class="muted" style="margin:8px 4px;font-size:13px">Показаны первые 150 из ${rows.length} — уточните поиском.</div>`:'')}
@@ -3403,6 +3413,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   const bx=(lab,z,pz,pl)=>z?drrBox(lab,z.v,pz&&pz.v,pl,'расход '+kr(z.x.s)+' ₽ · заказы товара '+f0(z.oq)+' шт<br>с этой рекламы '+f0(z.x.q)+' шт'):'';
   /* 14.11 Андрей: «в товаре над рк отдельный смену периода или нет вот как на главной он в шапке» — период первой строкой листа, прилипает к верху */
   let h=perSeg();
+  /* 17.11 Андрей «куда делась кнопочка по ФБС, был динамику» — плашки FBO/FBS в шапке листа кампании тоже открывают «остатки по дням», как в листе товара */
+  if(t&&t.oh&&S.ostOpen)h+=ostHist(t);
   /* 14.11 Андрей: «открыть товар не надо отдельно банер просто значек должен быть у рк и по нему попадаеш в товар», «переход из рекла комап в товар в сервисе
      не на вб надо кнопку рядом» — голубой полосы «Товар кампании … Открыть товар» больше нет: фото товара стоит первым в листе (нажатие — лист товара),
      и такая же кнопка с фото «Товар здесь» — в ряду ссылок рядом с кабинетом ВБ и карточкой на ВБ. Состояние, ставка и бюджет — в блоке управления ниже */
@@ -3473,7 +3485,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
-  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
+  const rkHead=`<span class="rkchips"><span class="pill wb">${rkType(r)}</span><span class="pill">${rkZone(r)}</span>${t?(t.oh?`<button type="button" class="osbt rkos press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}" aria-label="Остатки по дням">${ostPills(t)}<span class="pill osar">${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)):''}<a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
   return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
@@ -3644,6 +3656,10 @@ function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=(D.ist||[]).filter(z=>z
   return `<div class="hrw" style="margin-top:22px"><h3>История изменений</h3></div>`+(L.length?'<div>'+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'
     +(L.length>6?`<button class="btn press" type="button" data-act="chgmore" data-key="${key}" style="width:100%;margin-top:10px">${open?'Свернуть':'Развернуть, ещё '+Math.min(L.length-6,24)}</button>`:'')
     +(open&&L.length>30?`<div class="muted tnote">Последние 30 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений по товару пока не было.</div>')}
+/* 17.11 фильтр «Вхолостую»: дни и потолок трат выбираются списком */
+document.addEventListener('change',e=>{const x=e.target;if(!x||!x.classList||!x.classList.contains('zsel'))return;const v=+x.value;
+  if(x.dataset.k==='zasd'){S.rkf.zd=v;RS.set('zasd',v)}else{S.rkf.zl=v;RS.set('zasl',v)}unfz();render(true)});
+
 /* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
    Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
    трата за час = разница замеров. Режимы: «В среднем за день» (последние до 7 полных дней) | «Сегодня». Три самых дорогих часа — красным.
