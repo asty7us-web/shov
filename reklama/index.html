@@ -2581,11 +2581,14 @@ function dayTbl(kind,ix,get,spl){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['
   for(const k of DFL){let s=null;for(const r of R)if(r[k]!=null)s=(s||0)+r[k];tt[k]=s}
   const tot=Object.assign(dRow(-1,tt),{tot:1,lab:ix.length?dm(D.days[ix[0]])+'–'+dm(D.days[ix[ix.length-1]]):''});
   let rows=[tot].concat(tblSort(id,R));
-  if(spl){const ex=S.dtx||(S.dtx=new Set()),ss=L=>{const o={p:{},r:{}};for(const s of L)if(s)for(const w of ['p','r'])for(const k in s[w])if(s[w][k]!=null)o[w][k]=(o[w][k]||0)+s[w][k];return o};
-    rows=rows.flatMap(x=>{const s=x.tot?ss(ix.map(spl)):spl(x.i);if(!s)return [x];const k=kind+'|'+(x.tot?-1:x.i);x.ex=k;x.op=ex.has(k);
-      return x.op?[x,Object.assign(dRow(x.i,s.p),{sub:'поиск',tot:x.tot}),Object.assign(dRow(x.i,s.r),{sub:'рекомендации',tot:x.tot})]:[x]})}
+  /* 17.11 Андрей «зоны показа в каждой рк … как в марпла при нажатии на каждую дату»: spl(i) → {p: поиск, k: каталог, r: рекомендации} — зоны ВБ (zony.py);
+     у spl.real нет — прежний расчёт (поиск по кластерам, рекомендации — остальное) */
+  const ZL=[['p','поиск'],['k','каталог'],['r','рекомендации']];
+  if(spl){const ex=S.dtx||(S.dtx=new Set()),ss=L=>{const o={};for(const s of L)if(s)for(const w in s){o[w]=o[w]||{};for(const k in s[w])if(s[w][k]!=null)o[w][k]=(o[w][k]||0)+s[w][k]}return o};
+    rows=rows.flatMap(x=>{const s=x.tot?ss(ix.map(spl)):spl(x.i);if(!s||!ZL.some(([w])=>s[w]))return [x];const k=kind+'|'+(x.tot?-1:x.i);x.ex=k;x.op=ex.has(k);
+      return x.op?[x].concat(ZL.filter(([w])=>s[w]&&(!spl.real||s[w].v||s[w].s)).map(([w,l])=>Object.assign(dRow(x.i,s[w]),{sub:l,tot:x.tot}))):[x]})}
   const at=x=>x.sub?'class="dsub"':(x.ex?`data-act="dtx" data-k="${x.ex}" `:'')+(x.tot?'class="dtot'+(x.ex?' dex':'')+'"':'class="dtr'+(x.ex?' dex':'')+'"');
-  return `<div class="hrw dth"><h3>По дням таблицей</h3>${tblBtn(id)}</div>`+tblHtml(id,rows,at,'dtw')+(spl?'<div class="muted tnote">Нажмите на день — раскроется: поиск и рекомендации. Поиск — по статистике запросов, рекомендации — остальное, по расчёту.</div>':'')}
+  return `<div class="hrw dth"><h3>По дням таблицей</h3>${tblBtn(id)}</div>`+tblHtml(id,rows,at,'dtw')+(spl?'<div class="muted tnote">'+(spl.real?'Нажмите на день — раскроется по зонам показа: поиск, каталог, рекомендации. Цифры ВБ.'+(spl.note||''):'Нажмите на день — раскроется: поиск и рекомендации. Поиск — по статистике запросов, рекомендации — остальное, по расчёту.')+'</div>':'')}
 
 /* ───────── Склейки ───────── */
 function sklAgg(L,ix){const a={s:0,or:0,oq:0,q:0,c:0,v:0,sp:0,a:0};for(const t of L){const x=pAgg(t,ix);a.s+=x.s;a.or+=x.or;a.oq+=x.oq;a.q+=x.q;a.c+=x.c;a.v+=x.v;a.sp+=x.sp;a.a+=x.a}   // a — корзины (для таблицы по дням)
@@ -3416,9 +3419,12 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
     return {p,r:{v:m('v'),c:m('c'),a:m('a'),q:m('q'),s:Math.round(100*m('s'))/100}}}:null;   // 15.11: смешанная кампания — день раскрывается на поиск и рекомендации
+  /* 17.11 Андрей «зоны показа в каждой рк … как в марпла»: есть зоны ВБ (r.zn, Каб 1) — день раскрывается на поиск / каталог / рекомендации у любой кампании */
+  let spz=spl;if(r.zn){const Z=r.zn;spz=i=>{const o={};for(const w in Z){const z=Z[w],v=k=>z[k]?z[k][i]||0:0;o[w]={v:v('v'),c:v('c'),a:v('a'),q:v('q'),s:v('s'),sp:v('sp')}}return o};spz.real=1;
+    const nn=Object.values(r.nm||{}).filter(x=>x.d&&x.d.s&&x.d.s.some(v=>v>0)).length;if(nn>1)spz.note=' Зоны — по всей кампании, в ней '+nn+' товара с тратами.'}
   /* 17.11 Андрей «расход по часам куда-то сюда» (на «По дням»): траты по часам — сразу под графиком по дням, до таблицы (d_chasy.js) */
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
-  if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spl);
+  if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spz);
   /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
   if(t)h+=rkCenaAk(t,nm,cx);
   if(t)h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
