@@ -1423,6 +1423,16 @@ table.zon tr:last-child td{font-weight:700}
 .ctlt.gr>i{background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}.ctlt.gr b{color:var(--acc)}
 .ctlt>span:first-of-type{color:var(--ink3)}.ctlt b{font-weight:700}.ctlt .ar{margin-left:auto;color:var(--ink3)}
 .ctlt[aria-expanded=true]+.cts{margin-top:8px}
+/* 17.11 ставка кластера прямо в таблице фраз (kbEdit) и одной ставкой для отмеченных (actFrBid) */
+.fr td.kbt{min-width:74px}
+.fr .kbe{display:flex;flex-direction:column;gap:4px;align-items:stretch;min-width:84px}
+.fr .kbe .kbi{width:84px;box-sizing:border-box;border:1.5px solid var(--acc);border-radius:8px;padding:5px 6px;font:inherit;font-weight:650;font-size:16px;background:var(--bg);color:var(--ink);text-align:center}
+.fr .kbe .kbb{display:flex;gap:4px}
+.fr .kbe .kbb button{flex:1;border:0;border-radius:8px;padding:5px 0;font:inherit;font-weight:700;cursor:pointer}
+.fr .kbe .kbok{background:var(--acc);color:#fff}.fr .kbe .kbx{background:var(--fill);color:var(--ink2)}
+.fr .kbe small{font-size:10.5px;color:var(--ink3);white-space:nowrap}
+.kbl{display:flex;flex-direction:column;gap:6px;margin:10px 0;max-height:40vh;overflow:auto}
+.kbl>div{display:flex;justify-content:space-between;gap:10px;font-size:14px}.kbl>div span{min-width:0;overflow-wrap:anywhere}.kbl>div b{white-space:nowrap}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -2938,7 +2948,9 @@ const FRL={q:'Фраза',p:'Сейчас',b:'Ставка, ₽',f:'Частот
 /* 15.11 Андрей «почему CTR пустой в запросах» → «да»: у кампаний за клик ВБ по запросам показов не отдаёт (normquery/stats — только клики, траты,
    заказы; проверено на «тетрис» 14.11) — столбцы «Показы» и CTR там не рисуем */
 function frCols(man,cpc){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.keys(FRL).map(k=>({k,l:FRL[k],def:k==='a'?0:1,t:k==='ctr'?'клик из показа, %':k==='b'?'только у кампаний за показы с ручной ставкой':k==='dn'?'места по дням за неделю':''}))};
-  return tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man)&&!(cpc&&(k==='v'||k==='ctr')))}
+  const L=tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man)&&!(cpc&&(k==='v'||k==='ctr')));
+  /* 17.11 Андрей «очень сложно и долго, как в Марпле сделай управление» — ставка всегда сразу за фразой (была в конце, за датами, на телефоне не видно) */
+  return L.includes('b')?['b'].concat(L.filter(k=>k!=='b')):L}
 function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
@@ -2957,16 +2969,16 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   function dH(){return !dn?'':days.slice(1).map(i=>`<th class="dh">${D.days[i].slice(8,10)}.${D.days[i].slice(5,7)}</th>`).join('')}
   const ncol=1+fc.filter(k=>k!=='dn').length+(dn?days.length-1:0);
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
-    const dC=!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return FR.tm===days[k+1]?mxCell(c,p,true):'<td>'+cellIn(c,p)+(c?`<small class="num mhm">${c.src==='w'?'среднее':c.nt?c.nf+' из '+c.nt:esc(c.hm||'')}</small>`:'')+'</td>'}).join('');   /* 17.11 Андрей «под датой писать во сколько было» — время замера под каждым прошлым днём, как у сегодняшнего */
+    const dC=!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return FR.tm===days[k+1]?mxCell(c,p,true):'<td>'+cellIn(c,p)+(c?`<small class="num mhm">${c.src==='w'?'среднее':c.nt?(c.nf?esc(c.hm)+'<br>':'')+c.nf+' из '+c.nt:esc(c.hm||'')}</small>`:'')+'</td>'}).join('');   /* 17.11 Андрей (кадр, обвёл даты): «тут время погрузки надо» — у прошлого дня под местом и время, когда нашли (16:28–19:24), и «N из M» */ /* 17.11 Андрей «под датой писать во сколько было» — время замера под каждым прошлым днём, как у сегодняшнего */
     h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button></div></td>`
-      +fc.map(k=>k==='p'?`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>\u0001`:k==='dn'?'\u0002':k==='b'?`<td><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-act="klbid" data-k="${id}|${nm}|${esc(e.t)}" title="Поставить свою ставку кластеру">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:k==='f'?`<td class="num">${e.f?kr(e.f):'—'}</td>`:k==='v'?`<td class="num">${e.a.v?f0(e.a.v):'—'}</td>`:k==='c'?`<td class="num">${e.a.c?f0(e.a.c):'—'}</td>`:k==='ctr'?`<td class="num">${e.a.v?pc(100*e.a.c/e.a.v):'—'}</td>`:k==='cpc'?`<td class="num">${e.a.c?rub2(e.a.s/e.a.c):'—'}</td>`:k==='s'?`<td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td>`:k==='a'?`<td class="num">${e.a.a?f0(e.a.a):'—'}</td>`:k==='o'?`<td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td>`:k==='cpo'?`<td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`:'').join('').replace('\u0001',dC).replace('\u0002',fc.includes('p')?'':dC)+'</tr>'
+      +fc.map(k=>k==='p'?`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>\u0001`:k==='dn'?'\u0002':k==='b'?`<td class="kbt"><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-kbe="${id}|${nm}|${esc(e.t)}" title="Нажмите — впишите ставку прямо здесь">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:k==='f'?`<td class="num">${e.f?kr(e.f):'—'}</td>`:k==='v'?`<td class="num">${e.a.v?f0(e.a.v):'—'}</td>`:k==='c'?`<td class="num">${e.a.c?f0(e.a.c):'—'}</td>`:k==='ctr'?`<td class="num">${e.a.v?pc(100*e.a.c/e.a.v):'—'}</td>`:k==='cpc'?`<td class="num">${e.a.c?rub2(e.a.s/e.a.c):'—'}</td>`:k==='s'?`<td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td>`:k==='a'?`<td class="num">${e.a.a?f0(e.a.a):'—'}</td>`:k==='o'?`<td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td>`:k==='cpo'?`<td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`:'').join('').replace('\u0001',dC).replace('\u0002',fc.includes('p')?'':dC)+'</tr>'
       +(op?klRow(e.t,id,nm,ncol):'')}
   h+='</tbody></table></div>';
   if(L.length>show.length)h+=`<div style="margin-top:8px"><button class="btn gray sm press" type="button" data-act="frmore" style="width:100%">Показать все ${L.length}</button></div>`;
   /* 14.11 Андрей: «снизу куча текста не понятного» — под таблицей одна строка: что нажимается (было семь предложений) */
   h+=`<div class="muted tnote">Нажмите: на кластер — из каких запросов он состоит, на место — снимется заново, на дату — время замеров, на столбец — сортировка. Частота — запросов за месяц.${rr&&rr.pay==='cpc'?' Кампания за клик: исключать фразы ВБ здесь не даёт.':''}${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
   const lk=UPR?'':' nolk',n=FR.sel.size,xs=[...FR.sel].filter(q=>(all.find(e=>e.t===q)||{}).xall).length;
-  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button><button class="btn sm gray press" type="button" data-act="frcopy" style="flex:none" title="Скопировать выбранные фразы">Скопировать</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}${mBtn('Прожать выбранные · '+n,lk,1)}</div>`
+  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button><button class="btn sm gray press" type="button" data-act="frcopy" style="flex:none" title="Скопировать выбранные фразы">Скопировать</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}${man?`<button class="btn sm press${lk}" type="button" data-act="frbid" style="flex:none">Ставка · ${n}</button>`:''}${mBtn('Прожать выбранные · '+n,lk,1)}</div>`
     :`<div class="acts" style="grid-template-columns:1fr">${mBtn('Прожать места · '+show.length+' '+(show.length%10===1&&show.length%100!==11?'фраза':show.length%10>=2&&show.length%10<=4&&(show.length%100<12||show.length%100>14)?'фразы':'фраз'),lk)}</div>`;
   if(K.jam){const sk=new Set(all.map(e=>e.t.trim().toLowerCase())),nj=jamRows(nm).filter(q=>!sk.has(q.t.trim().toLowerCase())).length;
     if(nj)h+=`<div class="hrw"><h3>Остальные запросы товара · ${nj}</h3><button class="lnk" type="button" data-act="frjam">${FR.jam?'свернуть':'показать'}</button></div>`
@@ -3059,6 +3071,29 @@ function actFrMinus(id,nm,add){if(!need())return;const all=frAll(id,nm)||[],qs=[
     h:`<div class="cmp"><div><small>Сейчас</small><b style="font-size:16px;white-space:normal">${add?'показываются':'исключены'}</b></div><div class="ar">→</div><div><small>Станет</small><b style="font-size:16px;white-space:normal">${add?'в минус-фразах':'показываются'}</b></div></div>
      <div class="note">${qs.map(esc).join(' · ')}</div><div class="note">${add?'Товар перестанет показываться по этим фразам в этой кампании. Остальные минус-фразы останутся как есть.':'Фразы уберутся из минус-фраз кампании, показы по ним вернутся.'}</div>${RUNBOX(add?'Исключить':'Вернуть',add?'red':'')}`,
     after:()=>{$('#okBtn').onclick=()=>run({k:'minus',cid:+id,nm:+nm,qs,add:!!add},(r,away)=>{FR.sel=new Set();if(!away)back()})}}),true)}
+/* 17.11 Андрей «очень сложно и долго уходишь куда-то непонятно, вот как в Марпле сделай управление» (ставка кластера была только в листе фразы,
+   два перехода): нажал на ставку в таблице — поле ввода прямо в ячейке, под ним «было …»; ✓ или Enter — ставка уходит сторожу (klbid), ответ ВБ —
+   плашкой внизу, строка обновляется сама; ✕ или Esc — как было. Отмеченным галочками фразам — одна ставка кнопкой «Ставка · N» (actFrBid) */
+function kbEdit(btn){if(!need())return;const td=btn.parentNode,kk=btn.dataset.kbe.split('|'),id=kk[0],nm=kk[1],q=kk.slice(2).join('|'),r=RK[id];
+  const z=(((KL.kab[S.kab]||{}).k||{})[id+'|'+nm]||{q:[]}).q.find(x=>x.t===q),cur=z&&z.b,base=r&&((r.nm[nm]||{b:{}}).b||{}).search,old=td.innerHTML;
+  td.innerHTML=`<div class="kbe"><input class="kbi num" inputmode="numeric" enterkeyhint="done" value="${Math.round((cur||base||0)/100)}" aria-label="Ставка, ₽ за 1000 показов"><div class="kbb"><button class="kbok press" type="button" aria-label="Поставить">✓</button><button class="kbx press" type="button" aria-label="Отмена">✕</button></div><small class="num">было ${cur?kop(cur):'общая '+kop(base)}</small></div>`;
+  const inp=td.querySelector('.kbi'),undo=()=>{td.innerHTML=old},go=async()=>{const v=Math.round(+String(inp.value).replace(/\s/g,'').replace(',','.'));
+    if(!(isFinite(v)&&v>=1&&v<=29999)){toast('Ставка — целым числом рублей, от 1 до 29 999');inp.focus();return}
+    if(cur&&v*100===cur){undo();return}
+    td.innerHTML=`<div class="kbe"><span class="sp"></span><small class="num">${cur?f0(cur/100):'общая'} → ${f0(v)} ₽</small></div>`;
+    try{const x=await quick({k:'klbid',cid:+id,nm:+nm,q,kop:v*100,was:cur||null},null,90000);pmemSave(x.patch,RUNNM.klbid||'');toast('✓ '+(x.msg||'Ставка поставлена'));redraw()}catch(e){undo()}};
+  td.querySelector('.kbok').onclick=go;td.querySelector('.kbx').onclick=undo;
+  inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}else if(e.key==='Escape')undo()};
+  setTimeout(()=>{inp.focus();inp.select()},30)}
+function actFrBid(id,nm){if(!need())return;const all=frAll(id,nm)||[],qs=[...FR.sel].filter(q=>all.some(x=>x.t===q&&!x.xall)),r=RK[id],base=((r.nm[nm]||{b:{}}).b||{}).search;
+  if(!qs.length){toast('Среди выбранных нет фраз с показами');return}
+  const curOf=q=>(all.find(x=>x.t===q)||{}).b||0;
+  sheet(()=>({t:qs.length===1?'Ставка фразы':'Ставка для '+qs.length+' фраз',s:esc(r.name),h:`<label class="fld"><span>Ставка, ₽ за 1000 показов · общая ставка кампании ${kop(base)}</span><input class="inp num" id="kv" inputmode="numeric" value="${Math.round((curOf(qs[0])||base||0)/100)}"></label>
+     <div class="kbl">${qs.map(q=>`<div><span>${esc(q)}</span><b class="num">${curOf(q)?f0(curOf(q)/100):'общая'} → <i class="kbn">—</i></b></div>`).join('')}</div>
+     <div id="runbox"><div class="acts" style="grid-template-columns:1fr 1fr 1.4fr"><button class="btn gray press" type="button" data-act="back">Отмена</button><button class="btn gray press" type="button" id="kdel"${qs.some(curOf)?'':' disabled'}>Снять свои</button><button class="btn press" type="button" id="okBtn">Поставить</button></div></div>`,
+    after:()=>{const up=()=>{const v=numv('kv'),ok=isFinite(v)&&v>=1&&v<=29999;document.querySelectorAll('.kbn').forEach(x=>x.textContent=ok?f0(Math.round(v)):'—');$('#okBtn').disabled=!ok};$('#kv').oninput=up;up();
+      const fin=(x,away)=>{FR.sel=new Set();if(!away)back()};
+      $('#okBtn').onclick=()=>run({k:'klbid',cid:+id,nm:+nm,qs,kop:Math.round(numv('kv'))*100},fin);$('#kdel').onclick=()=>run({k:'klbid',cid:+id,nm:+nm,qs:qs.filter(curOf),kop:0},fin)}}),true)}
 /* 14.11 Андрей: «нажимаеш на исключения ощущения попадаеш в другой раздел резко» — «Активные / Исключённые / Все» меняют только таблицу: лист не
    перерисовывается, прокрутка остаётся на месте, высота блока не схлопывается (помним самую большую — FR.mh), новое содержимое проявляется плавно.
    Нажатие ловит обработчик в конце файла (раньше, чем общий в e_sheets.js) */
@@ -3627,6 +3662,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
       old=()=>{const x=document.createElement('textarea');x.value=t;x.setAttribute('readonly','');x.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(x);x.select();let q=false;try{q=document.execCommand('copy')}catch(_){}x.remove();q?ok():toast('Не получилось скопировать')};
     if(!t)toast('Нет названия');else if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,old);else old()}
   else if(a==='frminus')actFrMinus(fk[0],fk[1],ds.add==='1');
+  else if(a==='frbid')actFrBid(fk[0],fk[1]);
   else if(a==='frmes'){const z=frShown(fk[0],fk[1]);frMeasure(fk[0],fk[1],FR.sel.size?[...FR.sel]:z.show.map(e=>e.t))}
   else if(a==='pickprod')pickProd();
   else if(a==='allp'){S.openP=+S.openP===+ds.nm?0:+ds.nm;redraw()}
@@ -3657,6 +3693,7 @@ function swapSheet(d){const top=SHS[SHS.length-1];if(!top||!top.nav)return false
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-frf]');if(x){e.stopPropagation();frSwitch(x.dataset.frf)}});
   /* 14.11: состав кластера в таблице фраз — раскрыть / свернуть на месте (klToggle); «Цена по дням» — смена «наша / у покупателя / скидка ВБ» только в своём блоке */
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-klo],[data-klm]');if(x){e.stopPropagation();klToggle(x)}});
+  el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-kbe],.kbe');if(!x)return;e.stopPropagation();if(x.dataset.kbe)kbEdit(x)});
   el.addEventListener('click',e=>{const x=e.target.closest&&e.target.closest('[data-seg="prd"] button');if(x){e.stopPropagation();if(x.getAttribute('aria-pressed')!=='true')prcSwap(x.dataset.v)}});
   el.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('klhow'))KLHOW=e.target.open},true);   // «Что такое кластер» — помним, открыто ли
   /* 15.11: «история ›» в строке «Сегодня» листа кампании — 7 последних записей раскрыть / свернуть на месте */
