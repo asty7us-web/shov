@@ -1387,6 +1387,9 @@ table.zon tr:last-child td{font-weight:700}
 /* 17.11 Андрей «ВБ значок белый — это в РК, а обычный — на сайт»: у «Товар ↗» значок как вверху у «Каб 1» */
 .rkchips a.rklk .rkw.rkw0{background-image:var(--wbi0)}
 
+/* 17.11 Андрей «мин ставку чуть по-другому покрась»: кнопки от мин. ставки — своим цветом */
+.chip.mnc{background:color-mix(in srgb,#34c77b 16%,transparent);color:#34c77b;box-shadow:inset 0 0 0 1px color-mix(in srgb,#34c77b 45%,transparent)}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -4114,8 +4117,8 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
     return {t:'Ставка',s:esc(r.name),h:`${pls.length>1?seg('bidpl',pls.map(p=>[p,PLN[p]||p]),pl,'sm'):''}
      ${mn!=null?`<div class="mnl">мин. ставка <b class="num">${kop(mn)}</b><span>${cpm?'за 1000 показов':'за клик'}${cur<=mn?' · ставка сейчас такая':''}</span></div>`:''}
      <label class="fld"><span>Новая ставка, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ${kop(cur)}</span><input class="inp num" id="bv" inputmode="decimal" value="${f2(cur/100).replace(/\s/g,'')}"></label>
-     ${cur!=null&&!cpm?`<div class="chips">${[30,40,50,60,100].map(k=>`<button class="chip press" type="button" data-bv="${cur+k}">+ ${k<100?'0,'+k:'1 ₽'}</button>`).join('')}</div>`:''}<!-- 15.11 Андрей «Добавь варианты 30 40 50 60 1р + к ставке»: прибавка к ставке сейчас -->
-     <div class="chips">${mn!=null?`<button class="chip press" type="button" data-bv="${mn}">мин. ставка ${kop(mn)}</button><button class="chip press" type="button" data-bv="${mn+(cpm?100:100)}">мин. + 1 ₽</button>`:''}${Object.entries(rc).filter(([k,v])=>v&&RL[k]).map(([k,v])=>`<button class="chip press" type="button" data-bv="${v}" title="Подсказка ВБ"><span class="wbc" aria-hidden="true"></span>${RL[k]} ${kop(v)}</button>`).join('')}</div><!-- 16.11 Андрей «помечай значком такое»: подсказки ставки самого ВБ — со значком ВБ -->
+     ${cur!=null&&!cpm?`<div class="chips">${[30,40,50,60,100].map(k=>`<button class="chip press" type="button" data-bp="${k}">+ ${k<100?'0,'+k:'1 ₽'}</button>`).join('')}</div>`:''}<!-- 15.11 Андрей «Добавь варианты 30 40 50 60 1р + к ставке»: прибавка к ставке сейчас -->
+     <div class="chips">${mn!=null?`<button class="chip press mnc" type="button" data-bv="${mn}">мин. ставка ${kop(mn)}</button><button class="chip press mnc" type="button" data-bv="${mn+(cpm?100:100)}">мин. + 1 ₽</button>`:''}${Object.entries(rc).filter(([k,v])=>v&&RL[k]).map(([k,v])=>`<button class="chip press" type="button" data-bv="${v}" title="Подсказка ВБ"><span class="wbc" aria-hidden="true"></span>${RL[k]} ${kop(v)}</button>`).join('')}</div><!-- 16.11 Андрей «помечай значком такое»: подсказки ставки самого ВБ — со значком ВБ -->
      <div class="cmp"><div><small>Было</small><b class="num">${kop(cur)}</b></div><div class="ar">→</div><div><small>Станет</small><b class="num" id="bnew">${kop(cur)}</b></div></div>
      ${mb?'<div class="note w">Ставку ведёт биддер Марплы — он вернёт свою через несколько минут. Чтобы держалась ваша, выключите его в Марпле.</div>':bdOn(e.bd)&&e.bd.src==='svoi'&&e.bd.mode==='sam'?'<div class="note w">Ставку ведёт наш биддер в режиме «Сам» — при следующем расчёте он может поставить свою.</div>':''}
      ${mn==null?'<div class="note">Минимальная ставка ВБ ещё не собрана — ниже минимума сервис поставить не даст.</div>':''}
@@ -4500,6 +4503,7 @@ document.addEventListener('click',e=>{const c=s=>e.target.closest(s);let x;
   if(x=c('[data-seg] button')){onSeg(x.parentNode.dataset.seg,x.dataset.v);return}
   if(x=c('[data-kab]')){S.kab=x.dataset.kab;RS.set('kab',S.kab);S.kw.cid=0;S.ist.nm=0;S.ist.cid=0;unfz();prep();closeAll();sync();render();return}
   if(x=c('#tabs [data-tab]')){go(x.dataset.tab);if(SHS.length)shSave();return}
+  if(x=c('[data-bp]')){const v=numv('bv');$('#bv').value=f2((isNaN(v)?0:v)+(+x.dataset.bp)/100).replace(/\s/g,'');$('#bv').oninput();return}   // 17.11 Андрей: сколько раз нажал — столько и прибавилось
   if(x=c('[data-bv]')){$('#bv').value=f2(+x.dataset.bv/100).replace(/\s/g,'');$('#bv').oninput();return}
   if(x=c('[data-dv]')){$('#dv').value=x.dataset.dv;$('#dv').oninput();return}
   if(x=c('label.ck')){return}   // галочки таблицы фраз — событие change ниже
