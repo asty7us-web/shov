@@ -1626,6 +1626,8 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 @keyframes skin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .skc.skan .skls{animation:skin .3s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){.skc.skan .skls{animation:none}}
+/* 17.11 Андрей «справа накладка»: в склейках длинная подпись («чистая маржа панели») переносится на вторую строку, а не наезжает на соседнюю «на 1 заказ» */
+.skc .kpi span{white-space:normal;line-height:1.25;overflow-wrap:anywhere}
 
 </style>
 </head>
@@ -2618,7 +2620,7 @@ function vSkl(){const rows=sklRows();let h=fresh();
     h+=`<div class="card skc${op?' skop':''}${an?' skan':''}"><div class="skhw"><button class="skh press" type="button" data-skl="${g.imt}"><div class="ph"${foto(g.top)}></div><div style="min-width:0;flex:1"><div class="nm">${sklName(g)}</div>
         <div class="muted" style="font-size:12.5px;margin-top:2px">${jn(g.L.length+' товаров','реклама идёт на '+g.nw,'заказы на '+kr(a.or)+' ₽, '+f0(a.oq)+' шт','реклама '+kr(a.s)+' ₽')}</div></div></button>
         <button class="skx press" type="button" data-act="sklx" data-imt="${g.imt}" aria-expanded="${op}" aria-label="${op?'Свернуть товары':'Показать товары'}">${CHEV}</button></div>
-      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=0?'':'bad'):''}">${pz&&pz.m!=null&&a.or?kr(a.or*pz.m)+' ₽':'—'}</b><span>маржа заказов</span></div><div><b class="num ${pz&&pz.mr!=null?(pz.mr>=0?'':'bad'):''}">${pz&&pz.mr!=null?kr(pz.mr)+' ₽':'—'}</b><span>чистая маржа панели</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
+      <div class="kpi k4"><div><b class="num ${dcls(a.drr)}">${drrT(a.drr)}</b><span>ДРР склейки</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=0?'':'bad'):''}">${pz&&pz.m!=null&&a.or?kr(a.or*pz.m)+' ₽':'—'}</b><span>маржа заказов</span></div><div><b class="num ${pz&&pz.mr!=null?(pz.mr>=0?'':'bad'):''}">${pz&&pz.mr!=null?kr(pz.mr)+' ₽':'—'}</b><span>чистая маржа</span></div><div><b class="num">${a.cpa==null?'—':f0(a.cpa)+' ₽'}</b><span>на 1 заказ</span></div></div>
       <div class="kpi k4 skpn"><div><b class="num ${pz&&pz.d!=null?dcls(100*pz.d):''}">${pz&&pz.d!=null?pc(100*pz.d):'—'}</b><span>ДРР панели</span></div><div><b class="num ${pz&&pz.m!=null?(pz.m>=.1?'good':pz.m>=0?'warnc':'bad'):''}">${pz&&pz.m!=null?pc(100*pz.m):'—'}</b><span>маржа панели</span></div><div><b class="num">${pz&&pz.s?kr(pz.s)+' ₽':'—'}</b><span>продажи</span></div><div><b class="num">${vk==null?'—':pc(vk)}</b><span>выкуп</span></div></div>
       <div class="muted skpl">${pz?'по панели: '+esc(pz.l):'в панели этих товаров нет'}${vk==null?'':' · выкуп — '+esc(D.pan&&D.pan.ml||'месяц').toLowerCase()}</div>
       <div class="skls"><div class="skbar"><span class="muted">Нажмите на столбец — сортировка</span>${tblBtn('skc')}</div>`
@@ -2630,12 +2632,13 @@ function openSkl(imt){if(typeof shMark==='function')shMark('skl',imt);sheet(()=>
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   /* 14.11: как в листе товара — четыре главные цифры kpi4 вместо плашек «ДРР вчера» и «ДРР период» («Вчера» — кнопкой периода) */
   let h=perSeg()+kpi4({drr:a.drr,pdrr:b&&b.drr,drrk:a.drrk,s:a.s,ps:b&&b.s,q:a.oq,z:a.oq,qd:'на '+kr(a.or)+' ₽ · с рекламы <b>'+f0(a.q)+'</b>'});
+  /* 17.11 Андрей «товары склейки должны быть вверху сразу после первого блока данных» */
+  const rows=tblSort('skl',g.L);
+  h+=`<div class="hrw"><h3>Товары склейки · ${g.L.length}</h3>${tblBtn('skl')}</div>`+tblHtml('skl',rows,x=>`data-nm2="${x.t.nm}"`);
   h+=`<div class="tiles t3" style="margin-top:10px"><div class="tile"><div class="l">Реклама на 1 заказ</div><div class="v num">${a.cpa==null?'—':rub(a.cpa)}</div><div class="d">реклама ÷ все заказы</div></div>
     <div class="tile"><div class="l">Заказы без рекламы</div><div class="v num">${f0(g.bez)} <small>шт</small></div><div class="d">товары, на которые не тратились</div></div>
     <div class="tile"><div class="l">Сегодня</div><div class="v num">${rub(td.s)}</div><div class="d">заказы ${f0(td.oq)} шт</div></div></div>`;
   h+='<div class="hrw"><h3>Склейка по дням: ДРР и заказы</h3></div>'+drrChart(cx,gm)+CHLG+dayTbl('skl',cx,gm);   // 14.11 Андрей 06:40: таблица по дням, как в Марпле
-  const rows=tblSort('skl',g.L);
-  h+=`<div class="hrw"><h3>Товары склейки · ${g.L.length}</h3>${tblBtn('skl')}</div>`+tblHtml('skl',rows,x=>`data-nm2="${x.t.nm}"`);
   const W=[];for(const t of L)for(const r of wrk(t))W.push([r,t.nm]);
   if(W.length)h+=`<div class="hrw"><h3>Работающие кампании склейки · ${W.length}</h3></div><div class="rows" data-rctx="${W.map(z=>z[0].id+'|'+z[1]).join(',')}">`+W.map(z=>rkRow(z[0],z[1],ix,1)).join('')+'</div>';
   return {t:sklName(g),s:jn('склейка',esc(g.top.subj||''),g.L.length+' товаров',esc(K.name)),h}})}
@@ -4090,17 +4093,17 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
    кабинета (K.bal): счёт, баланс, бонусы — показываем все, где больше нуля, с остатком у каждого; новое незнакомое поле с деньгами тоже видно строкой.
    Сторож (worker.do_deposit, do_create) пока принимает только счёт (0) и баланс (1): бонусы (у ВБ это источник 3) видны, но выбрать их нельзя.
    Научится сторож — поставить DEP_BONUS=true, больше ничего менять не надо */
-const DEP_BONUS=false;
+const DEP_BONUS=true;   // 17.11 Андрей «у Марплы был выбор, даже если не было денег показывал»: сторож принимает бонусы (3), все три источника видны всегда
 const depHave=(b,src)=>src===0?(b.balance||0):src===3?(b.bonus||0):(b.net||0);
 const depName=src=>src===0?'счёте':src===3?'бонусном счёте':'балансе';
 function depSrc(b){b=b||{};const cb=(Array.isArray(b.cashbacks)?b.cashbacks:[]).reduce((z,x)=>z+(+(x&&x.sum)||0),0),X=[];
-  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);L=L.filter(x=>x.s>0||(!any&&x.v<2));   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
+  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
   if(cb>0)X.push(['Кэшбэк ВБ',cb]);for(const k in b)if(!['balance','net','bonus','currency','cashbacks'].includes(k)&&typeof b[k]==='number'&&b[k]>0)X.push(['Ещё у ВБ («'+k+'»)',b[k]]);
   return {L,X,any}}
 const depFirst=(b,mt)=>{const L=depSrc(b).L.filter(x=>x.ok);return (L.find(x=>x.s>=mt)||L.find(x=>x.s>0)||{v:(b.balance||0)>=mt?0:1}).v};
 function depHtml(b,src){const z=depSrc(b);
   return `<div class="fld"><span>Откуда</span><div class="srcs">${z.L.map(x=>`<button class="srcb press" type="button" ${x.ok?`data-src="${x.v}" aria-pressed="${x.v===src}"`:'disabled'}><i></i><b>${x.n}</b>${x.ok?'':'<small>пополнять ими сервис пока не умеет</small>'}<span class="num">${rub(x.s)}</span></button>`).join('')}</div>
-    ${z.any?'':'<div class="note w">По последним данным на счёте и балансе пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
+    ${z.any?'':'<div class="note w">По последним данным на счёте, балансе и бонусах пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
 function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.minTopUp||100000)/100;let src=depFirst(b,mt),st=r.st!==9,sm=String(mt);
   sheet(()=>({t:'Пополнить бюджет',s:esc(r.name),h:`<label class="fld"><span>Сумма, ₽ · не меньше ${f0(mt)}</span><input class="inp num" id="dv" inputmode="numeric" value="${esc(sm)}"></label>
      <div class="chips">${[1,2,3,5].map(x=>`<button class="chip press" type="button" data-dv="${x*1000}">${x} 000</button>`).join('')}</div>
