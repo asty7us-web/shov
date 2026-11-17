@@ -3325,8 +3325,11 @@ function rkCtl(r,nm){const e=r.nm[nm]||{},b=e.bd,m=r.mar||{},ol=ourLim(r),g=ourG
   if(g&&g.on){const same=g.h.every(x=>x===g.h[0]);h+=til('График показа',same?(g1(g.h[0])||Math.round(grHours(g)/7)+' ч в день'):grHours(g)+' ч в неделю',(same?'каждый день':'по дням недели')+(m.gr?' · и график Марплы':''),'gr','o')}
   else if(m.gr){const hs=m.gr.h||[];h+=til('График показа',hs.length?(g1(hoursStr(hs))||hs.length+' ч сегодня'):'сегодня показа нет',m.gr.name?'«'+esc(m.gr.name)+'»':'','gr','m')}
   else h+=til('График показа','круглые сутки','включить по часам','gr');
-  if(srch)h+=own?til('Биддер','цель '+b.cel+' место','до '+kop(b.max),'bidder','o',b.mode==='sam'?'свой, сам ставит':'свой, советует')
-    :mb?til('Биддер','цель '+mb.cel+' место','до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
+  /* 17.11 Андрей «факт нужно и внутри»: в плитке рядом с целью — место сейчас по фразе биддера (bdFact, как в блоке «Биддер» ниже) */
+  const nq=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase(),bq=b?(b.q||b.qs||''):'';
+  const fk=(q,bb)=>{const f=typeof bdFact==='function'?bdFact(nm,q,bb):null;return f&&f.n!=null?' · факт '+f.v.replace(/ место$/,''):' · факт —'};
+  if(srch)h+=own?til('Биддер','цель '+b.cel+fk(bq,b),'до '+kop(b.max),'bidder','o',b.mode==='sam'?'свой, сам ставит':'свой, советует')
+    :mb?til('Биддер','цель '+mb.cel+fk(mb.kw||bq,b&&(!mb.kw||nq(bq)===nq(mb.kw))?b:null),'до '+kop(mb.max)+(mb.kw?' · '+esc(mb.kw):''),'bidder','m'):til('Биддер','выключен','включить','bidder');
   /* 15.11 Андрей «не настроено автопополнение»: в Каб 1 пополняет наш wb_rk_popolnenie (каждые 5 мин идущие РК, остаток ≤ 205 ₽ → +1000) — плитка показывает его */
   h+=m.ad?til('Автопополнение','+'+f0(m.ad.add)+' ₽','когда остаток ниже '+f0(m.ad.min)+' ₽','adinfo','m'):S.kab==='kab1'?til('Автопополнение','+1 000 ₽','когда остаток 205 ₽ и меньше','adinfo','o'):til('Автопополнение','нет','пополняется вручную','adinfo');
   return `<div class="cts ${st.c}"><div class="s"><i></i><div><small>Кампания</small><b>${st.t}</b>${pzWhy(r)?`<small class="pzw">${pzWhy(r)}</small>`:''}</div></div><button class="ctgo ${run9?'pz':'go'} press${lk}" type="button" data-act="st" data-rk="${key}"><svg viewBox="0 0 24 24" fill="${run9?'none':'currentColor'}" stroke="currentColor" stroke-width="${run9?3:1.6}" stroke-linecap="round" stroke-linejoin="round">${run9?'<path d="M8.5 6v12M15.5 6v12"/>':'<path d="M8 5.5v13l11-6.5z"/>'}</svg>${run9?'Поставить на паузу':'Запустить'}</button>${r.st===11&&st.w?`<button class="ctgo pz press${lk}" type="button" data-act="st" data-to="stop" data-rk="${key}"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>Остановить</button>`:''}</div>
@@ -3398,12 +3401,12 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
     return {p,r:{v:m('v'),c:m('c'),a:m('a'),q:m('q'),s:Math.round(100*m('s'))/100}}}:null;   // 15.11: смешанная кампания — день раскрывается на поиск и рекомендации
+  /* 17.11 Андрей «расход по часам куда-то сюда» (на «По дням»): траты по часам — сразу под графиком по дням, до таблицы (d_chasy.js) */
+  if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spl);
   /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
   if(t)h+=rkCenaAk(t,nm,cx);
   if(t)h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
-  /* 15.11 Андрей «пики трат по часам … в рекламу сервис» → «Да»: траты по часам — сразу за таблицей по дням (d_chasy.js) */
-  if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
   /* 15.11 Андрей «да» на разбивку по зонам показа (как вкладка «Статистика» Марплы): ВБ зон в статистике кампании не отдаёт — поиск = сумма по запросам
@@ -4094,17 +4097,17 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
    кабинета (K.bal): счёт, баланс, бонусы — показываем все, где больше нуля, с остатком у каждого; новое незнакомое поле с деньгами тоже видно строкой.
    Сторож (worker.do_deposit, do_create) пока принимает только счёт (0) и баланс (1): бонусы (у ВБ это источник 3) видны, но выбрать их нельзя.
    Научится сторож — поставить DEP_BONUS=true, больше ничего менять не надо */
-const DEP_BONUS=false;
+const DEP_BONUS=true;   // 17.11 Андрей «у Марплы был выбор, даже если не было денег показывал»: сторож принимает бонусы (3), все три источника видны всегда
 const depHave=(b,src)=>src===0?(b.balance||0):src===3?(b.bonus||0):(b.net||0);
 const depName=src=>src===0?'счёте':src===3?'бонусном счёте':'балансе';
 function depSrc(b){b=b||{};const cb=(Array.isArray(b.cashbacks)?b.cashbacks:[]).reduce((z,x)=>z+(+(x&&x.sum)||0),0),X=[];
-  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);L=L.filter(x=>x.s>0||(!any&&x.v<2));   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
+  let L=[{v:0,n:'Счёт',s:+b.balance||0,ok:1},{v:1,n:'Баланс',s:+b.net||0,ok:1},{v:3,n:'Бонусы',s:+b.bonus||0,ok:DEP_BONUS}];const any=L.some(x=>x.ok&&x.s>0);   // выбрать нечего — счёт и баланс всё равно показаны: данные могли устареть, сторож перепроверит
   if(cb>0)X.push(['Кэшбэк ВБ',cb]);for(const k in b)if(!['balance','net','bonus','currency','cashbacks'].includes(k)&&typeof b[k]==='number'&&b[k]>0)X.push(['Ещё у ВБ («'+k+'»)',b[k]]);
   return {L,X,any}}
 const depFirst=(b,mt)=>{const L=depSrc(b).L.filter(x=>x.ok);return (L.find(x=>x.s>=mt)||L.find(x=>x.s>0)||{v:(b.balance||0)>=mt?0:1}).v};
 function depHtml(b,src){const z=depSrc(b);
   return `<div class="fld"><span>Откуда</span><div class="srcs">${z.L.map(x=>`<button class="srcb press" type="button" ${x.ok?`data-src="${x.v}" aria-pressed="${x.v===src}"`:'disabled'}><i></i><b>${x.n}</b>${x.ok?'':'<small>пополнять ими сервис пока не умеет</small>'}<span class="num">${rub(x.s)}</span></button>`).join('')}</div>
-    ${z.any?'':'<div class="note w">По последним данным на счёте и балансе пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
+    ${z.any?'':'<div class="note w">По последним данным на счёте, балансе и бонусах пусто — ВБ, скорее всего, откажет.</div>'}${z.X.map(([n,s])=>`<div class="muted num" style="font-size:12.5px;margin-top:6px">${esc(n)}: ${rub(s)}</div>`).join('')}</div>`}
 function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.minTopUp||100000)/100;let src=depFirst(b,mt),st=r.st!==9,sm=String(mt);
   sheet(()=>({t:'Пополнить бюджет',s:esc(r.name),h:`<label class="fld"><span>Сумма, ₽ · не меньше ${f0(mt)}</span><input class="inp num" id="dv" inputmode="numeric" value="${esc(sm)}"></label>
      <div class="chips">${[1,2,3,5].map(x=>`<button class="chip press" type="button" data-dv="${x*1000}">${x} 000</button>`).join('')}</div>
