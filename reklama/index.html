@@ -3609,7 +3609,7 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
   const tl=top.length?'Дороже всего: '+top.map(h=>`<b>${h} ч</b> — ${rub(V[h])}`).join(', ')+'. ':'';
   const pod=m==='t'?`Сегодня по часам${z.tp?' (копим не с полуночи — часы до первого замера пустые)':''}. `:`В среднем за день, ${n} ${n===1?'день':n<5?'дня':'дней'} с ${z.d0?dm(z.d0):"—"}${n<5?' — мало, судить рано':''}. `;
   return hd(`<span class="pnqs">${bt('a','В среднем',n>0)}${bt('t','Сегодня',hasT)}</span>`)
-    +`<div class="ch ax" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
+    +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
     +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа. Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`+zakBlock(z,m,n)}
 
 /* ── 15.11 Андрей («К»): «надо снизу тогда по заказам и корзинам гистограмму ниже» — тот же режим (в среднем / сегодня), переключатель Заказы | Корзины.
@@ -3629,7 +3629,7 @@ function zakBlock(z,m,n){const isT=m==='t',A=isT?z.ta:z.a,O=isT?z.to:z.o;
   const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
   const tl=top.length?'Больше всего: '+top.map(h=>`<b>${h} ч</b> — ${f1(V[h])}`).join(', ')+'. ':'Пока ни одного — судить рано. ';
   return `<div class="hrw"><h3>Заказы и корзины по часам</h3><span class="pnqs">${bt('o','Заказы')}${bt('a','Корзины')}</span></div>`
-    +`<div class="ch ax" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:12)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
+    +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:12)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
     +`<div class="muted tnote">${isT?'Сегодня':'В среднем за день'}, с этой рекламы. ${tl}Зелёным — три лучших часа: их держать в графике показа. Час примерный.</div>`}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
