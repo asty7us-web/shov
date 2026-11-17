@@ -1416,6 +1416,13 @@ table.zon tr:last-child td{font-weight:700}
 .rktyp .pill{display:inline-flex;align-items:center;width:auto;margin:0;height:24px;padding:0 9px;font-size:12.5px;border-radius:8px;white-space:nowrap}
 /* 17.11 Андрей «артикул надо и копировать его при нажатии»: кнопки копирования в шапке листа кампании — как плашки ссылок */
 .shh .tt span.rkchips button.rkcp{display:inline-flex;align-items:center;height:21px;padding:0 7px;font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--card2,var(--fill));border:0;box-shadow:0 0 0 .5px var(--line);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 17.11 Андрей «скрытно, свёрнуто»: строка-переключатель блока управления наверху листа кампании */
+.ctlt{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:16px;background:var(--card2);color:var(--ink);font:600 15px/1.2 var(--fb,inherit);text-align:left;cursor:pointer}
+.ctlt>i{width:10px;height:10px;border-radius:50%;background:var(--ink3);flex:none}
+.ctlt.on>i{background:var(--good);box-shadow:0 0 0 4px var(--good-soft)}.ctlt.on b{color:var(--good)}
+.ctlt.gr>i{background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}.ctlt.gr b{color:var(--acc)}
+.ctlt>span:first-of-type{color:var(--ink3)}.ctlt b{font-weight:700}.ctlt .ar{margin-left:auto;color:var(--ink3)}
+.ctlt[aria-expanded=true]+.cts{margin-top:8px}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -3229,7 +3236,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
     const pz=pn.m&&pn.m[2]!=null?[pn.m,D.pan&&D.pan.ml]:pn.w&&pn.w[2]!=null?[pn.w,D.pan&&D.pan.wl]:null,mg=pz?pz[0][2]:null;
     const m2=pl=>mg==null||!pl||!P?null:(mg*P-(P-pl))/pl;let anyM=false;
     /* 14.11 (четвёртый заход): плиток «Цена / ДРР / Маржа» здесь больше нет — маржа и ДРР в блоке «Показатели» выше, цена — в «Цене по дням» */
-    h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div><div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`
+    h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`+akStat(aks)
       +prcBlock(t,nm,cx)
       +`<div class="akl">`
       +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
@@ -3246,9 +3253,15 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
    пришлась на кампании, что сейчас на паузе), иначе это те же числа второй раз подряд. На паузе — одна свёрнутая строка «На паузе · N ›»: нажатие
    раскрывает список, «свернуть» — обратно */
 /* 15.11: цены и акции товара в листе кампании — те же «Цена по дням» и список акций, что в листе товара (нажатие на акцию — как там) */
+/* 17.11 Андрей (кадр: «БЕЗ АКЦИИ», а ниже «Чёрная пятница: максимум заказов — участвуем»): «Должно сразу актуальным быть» — товар уже вошёл в акцию,
+   которая начнётся позже, — строка не «без акции», а «входит в акцию с ДД.ММ — …» (зелёная); идёт акция — как было «В АКЦИИ — …» */
+function akStat(aks){const inA=aks.filter(x=>x.uch&&x.s<=D.today),fu=aks.filter(x=>x.uch&&x.s>D.today).sort((x,y)=>x.s<y.s?-1:1),dm=s=>s.slice(8,10)+'.'+s.slice(5,7);
+  if(inA.length)return `<div class="akst g">В АКЦИИ — ${esc(inA.map(x=>x.name).join(', '))}</div>`;
+  if(fu.length)return `<div class="akst g">ВХОДИТ В АКЦИЮ — ${fu.map(x=>esc(x.name)+' с '+dm(x.s)).join(', ')}</div>`;
+  return `<div class="akst b">БЕЗ АКЦИИ</div>`}
 function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
 function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
-  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?`<div class="akst ${inA.length?'g':'b'}">${inA.length?'В АКЦИИ — '+esc(inA.map(x=>x.name).join(', ')):'БЕЗ АКЦИИ'}</div>`:akNet())+pb;
+  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?akStat(aks):akNet())+pb;
   if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
@@ -3451,7 +3464,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      гистограмма ДРР (переключатель «ДРР общий | ДРР РК | Расход», одна цифра над столбиком, шкала и линия нормы) → таблица по дням → другие РК товара →
      управление и настройки (блок управления, биддер, график) → что меняли, заметки, фразы. Было: управление первым (14.11) */
   /* 17.11 Андрей «этот блок добавь наверх», «Обновить / Название / Копировать — уже есть сверху, не нужно тут»: блок управления первым под периодом, ⟳ — плашкой в шапке */
-  h+=rkCtl(r,nm);
+  /* 17.11 Андрей «его надо добавить скрытно, свёрнуто»: блок управления наверху свёрнут, в строке — состояние кампании; нажатие раскрывает/сворачивает */
+  h+=`<button type="button" class="ctlt press ${st.c}" data-act="ctlt" aria-expanded="${S.ctlOpen?'true':'false'}"><i></i><span>Управление</span><b>${st.t}</b><span class="ar">${S.ctlOpen?'▴':'▾'}</span></button>`+(S.ctlOpen?rkCtl(r,nm):'');
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
   h+=`<div class="hrw"><h3>Показатели кампании</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div>`;
   h+=kpi4({drr:zp.v,pdrr:zpp&&zpp.v,drrk:a.drrk,s:a.s,ps:zpp&&zpp.x.s,q:a.q,z:a.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(zp.oq)+' шт</b>'});
@@ -3592,6 +3606,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='rkdm'){S.rkdm=ds.k;redraw()}
   else if(a==='dtx'){const X=S.dtx||(S.dtx=new Set());if(X.has(ds.k))X.delete(ds.k);else X.add(ds.k);redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
+  else if(a==='ctlt'){S.ctlOpen=!S.ctlOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
   else if(a==='istall'){S.ist.k='all';S.ist.q='';openIst()}
