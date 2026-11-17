@@ -568,6 +568,8 @@ table.cmpd{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
 .cmpd .hint{display:block;font-size:11px;color:var(--ink3);font-weight:400}
 .cmpd td.c{text-align:center;font-weight:700;padding:9px 6px}
 .cmpd td.c.p0{background:none;font-weight:400}
+.cmpd.chs td:first-child,.cmpd.chs th:first-child{min-width:56px}
+.cmpd.chs th{text-align:center}
 .hm{padding:8px 10px 10px}
 .hm .hr{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:4px 6px;align-items:center;width:100%;text-align:left;padding:7px 0 0}
 .hm .hr+.hr{border-top:.5px solid var(--line2);margin-top:7px}
@@ -2241,6 +2243,7 @@ function vKeys(p){
   <div class="sec"><h2>Средняя позиция по дням</h2><span>чьи места — выберите</span></div>
   ${whoSel(p)}
   ${heat(p,ks)}
+  ${chasyBlock(p)}
   <div class="sec"><h2>По каждому ключу</h2><span>сравнить — до 3</span></div>
   <div class="wsel multi" id="kc">${rk.map((c,i)=>`<button class="press${KC.includes(c.sku)?' on':''}" data-kc="${c.sku}">${img(c.photo)}<span><b>${i+1}. ${esc(cnm(c))}</b><i>${ok(c.cnt7)?fi(c.cnt7)+' шт':'из выдачи'}</i></span><em>${KC.includes(c.sku)?IC.check:''}</em></button>`).join('')}</div>
   ${OZ?`<div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся с 25.10 по нашим замерам выдачи (4 раза в день) — каждый день добавляется столбик. Историю за прошлые дни по чужим товарам Озон даёт только в Premium Pro.</div>`:`<div class="note" style="margin:-2px 2px 10px">У конкурентов места копятся по нашим замерам выдачи — каждый день добавляется столбик.</div>`}
@@ -2256,6 +2259,26 @@ function vKeys(p){
   ${junk.length?`<div class="sec"><h2>Показы есть, заказов нет</h2><span>топ-${junk.length} за 28 дней</span></div>
    <div class="card pad reveal"><div class="note" style="margin:0 0 6px">Чужие запросы (как «унитаз» у сиденья) — убрать из названия и описания. Свои — поднимать позицию. Столбики — место по дням за 14 дней: выше столбик — выше в выдаче, зелёный — лучше прошлого дня, красный — хуже.</div>
    ${junk.map(j=>`<div class="jr"><div class="q">${ozq(j.q)}<small>${OZ?'увидели '+fi(j.seen)+' · в карточку '+fp(j.ctr):'открыли карточку '+fi(j.seen)}</small></div>${spark(series(p,j.q,p.sku),'s',j.pos28)}<span class="pc ${pc(j.pos28)}" data-tip="<b>${esc(j.q)}</b>Средняя позиция за 28 дней: ${fi(j.pos28)}">${j.pos28?fi(j.pos28):'—'}</span></div>`).join('')}</div>`:''}`;
+}
+/* 17.11 Андрей «добавь»: наши места по часам — замеры выдачи Москвы (каждый час, у ленты 50мм — чаще), 7 дней.
+   Строка — час, столбец — запрос (номер — в списке над таблицей), в ячейке место в этот час (если замеров несколько — середина). */
+function chasyBlock(p){
+  const C=p.chasy;if(!OZ||!C||!(C.r||[]).length||kwOf(p)!=='us')return '';
+  const days=[...new Set(C.r.map(x=>x[0].slice(0,10)))].sort();
+  if(!S.chd||S.chdP!==p.sku||!days.includes(S.chd)){S.chd=days[days.length-1];S.chdP=p.sku}
+  const rows=C.r.filter(x=>x[0].slice(0,10)===S.chd);
+  const qi=C.q.map((q,i)=>i).filter(i=>rows.some(x=>ok(x[1][i]))).slice(0,6);
+  const med=a=>{a=a.filter(ok).sort((x,y)=>x-y);return a.length?a[Math.floor((a.length-1)/2)]:null};
+  const H={};rows.forEach(x=>{const h=x[0].slice(11,13);(H[h]=H[h]||[]).push(x[1])});
+  const hs=Object.keys(H).sort();
+  const cell=v=>`<td class="c ${pc(v)}">${ok(v)?NF.format(v):'·'}</td>`;
+  const tb=hs.map(h=>{const vs=qi.map(i=>med(H[h].map(r=>r[i])));const a=vs.filter(ok);const av=a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):null;
+    return `<tr><td><b>${h}:00</b></td>${vs.map(cell).join('')}${cell(av)}</tr>`}).join('');
+  return `<div class="sec"><h2>Наши места по часам</h2><span>${ddmm(S.chd)}</span></div>
+  <div class="vt2 sgm" id="chd" style="margin:0 2px 8px;flex-wrap:wrap">${days.map(d=>`<button class="${d===S.chd?'on':''}" data-chd="${d}">${ddmm(d)}</button>`).join('')}</div>
+  <div class="card pad reveal" style="padding-bottom:6px"><div class="note" style="margin:0">${qi.map((i,n)=>`<b>${n+1}</b> — ${esc(C.q[i])}`).join(' · ')}</div></div>
+  <div class="card tw reveal" data-f="chasy"><table class="cmpd chs"><thead><tr><th>Час</th>${qi.map((i,n)=>`<th data-tip="${esc(C.q[i])}">${n+1}</th>`).join('')}<th>Среднее</th></tr></thead><tbody>${tb||`<tr><td colspan="${qi.length+2}" class="mut">За этот день замеров нет</td></tr>`}</tbody></table></div>
+  <div class="note">Место в поиске Москвы в этот час по нашим замерам выдачи (с рекламой). Точка — не нашли в выдаче или замер не удался. Зелёный — топ-10, жёлтый — до 30, красный — ниже.</div>`;
 }
 // 11.11 Андрей: запрос — ссылка на поиск Озона с этим запросом
 const ozq=q=>`<a class="ozq" href="${esc(M.q(q))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(q)} ↗</a>`;
@@ -2346,7 +2369,7 @@ function vSklad(p){
   return `<h1 class="lt reveal">${mpi(MP,'big')}Склады</h1><p class="sub reveal">Остатки FBO по кластерам. Вова: везти на 7–10 дней, Москву — в начале недели, подсвечивать за 3–4 дня до нуля.</p>
   ${cities.length?`<div class="sec" style="margin-top:14px"><h2>Где лежат конкуренты</h2><span>срок доставки, дней</span></div><div class="pbar"><span class="vt2 sgm" id="rv">${[['tab','Таблица'],['city','По городам'],['bars','Полоски']].map(([k,n])=>`<button class="${S.rv===k?'on':''}" data-rv="${k}">${n}</button>`).join('')}</span></div><div id="rgbox">${regView(p)}</div>`:''}
   <div class="card sh reveal"><div class="ring"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${R}" stroke="var(--fill)"/><circle cx="66" cy="66" r="${R}" stroke="${rc}" stroke-dasharray="${Cn}" stroke-dashoffset="${Cn}" class="rg" data-off="${Cn*(1-frac)}" style="transition:stroke-dashoffset 1.3s var(--out)"/></svg><div class="rv"><b>${days==null?'—':`<span data-count="${Math.round(days)}">${fi(days)}</span>`}</b><span>дней в среднем</span></div></div>
-   <div class="tx"><b style="font-size:17px">${bad.length?`${bad.length} ${plur(bad.length,'кластер пустеет','кластера пустеют','кластеров пустеют')}, а там продажи`:`${fi(tot)} шт на складах Озона`}</b><p>${bad.length?`Всего ${fi(tot)} шт. `:''}Продаём ${N1.format(ads)} шт в день.${need?` Чтобы хватило на 10 дней в каждом кластере, довезти <b>${fi(need)} шт</b>.`:' На 10 дней хватает везде.'}</p>
+   <div class="tx"><b style="font-size:17px">${bad.length?`${bad.length} ${plur(bad.length,'кластер пустеет','кластера пустеют','кластеров пустеют')}, а там продажи`:`${fi(tot)} шт на складах Озона`}</b><p>${bad.length?`Всего ${fi(tot)} шт. `:''}${ads>0?`Продаём ${N1.format(ads)} шт в день.`:'Продаж со складов Озона сейчас нет, на сколько дней хватит — не посчитать.'}${!(ads>0)?'':need?` Чтобы хватило на 10 дней в каждом кластере, довезти <b>${fi(need)} шт</b>.`:' На 10 дней хватает везде.'}</p>
    ${bad.length?`<div class="tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${bad.map(c=>`<span class="tag bad">${IC.warn}${esc(c.cluster.replace(', МО и Дальние регионы',''))}</span>`).join('')}</div>`:''}</div></div>
   ${cl.length?`<div class="sec"><h2>Все кластеры на одном экране</h2><span>${cl.length}</span></div>
    <div class="card sv reveal" data-f="clusters"><table><thead><tr><th>Кластер</th><th>Есть</th><th>В день</th><th>Хватит</th><th>Довезти</th></tr></thead><tbody>${cl.map(c=>{const [k,lab]=stState(c);const nd=Math.max(0,Math.ceil((c.ads||0)*10-(c.stock||0)-(c.transit||0)));
@@ -2491,6 +2514,7 @@ document.addEventListener('click',e=>{
   const c=e.target.closest('[data-comp]');if(c){const sb=$('#sbody'),open=shw.classList.contains('on');   // открыли из списка — «назад» вернёт к нему
     SBACK=open&&(sb.dataset.other||sb.dataset.pend)?{k:sb.dataset.other?'other':'pend',y:sb.scrollTop}:null;compSheet(P,c.dataset.comp);return}
   const g=e.target.closest('[data-go]');if(g){S.sku=g.dataset.go;S.t=g.dataset.gt||'konk';if(g.dataset.gg){S.grp=g.dataset.gg;KS.set('grp',S.grp)}S.focus=g.dataset.gf||null;closeSheet();render(true);return}
+  const chd=e.target.closest('[data-chd]');if(chd){if(chd.dataset.chd===S.chd)return;S.chd=chd.dataset.chd;const y=scrollY;render(false);window.scrollTo(0,y);return}
   const kw=e.target.closest('[data-kw]');if(kw){if(kw.dataset.kw===S.kw)return;S.kw=kw.dataset.kw;const y=scrollY;render(false);window.scrollTo(0,y);
     const hm=$$('#view [data-f="heat"]').find(x=>x.offsetParent);if(hm){hm.classList.remove('hl');void hm.offsetWidth;hm.classList.add('hl')}
     toast(S.kw==='us'?'Наши места':'Места: '+short(((P.comps||[]).find(c=>c.sku===S.kw)||{}).seller));return}
