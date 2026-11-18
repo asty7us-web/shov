@@ -922,14 +922,18 @@ body.hasrunp .toast{bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 64px
    его место занимает наше ── */
 html,body{overscroll-behavior-y:contain}
 #sbody{overscroll-behavior-y:contain}
-.ptr{position:fixed;left:50%;top:0;z-index:150;width:40px;height:40px;margin-left:-20px;border-radius:50%;display:grid;place-items:center;pointer-events:none;
-  background:var(--card);color:var(--ink2);box-shadow:var(--sh2),0 0 0 .5px var(--line);opacity:0;transform:translateY(var(--py,-46px))}
-.ptr svg{width:21px;height:21px;transform:rotate(var(--pr,0deg))}
-.ptr.rdy,.ptr.spin{color:var(--acc)}
-.ptr.go{transition:transform .24s var(--out),opacity .2s var(--ease)}
-.ptr.spin svg{animation:rot .8s linear infinite}
-:root[data-theme="kosmos"] .ptr,:root[data-theme="space"] .ptr{background:var(--svc-card)}
-:root[data-lite="1"] .ptr{transition:none!important}:root[data-lite="1"] .ptr svg{transform:none}:root[data-lite="1"] .ptr.spin svg{animation:none}
+.ptr{position:fixed;left:50%;top:0;z-index:150;width:40px;height:40px;margin-left:-20px;display:grid;place-items:center;pointer-events:none;
+  color:var(--ink2);opacity:0;transform:translate3d(0,var(--py,-46px),0) scale(var(--ps,1))}
+/* 18.11 «как в Эпл»: чёрточки по кругу, бегут ступеньками; убирается — уменьшается и тает */
+.ptr .pt{opacity:0;transition:opacity .12s ease}
+.ptr .pt.on{opacity:.9}
+.ptr.spin .pt.on{opacity:var(--o)}
+.ptr.rdy svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1);transform:scale(1.08)}
+.ptr svg{transition:transform .2s cubic-bezier(.32,.72,0,1)}
+.ptr.go{transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .25s ease}
+.ptr.out{--ps:.55}
+.ptr.spin svg{animation:rot .8s steps(8) infinite}
+:root[data-lite="1"] .ptr{transition:none!important}:root[data-lite="1"] .ptr svg{transform:none;transition:none}:root[data-lite="1"] .ptr.spin svg{animation:none}:root[data-lite="1"] .ptr .pt{transition:none}
 @media (prefers-reduced-motion:reduce){.ptr{transition:none!important}.ptr.spin svg{animation:none}}
 
 /* 15.11: кнопки паузы / стопа в карточке раздела «Кампании» — справа в строке названия */
@@ -4872,23 +4876,31 @@ async function ptrDo(){const rb=$('#refBtn');if(rb)rb.classList.add('spin');
   finally{if(rb)rb.classList.remove('spin')}}
 (()=>{const ind=document.createElement('div');ind.className='ptr';ind.id='ptr';ind.setAttribute('aria-hidden','true');
   ind.style.cssText='position:fixed;top:0;left:50%;width:40px;height:40px;opacity:0;pointer-events:none';   // размер и «невидим» — сразу, даже если стили ещё не подгрузились
-  ind.innerHTML='<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+  /* 18.11 Андрей «кружок загрузки плавнее, как в Эпл»: вместо стрелки в кружке — 8 чёрточек по кругу, как у айфона: по мере потягивания
+     появляются по одной, на пороге — все и лёгкий толчок, при загрузке бегут по кругу; страница едет за пальцем и мягко возвращается */
+  ind.innerHTML='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">'+[0,1,2,3,4,5,6,7].map(i=>`<line class="pt" x1="13" y1="3.2" x2="13" y2="7.8" transform="rotate(${i*45} 13 13)" style="--o:${(1-i*.11).toFixed(2)}"/>`).join('')+'</svg>';
+  const TK=[...ind.querySelectorAll('.pt')],lite=()=>document.documentElement.dataset.lite==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let tgt=null,rdy0=false;
+  const mv=(el,y,anim)=>{if(!el||lite())return;el.style.transition=anim?'transform .5s cubic-bezier(.32,.72,0,1)':'none';el.style.transform=y?'translate3d(0,'+Math.round(y)+'px,0)':'';if(!y&&anim)setTimeout(()=>{if(el.style.transform==='')el.style.transition=''},520)};
   document.body.appendChild(ind);
   let g=null;   // жест: x, y — начало; sc — что прокручивается; on — тянем; d — на сколько выехала стрелка
   const shOn=()=>SHS.length>0&&$('#shw').classList.contains('on');
   const scY=el=>el===document.scrollingElement?Math.max(window.scrollY||0,el.scrollTop||0):el.scrollTop;
   /* под пальцем блок со своей прокруткой вверх-вниз, уже прокрученный (таблица по дням, таблица фраз), — палец двигает его, а не обновляет */
   const inner=(t,stop)=>{for(let e=t;e&&e!==stop&&e.nodeType===1;e=e.parentElement)if(e.scrollTop>0&&e.scrollHeight>e.clientHeight+1){const o=getComputedStyle(e).overflowY;if(o==='auto'||o==='scroll')return true}return false};
-  const put=(d,top)=>{ind.style.top=Math.round(top)+'px';ind.style.setProperty('--py',Math.round(d-46)+'px');ind.style.setProperty('--pr',Math.round(d*3.4)+'deg');
-    ind.style.opacity=String(Math.min(1,d/38));ind.classList.toggle('rdy',d>=PTR_TH)};
-  const hide=()=>{ind.classList.add('go');ind.classList.remove('rdy','spin');ind.style.setProperty('--py','-46px');ind.style.opacity='0';setTimeout(()=>ind.classList.remove('go'),260)};
+  const put=(d,top)=>{ind.style.top=Math.round(top)+'px';ind.style.setProperty('--py',Math.round(d/2-20)+'px');
+    const n=Math.min(8,Math.ceil(8*d/PTR_TH));TK.forEach((t,i)=>t.classList.toggle('on',i<n));
+    ind.style.opacity=String(Math.min(1,d/26));const r=d>=PTR_TH;ind.classList.toggle('rdy',r);
+    if(r&&!rdy0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}rdy0=r;mv(tgt,d,false)};
+  const hide=()=>{ind.classList.add('go','out');ind.classList.remove('rdy','spin');ind.style.opacity='0';mv(tgt,0,true);rdy0=false;
+    setTimeout(()=>{ind.classList.remove('go','out');ind.style.setProperty('--py','-46px');TK.forEach(t=>t.classList.remove('on'))},300)};
   document.addEventListener('touchstart',e=>{g=null;if(PTRB||!D||e.touches.length!==1)return;const t=e.target;
     if(!t||!t.closest||t.closest('input,textarea,select,[contenteditable],.tabs,.lock,.runres,#runp,#toast,.gst.ed,.dh'))return;
     let sc,top;
     if(shOn()){const u=SHS[SHS.length-1],sb=$('#sbody');if(!u.adr||!sb.contains(t)||sb.scrollTop>0||inner(t,sb))return;sc=sb;top=sb.getBoundingClientRect().top;
       const ps=sb.querySelector('.pseg'),pb=ps?ps.getBoundingClientRect().bottom:0;if(pb>top&&pb<top+100)top=pb}   // стрелка — из-под прилипшего периода, а не поверх него
     else{if(t.closest('#shw'))return;sc=document.scrollingElement||document.documentElement;if(scY(sc)>0||inner(t,document.body))return;const h=$('.hdr');top=h?h.getBoundingClientRect().bottom:0}
-    const p=e.touches[0];g={x:p.clientX,y:p.clientY,sc,top,on:false,d:0}},{passive:true});
+    const p=e.touches[0];g={x:p.clientX,y:p.clientY,sc,top,on:false,d:0};tgt=sc===document.scrollingElement||sc===document.documentElement?$('#view'):sc},{passive:true});
   document.addEventListener('touchmove',e=>{if(!g)return;const p=e.touches[0];if(!p||e.touches.length!==1){if(g.on)hide();g=null;return}const dx=p.clientX-g.x,dy=p.clientY-g.y;
     if(!g.on){if(!dx&&!dy)return;   // решаем по первому же движению: потом браузер уже прокручивает и отменить это нельзя
       if(dy<=0||Math.abs(dx)>=dy||!e.cancelable||scY(g.sc)>0){g=null;return}g.on=true;ind.classList.remove('go')}
@@ -4896,9 +4908,9 @@ async function ptrDo(){const rb=$('#refBtn');if(rb)rb.classList.add('spin');
     e.preventDefault();g.d=Math.min(PTR_MAX,dy*.55);put(g.d,g.top)},{passive:false});
   const end=e=>{const z=g;g=null;if(!z||!z.on)return;
     if(e.type!=='touchend'||z.d<PTR_TH){hide();return}
-    PTRB=true;ind.classList.add('go','spin');ind.classList.remove('rdy');ind.style.setProperty('--py','12px');ind.style.opacity='1';const t0=Date.now();
+    PTRB=true;ind.classList.add('go','spin');ind.classList.remove('rdy');ind.style.setProperty('--py','8px');ind.style.opacity='1';TK.forEach(t=>t.classList.add('on'));mv(tgt,56,true);const t0=Date.now();
     let p;try{p=Promise.resolve(ptrDo())}catch(x){p=Promise.resolve()}
-    const fin=()=>setTimeout(()=>{PTRB=false;hide()},Math.max(0,450-(Date.now()-t0)));
+    const fin=()=>setTimeout(()=>{PTRB=false;hide()},Math.max(0,600-(Date.now()-t0)));
     Promise.race([p,new Promise(r=>setTimeout(r,30000))]).then(fin,fin)};
   document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true})})();
 let rsT=0,wide0=WIDE();addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(()=>{twFit();if(WIDE()!==wide0){wide0=WIDE();if(D)render(true)}},200)});
