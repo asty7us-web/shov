@@ -1803,6 +1803,9 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 .zbal .zbw{margin-top:4px;font-size:15px}
 .zbal .zbft{margin-top:8px;font-size:12px}
 
+/* 18.11 Андрей «сами принципы другие может»: главное время перехода — расчёт раскладки всего длинного списка. Как в приложении: телефон считает только строки на экране и рядом */
+@supports (content-visibility:auto){#view .list>*{content-visibility:auto;contain-intrinsic-size:auto var(--lh,240px)}.view[data-v=tov]{--lh:256px}.view[data-v=ak]{--lh:560px}}
+
 </style>
 </head>
 <body>
@@ -2332,16 +2335,35 @@ function sync(){
   rb.title='Обновить данные · собраны '+(old2?dm(D.at.slice(0,10))+' в '+D.at.slice(11,16)+' МСК ('+ago+')':'в '+D.at.slice(11,16)+' МСК');rb.setAttribute('aria-label',rb.title);
   rb.querySelectorAll('.dot').forEach(e=>e.remove());if(warnN)rb.insertAdjacentHTML('beforeend','<i class="dot"></i>');
 }
+/* 18.11 Андрей «сами принципы другие может» (сравнил с приложением ВБ): разделы лежат готовыми, как экраны в приложении. Переход только подставляет готовый раздел.
+   Ушли из раздела — он остаётся целиком; остальные собираются заранее, когда телефон свободен. Любая обычная перерисовка (новые данные, срок, кабинет, сортировка) сбрасывает запас,
+   а после подстановки раздел в свободную минуту сверяется со свежим расчётом: разошёлся — перерисовывается. Устаревшие цифры так не задержатся. */
+const VBODY=()=>({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)();
+const VC=new Map();let VCUR=null,VGO=false,VWT=0,VCT=0;
+const vcSig=()=>{const{tab,q,...r}=S;return JSON.stringify(r,(k,v)=>v instanceof Set||v instanceof Map?[...v]:v)};
+const vcOk=()=>!!D&&!S.q&&!Object.keys(FRZ).length;
+const vcIdle=(f,ms)=>window.requestIdleCallback?requestIdleCallback(f,{timeout:ms}):setTimeout(f,Math.min(ms,300));
+function vcPut(){const el=$('#view > .view');if(el&&VCUR&&VCUR.tab===S.tab&&vcOk()&&VCUR.sig===vcSig())VC.set(S.tab,{el,body:VCUR.body,sig:VCUR.sig})}
+function vcTake(){const e=VC.get(S.tab);if(!e||e.sig!==vcSig()||!vcOk())return false;VC.delete(S.tab);e.el.style.animation='none';$('#view').replaceChildren(e.el);
+  VCUR={tab:S.tab,sig:e.sig,body:e.body};e.el.querySelectorAll('.zsc[data-done]').forEach(x=>{delete x.dataset.done});twFit();zchScroll();scrollTo(0,0);vcLater(true);return true}
+function vcLater(chk){clearTimeout(VWT);const tok=++VCT;VWT=setTimeout(()=>vcIdle(()=>vcStep(tok,chk),2000),700)}
+function vcStep(tok,chk){if(tok!==VCT||!D)return;
+  if(document.documentElement.dataset.vt||document.hidden){VWT=setTimeout(()=>vcStep(tok,chk),400);return}
+  if(chk&&VCUR&&VCUR.tab===S.tab&&vcOk()&&VCUR.sig===vcSig()&&VBODY()!==VCUR.body){render(true);return}
+  if(!vcOk())return;const sig=vcSig(),t=TABS.find(x=>x!==S.tab&&!(VC.get(x)&&VC.get(x).sig===sig));if(!t)return;
+  const t0=S.tab;let b;S.tab=t;try{b=VBODY()}catch(e){return}finally{S.tab=t0}
+  const T=document.createElement('template');T.innerHTML='<div class="view" data-v="'+t+'" style="animation:none">'+b+'</div>';   // в шаблоне картинки не грузятся, пока раздел не показан
+  VC.set(t,{el:T.content.firstElementChild,body:b,sig});vcIdle(()=>vcStep(tok,false),2000)}
 function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card'),cy=innerHeight*.45;for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.top<=cy&&r.bottom>cy){let b=[k,r.top,null],bd=Math.abs(r.top-cy);for(const tr of C[k].querySelectorAll('tr[data-nm]')){const q=tr.getBoundingClientRect(),dd=Math.abs(q.top-cy);if(dd<bd){bd=dd;b=[k,q.top,tr.dataset.nm]}}return b}}for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top,null]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
-  $('#view').innerHTML=`<div class="view"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`
-    +({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)()+'</div>';twFit();
+  const body=VBODY();$('#view').innerHTML=`<div class="view" data-v="${S.tab}"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`+body+'</div>';twFit();
+  VCUR={tab:S.tab,sig:vcSig(),body};if(!VGO)VC.clear();vcLater();
   if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}
     /* 15.11 Андрей «если сроки менять дёргается»: первая видимая карточка остаётся на том же месте экрана (порядок при смене срока держит FRZ) */
     /* 17.11 Андрей «при смене срока … как-то дёргано»: держим на месте то, что в середине экрана — строку товара открытой склейки или карточку, а не первую карточку сверху (у неё менялась высота, и всё ниже прыгало) */
     if(an){const c=document.querySelectorAll('#view .card')[an[0]],e=c&&(an[2]?c.querySelector('tr[data-nm="'+an[2]+'"]'):c);if(e){const d=e.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
 /* смена раздела: вперёд — страница уезжает влево, назад — вправо */
 function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render();return}const d=TABS.indexOf(tab)-TABS.indexOf(S.tab);
-  smooth(d>0?'fwd':'back',()=>{S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();render()});K3.call('go',K3MAP[tab])}
+  smooth(d>0?'fwd':'back',()=>{vcPut();S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();if(!vcTake()){VGO=true;try{render()}finally{VGO=false}}});K3.call('go',K3MAP[tab])}
 const agoMin=()=>atMin();
 /* 14.11 Андрей: «время обновл стоит, а если 3 дня назад как» — рядом с датой словами: «вчера», «3 дня назад» (красным), сегодняшние, но давние — «5 ч назад» */
 const fresh=bez=>{const a=D.at.replace('T',' '),ago=atAgo();   // bez — без слов о периоде («Акции»: периода там нет)
