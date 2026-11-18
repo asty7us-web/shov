@@ -1731,6 +1731,7 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .zlt .zlsc::-webkit-scrollbar{display:none}
 .zlt .zlc{flex:0 0 86%;scroll-snap-align:start;display:flex;flex-direction:column;gap:10px}
 .zlt .zli{display:flex;gap:12px;align-items:center;min-width:0}
+.zlt .zli[data-nm2]{cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:10px}
 .zlt .zli img,.zlt .zlf{width:44px;height:58px;border-radius:8px;object-fit:cover;flex:none;background:rgba(127,127,127,.15)}
 .zlt .zlt2{display:flex;flex-direction:column;gap:4px;min-width:0}
 .zlt .zlt2 b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3907,7 +3908,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.clos
 function zltBlock(){const L=K.zch&&K.zch.lt;if(!L)return '';
   const m=['o','v','c','r'].includes(S.zlt)?S.zlt:'o',it=L[m]||[];
   const tm=w=>{const d=new Date(w.slice(0,10)+'T12:00:00');return isNaN(d)?esc(w):d.getDate()+' '+ZMK[d.getMonth()]+(m==='c'&&w.slice(11,16)==='00:00'?'':', '+w.slice(11,16))};
-  const row=x=>`<div class="zli">${x[2]?`<img src="${esc(x[2])}" alt="" loading="lazy">`:'<span class="zlf"></span>'}<div class="zlt2"><b>${esc(x[1]||String(x[0]))}</b><span class="muted num">${tm(x[3])}${x[4]?' · '+rub(x[4]):''}</span></div></div>`;
+  const row=x=>`<div class="zli${TOV[x[0]]?' press':''}"${TOV[x[0]]?` data-nm2="${x[0]}" role="button" tabindex="0"`:''}>${x[2]?`<img src="${esc(x[2])}" alt="" loading="lazy">`:'<span class="zlf"></span>'}<div class="zlt2"><b>${esc(x[1]||String(x[0]))}</b><span class="muted num">${tm(x[3])}${x[4]?' · '+rub(x[4]):''}</span></div></div>`;
   const nm={o:'заказов',v:'выкупов',c:'отказов',r:'возвратов'}[m];
   let cols='';for(let i=0;i<it.length;i+=3)cols+=`<div class="zlc">${it.slice(i,i+3).map(row).join('')}</div>`;
   return `<div class="card zlt"><div class="hrw zlh"><b>Лента заказов</b>${it.length>3?'<button type="button" class="chip press zle">Ещё</button>':''}</div>
