@@ -711,6 +711,17 @@ td.t1 small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes vtOR{to{opacity:0;transform:translateX(26%)}}@keyframes vtIL{from{opacity:0;transform:translateX(-26%)}}
 </style>
 <style>
+/* 18.11 «Когда работает реклама» (d_chasy.js): вывод фразой и таблица по частям дня */
+.chv{font-size:15px;line-height:1.4;margin:2px 4px 10px;color:var(--ink)}
+.chv b.good,.chq .pr.good{color:var(--good)}.chv b.bad,.chq .pr.bad{color:var(--bad)}
+.chq{display:grid;grid-template-columns:minmax(0,1.55fr) repeat(4,minmax(0,1fr));background:var(--card);border-radius:14px;padding:4px 10px}
+.chq>div{padding:8px 0;border-top:1px solid var(--line2);text-align:right;font-size:13.5px;line-height:1.2;align-self:stretch;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap}
+.chq>.h{border-top:0;color:var(--ink3);font-size:11px;font-weight:600}
+.chq>.h:first-child,.chq>.t{justify-content:flex-start;text-align:left}
+.chq>.t{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;white-space:normal}
+.chq>.t b{font-weight:600;font-size:13px}.chq>.t span{font-size:11px;color:var(--ink3)}
+.chq>.pr{font-weight:700}.chq>.f{font-weight:700}.chq>.t.f b{font-weight:700}
+
 /* ───────── «Реклама»: добавочные стили помощника «Е» — стопка листов (шапка, плавность), листы действий, график показа, биддер, пополнение,
    сообщения о ходе команд (14.11, по замечаниям Андрея). Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
 
@@ -2641,9 +2652,9 @@ function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
       :`<button class="sw" type="button" role="switch" data-colsw="${k}" aria-checked="${on}" aria-label="${c.l}"></button>`}</div>`};
   const opts=(cur,none)=>(none?`<option value=""${cur?'':' selected'}>— нет —</option>`:'')+T0.cols.map(c=>`<option value="${c.k}"${c.k===cur?' selected':''}>${esc(String(c.l+(c.sub?' '+c.sub:'')).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim())}</option>`).join('');
   const dirB=(n,d)=>`<button class="mvb press" type="button" data-sdir="${n}" aria-label="${d<0?'По убыванию':'По возрастанию'}" title="${d<0?'по убыванию':'по возрастанию'}">${d<0?'↓':'↑'}</button>`;
+  /* 18.11 Андрей (кадр листа, обвёл «Затем по»): «не нужно» — строка второго столбца убрана; второй столбец остаётся только от нажатий на шапку таблицы */
   const srt=`<div class="hrw" style="margin-top:2px"><h3>Сортировка</h3></div>
     <div class="opt colr"><div><b>Сначала по</b><span>основной столбец</span></div><select class="ssel" id="sso1" aria-label="Основной столбец сортировки">${opts(st.sort)}</select>${dirB(1,st.dir)}</div>
-    <div class="opt colr"><div><b>Затем по</b><span>когда в основном значения равны</span></div><select class="ssel" id="sso2" aria-label="Второй столбец сортировки">${opts(st.sort2,1)}</select>${dirB(2,st.dir2)}</div>
     <div class="hrw"><h3>Столбцы</h3></div>`;
   /* 15.11 Андрей «показы и клики и выбор самому что ставить»: у таблицы фраз своя сортировка (нажатием на столбец) — здесь только столбцы (T0.nosort) */
   if(T0.nosort)return {t:'Столбцы',s:'что показывать и в каком порядке · запоминается на этом устройстве',h:st.ord.map(row).join('')
@@ -2659,10 +2670,9 @@ function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
       colDrag(id,ap);
       const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()};
-      const s1=$('#sso1'),s2=$('#sso2');
+      const s1=$('#sso1');
       if(s1)s1.onchange=()=>{const z=tblSt(id),c=T0.cols.find(x=>x.k===s1.value);if(!c)return;if(z.sort2===c.k)z.sort2=null;z.sort=c.k;z.dir=c.asc?1:-1;tblSave(id,z);unfz();ap()};
-      if(s2)s2.onchange=()=>{const z=tblSt(id),c=T0.cols.find(x=>x.k===s2.value);z.sort2=c&&c.k!==z.sort?c.k:null;z.dir2=c&&c.asc?1:-1;tblSave(id,z);unfz();ap()};
-      $$('[data-sdir]').forEach(b=>b.onclick=()=>{const z=tblSt(id);if(b.dataset.sdir==='1')z.dir=-z.dir;else z.dir2=-z.dir2;tblSave(id,z);unfz();ap()})}}},true)}
+      $$('[data-sdir]').forEach(b=>b.onclick=()=>{const z=tblSt(id);z.dir=-z.dir;tblSave(id,z);unfz();ap()})}}},true)}
 /* шапка столбцов остаётся на месте: таблица занимает экран под шапкой сайта и листается внутри себя */
 function twFit(){const hd=$('.hdr'),tb=$('#tabs');if(!hd||!tb)return;const w=WIDE(),top=hd.getBoundingClientRect().height+(w?tb.getBoundingClientRect().height:0),bot=w?14:tb.getBoundingClientRect().height+8;
   document.documentElement.style.setProperty('--twh',Math.max(280,innerHeight-top-bot-10)+'px')}
@@ -3929,52 +3939,48 @@ function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=(D.ist||[]).filter(z=>z
 document.addEventListener('change',e=>{const x=e.target;if(!x||!x.classList||!x.classList.contains('zsel'))return;const v=+x.value;
   if(x.dataset.k==='zasd'){S.rkf.zd=v;RS.set('zasd',v)}else{S.rkf.zl=v;RS.set('zasl',v)}unfz();render(true)});
 
-/* ── 15.11 Андрей («ВБ Маркетолог К»): «пики трат по часам у нас можно как-то вывести в рекламу сервис?» → «✅ Да».
-   Траты кампании по часам: ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько потрачено с начала дня» (chasy.py),
-   трата за час = разница замеров. Режимы: «В среднем за день» (последние до 7 полных дней) | «Сегодня». Три самых дорогих часа — красным.
-   Нажатие на час — траты, клики, корзины, заказы с рекламы и цена клика за этот час. Только показывает, ничего не меняет. ── */
+/* ── 15.11 Андрей («ВБ Маркетолог К»): траты кампании по часам. ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько с начала дня» (chasy.py), за час = разница замеров.
+   18.11 Андрей (скрин, «совершенно непонятно, читай не читай, надо по-другому»): вместо двух графиков с точками и абзаца — вывод одной фразой, таблица по частям дня
+   и один график по часам с выбором Траты | Корзины | Заказы. Числа — суммы за период, а не средние с дробями («заказы 0,4»). Только показывает, ничего не меняет. ── */
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-chm]');if(!b)return;S.chm=b.dataset.chm;redraw()});
-function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch;
-  const hd=x=>`<div class="hrw"><h3>Траты по часам</h3>${x||''}</div>`;
-  if(!z)return hd('')+`<div class="muted tnote">Копим траты по часам: сервис каждые 30 минут запоминает, сколько кампания потратила с начала дня. Первая картинка — через сутки, судить о часах — через 5–7 дней.</div>`;
-  const n=z.n||0,hasT=!!(z.t&&z.t.some(v=>v>0));let m=S.chm==='t'&&hasT?'t':n?'a':hasT?'t':'a';
-  const bt=(v,l,on)=>on?`<button type="button" class="press" data-chm="${v}" aria-pressed="${m===v}">${l}</button>`:'';
-  const H=[...Array(24).keys()],g=h=>{if(m==='t')return {s:z.t[h]||0,c:(z.tc||[])[h]||0,a:z.ta?(z.ta[h]||0):null,o:z.to?(z.to[h]||0):null};const k=n||1;return {s:(z.s[h]||0)/k,c:(z.c[h]||0)/k,a:(z.a[h]||0)/k,o:(z.o[h]||0)/k}};
-  const V=H.map(h=>g(h).s),top=[...H].filter(h=>V[h]>=1).sort((a,b)=>V[b]-V[a]).slice(0,3),mx=Math.max(1,...V),tot=V.reduce((a,b)=>a+b,0);
-  const id='ch'+(++CHN),MH=64;let b='',x='';
-  /* 17.11 Андрей («К», скрин «Траты по часам»): «надо добавить по корзинам» — корзины с рекламы за час зелёной точкой прямо на графике трат (своя шкала, число в точке) */
-  const KA=H.map(h=>g(h).a||0),kmx=Math.max(...KA),kok=KA.some(v=>v>0);
-  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,red=top.includes(h),ka=KA[h];
-    const dot=ka>0?`<b class="kzd" style="bottom:${(4+MH*ka/kmx).toFixed(1)}%"></b>`:'';
-    b+=`<div class="col${h===23?' sel':''}" data-ch="${id}" data-i="${h}">${red?`<span class="tp num">${ksh(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(red?'var(--bad)':'var(--acc)'):'var(--bar)'}"></i>${dot}</div>`;
-    x+=`<span>${h%3===0?h:''}</span>`});
-  CHR[id]=h=>{const q=g(h),cpc=q.c?q.s/q.c:null;return `<b>${h}:00–${h+1}:00</b> · траты <b>${rub(q.s)}</b>${tot?' ('+pc(100*q.s/tot)+' дня)':''} · клики ${f1(q.c)}${cpc!=null?' · клик '+rub2(cpc):''}${q.a!=null?' · корзины '+f1(q.a)+' · заказы РК '+f1(q.o):''}`};
-  const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
-  const tl=top.length?'Дороже всего: '+top.map(h=>`<b>${h} ч</b> — ${rub(V[h])}`).join(', ')+'. ':'';
-  const pod=m==='t'?`Сегодня по часам${z.tp?' (копим не с полуночи — часы до первого замера пустые)':''}. `:`В среднем за день, ${n} ${n===1?'день':n<5?'дня':'дней'} с ${z.d0?dm(z.d0):"—"}${n<5?' — мало, судить рано':''}. `;
-  return hd(`<span class="pnqs">${bt('a','В среднем',n>0)}${bt('t','Сегодня',hasT)}</span>`)
-    +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:23)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
-    +`<div class="muted tnote">${pod}${tl}Красным — три самых дорогих часа.${kok?' Зелёные точки — корзины с этой рекламы: чем выше точка, тем больше корзин в этот час (число — нажмите на час).':(g(0).a!=null?' Корзин с рекламы пока нет.':'')} Час примерный: ВБ присылает статистику с задержкой. Нажмите на час — клики, корзины и заказы за него.</div>`+zakBlock(z,m,n)}
-
-/* ── 15.11 Андрей («К»): «надо снизу тогда по заказам и корзинам гистограмму ниже» — тот же режим (в среднем / сегодня), переключатель Заказы | Корзины.
-   Заказы и корзины — с этой рекламы (статистика кампании), по тем же замерам раз в 30 минут. Лучшие три часа — зелёным: по ним видно, какие часы держать в графике показа. ── */
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-chz]');if(!b)return;S.chz=b.dataset.chz;redraw()});
-function zakBlock(z,m,n){const isT=m==='t',A=isT?z.ta:z.a,O=isT?z.to:z.o;
-  if(!A||!O)return `<div class="hrw"><h3>Заказы и корзины по часам</h3></div><div class="muted tnote">За сегодня заказы и корзины по часам начнём копить со следующего сбора — через полчаса.</div>`;
-  const k=isT?1:(n||1),w=S.chz==='a'?'a':'o',Z=w==='a'?A:O,H=[...Array(24).keys()],V=H.map(h=>(Z[h]||0)/k),S2=H.map(h=>(z.s[h]||0)/k);
-  const sp=isT?(z.t||[]):S2,tot=V.reduce((a,b)=>a+b,0),mx=Math.max(isT?1:0.5,...V);
-  const top=[...H].filter(h=>V[h]>0).sort((a,b)=>V[b]-V[a]).slice(0,3),nm=w==='a'?'корзины':'заказы РК';
-  const bt=(v,l)=>`<button type="button" class="press" data-chz="${v}" aria-pressed="${w===v}">${l}</button>`;
-  const id='ch'+(++CHN),MH=64;let b='',x='';
-  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0,gr=top.includes(h);
-    b+=`<div class="col" data-ch="${id}" data-i="${h}">${gr?`<span class="tp num">${f1(v)}</span>`:''}<i style="height:${ht}%;background:${ht?(gr?'var(--good)':'var(--acc)'):'var(--bar)'}"></i></div>`;
+const CHCAST=[[0,4,'Ночь'],[4,8,'Раннее утро'],[8,12,'Утро'],[12,16,'День'],[16,20,'Вечер'],[20,24,'Поздний вечер']];
+function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch,T='Когда работает реклама';
+  const hd=x=>`<div class="hrw"><h3>${T}</h3>${x||''}</div>`;
+  if(!z)return hd('')+`<div class="muted tnote">Копим данные по часам: сервис каждые 30 минут запоминает, сколько кампания потратила с начала дня. Первая картинка — через сутки, судить — через 5–7 дней.</div>`;
+  const n=z.n||0,hasT=!!(z.t&&z.t.some(v=>v>0)),m=S.chm==='t'&&hasT?'t':n?'a':hasT?'t':'a',isT=m==='t';
+  const dn=n===1?'день':n<5?'дня':'дней',bt=(v,l,on)=>on?`<button type="button" class="press" data-chm="${v}" aria-pressed="${m===v}">${l}</button>`:'';
+  const head=hd(`<span class="pnqs">${bt('a',`За ${n} ${dn}`,n>0)}${bt('t','Сегодня',hasT)}</span>`);
+  const P=isT?{s:z.t,c:z.tc,a:z.ta,o:z.to}:{s:z.s,c:z.c,a:z.a,o:z.o},hasK=!!(P.a&&P.o),H=[...Array(24).keys()],at=(k,h)=>(P[k]&&P[k][h])||0;
+  const sum=(k,a,b)=>{let v=0;for(let h=a;h<b;h++)v+=at(k,h);return v},all={s:sum('s',0,24),a:sum('a',0,24),o:sum('o',0,24)};
+  const per=isT?`Сегодня${z.tp?', копим не с полуночи':''}, день ещё идёт.`:`За ${n} ${dn} с ${z.d0?dm(z.d0):'—'}.`;
+  if(all.s<1)return head+`<div class="muted tnote">${per} Трат за это время нет.</div>`;
+  const R=CHCAST.map(([a,b,l])=>{const s=sum('s',a,b),k=sum('a',a,b),o=sum('o',a,b);return {a,b,l,s,k,o,p:k>=.5?s/k:null,ok:k>=3}});
+  /* вывод — только по частям дня, где набралось хотя бы 3 корзины: на меньшем числе цена корзины случайна */
+  const E=R.filter(x=>x.ok).sort((x,y)=>x.p-y.p),lo=E[0],hi=E[E.length-1],cmp=E.length>1&&hi.p/lo.p>=1.3,nm2=x=>`${x.l.toLowerCase()} ${x.a}–${x.b}`;
+  let vy;
+  if(!hasK)vy='Корзины за сегодня начнём считать со следующего сбора, через полчаса.';
+  else if(E.length<2)vy=`Корзин пока мало (${f0(all.a)}), сравнивать время суток рано.`;
+  else if(!cmp)vy=`Корзина стоит примерно одинаково весь день: около <b>${rub(all.s/all.a)}</b>.`;
+  else vy=`Дешевле всего корзина: <b class="good">${nm2(lo)}, ${rub(lo.p)}</b>. Дороже всего: <b class="bad">${nm2(hi)}, ${rub(hi.p)}</b>.`;
+  if(hasK&&E.length>1&&!isT&&n<5)vy+=' Дней пока мало, вывод может поменяться.';
+  const cell=(v,f)=>v>=.5?f(v):'—',row=x=>{const c=cmp&&x===lo?' good':cmp&&x===hi?' bad':'';
+    return `<div class="t"><b>${x.l}</b><span>${x.a}–${x.b} ч</span></div><div class="num">${cell(x.s,rub)}</div><div class="num">${hasK?cell(x.k,f0):'—'}</div><div class="num">${hasK?cell(x.o,f0):'—'}</div><div class="num pr${c}">${x.p!=null?rub(x.p):'—'}</div>`};
+  const tb=`<div class="chq"><div class="h">Время</div><div class="h">Траты</div><div class="h">Корзины</div><div class="h">Заказы</div><div class="h">1 корзина</div>${R.map(row).join('')}`
+    +`<div class="t f"><b>Всего</b></div><div class="num f">${rub(all.s)}</div><div class="num f">${hasK?f0(all.a):'—'}</div><div class="num f">${hasK?f0(all.o):'—'}</div><div class="num f">${hasK&&all.a>=.5?rub(all.s/all.a):'—'}</div></div>`;
+  /* один график: что выбрано, то и столбики; цвет один, значение часа — нажатием */
+  const w=hasK&&(S.chz==='a'||S.chz==='o')?S.chz:'s',V=H.map(h=>at(w,h)),mx=Math.max(w==='s'?1:.5,...V),top=[...H].filter(h=>V[h]>0).sort((a,b)=>V[b]-V[a]).slice(0,3),sel=top.length?top[0]:12;
+  const lb=v=>w==='s'?ksh(v):f1(v),id='ch'+(++CHN),MH=64;let b='',x='';
+  H.forEach(h=>{const v=V[h],ht=v>0?Math.max(2.5,MH*v/mx):0;
+    b+=`<div class="col${h===sel?' sel':''}" data-ch="${id}" data-i="${h}">${top.includes(h)?`<span class="tp num">${lb(v)}</span>`:''}<i style="height:${ht}%;background:${ht?'var(--acc)':'var(--bar)'}"></i></div>`;
     x+=`<span>${h%3===0?h:''}</span>`});
-  CHR[id]=h=>{const q=V[h],s=sp[h]||0;return `<b>${h}:00–${h+1}:00</b> · ${nm} <b>${f1(q)}</b>${tot?' ('+pc(100*q/tot)+' дня)':''} · траты ${rub(s)}${q>0?' · на 1 — '+rub(s/q):''}`};
+  CHR[id]=h=>{const s=at('s',h),c=at('c',h),a=at('a',h);return `<b>${h}:00–${h+1}:00</b> · траты <b>${rub(s)}</b> · клики ${f0(c)}${c>=.5?' по '+rub2(s/c):''}${hasK?` · корзины ${f1(a)} · заказы ${f1(at('o',h))}`:''}`};
   const ax=axTicks(mx,false).map(v=>`<div class="yt" style="bottom:${(MH*v/mx).toFixed(2)}%"><span class="num">${axNum(v)}</span></div>`).join('');
-  const tl=top.length?'Больше всего: '+top.map(h=>`<b>${h} ч</b> — ${f1(V[h])}`).join(', ')+'. ':'Пока ни одного — судить рано. ';
-  return `<div class="hrw"><h3>Заказы и корзины по часам</h3><span class="pnqs">${bt('o','Заказы')}${bt('a','Корзины')}</span></div>`
-    +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](top.length?top[0]:12)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
-    +`<div class="muted tnote">${isT?'Сегодня':'В среднем за день'}, с этой рекламы. ${tl}Зелёным — три лучших часа: их держать в графике показа. Час примерный.</div>`}
+  const zb=(v,l)=>`<button type="button" class="press" data-chz="${v}" aria-pressed="${w===v}">${l}</button>`;
+  return head+`<div class="chv">${vy}</div>`+tb
+    +`<div class="hrw"><h3>По часам</h3><span class="pnqs">${zb('s','Траты')}${hasK?zb('a','Корзины')+zb('o','Заказы'):''}</span></div>`
+    +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](sel)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
+    +`<div class="muted tnote">${per} Кнопки периода вверху на этот блок не влияют. ВБ присылает статистику с задержкой, поэтому час примерный: надёжнее смотреть таблицу. Нажмите на столбик — цифры за час.</div>`}
 
 /* ── 17.11 Андрей («К», скрин главной приложения ВБ): «добавить пока что такое же точно и чтобы обновлялось также».
    Блок «Заказы | Выкупы» вверху «Товаров»: сегодня — сумма и штуки, ниже — на сколько меньше / больше, чем вчера к этому же
