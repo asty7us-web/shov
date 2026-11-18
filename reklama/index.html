@@ -1752,6 +1752,13 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .zch .zwr.zin .zb i{transform:scaleY(.35)}
 @media (prefers-reduced-motion:reduce){.zch .zb i{transition:none}}
 
+/* 18.11 Андрей «обновляет дёргано»: «потянуть — обновить» — старая страница гаснет, новая проявляется; столбики при этом не растут заново */
+body.ptrout #view{opacity:.35;transition:opacity .16s ease}
+#view.ptrin{animation:ptrIn .38s ease both}
+#view.ptrin .zch *{animation:none!important;transition:none!important}
+@keyframes ptrIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#view.ptrin{animation:none}body.ptrout #view{transition:none}}
+
 </style>
 </head>
 <body>
@@ -4852,7 +4859,8 @@ const atTx=()=>{const a=D&&D.at||'';return a?'Данные на '+(a.slice(0,10)
    возвращаются из памяти вкладки, данные берутся свежие). После перезагрузки — плашка: данные на какое время и что из ваших изменений применено */
 const PTRK='rek.ptr';
 function ptrDo(){try{sessionStorage.setItem(PTRK,String(Date.now()))}catch(e){}const rb=$('#refBtn');if(rb)rb.classList.add('spin');
-  setTimeout(()=>location.reload(),120);return new Promise(()=>{})}
+  document.body.classList.add('ptrout');   // 18.11 Андрей «обновляет дёргано»: старая страница мягко гаснет, новая мягко проявляется (ptrin), без скачка
+  setTimeout(()=>location.reload(),180);return new Promise(()=>{})}
 (()=>{const ind=document.createElement('div');ind.className='ptr';ind.id='ptr';ind.setAttribute('aria-hidden','true');
   ind.style.cssText='position:fixed;top:0;left:50%;width:40px;height:40px;opacity:0;pointer-events:none';   // размер и «невидим» — сразу, даже если стили ещё не подгрузились
   ind.innerHTML='<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
@@ -4902,6 +4910,7 @@ async function boot(pass){
   rknMerge();   // 14.11: созданная с сайта кампания видна и после обновления страницы, пока её не принёс сбор
   const pm=pmemMerge();let ptr0=0;try{ptr0=+sessionStorage.getItem(PTRK)||0;sessionStorage.removeItem(PTRK)}catch(e){}   // 14.11: принятые ВБ правки — поверх данных до сбора
   const sha=shRead();shPre(sha);   // 14.11: обновили страницу в листе — тот же кабинет и раздел…
+  if(fr){const v=$('#view');v.classList.add('ptrin');setTimeout(()=>v.classList.remove('ptrin'),600)}
   $('#lock').hidden=true;$('#lock').innerHTML='';prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
   if(UPASS){const p=UPASS;UPASS=null;if(!UPR)unlockDo(p).then(()=>{render(true);toast('Управление включено')}).catch(()=>{})}   // вошли паролем управления — второй раз его не спрашиваем
   const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha);
