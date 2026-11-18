@@ -1694,13 +1694,13 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 /* 17.11 блок «Заказы | Выкупы» как на главной приложения ВБ (d_zch.js) */
 .zch{margin-bottom:10px}
 .zch .zdt{font-size:13px;margin-top:2px}
-.zch .zbig{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0 2px}
+.zch .zbig{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0 2px;min-height:57px}   /* 18.11: место под плашку сравнения есть всегда — без неё блок не сжимается */
 .zch .zbig>div{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .zch .zbig b{font-size:26px;font-weight:700;line-height:1.1}
 .zch .zpl{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:600}
 .zch .zpl.dn{color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,transparent)}
 .zch .zpl.up{color:var(--good);background:color-mix(in srgb,var(--good) 16%,transparent)}
-.zch .zcm{font-size:11px;min-height:14px;margin-bottom:6px}
+.zch .zcm{font-size:11px;line-height:15px;min-height:15px;margin-bottom:6px}
 .zch .zwr{position:relative;display:flex;gap:6px}
 .zch .zsc{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .zch .zsc::-webkit-scrollbar{display:none}
@@ -1716,7 +1716,7 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 .zch .zc.sel .zb{background-color:color-mix(in srgb,var(--acc) 9%,transparent);border-radius:6px 6px 0 0}
 .zch .zax{position:relative;width:48px;height:140px;flex:none}
 .zch .zy{position:absolute;right:0;transform:translateY(50%);font-size:11px;opacity:.7}
-.zch .zrd{font-size:12px;margin:8px 0 2px;min-height:16px}
+.zch .zrd{font-size:12px;line-height:17px;margin:8px 0 2px;min-height:34px}   /* 18.11 Андрей «при смене день/неделя окно меняет размер»: место под 2 строки — у «Недели» подпись длиннее и переносится */
 .zch .zft{margin:8px 0 0;align-items:center;justify-content:space-between}
 .zch .zft .muted{font-size:12px}
 
