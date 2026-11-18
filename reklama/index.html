@@ -1755,9 +1755,9 @@ th .ths{display:block;margin-top:2px;font-size:10px;font-weight:600;letter-spaci
 
 /* 18.11 Андрей «обновляет дёргано»: «потянуть — обновить» — старая страница гаснет, новая проявляется; столбики при этом не растут заново */
 body.ptrout #view{opacity:.35;transition:opacity .16s ease}
-#view.ptrin{animation:ptrIn .38s ease both}
+#view.ptrin{animation:ptrIn .4s cubic-bezier(.32,.72,0,1) both}
 #view.ptrin .zch *{animation:none!important;transition:none!important}
-@keyframes ptrIn{from{opacity:0}to{opacity:1}}
+@keyframes ptrIn{from{opacity:.55}to{opacity:1}}   /* 18.11: обновление на месте — без гашения в пустоту */
 @media (prefers-reduced-motion:reduce){#view.ptrin{animation:none}body.ptrout #view{transition:none}}
 
 </style>
@@ -4859,9 +4859,17 @@ const atTx=()=>{const a=D&&D.at||'';return a?'Данные на '+(a.slice(0,10)
 /* 14.11 Андрей: «при подтягивании должна обновляться сама страница, а не данные» — жест перезагружает страницу целиком (открытые листы
    возвращаются из памяти вкладки, данные берутся свежие). После перезагрузки — плашка: данные на какое время и что из ваших изменений применено */
 const PTRK='rek.ptr';
-function ptrDo(){try{sessionStorage.setItem(PTRK,String(Date.now()))}catch(e){}const rb=$('#refBtn');if(rb)rb.classList.add('spin');
-  document.body.classList.add('ptrout');   // 18.11 Андрей «обновляет дёргано»: старая страница мягко гаснет, новая мягко проявляется (ptrin), без скачка
-  setTimeout(()=>location.reload(),180);return new Promise(()=>{})}
+/* 18.11 Андрей «обновление страницы медленное, не плавное»: перезагрузка целиком каждый раз качала весь сайт (~0,7 МБ) и на миг гасила экран.
+   Теперь: сайт не менялся (метка страницы на сервере та же, что при открытии) — перечитываем только данные и мягко обновляем на месте,
+   прокрутка и листы остаются; выложили новую версию сайта — тогда, как раньше, перезагрузка целиком */
+let PVER=null;const pverGet=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>r.ok?(r.headers.get('etag')||r.headers.get('last-modified')||''):null).catch(()=>null);
+function ptrFull(){try{sessionStorage.setItem(PTRK,String(Date.now()))}catch(e){}document.body.classList.add('ptrout');setTimeout(()=>location.reload(),180);return new Promise(()=>{})}
+async function ptrDo(){const rb=$('#refBtn');if(rb)rb.classList.add('spin');
+  try{const v=await pverGet();if(PVER&&v&&v!==PVER)return ptrFull();
+    await reload();const pm=RS.get(PMEMK,null)||[];const w=$('#view');w.classList.remove('ptrin');w.offsetWidth;w.classList.add('ptrin');setTimeout(()=>w.classList.remove('ptrin'),450);
+    setTimeout(()=>ptrNote(pm),200)}
+  catch(e){return ptrFull()}
+  finally{if(rb)rb.classList.remove('spin')}}
 (()=>{const ind=document.createElement('div');ind.className='ptr';ind.id='ptr';ind.setAttribute('aria-hidden','true');
   ind.style.cssText='position:fixed;top:0;left:50%;width:40px;height:40px;opacity:0;pointer-events:none';   // размер и «невидим» — сразу, даже если стили ещё не подгрузились
   ind.innerHTML='<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
@@ -4912,7 +4920,7 @@ async function boot(pass){
   const pm=pmemMerge();let ptr0=0;try{ptr0=+sessionStorage.getItem(PTRK)||0;sessionStorage.removeItem(PTRK)}catch(e){}   // 14.11: принятые ВБ правки — поверх данных до сбора
   const sha=shRead();shPre(sha);   // 14.11: обновили страницу в листе — тот же кабинет и раздел…
   if(fr){const v=$('#view');v.classList.add('ptrin');setTimeout(()=>v.classList.remove('ptrin'),600)}
-  $('#lock').hidden=true;$('#lock').innerHTML='';prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
+  $('#lock').hidden=true;$('#lock').innerHTML='';pverGet().then(v=>{if(v)PVER=v});prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
   if(UPASS){const p=UPASS;UPASS=null;if(!UPR)unlockDo(p).then(()=>{render(true);toast('Управление включено')}).catch(()=>{})}   // вошли паролем управления — второй раз его не спрашиваем
   const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha);
   if(ptr0&&Date.now()-ptr0<60000)setTimeout(()=>ptrNote(pm),350)}   // …и те же листы
@@ -4924,7 +4932,7 @@ if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('t
 window.REK={get shNav(){const x=SHS[SHS.length-1];return x&&x.nav?{i:x.nav.i,n:x.nav.n}:null},actStatus,noLim,get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
   FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
   get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC},
-  prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
+  prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,ptrVer:v=>{PVER=v},get pver(){return PVER},reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
 hashKey();boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
