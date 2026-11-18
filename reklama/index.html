@@ -1468,6 +1468,18 @@ table.zon tr:last-child td{font-weight:700}
 .kbl>div{display:flex;justify-content:space-between;gap:10px;font-size:14px}.kbl>div span{min-width:0;overflow-wrap:anywhere}.kbl>div b{white-space:nowrap}
 /* 17.11 корзины на графике трат по часам */
 .bars .col .kzd{position:absolute;left:50%;transform:translate(-50%,50%);width:8px;height:8px;border-radius:50%;background:var(--good);z-index:3;pointer-events:none;box-shadow:0 0 0 2px var(--card,#fff)}
+/* 18.11 лист товара: «Продажи по дням» и «По дням: ДРР и заказы» свёрнуты, каждый раскрывается своей строкой */
+.gfd{margin-top:10px}
+.gfd>summary.hrw{margin:0;min-height:44px;padding:8px 12px;border-radius:14px;background:var(--card2);cursor:pointer;list-style:none;flex-wrap:nowrap;-webkit-tap-highlight-color:transparent}
+.gfd>summary::-webkit-details-marker{display:none}
+.gfd>summary h3{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.gfd[open]>summary.hrw{margin-bottom:8px}
+.gfc,.gfo{font-size:12.5px;white-space:nowrap}
+.gfo{display:none}
+.gfd[open] .gfo{display:inline}
+.gfd[open] .gfc{display:none}
+.gfa{font-style:normal;font-size:18px;line-height:1;color:var(--acc);transition:transform .2s ease}
+.gfd[open] .gfa{transform:rotate(90deg)}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -3406,6 +3418,11 @@ function ostHist(t){const od=K.oh_d||[],ix=[],at={};od.forEach((d,k)=>{const i=D
       +chart({ix,h:96,val:f,col:i=>f(i)?col:'var(--bad,#e5484d)',top:i=>{const x=f(i);return x==null?'':x>=1e4?(x/1e3).toFixed(0)+'к':x>=1e3?(x/1e3).toFixed(1).replace('.0','')+'к':x},
         read:i=>`<b>${dlab(i)}${i===T?' (сейчас)':''}</b> · ${ttl==='Склады ВБ'?'склады ВБ':'свой склад'}: <b>${f0(f(i)||0)} шт</b>`})+'</div>'};
   return `<div class="osh">${one(0,'Склады ВБ',t.fbo,'var(--acc)')}${one(1,'Свой склад',t.fbs,'var(--acc2,var(--acc))')}</div>`}
+/* 18.11 Андрей (кадр листа товара, обвёл «Продажи по дням» и «По дням: ДРР и заказы»): «пусть свёрнуты и будут каждый с раскрытием» — каждый график открывается своей строкой;
+   открыто / закрыто помним до перезагрузки страницы (при смене периода и товара не схлопывается) */
+let PGF={};
+document.addEventListener('toggle',e=>{const x=e.target;if(x&&x.classList&&x.classList.contains('gfd'))PGF[x.dataset.gf]=x.open},true);
+const gfBlk=(k,ttl,hint,oo,body)=>`<details class="gfd" data-gf="${k}"${PGF[k]?' open':''}><summary class="hrw"><h3>${ttl}</h3>${oo?`<span class="muted gfo">${oo}</span>`:''}<span class="muted num gfc">${hint}</span><i class="gfa" aria-hidden="true">›</i></summary>${body}</details>`;
 function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?pAgg(t,pp):null,td=pAgg(t,[T]),y=T>0?pAgg(t,[T-1]):null,y2=T>1?pAgg(t,[T-2]):null,W=wrk(t),P=t.rk.map(id=>RK[id]).filter(r=>r&&!rkLive(r));
   const memo={},gm=i=>memo[i]||(memo[i]=pAgg(t,[i])),pn=t.pan||{},cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);
   const rctx=t.rk.map(id=>id+'|'+nm).join(','),by=buyer(t);
@@ -3431,15 +3448,16 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   const nzq=!cx.some(i=>(sq(i)||0)>0);
   if(nzq&&cx.some(i=>sq(i)!=null))h+=`<div class="hrw"><h3>Продажи по дням, шт</h3></div><div class="note nzq" style="margin-top:0">Заказов за период не было <span class="muted num">· ${cx.length} дн.</span></div>`;
   else if(cx.some(i=>sq(i)!=null)){const nf=cx.filter(i=>!hasF(i)).length;
-    h+=`<div class="hrw"><h3>Продажи по дням, шт</h3><span class="muted" style="font-size:12.5px">как в кабинете</span></div><div class="sal1">`+chart({ix:cx,h:100,val:sq,col:()=>'var(--acc)',top:i=>sq(i)?sq(i):'',
+    h+=gfBlk('sal','Продажи по дням, шт',`сегодня ${f0(sq(T)||0)} шт`,'как в кабинете',`<div class="sal1">`+chart({ix:cx,h:100,val:sq,col:()=>'var(--acc)',top:i=>sq(i)?sq(i):'',
       read:i=>hasF(i)?`<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · открыли ${f0(t.f.op[i])} · в корзину ${f0(t.f.cart[i])}${t.f.op[i]?' ('+pc(100*t.f.cart[i]/t.f.op[i])+')':''} · заказали <b>${f0(t.f.o[i])}</b> на ${rub(t.f.r[i])} · выкупили ${f0(t.f.b[i])}`
         :`<b>${dlab(i)}</b> · заказали <b>${f0(sq(i)||0)}</b> — по отчёту ВБ, счёта карточки за этот день нет`})+'</div>'
-      +(nf?`<div class="muted tnote">${nf===cx.length?'Счёта карточки нет — заказы по отчёту ВБ (он показывает меньше).':'За '+nf+' дн. счёта карточки нет — там заказы по отчёту ВБ (он показывает меньше).'}</div>`:'')}
+      +(nf?`<div class="muted tnote">${nf===cx.length?'Счёта карточки нет — заказы по отчёту ВБ (он показывает меньше).':'За '+nf+' дн. счёта карточки нет — там заказы по отчёту ВБ (он показывает меньше).'}</div>`:''))}
   const cd=chgDays(nm,0);
   /* 14.11 (четвёртый заход): заказов за период нет — график трат остаётся (видно, сколько ушло впустую), сверху подпись; нет и трат — только строка */
   const nzs=!cx.some(i=>(gm(i).s||0)>=1),nzo=!cx.some(i=>(gm(i).oq||0)>0);
-  h+='<div class="hrw"><h3>По дням: ДРР и заказы</h3></div>'+(nzo&&nzs?`<div class="note nzq" style="margin-top:0">За период не было ни трат, ни заказов <span class="muted num">· ${cx.length} дн.</span></div>`
-    :(nzo?`<div class="note b nzq nzo" style="margin:0 0 8px">Заказов за период не было — столбики показывают траты <span class="num">· ${cx.length} дн.</span></div>`:'')+drrChart(cx,gm,{dot:i=>cd.has(i)})+CHLG);
+  h+=nzo&&nzs?`<div class="hrw"><h3>По дням: ДРР и заказы</h3></div><div class="note nzq" style="margin-top:0">За период не было ни трат, ни заказов <span class="muted num">· ${cx.length} дн.</span></div>`
+    :gfBlk('drr','По дням: ДРР и заказы',nzo?'заказов не было':td.oq&&td.drr!=null&&isFinite(td.drr)?'ДРР сегодня '+pc(td.drr):td.s>=1?'сегодня без заказов':'сегодня без трат','',
+      (nzo?`<div class="note b nzq nzo" style="margin:0 0 8px">Заказов за период не было — столбики показывают траты <span class="num">· ${cx.length} дн.</span></div>`:'')+drrChart(cx,gm,{dot:i=>cd.has(i)})+CHLG);
   /* 14.11 Андрей 08:10: «пусть рк будет выше в товаре и заметнее» — кампании товара сразу под главными цифрами (раньше стояли после гистограмм,
      таблицы по дням и «Что меняли»), заголовок крупный, с числом; кампании на паузе — свёрнутой строкой «На паузе · N ›» под работающими */
   h+=prodRk(t,nm,ix,pp,a,W,P,rctx);
