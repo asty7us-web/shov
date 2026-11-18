@@ -153,6 +153,24 @@ input,textarea,select{font:inherit;color:inherit}
 @keyframes svc-out{to{opacity:0}}
 @keyframes svc-in{from{opacity:0;transform:translateY(14px)}}
 @media (prefers-reduced-motion:reduce){@keyframes svc-in{from{opacity:0}}}
+/* 18.11 Андрей «во всех сервисах»: «потянуть вниз — обновить» как в айфоне (у «Рекламы» свой такой же, reklama_wb) */
+html,body{overscroll-behavior-y:contain}
+.svc-ptr{position:fixed;left:50%;top:0;z-index:150;width:40px;height:40px;margin-left:-20px;display:grid;place-items:center;pointer-events:none;
+  color:var(--svc-ink2,#8a8a8e);opacity:0;transform:translate3d(0,var(--py,-46px),0) scale(var(--ps,1))}
+.svc-ptr .pt{opacity:0;transition:opacity .12s ease}
+.svc-ptr .pt.on{opacity:.9}
+.svc-ptr.spin .pt.on{opacity:var(--o)}
+.svc-ptr svg{transition:transform .2s cubic-bezier(.32,.72,0,1)}
+.svc-ptr.rdy svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1);transform:scale(1.08)}
+.svc-ptr.go{transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .25s ease}
+.svc-ptr.out{--ps:.55}
+.svc-ptr.spin svg{animation:svc-rot .8s steps(8) infinite}
+@keyframes svc-rot{to{transform:rotate(360deg)}}
+html.svc-ptrout body>main{opacity:.4;transition:opacity .16s ease}
+html.svc-ptrin body>main{animation:svc-ptrin .4s cubic-bezier(.32,.72,0,1) both}
+@keyframes svc-ptrin{from{opacity:.55}}
+:root[data-lite="1"] .svc-ptr,:root[data-lite="1"] .svc-ptr svg,:root[data-lite="1"] .svc-ptr .pt{transition:none!important;animation:none!important}
+@media (prefers-reduced-motion:reduce){.svc-ptr,.svc-ptr svg{transition:none!important;animation:none!important}html.svc-ptrin body>main{animation:none}}
 /*/SVC:CSS*/
 /* ── шапка ── */
 .hdr{position:sticky;top:0;z-index:60;background:var(--hdr);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--line);
@@ -1764,6 +1782,27 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 @keyframes ptrIn{from{opacity:.55}to{opacity:1}}   /* 18.11: обновление на месте — без гашения в пустоту */
 @media (prefers-reduced-motion:reduce){#view.ptrin{animation:none}body.ptrout #view{transition:none}}
 
+/* 18.11 плитки наших сервисов и баланс продавца (d_zch.js zsvBlock) — как на главной приложения ВБ */
+.zsv{margin:0 0 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.zsv::-webkit-scrollbar{display:none}
+.zsvr{display:flex;gap:8px;padding:0;width:max-content;min-width:100%;box-sizing:border-box}
+.zsvt{flex:1 0 72px;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;color:inherit}
+.zsvi{display:flex;align-items:center;justify-content:center;width:100%;height:62px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.zsvi svg{width:30px;height:30px}
+.zsvt b{font-size:12.5px;font-weight:500;color:var(--ink2,inherit);white-space:nowrap}
+.zbal{margin-bottom:10px}
+.zbal .zbr{display:flex;align-items:center;gap:10px}
+.zbal .zbs{font-size:28px;letter-spacing:-.02em}
+.zbal .zeye{border:0;background:none;color:inherit;padding:4px;width:34px;height:34px;cursor:pointer}
+.zbal .zeye svg{width:24px;height:24px}
+.zbal .zeye .x{display:none}
+.zbal.hid .zeye .x{display:inline}
+.zbal .zbm{display:none}
+.zbal.hid .zbv{display:none}
+.zbal.hid .zbm{display:inline}
+.zbal .zbw{margin-top:4px;font-size:15px}
+.zbal .zbft{margin-top:8px;font-size:12px}
+
 </style>
 </head>
 <body>
@@ -1896,6 +1935,46 @@ window.svcBack=o=>{
     last=k;gu=location.href});
 };
 })();
+/* 18.11 Андрей («кружок загрузки плавнее, как в Эпл» → «во всех сервисах»): потянуть страницу вниз в самом верху — 8 чёрточек по кругу
+   появляются по мере потягивания, на пороге — все и лёгкий толчок, при загрузке бегут по кругу; страница (body>main) едет за пальцем
+   и мягко возвращается. Обновляет window.svcRefresh() страницы (данные на месте), если её нет — перезагрузка с мягким переходом (window.svcReload).
+   window.svcPtrPane — селектор окон страницы со своей прокруткой, где тоже тянется (Юнитка: открытая карточка).
+   В «Рекламе» свой такой же (#ptr) — там этот не включается. Только касание пальцем */
+(()=>{const R=document.documentElement;
+try{if(sessionStorage.getItem('svc.ptr')){sessionStorage.removeItem('svc.ptr');R.classList.add('svc-ptrin');setTimeout(()=>R.classList.remove('svc-ptrin'),500)}}catch(e){}
+const TH=70,MAX=112,lite=()=>R.dataset.lite==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ind=null,TK=[],g=null,busy=false,tgt=null,r0=false;
+const mk=()=>{if(ind)return;ind=document.createElement('div');ind.className='svc-ptr';ind.setAttribute('aria-hidden','true');
+  ind.innerHTML='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">'+[0,1,2,3,4,5,6,7].map(i=>'<line class="pt" x1="13" y1="3.2" x2="13" y2="7.8" transform="rotate('+i*45+' 13 13)" style="--o:'+(1-i*.11).toFixed(2)+'"/>').join('')+'</svg>';
+  document.body.appendChild(ind);TK=[...ind.querySelectorAll('.pt')]};
+const mv=(y,anim)=>{const el=tgt;if(!el||lite())return;el.style.transition=anim?'transform .5s cubic-bezier(.32,.72,0,1)':'none';el.style.transform=y?'translate3d(0,'+Math.round(y)+'px,0)':'';
+  if(!y&&anim)setTimeout(()=>{if(el.style.transform==='')el.style.transition=''},520)};
+const put=(d,top)=>{ind.style.top=Math.round(top)+'px';ind.style.setProperty('--py',Math.round(d/2-20)+'px');
+  const n=Math.min(8,Math.ceil(8*d/TH));TK.forEach((t,i)=>t.classList.toggle('on',i<n));ind.style.opacity=String(Math.min(1,d/26));
+  const r=d>=TH;ind.classList.toggle('rdy',r);if(r&&!r0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}r0=r;mv(d,false)};
+const hide=()=>{if(!ind)return;ind.classList.add('go','out');ind.classList.remove('rdy','spin');ind.style.opacity='0';mv(0,true);r0=false;
+  setTimeout(()=>{ind.classList.remove('go','out');ind.style.setProperty('--py','-46px');TK.forEach(t=>t.classList.remove('on'))},300)};
+/* под пальцем окно поверх страницы (лист, всплывающее, шапка) или свой уже прокрученный блок — жест не наш */
+const busyEl=(t,stop)=>{for(let e=t;e&&e!==document.body&&e!==stop&&e.nodeType===1;e=e.parentElement){const c=getComputedStyle(e);if(c.position==='fixed')return true;
+  if(e.scrollTop>0&&e.scrollHeight>e.clientHeight+1&&/auto|scroll/.test(c.overflowY))return true}return false};
+const full=()=>{try{sessionStorage.setItem('svc.ptr','1')}catch(e){}R.classList.add('svc-ptrout');setTimeout(()=>location.reload(),180);return new Promise(()=>{})};
+document.addEventListener('touchstart',e=>{g=null;if(busy||e.touches.length!==1||document.getElementById('ptr'))return;const t=e.target;
+  if(!t||!t.closest||t.closest('input,textarea,select,canvas,[contenteditable],.svc,.svt,.slider'))return;
+  const p=e.touches[0],pane=window.svcPtrPane?t.closest(window.svcPtrPane):null;   // окно страницы со своей прокруткой, где тоже можно тянуть (карточка Юнитки)
+  if(pane){if(pane.scrollTop>0||busyEl(t,pane))return;g={x:p.clientX,y:p.clientY,top:Math.max(0,pane.getBoundingClientRect().top),on:false,d:0,pane};tgt=pane;return}
+  if(busyEl(t))return;
+  const se=document.scrollingElement||R;if(Math.max(scrollY||0,se.scrollTop||0)>0||getComputedStyle(document.body).overflow==='hidden')return;
+  const h=document.querySelector('.svc-hdr'),hb=h?h.getBoundingClientRect().bottom:0;
+  g={x:p.clientX,y:p.clientY,top:Math.max(0,hb),on:false,d:0};tgt=document.querySelector('body>main')},{passive:true});
+document.addEventListener('touchmove',e=>{if(!g)return;const p=e.touches[0];if(!p||e.touches.length!==1){if(g.on)hide();g=null;return}const dx=p.clientX-g.x,dy=p.clientY-g.y;
+  if(!g.on){if(!dx&&!dy)return;if(dy<=0||Math.abs(dx)>=dy||!e.cancelable||(g.pane?g.pane.scrollTop:scrollY||0)>0){g=null;return}g.on=true;mk();ind.classList.remove('go')}
+  if(dy<=0){hide();g=null;return}e.preventDefault();g.d=Math.min(MAX,dy*.55);put(g.d,g.top)},{passive:false});
+const end=e=>{const z=g;g=null;if(!z||!z.on)return;if(e.type!=='touchend'||z.d<TH){hide();return}
+  busy=true;ind.classList.add('go','spin');ind.classList.remove('rdy');ind.style.setProperty('--py','8px');ind.style.opacity='1';TK.forEach(t=>t.classList.add('on'));mv(56,true);
+  const t0=Date.now();let pr;try{pr=Promise.resolve(typeof window.svcRefresh==='function'?window.svcRefresh():full())}catch(x){pr=Promise.resolve()}
+  const fin=()=>setTimeout(()=>{busy=false;hide()},Math.max(0,600-(Date.now()-t0)));Promise.race([pr,new Promise(r=>setTimeout(r,30000))]).then(fin,fin)};
+document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true});
+window.svcReload=full})();
 /*/SVC:JS*/
 </script>
 <script>
@@ -3904,7 +3983,7 @@ function zchBlock(){const Z=K.zch;if(!Z||!Z.o)return '';
     <div class="muted zcm">${ps||pn?'Разница '+cmpT:''}</div>
     <div class="zwr"><div class="zsc"${dd?` data-h="${nowI}"`:''}><div class="zrow${dd?'':' wk'}">${cols}</div></div><div class="zax">${ax}</div></div>
     <div class="zrd num">${rdT(nowI)}</div>
-    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">Данные на сегодня, ${D.at.slice(11,16)}</span></div></div>`+zltBlock()}
+    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">Данные на сегодня, ${D.at.slice(11,16)}</span></div></div>`+zsvBlock()+zltBlock()}
 /* 18.11 Андрей (скрин приложения ВБ «Лента заказов», «там 3 ряда ленты»): последние заказы / выкупы / отказы / возвраты —
    по 3 в столбике, следующий столбик видно справа, листается вбок; «Ещё» — весь список (до 30). Данные — sbor.zak_chas → K.zch.lt. */
 const ZMK=['янв','февр','марта','апр','мая','июня','июля','авг','сент','окт','нояб','дек'];
@@ -3945,6 +4024,18 @@ function zchSwap(id){const sel=id==='zlt'?'.zlt':'.zch',old=document.querySelect
   parts.forEach(q=>{const x=old.querySelector(q);if(x)x.classList.add('zout')});setTimeout(go,130);return true}
 new MutationObserver(()=>{if(document.querySelector('.zch [data-seg]:not(.zsg),.zlt [data-seg]:not(.zsg)'))zThumbs()}).observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('resize',zThumbs);
+
+/* 18.11 Андрей (скрин главной приложения ВБ: плитки «Аналитика · Цены · Продвижение · Остатки» и баланс): «добавь это тоже, а сверху
+   такими кнопками, но наши разделы — закупки и прочее». Плитки — переход в наши сервисы (те же значки, что в выборе сервиса servisy\svc.py);
+   под ними баланс продавца ВБ кабинета (sbor → K.sbal, раз в 30 минут) и «можно вывести». Только показывает: кнопки «Вывести» нет — деньги не трогаем.
+   Глаз прячет сумму (запоминается). */
+const ZSV_T='<a class="zsvt press" href="/unitka/"><span class="zsvi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></span><b>Юнитка</b></a><a class="zsvt press" href="/shov/"><span class="zsvi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></span><b>Склейки</b></a><a class="zsvt press" href="/shov/konkurenty/"><span class="zsvi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></span><b>Конкуренты</b></a><a class="zsvt press" href="/shov/zakupki/"><span class="zsvi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></span><b>Закупки</b></a><a class="zsvt press" href="/shov/panel/"><span class="zsvi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></span><b>Панель</b></a>';
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('.zbal .zeye');if(!b)return;S.zbh=!S.zbh;RS.set('zbh',S.zbh);const w=b.closest('.zbal');w.classList.toggle('hid',S.zbh);b.setAttribute('aria-pressed',String(!!S.zbh))});
+function zsvBlock(){const B=K.sbal;if(S.zbh===undefined)S.zbh=RS.get('zbh',false);
+  const eye='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="o" d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path class="x" d="M4 4l16 16"/></svg>';
+  const bal=B&&B.c!=null?`<div class="card zbal${S.zbh?' hid':''}"><div class="zbr"><b class="num zbs"><span class="zbv">${f0(Math.round(B.c))} ₽</span><span class="zbm">••• ₽</span></b><button type="button" class="zeye press" aria-label="Скрыть или показать сумму" aria-pressed="${!!S.zbh}">${eye}</button></div>
+    <div class="muted zbw num"><span class="zbv">${f0(Math.round(B.w||0))} ₽</span><span class="zbm">•••</span> можно вывести</div><div class="muted zbft">Баланс ${esc(K.name)} на ${esc((B.at||'').slice(11,16))}</div></div>`:'';
+  return `<div class="zsv"><div class="zsvr">${ZSV_T}</div></div>`+bal}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
    Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
