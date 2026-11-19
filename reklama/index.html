@@ -1160,7 +1160,7 @@ html,body{overscroll-behavior-y:contain}
 .vnh{font:650 13px var(--f);letter-spacing:.03em;text-transform:uppercase;color:var(--ink3);margin:2px 3px 0}
 .vnr{display:flex;align-items:center;gap:12px;width:100%;min-width:0;border:0;border-radius:16px;padding:10px 13px;background:var(--card);box-shadow:var(--sh1);color:var(--ink);text-align:left;cursor:pointer}
 .vnr>b{flex:none;min-width:30px;text-align:center;font:700 24px/1 var(--fd);letter-spacing:-.02em}
-.vnr.bud>b{color:var(--bad)}.vnr.zas>b{color:var(--warn)}
+.vnr.bud>b{color:var(--bad)}.vnr.zas>b{color:var(--warn)}.vnr.zsq>b{color:var(--good,#34c77b)}
 .vnr span{flex:1;min-width:0}
 .vnr span b{display:block;font-size:15px;font-weight:650;line-height:1.25}
 .vnr span small{display:block;font-size:12.5px;line-height:1.3;color:var(--ink3)}
@@ -2193,7 +2193,7 @@ const ostCell=v=>v==null?'<span class="muted">—</span>':v>0?f0(v):'<b class="b
 const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
 /* цена у покупателя: по последним заказам (цена и скидка ВБ дня); нашу цену с тех пор меняли — пересчитываем той же скидкой ВБ */
 function buyer(t){if(!t||!t.pr||!t.pd||!t.pd.length)return null;const x=t.pd[t.pd.length-1],same=Math.abs(x[1]-t.pr.f)<1.5;
-  return {v:same?x[2]:t.pr.f*(1-x[3]/100),spp:x[3],calc:!same,i:x[0]}}
+  return {v:same?x[2]:t.pr.f*(1-x[3]/100),spp:x[3],calc:!same,i:x[0],vit:x[4]===1}}   /* 19.11: x[4]=1 — день без заказов, снимок витрины из панели */
 /* последние правки и заметки: журнал целиком (D.ist), отбор по товару или кампании */
 const istOf=(nm,cid,note)=>{const t=nm&&TOV[nm];return (D.ist||[]).filter(z=>z.kab===S.kab&&(note?(z.kto==='заметка'||z.kto==='марпла'):(!z.avto&&z.kto!=='заметка'&&z.kto!=='марпла'))
   &&((!nm&&!cid)||(cid?z.cid===+cid:(String(z.nm)===String(nm)||!!(z.cid&&t&&t.rk.includes(z.cid))))))};
@@ -2524,7 +2524,7 @@ function cnPan(v,l){if(!v)return '';
 function cnCard(x){const t=x.t,p=t.pr,by=buyer(t),pn=t.pan,A=(t.ak||[]).filter(a=>a.e>=D.today),U=A.filter(a=>a.uch).sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:0),
     can=A.filter(a=>!a.uch&&a.plan&&p.f>a.plan).length,nr=U[0];
   let pl='';
-  if(by)pl+=`<span class="pill num">у покупателя ${by.calc?'≈ ':''}${rub(by.v)} · скидка ВБ ${f0(by.spp)}%</span>`;
+  if(by)pl+=`<span class="pill num">у покупателя ${by.calc?'≈ ':''}${rub(by.v)} · скидка ВБ ${f0(by.spp)}%${by.vit?' · по витрине':''}</span>`;
   if(t.am&&t.am[0])pl+=`<span class="pill num">нижняя цена автоакций ${rub(t.am[0])}${t.am[2]?' до '+dm(t.am[2]):''}</span>`;
   if(t.am&&t.am[1])pl+='<span class="pill w">снижение в автоакциях заблокировано</span>';
   if(U.length)pl+=`<span class="pill g num">в акциях: ${U.length}${nr&&nr.plan?' · '+(nr.s<=D.today?'сейчас ':'с '+dm(nr.s)+' ')+rub(nr.plan):''}</span>`;
@@ -3317,18 +3317,18 @@ function frSwitch(f){const kw=$('#rkkw'),k=FR.key.split('|'),sb=$('#sbody');if(F
 /* 17.11 Андрей: «раздел такой сделай … забытых и сделай чтобы можно было выбирать параметры забытости» — дни подряд (S.rkf.zd) и потолок трат в день (S.rkf.zl) выбираются в разделе; по умолчанию 5 дней и 100 ₽, как у отчёта 02:00 */
 const ZDN=[3,5,7,10,14],ZLM=[30,50,100,200,300,500];
 function zasD(){const d=+S.rkf.zd||5;return Math.min(d,Math.max(1,T))}
-function rkVnim(){const z={bud:new Set(),zas:new Set()};const ZD=zasD(),ZL=+S.rkf.zl||100;if(!K||T<ZD)return z;const d5=[],d7=[],edge=D.days[T-ZD];
+function rkVnim(){const z={bud:new Set(),zas:new Set(),zsq:new Set()};const ZD=zasD(),ZL=+S.rkf.zl||100;if(!K||T<ZD)return z;const d5=[],d7=[],edge=D.days[T-ZD];
   for(let i=T-ZD;i<T;i++)d5.push(i);for(let i=Math.max(0,T-7);i<=T;i++)d7.push(i);
   const ruki=new Set((D.ist||[]).filter(x=>x.kab===S.kab&&x.cid&&!x.avto&&x.kto!=='заметка'&&x.kto!=='марпла'&&x.t.slice(0,10)>=D.days[T-1]).map(x=>x.cid));
-  for(const r of K.rk){if(r.st!==9&&r.st!==11)continue;let s7=0,s5=0,on=0;
-    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){const x=(d.s&&d.s[i])||0;v+=x;s5+=x}}if(v>0)on++}   // 17.11 Андрей «поставил на паузу, а она в холостых»: после паузы ВБ ещё дни шлёт 1–5 показов без трат — живой день только с тратами
+  for(const r of K.rk){if(r.st!==9&&r.st!==11)continue;let s7=0,s5=0,on=0,q5=0;
+    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){const x=(d.s&&d.s[i])||0;v+=x;s5+=x;q5+=(d.q&&d.q[i])||0}}if(v>0)on++}   // 17.11 Андрей «поставил на паузу, а она в холостых»: после паузы ВБ ещё дни шлёт 1–5 показов без трат — живой день только с тратами
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
     const ost=Object.keys(r.nm).some(nm=>{const t=TOV[nm];return !t||((t.fbo||0)+(t.fbs||0))>0});   // 19.11 Андрей «тут не все такие»: бюджет 0 (своя кнопка «Бюджет 0») и товара нет ни на одном складе — не вхолостую
-    if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id)&&r.bud!==0&&ost)z.zas.add(r.id)}
+    if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id)&&r.bud!==0&&ost)(q5>0?z.zsq:z.zas).add(r.id)}   // 19.11 Андрей «ок»: фильтр на две кнопки — без заказов / с заказами, но мало трат
   return z}
-const VNL={bud:'Бюджет 0',zas:'Крутятся вхолостую'};
+const VNL={bud:'Бюджет 0',zas:'Вхолостую: без заказов',zsq:'Мало трат, но есть заказы'};const ZSK=k=>k==='zas'||k==='zsq';
 function rkRows(){const ix=PI(),q=(S.q||'').toLowerCase(),vn=VNL[S.rkf.vn]?rkVnim()[S.rkf.vn]:null;let L=[];
   for(const r of K.rk){const w=rkLive(r);
     for(const nm in r.nm){const t=TOV[nm],a=rkAgg(r,nm,ix),o=sum(t&&t.o&&t.o.r,ix);L.push({r,nm,t,a,w,oq:sum(t&&t.o&&t.o.q,ix),drr:o?100*a.s/o:(a.s?Infinity:null)})}}
@@ -3344,12 +3344,12 @@ function rkCard(x){const r=x.r,e=r.nm[x.nm]||{},a=x.a,g=ourGr(r);
    <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
    <div class="k kpi"><div><b class="num ${dcls(x.drr)}">${drrT(x.drr)}</b><span>ДРР</span></div><div><b class="num ${sbad(a.s,a.q)}">${rub(a.s)}</b><span>траты</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div></div></button>`}
 function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('zasd',+v);unfz();render(true)};SEGCB.zasl=v=>{S.rkf.zl=+v;RS.set('zasl',+v);unfz();render(true)}}
-  const VN=rkVnim();if(S.rkf.vn&&S.rkf.vn!=='zas'&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
+  const VN=rkVnim();if(S.rkf.vn&&!ZSK(S.rkf.vn)&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
   const rows=rkRows(),nW=K.rk.filter(r=>rkLive(r)).length,tot=rows.reduce((z,x)=>{z.s+=x.a.s;z.q+=x.a.q;return z},{s:0,q:0});
   let h=fresh();
   const zsub=`живые, но ${zasD()} ${zasD()%10===1&&zasD()%100!==11?'день':zasD()%10>=2&&zasD()%10<=4&&(zasD()%100<10||zasD()%100>=20)?'дня':'дней'} тратят до ${f0(+S.rkf.zl||100)} ₽ в день`;
-  if(K){const vr=(k,sub)=>VN[k].size||S.rkf.vn===k||k==='zas'?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
-    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas',zsub)}</div>`}
+  if(K){const vr=(k,sub)=>VN[k].size||S.rkf.vn===k||ZSK(k)?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
+    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas',zsub+', заказов нет')}${vr('zsq',zsub+', но заказы есть — дать денег')}</div>`}
   h+=`<div class="tiles c4"><div class="tile"><div class="l">Работает</div><div class="v num">${nW} <small>из ${K.rk.length}</small></div></div>
     <div class="tile"><div class="l">Расход</div><div class="v num">${kr(tot.s)} <small>₽</small></div></div>
     <div class="tile"><div class="l">Заказы РК</div><div class="v num">${f0(tot.q)}</div></div>
@@ -3359,9 +3359,9 @@ function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('za
     const kn=n=>n+' '+(n%10===1&&n%100!==11?'кампании':'кампаний');
     h+=`<button class="note w press" type="button" data-act="perenos" style="display:block;width:100%;text-align:left;cursor:pointer;font:inherit;font-size:13px;line-height:1.4;border:0">Сейчас ${nl?'лимит трат на день у '+kn(nl):''}${nl&&ng?' и ':''}${ng?'включение по часам у '+kn(ng):''} держит Марпла. Чтобы они работали и без её подписки, такие же можно завести у себя. В Марпле при этом ничего не выключится. <b>Что произойдёт и чем это может помешать ›</b><br><span style="opacity:.8">Это нажатие ничего не меняет — откроется объяснение и список.</span></button>`}
   /* 17.11 Андрей «аккуратный фильтр таких и его настройки без сдвигов»: строка фильтра всегда на месте (над «Кампании»), дни и ₽ — выпадающими списками; включение не раздвигает страницу */
-  if(K){const zo=S.rkf.vn==='zas';
-    h+=`<div class="zasf"><button class="chip press" type="button" data-act="rkvn" data-v="zas" aria-pressed="${zo}">Вхолостую · <span class="num">${VN.zas.size}</span></button><label class="zsl"><span>дней</span><select class="ssel zsel" data-k="zasd" aria-label="Сколько дней подряд почти не тратит">${ZDN.map(d=>`<option value="${d}"${d===zasD()?' selected':''}>${d}</option>`).join('')}</select></label><label class="zsl"><span>до, ₽/день</span><select class="ssel zsel" data-k="zasl" aria-label="Тратит в день не больше">${ZLM.map(v=>`<option value="${v}"${v===(+S.rkf.zl||100)?' selected':''}>${f0(v)}</option>`).join('')}</select></label></div>`}
-  h+=`<div class="hrw"><h3>${S.rkf.vn?VNL[S.rkf.vn]:'Кампании'} · ${rows.length}</h3>${S.rkf.vn&&S.rkf.vn!=='zas'?'<button class="chip press" type="button" data-act="rkvn" data-v="">✕ показать все</button>':''}${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
+  if(K){
+    h+=`<div class="zasf"><button class="chip press" type="button" data-act="rkvn" data-v="zas" aria-pressed="${S.rkf.vn==='zas'}">Без заказов · <span class="num">${VN.zas.size}</span></button><button class="chip press" type="button" data-act="rkvn" data-v="zsq" aria-pressed="${S.rkf.vn==='zsq'}">С заказами · <span class="num">${VN.zsq.size}</span></button><label class="zsl"><span>дней</span><select class="ssel zsel" data-k="zasd" aria-label="Сколько дней подряд почти не тратит">${ZDN.map(d=>`<option value="${d}"${d===zasD()?' selected':''}>${d}</option>`).join('')}</select></label><label class="zsl"><span>до, ₽/день</span><select class="ssel zsel" data-k="zasl" aria-label="Тратит в день не больше">${ZLM.map(v=>`<option value="${v}"${v===(+S.rkf.zl||100)?' selected':''}>${f0(v)}</option>`).join('')}</select></label></div>`}
+  h+=`<div class="hrw"><h3>${S.rkf.vn?VNL[S.rkf.vn]:'Кампании'} · ${rows.length}</h3>${S.rkf.vn&&!ZSK(S.rkf.vn)?'<button class="chip press" type="button" data-act="rkvn" data-v="">✕ показать все</button>':''}${frzChip('rk')}${viewSeg('rkv',S.rkv)}${S.rkv==='table'?tblBtn('rk'):seg('rks',[['s','Расход'],['drr','ДРР'],['bud','Мало бюджета']],S.rkf.sort,'sm')}</div>`;
   if(!rows.length)return h+'<div class="empty"><b>Ничего не нашлось</b>Сбросьте поиск или выберите «Все».</div>';
   if(S.rkv==='table')return h+tblHtml('rk',rows,x=>`data-rk="${x.r.id}|${x.nm}" data-ctx="rk"`)+`<div class="muted tnote">Нажмите на название столбца — сортировка; прежний столбец остаётся вторым (цифры 1 и 2 в шапке). «Столбцы» — выбрать оба столбца сортировки, скрыть лишние, переставить. ${ostAt()}</div>`;
   return h+'<div class="list">'+rows.slice(0,150).map(rkCard).join('')+'</div>'+(rows.length>150?`<div class="muted" style="margin:8px 4px;font-size:13px">Показаны первые 150 из ${rows.length} — уточните поиском.</div>`:'')}
@@ -3430,7 +3430,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 13.11 Андрей: «с нашей скидкой нашу цену надо и цену для покупателя чуть меньше», цену с WB Клубом не показываем */
   /* 14.11 Андрей: «в товаре над рк отдельный смену периода или нет вот как на главной он в шапке» — период один, первой строкой листа, прилипает к верху */
   let h=perSeg()+`<div class="prh"><div class="ph"${foto(t)}></div><div class="pp">${t.pr?`<span class="pl1">наша цена</span><b class="num">${rub2(t.pr.f)}</b>
-       <span class="pb num">${by?`у покупателя ${by.calc?'≈ ':''}<b>${rub(by.v)}</b> · скидка ВБ ${f0(by.spp)}%`:'у покупателя — нет данных: за период не было заказов'}</span><span class="num">до скидки ${f0(t.pr.p)} ₽ · наша скидка ${t.pr.d}%</span>`:'<b>цена не прочиталась</b>'}</div></div>
+       <span class="pb num">${by?`у покупателя ${by.calc?'≈ ':''}<b>${rub(by.v)}</b> · скидка ВБ ${f0(by.spp)}%${by.vit?' · по витрине '+dlab(by.i):''}`:'у покупателя — нет данных: ни заказов, ни снимков витрины'}</span><span class="num">до скидки ${f0(t.pr.p)} ₽ · наша скидка ${t.pr.d}%</span>`:'<b>цена не прочиталась</b>'}</div></div>
      <div class="wbln"><a class="press" href="https://www.wildberries.ru/catalog/${t.nm}/detail.aspx" target="_blank" rel="noopener">${WBL}Товар на ВБ ↗</a></div>
      <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${t.oh?`<button type="button" class="osbt press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}">${ostPills(t)}<span class="pill osar">остатки по дням ${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}</div>`;
   if(t.oh&&S.ostOpen)h+=ostHist(t);
