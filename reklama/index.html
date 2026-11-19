@@ -3325,7 +3325,8 @@ function rkVnim(){const z={bud:new Set(),zas:new Set()};const ZD=zasD(),ZL=+S.rk
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
-    if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id))z.zas.add(r.id)}
+    const ost=Object.keys(r.nm).some(nm=>{const t=TOV[nm];return !t||((t.fbo||0)+(t.fbs||0))>0});   // 19.11 Андрей «тут не все такие»: бюджет 0 (своя кнопка «Бюджет 0») и товара нет ни на одном складе — не вхолостую
+    if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id)&&r.bud!==0&&ost)z.zas.add(r.id)}
   return z}
 const VNL={bud:'Бюджет 0',zas:'Крутятся вхолостую'};
 function rkRows(){const ix=PI(),q=(S.q||'').toLowerCase(),vn=VNL[S.rkf.vn]?rkVnim()[S.rkf.vn]:null;let L=[];
