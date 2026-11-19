@@ -1205,7 +1205,8 @@ document.addEventListener('click',e=>{
    + отображение светофора показателей этих; до 10% ДРР норм»). NORM: [норма, граница, «меньше — лучше»]. Зелёный — норма, жёлтый — между нормой
    и границей, красный — за границей. ДРР: до 10% / до 15% / выше. Маржа: от 10% / от 0 / минус. До ДРР: от 20% / от 10% / ниже. ───────── */
 const NORM={drr:[.10,.15,1],mProfit:[.10,0],mNodrr:[.20,.10]};
-function zone(key,v){const n=NORM[key];if(!n||!ok(v))return 0;return n[2]?(v<=n[0]?1:v<=n[1]?2:3):(v>=n[0]?1:v>=n[1]?2:3)}
+const NORM_WB={drr:[.09,.15,1]};   // Андрей 19.11: «для ВБ норма до 9» — ДРР ВБ до 9% зелёный
+function zone(key,v){const n=(S.mp==='wb'&&NORM_WB[key])||NORM[key];if(!n||!ok(v))return 0;return n[2]?(v<=n[0]?1:v<=n[1]?2:3):(v>=n[0]?1:v>=n[1]?2:3)}
 const ZS=['','sg1','sg2','sg3'],ZT=['','z1','z2','z3'],LT='<i class="lt"><i></i><i></i><i></i></i>';
 function sem(rows,T,g,k){   // rows — строки площадок отбора (по ним сравнение «на тот же день»), T — их сумма
   const m=met(T),pk=prevK(g,k),part=g!=='y'&&partial(g,k),pc=pk!=null?paces(rows,g,k,fS):null,d=pc&&pc[1]?(pc[0]-pc[1])/Math.abs(pc[1]):null;
@@ -1445,7 +1446,7 @@ const tcell=(v,c,it)=>{   // ячейка: минус красным; ДРР и 
   else if(key==='mNodrr'||key==='roi'||key==='pMarg'||key==='pVpdn'||key==='pBezHr')cl=ok(v)&&v<0?'b1':'';   // у остальных долей — только минус красным
   if(it&&it.p&&ok(v)&&(key==='drr'||key==='pComm'||key==='pLogi')){const pv=it.pm[key];if(ok(pv)&&v-pv>=(key==='drr'?.03:.02))ex='<i class="gr">▲</i>'}
   return `<td${cl?` class="${cl}"`:''}>${FMT[c[2]](v)}${ex}</td>`};
-const TNOTE='<div class="note" style="margin-top:8px">▲ у ДРР, комиссии и логистики — доля в продажах выросла к прошлому периоду. Красная строка под названием — за счёт чего товар в минусе: какие расходы у него выше среднего. Цвет у ДРР и маржи % — светофор: зелёный — норма (ДРР до 10%, маржа от 10%), жёлтый — на границе (ДРР до 15%, маржа выше нуля), красный — хуже.</div>';
+const TNOTE='<div class="note" style="margin-top:8px">▲ у ДРР, комиссии и логистики — доля в продажах выросла к прошлому периоду. Красная строка под названием — за счёт чего товар в минусе: какие расходы у него выше среднего. Цвет у ДРР и маржи % — светофор: зелёный — норма (ДРР до 10%, у ВБ до 9%, маржа от 10%), жёлтый — на границе (ДРР до 15%, маржа выше нуля), красный — хуже.</div>';
 const buyP=rows=>{const b=buyOf(rows,S.g,curK());return b?b[0]/(b[0]+b[1]):null};   // % выкупа — как на листе «SKU»: считается по месяцам
 const gv=(it,key)=>key==='salesP'?(it.p?it.pm.sales:null):key==='avgP'?(it.p?it.pm.avg:null):key==='drrP'?(it.p?it.pm.drr:null):key==='buy'?buyP(it.its||crd(it)):it.m[key];
 /* фото карточек (rows[].im ставит sostav.py из данных сервиса «Склейки»): маленькая копия с сервера площадки; не открылась — исходная, не открылась и она — место остаётся пустым */
