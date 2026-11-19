@@ -2016,7 +2016,7 @@ const u8b64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i])
 let D=null,KL=null,DKC=null,UPR=RS.get('upr',null),K=null,TOV={},RK={},N=0,T=0,UPASS=null;
 const S={tab:RS.get('tab','tov'),kab:RS.get('kab','kab1'),per:RS.get('per',7),off:RS.get('off',0),view:RS.get('view','cards'),sort:RS.get('sort','drr'),dir:RS.get('dir',-1),q:'',only:RS.get('only',true),ost:RS.get('ost',false),
   chm:RS.get('chm','drr'),kw:{nm:RS.get('kwnm',0),cid:0,sort:'s',dir:-1,src:'rk',x:false},ak:{f:RS.get('akf','can')},ist:{f:'all',avto:false,nm:0}};
-const NORMA=12;   // доля рекламы от заказов, % — как в отчётах маркетолога
+const NORMA=9;   // доля рекламы, % — Андрей 19.11 «для ВБ норма до 9» (было 12)
 
 async function pbk(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64u8(salt),iterations:iter},base,{name:'AES-GCM',length:256},true,['decrypt'])}
@@ -3729,7 +3729,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(t){const pb=panBlock(t,a);if(pb)h+='<div style="height:10px"></div>'+pb}
   const cx=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cx.push(i);const cd=chgDays(nm,id);
   /* гистограмма: высота — то, что выбрано (ДРР к заказам товара, ДРР к заказам с этой рекламы или расход), над столбиком одна цифра; день с тратами без заказов —
-     красный во всю высоту, «0 зак»; линия — норма ДРР 15%; шкала слева. ДРР выше 60% упирается в верх (цифра над ним настоящая) */
+     красный во всю высоту, «0 зак»; линия — норма ДРР (NORMA, 9%); шкала слева. ДРР выше 60% упирается в верх (цифра над ним настоящая) */
   const dmo=S.rkdm||'o',zk=x=>x.s>=1&&!(dmo==='k'?x.sp:x.or),dv=x=>dmo==='k'?(x.sp?100*x.s/x.sp:null):x.drr,
     dbt=(v,l)=>`<button type="button" class="press" data-act="rkdm" data-k="${v}" aria-pressed="${dmo===v}">${l}</button>`;
   h+=`<div class="hrw"><h3>По дням</h3><span class="pnqs">${dbt('o','ДРР общий')}${dbt('k','ДРР РК')}${dbt('s','Расход')}</span></div>`+chart({ix:cx,h:176,mh:72,
