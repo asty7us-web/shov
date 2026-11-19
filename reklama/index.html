@@ -3544,7 +3544,7 @@ const panWk=s=>{s=String(s||'').trim();const m=s.match(/(\d{1,2})\.?\s*([^\d\s.\
    Столбец «период» убран — те же ДРР и заказы в главных цифрах ниже */
 /* 14.11 Андрей «2 недели добавь» — третья кнопка «2 недели» (t.pan.w2, подпись D.pan.w2l; при «14 дн» выбрана сама) */
 function panBlock(t,a,akc){const pn=t.pan||{},w=pn.w,m=pn.m,w2=pn.w2,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
-  if(!has(w)&&!has(m)&&!has(w2))return t.pan&&!akc?`<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><small class="pnqd">продаж нет: ни за неделю ${esc(D.pan&&D.pan.wl?panWk(D.pan.wl):'')}, ни за ${esc(D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'месяц')} — маржу и ДРР считать не от чего</small></div></div>`:'';   // 19.11 Андрей «где панель данные?»: товар в панели есть, продаж ноль — пишем это, а не прячем блок
+  if(akc&&!has(w)&&!has(m)&&!has(w2))return '';   // 19.11 Андрей «блок будет у всех одинаковый, просто данных не будет»: в листах блок всегда, без продаж — прочерки; в «Акциях» без продаж — график заказов
   const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w'),x=k==='m'?m:k==='w2'?w2:w;
   const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'',w2l=D.pan&&D.pan.w2l?panWk(D.pan.w2l):'';
   const mg=has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
