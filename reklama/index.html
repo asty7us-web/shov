@@ -2500,7 +2500,7 @@ function vAk(){const rows=akRows();let h=fresh(1);
   const i30=PI(30);
   for(const {t,L} of rows){const q30=sum(t.o&&t.o.q,i30);
     h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="akp"><b class="num">${rub2(t.pr.f)}</b><span class="num">наша цена · скидка ${t.pr.d}%</span></div></div></button>
-      ${(pb=>pb?`<div class="akpn">${pb}</div>`:`<div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div>`)(panBlock(t))}<div style="margin-top:4px">`;   /* 17.11 Андрей (кадр «Акции»): «вместо этого блока панель блок такой же короткий и сроки менять» — строка «По панели» как в листе товара (неделя | 2 недели | месяц); нет панели — прежний график заказов */
+      ${(pb=>pb?`<div class="akpn">${pb}</div>`:`<div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div>`)(panBlock(t,null,1))}<div style="margin-top:4px">`;   /* 17.11 Андрей (кадр «Акции»): «вместо этого блока панель блок такой же короткий и сроки менять» — строка «По панели» как в листе товара (неделя | 2 недели | месяц); нет панели — прежний график заказов */
     for(const a of L)h+=`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
       <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">'+(a.nw?'вошли, ВБ отметит':'участвуем')+'</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
     h+='</div></div>'}
@@ -3543,8 +3543,8 @@ const panWk=s=>{s=String(s||'').trim();const m=s.match(/(\d{1,2})\.?\s*([^\d\s.\
    «По панели: маржа · ДРР · продажи» под ценой и остатками, один период (неделя | месяц переключателем; по умолчанию месяц при «30 дн», иначе неделя).
    Столбец «период» убран — те же ДРР и заказы в главных цифрах ниже */
 /* 14.11 Андрей «2 недели добавь» — третья кнопка «2 недели» (t.pan.w2, подпись D.pan.w2l; при «14 дн» выбрана сама) */
-function panBlock(t,a){const pn=t.pan||{},w=pn.w,m=pn.m,w2=pn.w2,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
-  if(!has(w)&&!has(m)&&!has(w2))return '';
+function panBlock(t,a,akc){const pn=t.pan||{},w=pn.w,m=pn.m,w2=pn.w2,has=x=>!!(x&&x[0]>0),no='<b class="muted">—</b>';
+  if(!has(w)&&!has(m)&&!has(w2))return t.pan&&!akc?`<div class="pnt pnq"><div class="pnqh"><span class="pnql">По панели</span><small class="pnqd">продаж нет: ни за неделю ${esc(D.pan&&D.pan.wl?panWk(D.pan.wl):'')}, ни за ${esc(D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'месяц')} — маржу и ДРР считать не от чего</small></div></div>`:'';   // 19.11 Андрей «где панель данные?»: товар в панели есть, продаж ноль — пишем это, а не прячем блок
   const k=S.pnp||(S.per>=30?'m':S.per>=14&&D.pan&&D.pan.w2l?'w2':'w'),x=k==='m'?m:k==='w2'?w2:w;
   const wl=D.pan&&D.pan.wl?panWk(D.pan.wl):'',ml=D.pan&&D.pan.ml?String(D.pan.ml).toLowerCase():'',w2l=D.pan&&D.pan.w2l?panWk(D.pan.w2l):'';
   const mg=has(x)&&x[2]!=null?`<b class="num ${mcls(100*x[2])}">${pc(100*x[2])}</b>`:no,dr=has(x)&&x[1]!=null?`<b class="num ${dcls(100*x[1])}">${pc(100*x[1])}</b>`:no,
