@@ -3349,7 +3349,7 @@ function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('za
   let h=fresh();
   const zsub=`живые, но ${zasD()} ${zasD()%10===1&&zasD()%100!==11?'день':zasD()%10>=2&&zasD()%10<=4&&(zasD()%100<10||zasD()%100>=20)?'дня':'дней'} тратят до ${f0(+S.rkf.zl||100)} ₽ в день`;
   if(K){const vr=(k,sub)=>VN[k].size||S.rkf.vn===k||ZSK(k)?`<button class="vnr ${k} press" type="button" data-act="rkvn" data-v="${k}" aria-pressed="${S.rkf.vn===k}"><b class="num">${VN[k].size}</b><span><b>${VNL[k]}</b><small>${sub}</small></span><i>${S.rkf.vn===k?'✕':'›'}</i></button>`:'';
-    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas',zsub+', заказов нет')}${vr('zsq',zsub+', но заказы есть — дать денег')}</div>`}
+    h+=`<div class="vnm"><div class="vnh">Требуют внимания</div>${vr('bud','реклама шла, а денег в кампании нет')}${vr('zas',zsub+', заказов нет')}${vr('zsq',zsub+', а заказы есть — дать денег')}</div>`}
   h+=`<div class="tiles c4"><div class="tile"><div class="l">Работает</div><div class="v num">${nW} <small>из ${K.rk.length}</small></div></div>
     <div class="tile"><div class="l">Расход</div><div class="v num">${kr(tot.s)} <small>₽</small></div></div>
     <div class="tile"><div class="l">Заказы РК</div><div class="v num">${f0(tot.q)}</div></div>
