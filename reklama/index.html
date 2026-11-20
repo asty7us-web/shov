@@ -92,10 +92,11 @@ input,textarea,select{font:inherit;color:inherit}
 .svc-ic.z{--svc-glow:rgba(100,185,255,.5);background:linear-gradient(145deg,#456690 0%,#1d2d47 52%,#0a111d 100%)}
 .svc-ic.p{--svc-glow:rgba(30,34,48,.6);background:linear-gradient(145deg,#5b6275 0%,#262a36 52%,#0c0d12 100%)}
 .svc-ic.r{--svc-glow:rgba(255,120,160,.5);background:linear-gradient(145deg,#8a4a63 0%,#3e1c2b 52%,#190a11 100%)}
+.svc-ic.c{--svc-glow:rgba(255,205,90,.5);background:linear-gradient(145deg,#7d6b34 0%,#362c12 52%,#141006 100%)}
 @media (hover:hover){.svc-btn:hover .svc-ic,.svc-it:hover .svc-ic{transform:rotate(-8deg) scale(1.06)}}
 .svc-btn[aria-expanded="true"] .svc-ic{transform:rotate(-8deg) scale(1.06)}
 .svc-menu.on .svc-it .svc-ic{animation:svc-ico .6s cubic-bezier(.34,1.56,.64,1) both}
-.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}.svc-menu.on .svc-it:nth-child(5) .svc-ic{animation-delay:.15s}.svc-menu.on .svc-it:nth-child(6) .svc-ic{animation-delay:.2s}.svc-menu.on .svc-it:nth-child(7) .svc-ic{animation-delay:.25s}
+.svc-menu.on .svc-it:nth-child(3) .svc-ic{animation-delay:.05s}.svc-menu.on .svc-it:nth-child(4) .svc-ic{animation-delay:.1s}.svc-menu.on .svc-it:nth-child(5) .svc-ic{animation-delay:.15s}.svc-menu.on .svc-it:nth-child(6) .svc-ic{animation-delay:.2s}.svc-menu.on .svc-it:nth-child(7) .svc-ic{animation-delay:.25s}.svc-menu.on .svc-it:nth-child(8) .svc-ic{animation-delay:.3s}
 @keyframes svc-ico{from{transform:scale(.6) rotate(-20deg);opacity:0}}
 .svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
   background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
@@ -119,7 +120,7 @@ input,textarea,select{font:inherit;color:inherit}
 .svc-it.go .svc-sp{opacity:1;animation:svc-spin .7s linear infinite}
 @keyframes svc-spin{to{transform:rotate(360deg)}}
 .svc-menu.on .svc-it{animation:svc-row .5s cubic-bezier(.22,1.2,.36,1) both}
-.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}.svc-menu.on .svc-it:nth-child(5){animation-delay:.105s}.svc-menu.on .svc-it:nth-child(6){animation-delay:.14s}.svc-menu.on .svc-it:nth-child(7){animation-delay:.175s}
+.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}.svc-menu.on .svc-it:nth-child(5){animation-delay:.105s}.svc-menu.on .svc-it:nth-child(6){animation-delay:.14s}.svc-menu.on .svc-it:nth-child(7){animation-delay:.175s}.svc-menu.on .svc-it:nth-child(8){animation-delay:.21s}
 @keyframes svc-row{from{opacity:0;transform:translateY(-6px)}}
 /* выбор темы — как в Юнитке (Андрей 29.10: «как в юнитке выбор везде тем формат»): кнопка «значок + название темы», под ней список
    с кружками и группами «Весёлые» / «Спокойные». Юнитка рисует свой (он образец), Склейки и Конкуренты — svcPicker() отсюда */
@@ -1085,6 +1086,26 @@ html,body{overscroll-behavior-y:contain}
 :root[data-lite="1"] .rkbox::after{animation-duration:24s}
 @media (prefers-reduced-motion:reduce){.rkbox::before,.rkbox::after{animation-duration:30s}}
 
+/* 21.11 «Все площадки» на главной (d_mpv.js) */
+.mpv{margin-bottom:10px}
+.mpv .mpp{font-size:12px}
+.mpv .mpg{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr);gap:8px;align-items:center;width:100%;text-align:right}
+.mpv .mpg>span:first-child{text-align:left}
+.mpv .mph{font-size:11px;padding:0 6px 4px}
+.mpv .mprow{padding:8px 6px;border:0;border-top:1px solid color-mix(in srgb,currentColor 10%,transparent);background:none;color:inherit;font:inherit;border-radius:0}
+.mpv button.mprow{cursor:pointer}
+.mpv .mprow.on{background:color-mix(in srgb,currentColor 6%,transparent);border-radius:10px}
+.mpv .mpt{font-weight:700;border-top:1px solid color-mix(in srgb,currentColor 25%,transparent)}
+.mpv .mpl{display:flex;align-items:center;flex-wrap:wrap;gap:0 4px;min-width:0;font-weight:600}
+.mpv .mpl small{flex-basis:100%;font-weight:400;font-size:10.5px}
+.mpv .mps,.mpv .mpr,.mpv .mpd{font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:flex-end;line-height:1.2}
+.mpv .mpr small,.mpv .mpd small{font-size:11px;font-weight:500;opacity:.75}
+.mpv .mpd.good{color:var(--good)}.mpv .mpd.bad{color:var(--bad)}
+.mpv .mpn{font-size:11px;line-height:15px;margin-top:8px}
+.mpb{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:6px;margin-right:6px;flex:none;font:800 8px/1 var(--fd);font-style:normal;letter-spacing:-.02em}
+.mpb.oz{color:#fff;background:#005bff}
+.mpb.ym{color:#111;background:#fc0}
+
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
 /* текст на цветной кнопке (зелёной, жёлтой): в светлой теме белый, в тёмных — тёмный, как у столбиков графика */
@@ -1834,7 +1855,7 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 <body>
 <header class="hdr svc-hdr">
   <div class="hrow">
-    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама"><em class="svc-ic r"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11.2" cy="12.8" r="7.4" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><circle cx="11.2" cy="12.8" r="3" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><path d="m11.2 12.8 7.2-7.2" stroke="#ff8fb1" stroke-width="2.3" stroke-linecap="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-nm">Реклама</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" id="toZakup" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/panel/" id="toPanel" role="menuitem"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Панель</b><small>продажи, прибыль, ДРР по товарам</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/reklama/" aria-current="page" role="menuitem"><em class="svc-ic r"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11.2" cy="12.8" r="7.4" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><circle cx="11.2" cy="12.8" r="3" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><path d="m11.2 12.8 7.2-7.2" stroke="#ff8fb1" stroke-width="2.3" stroke-linecap="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Реклама</b><small>РК ВБ: статистика, ключи, акции</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a></div></div><!--/SVC:HTML-->
+    <!--SVC:HTML--><div class="svc"><button class="svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама, Учёт"><em class="svc-ic r"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11.2" cy="12.8" r="7.4" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><circle cx="11.2" cy="12.8" r="3" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><path d="m11.2 12.8 7.2-7.2" stroke="#ff8fb1" stroke-width="2.3" stroke-linecap="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-nm">Реклама</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" id="toUnitka" role="menuitem"><em class="svc-ic u"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 6v12M4.6 12h3.6" fill="none" stroke="#8df58b" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="12" r="5.6" fill="none" stroke="#8df58b" stroke-width="2.6"/><circle cx="19.8" cy="5.2" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><em class="svc-ic s"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="7.4" width="9.8" height="12.8" rx="2.7" fill="none" stroke="#cdaaff" stroke-opacity=".5" stroke-width="2.2" transform="rotate(-9 8.1 13.8)"/><rect x="10.9" y="3.8" width="9.8" height="12.8" rx="2.7" fill="#2a2046" stroke="#cdaaff" stroke-width="2.4" transform="rotate(8 15.8 10.2)"/><circle cx="12" cy="12.9" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><em class="svc-ic k"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 19.4v-5M12 19.4V9.6M18.8 19.4v-3.2" fill="none" stroke="#ffb45e" stroke-width="3.6" stroke-linecap="round"/><circle cx="12" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/zakupki/" id="toZakup" role="menuitem"><em class="svc-ic z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 5h2.3l2.4 9.8h9.5l1.9-7H6.6" fill="none" stroke="#86d2ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.4" cy="19" r="1.75" fill="#86d2ff"/><circle cx="16.5" cy="19" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Закупки</b><small>ниши и проверка товара</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/panel/" id="toPanel" role="menuitem"><em class="svc-ic p"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 17.2 9 11.4l4.1 3.3 7-8.3" fill="none" stroke="#5ef2c4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 20.4h16.8" stroke="currentColor" stroke-opacity=".5" stroke-width="1.7" stroke-linecap="round"/><circle cx="20.1" cy="6.4" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Панель</b><small>продажи, прибыль, ДРР по товарам</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/reklama/" aria-current="page" role="menuitem"><em class="svc-ic r"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11.2" cy="12.8" r="7.4" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><circle cx="11.2" cy="12.8" r="3" fill="none" stroke="#ff8fb1" stroke-width="2.3"/><path d="m11.2 12.8 7.2-7.2" stroke="#ff8fb1" stroke-width="2.3" stroke-linecap="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Реклама</b><small>РК ВБ: статистика, ключи, акции</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a><a class="svc-it" href="/uchet/" id="toUch" role="menuitem"><em class="svc-ic c"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 19.6V4.6h5.1a4 4 0 0 1 0 8H6.4M6.4 16.1h8.2" fill="none" stroke="#ffd166" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19.6" cy="4.6" r="2" fill="#fff59d"/></svg></em><span class="svc-tx"><b>Учёт</b><small>деньги на сейчас, сверка</small></span><i class="svc-sp" aria-hidden="true"></i></a></div></div><!--/SVC:HTML-->
     <span class="hsp"></span>
     <div class="seg" id="kabSeg" role="group" aria-label="Кабинет"></div>
     <!-- 14.11 Андрей: «а сверху это обновление мест именно?» — кнопка обновляет ДАННЫЕ (места снимает отдельная кнопка в её листе): под временем подпись «данные» (.rfd, a_css_v.css) -->
@@ -1882,10 +1903,10 @@ m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return
 addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
-// столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели, svcTheme(5, …) — у Рекламы)
-const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space','space'],['jim','jim',null,null,null,null],
-  ['farcry','farcry','farcry',null,null,null],['sonic','sonic','sonic',null,null,null],['solitaire','solitaire','solitaire',null,null,null],['birds','birds','birds',null,null,null]],
-  KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme','rek.theme'];
+// столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама, Учёт (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели, svcTheme(5, …) — у Рекламы, svcTheme(6, …) — у Учёта)
+const TH=[['auto','auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light','light'],['dark','graphite','dark','dark','dark','dark','dark'],['space','space','space','space','space','space','space'],['jim','jim',null,null,null,null,null],
+  ['farcry','farcry','farcry',null,null,null,null],['sonic','sonic','sonic',null,null,null,null],['solitaire','solitaire','solitaire',null,null,null,null],['birds','birds','birds',null,null,null,null]],
+  KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme','rek.theme','uch.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
 /* выбор темы в формате Юнитки: svcPicker({btn:'#id кнопки', list:[[ключ, название, группа, чей значок/кружок]], cur, onPick, sw:{свои кружки}}).
    Значки и кружки общих тем — те же, что в Юнитке (TH и SWATCH там) */
@@ -2429,6 +2450,7 @@ function vTov(){
   const zc=zchBlock();   // 17.11 блок «Заказы | Выкупы» как в приложении ВБ (d_zch.js), встаёт сразу под «Данные на…»
   let h=fresh();
   /* 17.11 Андрей (кадр плиток Каб 1): «Клики не надо, реклама руб не надо, нужно дрррк, дрр, продажи руб, и все» — три плитки вместо шести */
+  h+=mpvBlock();   // 21.11 Андрей «Дашборд по всем МП добавь в рекламу на главной вверху» (d_mpv.js)
   h+=zc+`<div class="tiles t3">
    <div class="tile"><div class="l">ДРР</div><div class="v num ${dcls(a.drr)}">${pc(a.drr)}</div><div class="d">${jn(b?delta(a.drr,b.drr,1):'','норма до '+NORMA+'%')}</div></div>
    <div class="tile"><div class="l">ДРР РК</div><div class="v num ${dcls(a.drrk)}">${isFinite(a.drrk)?pc(a.drrk):'нет зак.'}</div><div class="d">${b&&isFinite(a.drrk)&&isFinite(b.drrk)?delta(a.drrk,b.drrk,1):'к заказам с рекламы'}</div></div>
@@ -4083,6 +4105,33 @@ function zsvBlock(){const B=K.sbal;if(S.zbh===undefined)S.zbh=RS.get('zbh',false
   const bal=B&&B.c!=null?`<div class="card zbal${S.zbh?' hid':''}"><div class="zbr"><b class="num zbs"><span class="zbv">${f0(Math.round(B.c))} ₽</span><span class="zbm">••• ₽</span></b><button type="button" class="zeye press" aria-label="Скрыть или показать сумму" aria-pressed="${!!S.zbh}">${eye}</button></div>
     <div class="muted zbw num"><span class="zbv">${f0(Math.round(B.w||0))} ₽</span><span class="zbm">•••</span> можно вывести</div><div class="muted zbft">Баланс ${esc(K.name)} на ${esc((B.at||'').slice(11,16))}</div></div>`:'';
   return `<div class="zsv"><div class="zsvr">${ZSV_T}</div></div>`+bal}
+
+/* 21.11 Андрей в «К»: «Дашборд по всем МП добавь в рекламу на главной вверху» — блок «Все площадки» первым на «Товарах».
+   ВБ — оба кабинета из своих данных (как плитки ниже: реклама всех кампаний к заказам ₽ кабинета), Озон и Маркет — D.mp из mp_vse.py
+   (Озон: расход всех кампаний к заказам с отменами по дню заказа, как вечерняя сводка; Маркет: реклама — оценка по ставке буста × цена заказа).
+   Период — тот же, что выбран вверху (PI), сравнение ДРР — с прошлым таким же периодом (PP). Нажатие на строку кабинета ВБ — переключает кабинет (общий обработчик [data-kab] в e_sheets.js) */
+function mpWb(k,ix){const Z=D.kab[k];let s=0,r=0,q=0;if(!Z)return null;
+  for(const c of Z.rk||[])for(const nm in c.nm){const d=c.nm[nm].d;if(d)s+=sum(d.s,ix)}
+  for(const t of Z.tov||[]){r+=sum(t.o&&t.o.r,ix);q+=sum(t.o&&t.o.q,ix)}return {s,r,q,full:true}}
+function mpOt(m,ix){const M=D.mp&&D.mp[m];if(!M)return null;let s=0,r=0,q=0,n=0;
+  for(const i of ix){const x=M[D.days[i]];if(x){s+=x[0];r+=x[1];q+=x[2];n++}}return n?{s,r,q,full:n===ix.length}:null}
+function mpvBlock(){const ix=PI(),pp=PP(),mp=D.mp||{};
+  const rows=[];for(const k of Object.keys(D.kab))rows.push({key:'wb',kab:k,l:WBL+esc(D.kab[k].name),a:mpWb(k,ix),b:pp?mpWb(k,pp):null});
+  rows.push({key:'oz',l:'<i class="mpb oz" aria-hidden="true">OZ</i>Озон',a:mpOt('oz',ix),b:pp?mpOt('oz',pp):null,at:mp.oz_at});
+  rows.push({key:'ym',l:'<i class="mpb ym" aria-hidden="true">ЯМ</i>Маркет',a:mpOt('ym',ix),b:pp?mpOt('ym',pp):null,at:mp.ym_at,oc:1});
+  const tot={s:0,r:0,q:0},tb={s:0,r:0};let tbOk=!!pp;
+  for(const x of rows){if(x.a){tot.s+=x.a.s;tot.r+=x.a.r;tot.q+=x.a.q}if(x.b){tb.s+=x.b.s;tb.r+=x.b.r}else tbOk=false}
+  const dr=a=>a&&a.r?100*a.s/a.r:null,cell=(x,wb)=>{const d=dr(x.a),db=dr(x.b);
+    return `<span class="num mps">${x.a?kr(x.a.s)+' ₽':'—'}</span><span class="num mpr">${x.a?kr(x.a.r)+' ₽':'—'}<small>${x.a?f0(x.a.q)+' шт':''}</small></span><span class="num mpd ${wb?dcls(d):''}">${x.a?(d==null?(x.a.s?'нет зак.':'—'):pc(d)):'—'}<small>${x.b?delta(d,db,1):''}</small></span>`};
+  let h=`<div class="card mpv"><div class="hrw" style="margin:0 0 6px"><h3>Все площадки</h3><span class="muted mpp">${esc(perLab())}</span></div>
+    <div class="mpg mph muted"><span></span><span>Реклама</span><span>Заказы</span><span>ДРР</span></div>`;
+  for(const x of rows){const wb=x.key==='wb',on=wb&&x.kab===S.kab,miss=!x.a?(x.key==='wb'?'':'нет данных'):!x.a.full?'не все дни':'';
+    h+=`<${wb?`button type="button" data-kab="${x.kab}"`:'div'} class="mpg mprow${on?' on':''}"><span class="mpl">${x.l}${x.oc?'<sup class="muted">≈</sup>':''}${miss?`<small class="muted">${miss}</small>`:''}</span>${cell(x,wb)}</${wb?'button':'div'}>`}
+  const xt={a:tot,b:tbOk?tb:null};
+  h+=`<div class="mpg mprow mpt"><span class="mpl">Итого</span>${cell(xt,false)}</div>`;
+  const oz=mp.oz_at?mp.oz_at.slice(11,16):'',ym=mp.ym_at?mp.ym_at.slice(11,16):'';
+  h+=`<div class="muted mpn">ДРР — реклама к заказам ₽. ≈ Маркет: реклама по ставке буста, оценка.${oz||ym?` Озон и Маркет обновлены в ${oz||ym}${oz&&ym&&oz!==ym?' и '+ym:''}.`:''}</div></div>`;
+  return h}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
    Код перенесён из skleyki\app.html почти без изменений (сборщик — _k_tmp\rek_kosmos_js.py): звёзды и метеоры по фону (#spDeco, только в «Космосе»;
