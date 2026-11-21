@@ -130,6 +130,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .svc-menu.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .2s ease,transform .5s cubic-bezier(.22,1.3,.36,1),visibility 0s}
 .svc-menu.gone{transition:none!important;opacity:0!important;visibility:hidden!important}
 .svc-cap{padding:9px 12px 6px;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--svc-ink3)}
+.svc-it[hidden]{display:none!important}
 .svc-it{position:relative;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:14px;color:inherit;text-decoration:none;
   -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}
 .svc-it .svc-ic{width:42px;height:42px;border-radius:12px}
@@ -198,8 +199,6 @@ html.svc-ptrin body>main{animation:svc-ptrin .4s cubic-bezier(.32,.72,0,1) both}
 :root[data-lite="1"] .svc-ptr,:root[data-lite="1"] .svc-ptr svg,:root[data-lite="1"] .svc-ptr .pt{transition:none!important;animation:none!important}
 @media (prefers-reduced-motion:reduce){.svc-ptr,.svc-ptr svg{transition:none!important;animation:none!important}html.svc-ptrin body>main{animation:none}}
 /*/SVC:CSS*/
-:root[data-role="fin"] .svc-chev{display:none}
-:root[data-role="fin"] .svc-btn{cursor:default;pointer-events:none}
 .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:var(--ink2);flex:none}
 .ico svg{width:21px;height:21px}
 @media (hover:hover){.ico:hover{background:var(--fill2)}}
@@ -765,6 +764,12 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 (()=>{   // выбор сервиса (servisy\svc.py — править там)
 const b=document.getElementById('svcBtn'),m=document.getElementById('svcMenu');if(!b||!m)return;
 let pre=false;
+/* 21.11 Андрей «у бухгалтеров в одном, как у нас, сервисе видны только Панель и Учёт»: вошли паролем бухгалтера (Панель «только Панель»,
+   «Учёт» паролем) — в списке остаются Панель и Учёт; вход Андрея (свой пароль Панели, личная ссылка «Учёта») снимает. window.svcBuh(true|false) */
+const BUH=/^\/(shov\/panel|uchet)\//;
+window.svcBuh=on=>{try{on?localStorage.setItem('svc.buh','1'):localStorage.removeItem('svc.buh')}catch(e){}
+  m.querySelectorAll('a.svc-it').forEach(a=>{a.hidden=!!on&&!BUH.test(new URL(a.href,location.href).pathname)})};
+try{if(localStorage.getItem('svc.buh')==='1')svcBuh(true)}catch(e){}
 const prerender=()=>{   // пока выбирают — соседние сервисы уже открываются в фоне (Chrome), переход мгновенный
   if(pre)return;pre=true;
   try{if(!(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')))return;
@@ -1987,10 +1992,10 @@ const AMB=(()=>{let ac=null,master=null,rev=null,tm=[],on=false,liked=PS.get('sn
   return {want(){play()},stop,get ac(){return ac},get out(){return master},get on(){return on}}})();
 
 /* ───────── старт ───────── */
-function finRole(){   // пароль «только Панель»: других сервисов в шапке нет
+function finRole(){   // пароль «только Панель»: в шапке только Панель и Учёт (21.11, было — без списка)
   document.documentElement.dataset.role=ROLE;
+  if(window.svcBuh)svcBuh(ROLE==='fin');   // 21.11: у бухгалтеров в списке сервисов только Панель и Учёт (servisy\svc.py)
   if(ROLE!=='fin')return;
-  const b=$('#svcBtn'),m=$('#svcMenu');if(b){const c=b.cloneNode(true);c.removeAttribute('aria-haspopup');c.removeAttribute('aria-controls');c.removeAttribute('title');c.tabIndex=-1;b.replaceWith(c)}if(m)m.remove();
   $('#mf').href='manifest-fin.webmanifest';
 }
 async function boot(pass){
