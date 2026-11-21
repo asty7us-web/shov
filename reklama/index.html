@@ -1115,6 +1115,7 @@ html,body{overscroll-behavior-y:contain}
 
 /* 22.11 Андрей «значки именно селлер прилож»: ВБ Партнёры, Ozon Seller, Маркет для продавцов (skleyki\icons.json wbs/ozs/yms) */
 .wbl.ozl{box-shadow:0 0 0 1px rgba(0,0,0,.12)}.wbl.yml{border-radius:50%}
+.zlt .zlt2 b .wbl{width:14px;height:14px;margin-right:5px;vertical-align:-2px}
 
 /* ───────── «Реклама»: добавочные стили помощника «Н» — листы товара и кампании, «Кампании», заметки, «Обновление» (14.11, по замечаниям Андрея).
    Подключается после стилей a_head.html (make.py) и перекрывает их. Цвета — переменными темы ───────── */
@@ -4063,11 +4064,20 @@ document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.clos
 /* 22.11 Андрей (скрин блока, «тут переключение между МП и ниже их соотв лента и тп»): «ВБ | Озон | Маркет» справа от «Заказы | Выкупы».
    ВБ — выбранный вверху кабинет (K.zch), Озон и Маркет — D.mp.oz_z / ym_z из mp_vse.py (раз в час; итоги дней те же, что в «Все площадки»,
    часы — по времени заказа). У Озона и Маркета пока только заказы и отказы: выкупов по часам их кабинеты не отдают. */
-function zMp(){return ['oz','ym'].includes(S.zmp)?S.zmp:'wb'}
-function zZ(){const mp=zMp();return mp==='wb'?K.zch:(D.mp&&D.mp[mp+'_z'])}
+/* 22.11 Андрей «ну и кнопку все тоже»: «Все» — оба кабинета ВБ + Озон + Маркет вместе (только заказы и отказы: выкупов по часам у Озона и Маркета нет);
+   в ленте у каждой строки значок площадки. */
+function zMp(){return ['oz','ym','all'].includes(S.zmp)?S.zmp:'wb'}
+let ZALL=null,ZALLD=null;
+function zAll(){if(ZALLD===D&&ZALL)return ZALL;const src=[];for(const k of Object.keys(D.kab))if(D.kab[k].zch&&D.kab[k].zch.o)src.push([D.kab[k].zch,WBL]);
+  for(const m of ['oz','ym']){const z=D.mp&&D.mp[m+'_z'];if(z&&z.o)src.push([z,m==='oz'?OZL:YML])}
+  if(!src.length)return null;const b=src[0][0],o={};
+  for(const key of Object.keys(b.o)){const v=b.o[key];o[key]=Array.isArray(v)?v.map((_,i)=>src.reduce((a,[z])=>a+((z.o[key]||[])[i]||0),0)):src.reduce((a,[z])=>a+(+z.o[key]||0),0)}
+  const lt={};for(const t of ['o','c']){const it=[];for(const [z,ic] of src)for(const x of ((z.lt||{})[t]||[]))it.push([x[0],x[1],x[2],x[3],x[4],ic]);if(it.length)lt[t]=it.sort((p,q)=>String(q[3]).localeCompare(String(p[3]))).slice(0,30)}
+  ZALLD=D;ZALL={o,hm:b.hm,wd:b.wd,w0:b.w0,lt};return ZALL}
+function zZ(){const mp=zMp();return mp==='wb'?K.zch:mp==='all'?zAll():(D.mp&&D.mp[mp+'_z'])}
 function zAt(){const mp=zMp();return mp==='wb'?D.at.slice(11,16):((D.mp&&D.mp.at)||'').slice(11,16)}
 function zchBlock(){if(S.zmp===undefined)S.zmp=RS.get('zmp','wb');const mp=zMp(),Z=zZ();if(mp==='wb'&&(!Z||!Z.o))return '';
-  const mps=seg('zmp',[['wb',WBL+'ВБ'],['oz',OZL+'Озон'],['ym',YML+'Маркет']],mp,'sm');
+  const mps=seg('zmp',[['all','Все'],['wb',WBL+'ВБ'],['oz',OZL+'Озон'],['ym',YML+'Маркет']],mp,'sm');
   if(!Z||!Z.o)return `<div class="card zch zmpn"><div class="hrw zhd" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],'o','sm')}${mps}</div><div class="muted zdt">Данных по площадке пока нет</div><div class="zbig"></div><div class="zcm"></div><div class="zwr"></div><div class="zrd"></div><div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],S.zcp==='w'?'w':'d','sm')}<span class="muted"></span></div></div>`;
   const m=S.zcm==='v'&&Z.v?'v':'o',p=S.zcp==='w'?'w':'d',z=Z[m],dd=p==='d';
   const td=new Date(D.today+'T12:00:00'),d0=new Date(td);d0.setDate(td.getDate()-Z.wd);
@@ -4098,7 +4108,7 @@ function zltBlock(){const Z=zZ(),L=Z&&Z.lt;if(!L)return '';
   const tb=[['o','Заказы'],['v','Выкупы'],['c','Отказы'],['r','Возвраты']].filter(x=>L[x[0]]);
   const m=tb.some(x=>x[0]===S.zlt)?S.zlt:'o',it=L[m]||[];
   const tm=w=>{const d=new Date(w.slice(0,10)+'T12:00:00');return isNaN(d)?esc(w):d.getDate()+' '+ZMK[d.getMonth()]+(m==='c'&&w.slice(11,16)==='00:00'?'':', '+w.slice(11,16))};
-  const row=x=>`<div class="zli${TOV[x[0]]?' press':''}"${TOV[x[0]]?` data-nm2="${x[0]}" role="button" tabindex="0"`:''}>${x[2]?`<img src="${esc(x[2])}" alt="" loading="lazy">`:'<span class="zlf"></span>'}<div class="zlt2"><b>${esc(x[1]||String(x[0]))}</b><span class="muted num">${tm(x[3])}${x[4]?' · '+rub(x[4]):''}</span></div></div>`;
+  const row=x=>`<div class="zli${TOV[x[0]]?' press':''}"${TOV[x[0]]?` data-nm2="${x[0]}" role="button" tabindex="0"`:''}>${x[2]?`<img src="${esc(x[2])}" alt="" loading="lazy">`:'<span class="zlf"></span>'}<div class="zlt2"><b>${x[5]||''}${esc(x[1]||String(x[0]))}</b><span class="muted num">${tm(x[3])}${x[4]?' · '+rub(x[4]):''}</span></div></div>`;
   const nm={o:'заказов',v:'выкупов',c:'отказов',r:'возвратов'}[m];
   let cols='';for(let i=0;i<it.length;i+=3)cols+=`<div class="zlc">${it.slice(i,i+3).map(row).join('')}</div>`;
   return `<div class="card zlt"><div class="hrw zlh"><b>Лента заказов</b>${it.length>3?'<button type="button" class="chip press zle">Ещё</button>':''}</div>
