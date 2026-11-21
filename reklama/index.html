@@ -1863,7 +1863,11 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 
 /* 22.11 «ВБ | Озон | Маркет» справа от «Заказы | Выкупы» (d_zch.js); у Озона и Маркета «Выкупы» скрыты */
 .zch .zhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.zch.zmpn [data-seg="zcm"] button[data-v="v"]{display:none}
+/* 22.11 Андрей (скрин, «не очень то что они прыгают туда сюда»): площадки — всегда своей строкой сверху на всю ширину, кнопки поровну;
+   «Выкупы» у Озона/Маркета/«Все» не прячется, а бледнеет — ширина «Заказы | Выкупы» не меняется, ничего не переезжает */
+.zch .zhd [data-seg="zmp"]{order:-1;flex:1 1 100%;display:flex;width:100%;max-width:480px}
+.zch .zhd [data-seg="zmp"]>button{flex:1 1 0;min-width:0;justify-content:center;padding-left:4px;padding-right:4px;white-space:nowrap}
+.zch.zmpn [data-seg="zcm"] button[data-v="v"]{opacity:.35;pointer-events:none}
 
 </style>
 </head>
