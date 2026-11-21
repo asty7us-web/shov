@@ -105,6 +105,7 @@ input,textarea,select{font:inherit;color:inherit}
 .svc-menu.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .2s ease,transform .5s cubic-bezier(.22,1.3,.36,1),visibility 0s}
 .svc-menu.gone{transition:none!important;opacity:0!important;visibility:hidden!important}
 .svc-cap{padding:9px 12px 6px;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--svc-ink3)}
+.svc-it[hidden]{display:none!important}
 .svc-it{position:relative;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:14px;color:inherit;text-decoration:none;
   -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}
 .svc-it .svc-ic{width:42px;height:42px;border-radius:12px}
@@ -1886,6 +1887,12 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 (()=>{   // выбор сервиса (servisy\svc.py — править там)
 const b=document.getElementById('svcBtn'),m=document.getElementById('svcMenu');if(!b||!m)return;
 let pre=false;
+/* 21.11 Андрей «у бухгалтеров в одном, как у нас, сервисе видны только Панель и Учёт»: вошли паролем бухгалтера (Панель «только Панель»,
+   «Учёт» паролем) — в списке остаются Панель и Учёт; вход Андрея (свой пароль Панели, личная ссылка «Учёта») снимает. window.svcBuh(true|false) */
+const BUH=/^\/(shov\/panel|uchet)\//;
+window.svcBuh=on=>{try{on?localStorage.setItem('svc.buh','1'):localStorage.removeItem('svc.buh')}catch(e){}
+  m.querySelectorAll('a.svc-it').forEach(a=>{a.hidden=!!on&&!BUH.test(new URL(a.href,location.href).pathname)})};
+try{if(localStorage.getItem('svc.buh')==='1')svcBuh(true)}catch(e){}
 const prerender=()=>{   // пока выбирают — соседние сервисы уже открываются в фоне (Chrome), переход мгновенный
   if(pre)return;pre=true;
   try{if(!(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')))return;
@@ -3179,13 +3186,17 @@ function frCols(man,cpc){if(!TBL.fr)TBL.fr={nosort:1,sort:['s',-1],cols:Object.k
   const L=tblCols('fr').map(c=>c.k).filter(k=>k!=='q'&&(k!=='b'||man)&&!(cpc&&(k==='v'||k==='ctr')));
   /* 17.11 Андрей «очень сложно и долго, как в Марпле сделай управление» — ставка всегда сразу за фразой (была в конце, за датами, на телефоне не видно) */
   return L.includes('b')?['b'].concat(L.filter(k=>k!=='b')):L}
-function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='act';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
+function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=new Set();FR.all=false;FR.f='auto';FR.tm=null;FR.jam=false;FR.note='';FR.mh=0;FR.op=new Set();FR.opA=new Set()}   // FR.busy не сбрасываем: замер мест мог ещё идти — он сам уберёт свои фразы
   if(!KL)return '<div class="sk" style="height:90px"></div>';
   if(!frAll(id,nm))return '<div class="note" style="margin-top:0">По этой кампании ВБ не отдал поисковых кластеров за 30 дней.</div>';
+  /* 21.11 Андрей «где ключи … если они исключены то это видно как в марпла» (Авто Утеплитель 4х7: 49 из 49 исключены, лист показывал «Активные · 0» и «фраз нет»):
+     нет активных — сразу «Все», исключённые с пометкой «исключена»; есть активные — как было, «Активные» */
+  if(FR.f==='auto'){const a0=frAll(id,nm)||[];FR.f=a0.some(e=>!e.xall)?'act':'all'}
   const z=frShown(id,nm),all=z.all,L=z.L,show=z.show,rr=RK[id],man=rr&&rr.pay==='cpm'&&rr.bt==='manual',fc=frCols(man,rr&&rr.pay==='cpc'),dn=fc.includes('dn'),bs=man?((rr.nm[nm]||{}).b||{}).search:null,lkb=UPR?'':' nolk',canMin=!rr||rr.pay!=='cpc';
   const nx=all.filter(e=>e.xall).length,days=[];for(let i=T;i>T-7&&i>=0;i--)days.push(i);
   const sn=k=>FR.sort2&&FR.sort2!==FR.sort?(FR.sort===k?'<i class="sn">1</i>':FR.sort2===k?'<i class="sn">2</i>':''):'',th=(k,l)=>`<th data-fs="${k}"${FR.sort===k?` aria-sort="${FR.dir<0?'descending':'ascending'}"`:FR.sort2===k?` data-s2="${FR.dir2<0?'d':'a'}"`:''}>${l}${sn(k)}</th>`,allOn=show.length>0&&show.every(e=>FR.sel.has(e.t));
   let h=`<div class="chips" style="margin:0 0 8px"><button class="chip press" type="button" data-frf="act" aria-pressed="${FR.f==='act'}">Активные · ${all.length-nx}</button><button class="chip press" type="button" data-frf="x" aria-pressed="${FR.f==='x'}">Исключённые · ${nx}</button><button class="chip press" type="button" data-frf="all" aria-pressed="${FR.f==='all'}">Все · ${all.length}</button>${tblBtn('fr')}</div>`;
+  if(nx&&nx===all.length)h+=`<div class="note" style="margin-top:0;margin-bottom:8px">Все фразы кампании (${nx}) исключены — в поиске она сейчас не показывается.</div>`;
   if(!show.length)return h+`<div class="note" style="margin-top:0">${FR.f==='x'?'Исключённых фраз у кампании нет.':'Фраз с показами за период нет.'}</div>`;
   h+=`<div class="tw tws frw"><table class="fr"><thead><tr><th class="q"><div class="qw"><label class="ck"><input type="checkbox" id="frall"${allOn?' checked':''} aria-label="Выбрать все"></label><span data-fs="t" class="fsq">Фраза${FR.sort==='t'?(FR.dir<0?' ▾':' ▴'):FR.sort2==='t'?(FR.dir2<0?' ▿':' ▵'):''}${sn('t')}</span></div></th>`
     +fc.map(k=>k==='dn'?(fc.includes('p')?'':dH()):th(k,k==='p'?dmNow():FRL[k])+(k==='p'?dH():'')).join('')+'</tr></thead><tbody>';
