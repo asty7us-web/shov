@@ -4078,12 +4078,14 @@ function zAll(){if(ZALLD===D&&ZALL)return ZALL;const src=[];for(const k of Objec
   for(const key of Object.keys(b.o)){const v=b.o[key];o[key]=Array.isArray(v)?v.map((_,i)=>src.reduce((a,[z])=>a+((z.o[key]||[])[i]||0),0)):src.reduce((a,[z])=>a+(+z.o[key]||0),0)}
   const lt={};for(const t of ['o','c']){const it=[];for(const [z,ic] of src)for(const x of ((z.lt||{})[t]||[]))it.push([x[0],x[1],x[2],x[3],x[4],ic]);if(it.length)lt[t]=it.sort((p,q)=>String(q[3]).localeCompare(String(p[3]))).slice(0,30)}
   ZALLD=D;ZALL={o,hm:b.hm,wd:b.wd,w0:b.w0,lt};return ZALL}
+/* 22.11 Андрей «да»: выкупы Маркета по часам (время выкупа примерно), Озона — по дням (dn: часа выкупа Озон не отдаёт) → у Озона выкупы только «Неделя» */
+function zPe(){const Z=zZ(),m=S.zcm==='v'&&Z&&Z.v?'v':'o';return (Z&&Z[m]&&Z[m].dn)||S.zcp==='w'?'w':'d'}
 function zZ(){const mp=zMp();return mp==='wb'?K.zch:mp==='all'?zAll():(D.mp&&D.mp[mp+'_z'])}
 function zAt(){const mp=zMp();return mp==='wb'?D.at.slice(11,16):((D.mp&&D.mp.at)||'').slice(11,16)}
 function zchBlock(){if(S.zmp===undefined)S.zmp=RS.get('zmp','wb');const mp=zMp(),Z=zZ();if(mp==='wb'&&(!Z||!Z.o))return '';
   const mps=seg('zmp',[['all','Все'],['wb',WBL+'ВБ'],['oz',OZL+'Озон'],['ym',YML+'Маркет']],mp,'sm');
   if(!Z||!Z.o)return `<div class="card zch zmpn"><div class="hrw zhd" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],'o','sm')}${mps}</div><div class="muted zdt">Данных по площадке пока нет</div><div class="zbig"></div><div class="zcm"></div><div class="zwr"></div><div class="zrd"></div><div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],S.zcp==='w'?'w':'d','sm')}<span class="muted"></span></div></div>`;
-  const m=S.zcm==='v'&&Z.v?'v':'o',p=S.zcp==='w'?'w':'d',z=Z[m],dd=p==='d';
+  const m=S.zcm==='v'&&Z.v?'v':'o',p=zPe(),z=Z[m],dd=p==='d';
   const td=new Date(D.today+'T12:00:00'),d0=new Date(td);d0.setDate(td.getDate()-Z.wd);
   const sum=dd?z.t.reduce((a,b)=>a+b,0):z.ws,qn=dd?z.tq.reduce((a,b)=>a+b,0):z.wn,ps=dd?z.ys:z.ps,pn=dd?z.yn:z.pn;
   const pill=(a,b,u)=>{const d=a-b;if(!b&&!d)return '';const up=d>=0;return `<span class="zpl ${up?'up':'dn'} num">${up?'▲':'▼'} ${f0(Math.abs(d))}${u}${b?' · '+Math.round(Math.abs(100*d/b))+'%':''}</span>`};
@@ -4103,7 +4105,7 @@ function zchBlock(){if(S.zmp===undefined)S.zmp=RS.get('zmp','wb');const mp=zMp()
     <div class="muted zcm">${ps||pn?'Разница '+cmpT:''}</div>
     <div class="zwr"><div class="zsc"${dd?` data-h="${nowI}"`:''}><div class="zrow${dd?'':' wk'}">${cols}</div></div><div class="zax">${ax}</div></div>
     <div class="zrd num">${rdT(nowI)}</div>
-    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">Данные на сегодня, ${zAt()}</span></div></div>`+(mp==='wb'?zsvBlock():'')+zltBlock()}
+    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">${z.dn?'Выкупы Озона — только по дням · ':''}Данные на сегодня, ${zAt()}</span></div></div>`+(mp==='wb'?zsvBlock():'')+zltBlock()}
 /* 18.11 Андрей (скрин приложения ВБ «Лента заказов», «там 3 ряда ленты»): последние заказы / выкупы / отказы / возвраты —
    по 3 в столбике, следующий столбик видно справа, листается вбок; «Ещё» — весь список (до 30). Данные — sbor.zak_chas → K.zch.lt. */
 const ZMK=['янв','февр','марта','апр','мая','июня','июля','авг','сент','окт','нояб','дек'];
@@ -4134,7 +4136,7 @@ function zchSwap(id){const sel=id==='zlt'?'.zlt':'.zch',old=document.querySelect
     const sv=document.querySelector('.zsv'),bl=document.querySelector('.zbal');if(zMp()!=='wb'){if(sv)sv.remove();if(bl)bl.remove()}else if(!sv){const ns=tp.content.querySelector('.zsv'),nb=tp.content.querySelector('.zbal');const at=nl||null;if(ns){(document.querySelector('.zlt')||old).before(ns);if(nb)ns.after(nb)}}
     old.classList.toggle('zmpn',nw.classList.contains('zmpn'));const sg=old.querySelector('[data-seg="zcm"]');if(sg){const v=nw.querySelector('[data-seg="zcm"] [aria-pressed="true"]');S.zcm=v?v.dataset.v:'o'}}
   // кнопки: подложка едет, остальное не трогаем
-  old.querySelectorAll('[data-seg]').forEach(sg=>{const v=sg.dataset.seg==='zmp'?zMp():sg.dataset.seg==='zcm'&&old.classList.contains('zmpn')?'o':String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
+  old.querySelectorAll('[data-seg]').forEach(sg=>{const v=sg.dataset.seg==='zmp'?zMp():sg.dataset.seg==='zcp'?zPe():sg.dataset.seg==='zcm'&&old.classList.contains('zmpn')?'o':String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
   const parts=id==='zlt'?['.zlbody']:['.zdt','.zbig','.zcm','.zwr','.zrd'];
   const h0=old.offsetHeight;
   const go=()=>{parts.forEach(q=>{const a=old.querySelector(q),b=nw.querySelector(q);if(a&&b)a.replaceWith(b);else if(a&&!b)a.remove()});
