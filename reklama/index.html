@@ -1851,6 +1851,10 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 /* 18.11 Андрей «сами принципы другие может»: главное время перехода — расчёт раскладки всего длинного списка. Как в приложении: телефон считает только строки на экране и рядом */
 @supports (content-visibility:auto){#view .list>*{content-visibility:auto;contain-intrinsic-size:auto var(--lh,240px)}.view[data-v=tov]{--lh:256px}.view[data-v=ak]{--lh:560px}}
 
+/* 22.11 «ВБ | Озон | Маркет» справа от «Заказы | Выкупы» (d_zch.js); у Озона и Маркета «Выкупы» скрыты */
+.zch .zhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.zch.zmpn [data-seg="zcm"] button[data-v="v"]{display:none}
+
 </style>
 </head>
 <body>
@@ -4047,8 +4051,16 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch,T='Когда раб�
 const ZMS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],ZWD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 function zchScroll(){document.querySelectorAll('.zch .zsc[data-h]').forEach(el=>{if(el.dataset.done)return;el.dataset.done=1;const c=el.querySelector('.zc[data-i="'+el.dataset.h+'"]');if(c)el.scrollLeft=Math.max(0,c.offsetLeft+c.offsetWidth-el.clientWidth+8)})}
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('.zch .zc');if(!b)return;const w=b.closest('.zch');w.querySelectorAll('.zc.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');const r=w.querySelector('.zrd');if(r)r.innerHTML=b.dataset.r});
-function zchBlock(){const Z=K.zch;if(!Z||!Z.o)return '';
-  const m=S.zcm==='v'?'v':'o',p=S.zcp==='w'?'w':'d',z=Z[m],dd=p==='d';
+/* 22.11 Андрей (скрин блока, «тут переключение между МП и ниже их соотв лента и тп»): «ВБ | Озон | Маркет» справа от «Заказы | Выкупы».
+   ВБ — выбранный вверху кабинет (K.zch), Озон и Маркет — D.mp.oz_z / ym_z из mp_vse.py (раз в час; итоги дней те же, что в «Все площадки»,
+   часы — по времени заказа). У Озона и Маркета пока только заказы и отказы: выкупов по часам их кабинеты не отдают. */
+function zMp(){return ['oz','ym'].includes(S.zmp)?S.zmp:'wb'}
+function zZ(){const mp=zMp();return mp==='wb'?K.zch:(D.mp&&D.mp[mp+'_z'])}
+function zAt(){const mp=zMp();return mp==='wb'?D.at.slice(11,16):((D.mp&&D.mp.at)||'').slice(11,16)}
+function zchBlock(){if(S.zmp===undefined)S.zmp=RS.get('zmp','wb');const mp=zMp(),Z=zZ();if(mp==='wb'&&(!Z||!Z.o))return '';
+  const mps=seg('zmp',[['wb','ВБ'],['oz','Озон'],['ym','Маркет']],mp,'sm');
+  if(!Z||!Z.o)return `<div class="card zch zmpn"><div class="hrw zhd" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],'o','sm')}${mps}</div><div class="muted zdt">Данных по площадке пока нет</div><div class="zbig"></div><div class="zcm"></div><div class="zwr"></div><div class="zrd"></div><div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],S.zcp==='w'?'w':'d','sm')}<span class="muted"></span></div></div>`;
+  const m=S.zcm==='v'&&Z.v?'v':'o',p=S.zcp==='w'?'w':'d',z=Z[m],dd=p==='d';
   const td=new Date(D.today+'T12:00:00'),d0=new Date(td);d0.setDate(td.getDate()-Z.wd);
   const sum=dd?z.t.reduce((a,b)=>a+b,0):z.ws,qn=dd?z.tq.reduce((a,b)=>a+b,0):z.wn,ps=dd?z.ys:z.ps,pn=dd?z.yn:z.pn;
   const pill=(a,b,u)=>{const d=a-b;if(!b&&!d)return '';const up=d>=0;return `<span class="zpl ${up?'up':'dn'} num">${up?'▲':'▼'} ${f0(Math.abs(d))}${u}${b?' · '+Math.round(Math.abs(100*d/b))+'%':''}</span>`};
@@ -4062,27 +4074,28 @@ function zchBlock(){const Z=K.zch;if(!Z||!Z.o)return '';
     cols+=`<button type="button" class="zc${i===nowI?' sel':''}" data-i="${i}" data-r="${esc(rdT(i))}"><div class="zb">${fut||!a?'':`<i style="height:${ht(a)}%;background:${col}"></i>`}${b?`<i class="g" style="height:${ht(b)}%"></i>`:''}</div><span>${dd?i+':00':wl(i)}</span></button>`}
   const ax=[top,top/2,0].map(v=>`<div class="zy" style="bottom:${(100*v/top).toFixed(1)}%"><span class="num">${v?f0(v):'0'}</span></div>`).join('');
   setTimeout(zchScroll,0);
-  return `<div class="card zch"><div class="hrw" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],m,'sm')}</div>
+  return `<div class="card zch${Z.v?'':' zmpn'}"><div class="hrw zhd" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],m,'sm')}${mps}</div>
     <div class="muted zdt">${hd}</div>
     <div class="zbig"><div><b class="num">${f0(sum)} ₽</b>${pill(sum,ps,' ₽')}</div><div><b class="num">${f0(qn)} шт</b>${pill(qn,pn,' шт')}</div></div>
     <div class="muted zcm">${ps||pn?'Разница '+cmpT:''}</div>
     <div class="zwr"><div class="zsc"${dd?` data-h="${nowI}"`:''}><div class="zrow${dd?'':' wk'}">${cols}</div></div><div class="zax">${ax}</div></div>
     <div class="zrd num">${rdT(nowI)}</div>
-    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">Данные на сегодня, ${D.at.slice(11,16)}</span></div></div>`+zsvBlock()+zltBlock()}
+    <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">Данные на сегодня, ${zAt()}</span></div></div>`+(mp==='wb'?zsvBlock():'')+zltBlock()}
 /* 18.11 Андрей (скрин приложения ВБ «Лента заказов», «там 3 ряда ленты»): последние заказы / выкупы / отказы / возвраты —
    по 3 в столбике, следующий столбик видно справа, листается вбок; «Ещё» — весь список (до 30). Данные — sbor.zak_chas → K.zch.lt. */
 const ZMK=['янв','февр','марта','апр','мая','июня','июля','авг','сент','окт','нояб','дек'];
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('.zlt .zle');if(!b)return;const w=b.closest('.zlt');w.classList.toggle('all');b.textContent=w.classList.contains('all')?'Свернуть':'Ещё'});
-function zltBlock(){const L=K.zch&&K.zch.lt;if(!L)return '';
-  const m=['o','v','c','r'].includes(S.zlt)?S.zlt:'o',it=L[m]||[];
+function zltBlock(){const Z=zZ(),L=Z&&Z.lt;if(!L)return '';
+  const tb=[['o','Заказы'],['v','Выкупы'],['c','Отказы'],['r','Возвраты']].filter(x=>L[x[0]]);
+  const m=tb.some(x=>x[0]===S.zlt)?S.zlt:'o',it=L[m]||[];
   const tm=w=>{const d=new Date(w.slice(0,10)+'T12:00:00');return isNaN(d)?esc(w):d.getDate()+' '+ZMK[d.getMonth()]+(m==='c'&&w.slice(11,16)==='00:00'?'':', '+w.slice(11,16))};
   const row=x=>`<div class="zli${TOV[x[0]]?' press':''}"${TOV[x[0]]?` data-nm2="${x[0]}" role="button" tabindex="0"`:''}>${x[2]?`<img src="${esc(x[2])}" alt="" loading="lazy">`:'<span class="zlf"></span>'}<div class="zlt2"><b>${esc(x[1]||String(x[0]))}</b><span class="muted num">${tm(x[3])}${x[4]?' · '+rub(x[4]):''}</span></div></div>`;
   const nm={o:'заказов',v:'выкупов',c:'отказов',r:'возвратов'}[m];
   let cols='';for(let i=0;i<it.length;i+=3)cols+=`<div class="zlc">${it.slice(i,i+3).map(row).join('')}</div>`;
   return `<div class="card zlt"><div class="hrw zlh"><b>Лента заказов</b>${it.length>3?'<button type="button" class="chip press zle">Ещё</button>':''}</div>
-    <div class="zlseg">${seg('zlt',[['o','Заказы'],['v','Выкупы'],['c','Отказы'],['r','Возвраты']],m,'sm')}</div>
+    <div class="zlseg">${seg('zlt',tb,m,'sm')}</div>
     <div class="zlbody">${it.length?`<div class="zlsc">${cols}</div><div class="zlall">${it.map(row).join('')}</div>`:`<div class="muted" style="padding:10px 0">За последние дни ${nm} нет</div>`}</div>
-    <div class="muted zlft">Данные на сегодня, ${D.at.slice(11,16)}</div></div>`}
+    <div class="muted zlft">Данные на сегодня, ${zAt()}</div></div>`}
 
 /* 18.11 Андрей («когда переключаешь — дёргается, нужно больше эпл плавности»): «Заказы | Выкупы», «День | Неделя» и вкладки ленты
    не перерисовывают страницу — меняется только свой блок: подложка кнопки плавно едет к нажатой, содержимое мягко сменяется,
@@ -4094,8 +4107,11 @@ function zThumb(sg,anim){if(!sg)return;let th=sg.querySelector('.zth');if(!th){t
 function zThumbs(){document.querySelectorAll('.zch [data-seg],.zlt [data-seg]').forEach(sg=>zThumb(sg,false))}
 function zchSwap(id){const sel=id==='zlt'?'.zlt':'.zch',old=document.querySelector(sel);if(!old)return false;
   const tp=document.createElement('template');tp.innerHTML=zchBlock();const nw=tp.content.querySelector(sel);if(!nw)return false;
+  if(id==='zmp'){const zl=document.querySelector('.zlt'),nl=tp.content.querySelector('.zlt');if(zl&&nl){zl.classList.add('zout');setTimeout(()=>zl.replaceWith(nl),130)}else if(zl)zl.remove();else if(nl)old.after(nl);
+    const sv=document.querySelector('.zsv'),bl=document.querySelector('.zbal');if(zMp()!=='wb'){if(sv)sv.remove();if(bl)bl.remove()}else if(!sv){const ns=tp.content.querySelector('.zsv'),nb=tp.content.querySelector('.zbal');const at=nl||null;if(ns){(document.querySelector('.zlt')||old).before(ns);if(nb)ns.after(nb)}}
+    old.classList.toggle('zmpn',nw.classList.contains('zmpn'));const sg=old.querySelector('[data-seg="zcm"]');if(sg){const v=nw.querySelector('[data-seg="zcm"] [aria-pressed="true"]');S.zcm=v?v.dataset.v:'o'}}
   // кнопки: подложка едет, остальное не трогаем
-  old.querySelectorAll('[data-seg]').forEach(sg=>{const v=String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
+  old.querySelectorAll('[data-seg]').forEach(sg=>{const v=sg.dataset.seg==='zmp'?zMp():sg.dataset.seg==='zcm'&&old.classList.contains('zmpn')?'o':String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
   const parts=id==='zlt'?['.zlbody']:['.zdt','.zbig','.zcm','.zwr','.zrd'];
   const h0=old.offsetHeight;
   const go=()=>{parts.forEach(q=>{const a=old.querySelector(q),b=nw.querySelector(q);if(a&&b)a.replaceWith(b);else if(a&&!b)a.remove()});
@@ -4991,7 +5007,7 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 
 /* ───────── события ───────── */
 const SEGCB={};
-function onSeg(id,v){if(id==='zcm'||id==='zcp'||id==='zlt'){onSeg0(id,v);return}smooth('fade',()=>onSeg0(id,v))}
+function onSeg(id,v){if(id==='zcm'||id==='zcp'||id==='zlt'||id==='zmp'){onSeg0(id,v);return}smooth('fade',()=>onSeg0(id,v))}
 function onSeg0(id,v){
   if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
@@ -5002,7 +5018,7 @@ function onSeg0(id,v){
   else if(id==='sort'){S.sort=v;S.dir=-1;RS.set('sort',v);RS.set('dir',-1);unfz();render(true)}
   else if(id==='chm'){S.chm=v;RS.set('chm',v);if(SHS.length)redraw();else render(true)}
   else if(id==='chm2'){S.chm2=v;redraw()}
-  else if(id==='zcm'||id==='zcp'||id==='zlt'){S[id]=v;RS.set(id,v);if(!zchSwap(id))render(true)}   // 18.11 Андрей «дёргается, нужно больше эпл плавности»: меняем только свой блок, плавно (d_zch.js)   // 17.11 «Заказы | Выкупы», «День | Неделя» — блок как на главной приложения ВБ (d_zch.js)
+  else if(id==='zcm'||id==='zcp'||id==='zlt'||id==='zmp'){S[id]=v;RS.set(id,v);if(!zchSwap(id))render(true)}   // 18.11 Андрей «дёргается, нужно больше эпл плавности»: меняем только свой блок, плавно (d_zch.js)   // 17.11 «Заказы | Выкупы», «День | Неделя» — блок как на главной приложения ВБ (d_zch.js)
   else if(id==='akf'){S.ak.f=v;RS.set('akf',v);sync();render(true)}
   else if(id==='rkf'){S.rkf.f=v;RS.set('rkf',v);unfz();sync();render(true)}
   else if(id==='rks'){S.rkf.sort=v;RS.set('rks',v);unfz();render(true)}
