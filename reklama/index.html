@@ -3037,12 +3037,14 @@ function drrBox(title,cur,prev,prevLab,sub){const ok=v=>v!=null&&isFinite(v),d=o
 /* четыре главные цифры — одинаково у товара, у кампании и над списком кампаний товара (14.11 Андрей: «заказы шт оставь, и остальное: ДРР РК, ДРР от всего,
    траты»). o: {drr, pdrr — ДРР от всех заказов сейчас и в прошлом периоде; drrk — траты к заказам с рекламы; s, ps — траты; q — заказы, шт; ql — подпись заказов;
    qd — строка под заказами; z — по каким заказам красим траты (нет заказов — красные)} */
+/* 21.11 Андрей «покрупнее и в клетке где дрр добавь дрр рк чуть поменьше также»: вторая цифра рядом с главной, чуть меньше */
+const v2=x=>` <span style="font-size:.72em;opacity:.8;font-weight:600">/ ${x}</span>`;
 function kpi4(o){const ok=v=>v!=null&&isFinite(v),d=ok(o.drr)&&ok(o.pdrr)?o.drr-o.pdrr:null,inf=v=>v!=null&&!isFinite(v);
   const tl=(l,v,sub,vc,tc)=>`<div class="tile${tc||''}"><div class="l">${l}</div><div class="v num ${vc||''}">${v}</div><div class="d num">${sub||'&nbsp;'}</div></div>`;
-  return `<div class="tiles k4">`+tl('ДРР от всего',inf(o.drr)?'нет заказов':pc(o.drr),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?pc(o.pdrr):'нет заказов'):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
+  return `<div class="tiles k4">`+tl('ДРР от всего',(inf(o.drr)?'нет заказов':pc(o.drr))+(ok(o.drrk)?v2(pc(o.drrk)):inf(o.drrk)?v2('—'):''),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?pc(o.pdrr):'нет заказов'):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
     +tl('ДРР РК',inf(o.drrk)?'нет заказов':pc(o.drrk),'траты к заказам с рекламы',inf(o.drrk)?'bad tx':'')
     +tl('Траты',rub(o.s),o.ps!=null?perPr()+': '+rub(o.ps):'',sbad(o.s,o.z))
-    +tl(o.ql||'Заказы, шт',f0(o.q)+' шт',o.qd||'')+'</div>'}
+    +tl(o.ql||'Заказы, шт',f0(o.q)+(o.qa!=null?v2(f0(o.qa)):'')+' шт',o.qd||'')+'</div>'}
 function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0).filter(chgReal)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
 /* последние правки — сразу в листе, без перехода в отдельный раздел; «показать ещё» раскрывает тут же */
 /* 15.11 Андрей «что меняли просил не выводить пополнения сюда», «и совет там тоже не надо, только реальные изменения»: в «Что меняли» листов товара и кампании
@@ -3551,7 +3553,7 @@ function prodRk(t,nm,ix,pp,a,W,P,rctx){
   let h=`<div class="rkbox"><div class="rkcap">Рекламные кампании</div><div class="hrw rkhd"><h3>Работают <b class="num">${W.filter(r=>rkSt(r).w).length}</b>${W.some(r=>!rkSt(r).w)?` <small class="muted">· на паузе ${W.filter(r=>!rkSt(r).w).length}</small>`:''}</h3><span class="muted num">${perZa()}</span></div>`;
   if(W.length>1){const aw=pAgg(t,ix,true);
     if(Math.abs((aw.s||0)-(a.s||0))>=1){const bw=pp?pAgg(t,pp,true):null;
-      h+=kpi4({drr:aw.drr,pdrr:bw&&bw.drr,drrk:aw.drrk,s:aw.s,ps:bw&&bw.s,q:aw.q,z:aw.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(aw.oq)+' шт</b>'})+'<div style="height:10px"></div>'}}
+      h+=kpi4({drr:aw.drr,pdrr:bw&&bw.drr,drrk:aw.drrk,s:aw.s,ps:bw&&bw.s,q:aw.q,z:aw.q,ql:'Заказы РК / все',qa:aw.oq,qd:'всего у товара <b>'+f0(aw.oq)+' шт</b>'})+'<div style="height:10px"></div>'}}
   h+=W.length?`<div class="rows" data-rctx="${rctx}">`+W.map(r=>rkRow(r,nm,ix)).join('')+'</div>':'<div class="note" style="margin-top:0">Сейчас ни одна кампания товара не работает.</div>';
   /* только что созданная с сайта кампания (r.nov, applyPatch) трат ещё не имеет — её не прячем в свёрнутую строку, она стоит сразу под работающими */
   const Pn=P.filter(r=>r.nov),Po=P.filter(r=>!r.nov);
@@ -3751,10 +3753,10 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=`<button type="button" class="ctlt press ${st.c}" data-act="ctlt" aria-expanded="${S.ctlOpen?'true':'false'}"><i></i><span>Управление</span><b>${st.t}</b><span class="ar">${S.ctlOpen?'▴':'▾'}</span></button>`+(S.ctlOpen?rkCtl(r,nm):'');
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
   h+=`<div class="hrw"><h3>Показатели кампании</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div>`;
-  h+=kpi4({drr:zp.v,pdrr:zpp&&zpp.v,drrk:a.drrk,s:a.s,ps:zpp&&zpp.x.s,q:a.q,z:a.q,ql:'Заказы РК, шт',qd:'всего у товара <b>'+f0(zp.oq)+' шт</b>'});
+  h+=kpi4({drr:zp.v,pdrr:zpp&&zpp.v,drrk:a.drrk,s:a.s,ps:zpp&&zpp.x.s,q:a.q,z:a.q,ql:'Заказы РК / все',qa:zp.oq,qd:'всего у товара <b>'+f0(zp.oq)+' шт</b>'});
   /* плитки конверсий вместо строки-воронки (13.11 Андрей: «писанину про воронку убрать, оставить цифры конверсий понятно») */
   const tl=(l,v,sub)=>`<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${sub||'&nbsp;'}</div></div>`;
-  h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК / общие',f0(a.q)+' <span style="opacity:.55">/</span> '+f0(zp.oq),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
+  h+=`<div class="tiles t3" style="margin-top:10px">${tl('Показы',a.v?kr(a.v):'—',a.v?'':'ВБ не отдаёт')}${tl('Клики',f0(a.c),a.v?'клик из показа <b>'+pc(a.ctr)+'</b>':'')}${tl('Заказы РК / общие',f0(a.q)+v2(f0(zp.oq)),a.c?'заказ из клика <b>'+pc(a.cr)+'</b>':'их относит к рекламе ВБ')}
     ${tl('CPC',rub2(a.cpc),'цена клика: расход ÷ клики')}${tl('CPO',a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет зак.','цена заказа: расход ÷ заказы РК')}${tl('В корзину',f0(a.a),a.c?'корзина из клика <b>'+pc(100*a.a/a.c)+'</b>':'')}</div>`;
   h+=`<div class="tdl num">Сегодня: траты <b class="${sbad(td.s,td.q)}">${rub(td.s)}</b> · клики <b>${f0(td.c)}</b> · заказы с рекламы <b>${f0(td.q)}</b>${t&&t.o?' · заказы товара <b>'+f0(t.o.q[T]||0)+' шт</b>':''} · <button class="lnk tdlb${TDLH?' on':''}" type="button" data-tdlh>история<i>›</i></button></div>`+tdlHist(nm,id);
   /* 17.11 Андрей «перенеси» (стрелка с кадра): тип ставки и место показа — из шапки листа под строку «Сегодня» */
