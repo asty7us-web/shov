@@ -2147,7 +2147,8 @@ const perKey=()=>S.per===1?((S.off||0)<0?'v0':S.off?'v2':'v1'):S.per;           
 const perTx=()=>perD1()||S.per+' дн';                                                // «7 дн» | «вчера»
 const perZa=()=>perD1()?'за '+perD1():'за '+S.per+' дн.';                            // «за 7 дн.» | «за вчера»
 const perDn=()=>perD1()||S.per+' дней';                                              // «ДРР 7 дней» | «ДРР вчера»
-const perPr=()=>S.per===1?'днём раньше':'прошлые '+S.per+' дн.';                     // с чем сравниваем
+/* 21.11 Андрей «не днём раньше а вчера» */
+const perPr=()=>S.per===1?((S.off||0)<0?'вчера':S.off?'днём раньше':'позавчера'):'прошлые '+S.per+' дн.';                     // с чем сравниваем
 const PERS=l=>[['v0','Сегодня'],['v1','Вчера'],['v2','Позавчера'],[3,l?'3 дня':'3 дн'],[7,l?'7 дней':'7 дн'],[14,l?'14 дней':'14 дн'],[30,l?'30 дней':'30 дн']];
 
 function prep(){
@@ -3041,8 +3042,10 @@ function drrBox(title,cur,prev,prevLab,sub){const ok=v=>v!=null&&isFinite(v),d=o
 const v2=x=>` <span style="font-size:.72em;opacity:.8;font-weight:600">/ ${x}</span>`;
 function kpi4(o){const ok=v=>v!=null&&isFinite(v),d=ok(o.drr)&&ok(o.pdrr)?o.drr-o.pdrr:null,inf=v=>v!=null&&!isFinite(v);
   const tl=(l,v,sub,vc,tc)=>`<div class="tile${tc||''}"><div class="l">${l}</div><div class="v num ${vc||''}">${v}</div><div class="d num">${sub||'&nbsp;'}</div></div>`;
-  return `<div class="tiles k4">`+tl('ДРР от всего',(inf(o.drr)?'нет заказов':pc(o.drr))+(ok(o.drrk)?v2(pc(o.drrk)):inf(o.drrk)?v2('—'):''),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?pc(o.pdrr):'нет заказов'):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
-    +tl('ДРР РК',inf(o.drrk)?'нет заказов':pc(o.drrk),'траты к заказам с рекламы',inf(o.drrk)?'bad tx':'')
+  /* 21.11 Андрей «нет заказов это 0 и дрр какой что не понятно + цвет 31 и зел»: вместо «нет заказов» — «0 заказов» с тратами; ДРР РК тоже красится по норме */
+  const nz=s=>'0 заказов'+(s?' · траты '+rub(s):''),dk=v=>inf(v)?'bad':dcls(v);
+  return `<div class="tiles k4">`+tl('ДРР от всего',(inf(o.drr)?'0 заказов':pc(o.drr))+(ok(o.drrk)?v2(`<span class="${dk(o.drrk)}">${pc(o.drrk)}</span>`):''),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?'ДРР '+pc(o.pdrr):nz(o.ps)):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
+    +tl('ДРР РК',inf(o.drrk)?'0 заказов':pc(o.drrk),inf(o.drrk)?'траты '+rub(o.s)+', заказов с рекламы нет':'траты к заказам с рекламы',inf(o.drrk)?'bad tx':dk(o.drrk))
     +tl('Траты',rub(o.s),o.ps!=null?perPr()+': '+rub(o.ps):'',sbad(o.s,o.z))
     +tl(o.ql||'Заказы, шт',f0(o.q)+(o.qa!=null?v2(f0(o.qa)):'')+' шт',o.qd||'')+'</div>'}
 function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0).filter(chgReal)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
