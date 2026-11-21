@@ -946,11 +946,12 @@ async function openKey(enc,pass){
     const kc=SH.get('kc',null);
     if(own&&kc&&kc.salt===own.salt){const dk=await unwrap(await crypto.subtle.importKey('raw',b64u8(kc.k),'AES-GCM',false,['decrypt']),own);if(dk)return {dk,r:'own'}}
     let p=SH.get('pass','');if(!p){try{p=JSON.parse(localStorage.getItem('unitka.pass')||'""')}catch(e){p=''}}
+    if(!p)p=PS.get('fp','');   // 21.11 пароль бухгалтера из «Учёта» — тот же
     if(!p)throw new Error('NEED_PASS');pass=p;
   }
   for(const slot of enc.keys){
     const key=await pbk(pass,slot.salt,enc.iter),dk=await unwrap(key,slot);
-    if(dk){if(slot.r==='own'){SH.set('pass',pass);try{SH.set('kc',{salt:slot.salt,k:u8b64(new Uint8Array(await crypto.subtle.exportKey('raw',key)))})}catch(e){}}
+    if(dk){if(slot.r==='fin')PS.set('fp',pass);if(slot.r==='own'){SH.set('pass',pass);try{SH.set('kc',{salt:slot.salt,k:u8b64(new Uint8Array(await crypto.subtle.exportKey('raw',key)))})}catch(e){}}
       return {dk,r:slot.r}}
   }
   throw new Error('BAD_PASS');
