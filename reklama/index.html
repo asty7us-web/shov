@@ -3043,9 +3043,9 @@ const v2=x=>` <span style="font-size:.72em;opacity:.8;font-weight:600">/ ${x}</s
 function kpi4(o){const ok=v=>v!=null&&isFinite(v),d=ok(o.drr)&&ok(o.pdrr)?o.drr-o.pdrr:null,inf=v=>v!=null&&!isFinite(v);
   const tl=(l,v,sub,vc,tc)=>`<div class="tile${tc||''}"><div class="l">${l}</div><div class="v num ${vc||''}">${v}</div><div class="d num">${sub||'&nbsp;'}</div></div>`;
   /* 21.11 Андрей «нет заказов это 0 и дрр какой что не понятно + цвет 31 и зел»: вместо «нет заказов» — «0 заказов» с тратами; ДРР РК тоже красится по норме */
-  const nz=s=>'0 заказов'+(s?' · траты '+rub(s):''),dk=v=>inf(v)?'bad':dcls(v);
-  return `<div class="tiles k4">`+tl('ДРР от всего',(inf(o.drr)?'0 заказов':pc(o.drr))+(ok(o.drrk)?v2(`<span class="${dk(o.drrk)}">${pc(o.drrk)}</span>`):''),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?'ДРР '+pc(o.pdrr):nz(o.ps)):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
-    +tl('ДРР РК',inf(o.drrk)?'0 заказов':pc(o.drrk),inf(o.drrk)?'траты '+rub(o.s)+', заказов с рекламы нет':'траты к заказам с рекламы',inf(o.drrk)?'bad tx':dk(o.drrk))
+  const nz=s=>'заказов 0'+(s?' · траты '+rub(s):''),dk=v=>inf(v)?'bad':dcls(v);
+  return `<div class="tiles k4">`+tl('ДРР от всего',(inf(o.drr)?'заказов 0':pc(o.drr))+(ok(o.drrk)?v2(`<span class="${dk(o.drrk)}">${pc(o.drrk)}</span>`):''),d==null?(o.pdrr!=null?perPr()+': '+(isFinite(o.pdrr)?'ДРР '+pc(o.pdrr):nz(o.ps)):'траты к заказам товара'):Math.abs(d)<0.5?'как '+perPr()+': '+pc(o.pdrr):`<b class="${d>0?'bad':'good'}">${d>0?'▲ дороже':'▼ дешевле'} на ${f0(Math.abs(d))}</b> · было ${pc(o.pdrr)}`,(inf(o.drr)?'bad tx':dcls(o.drr)),d==null||Math.abs(d)<0.5?'':d>0?' b':' g')
+    +tl('ДРР РК',inf(o.drrk)?'заказов 0':pc(o.drrk),inf(o.drrk)?'с рекламы '+nz(o.s):'траты к заказам с рекламы',inf(o.drrk)?'bad tx':dk(o.drrk))
     +tl('Траты',rub(o.s),o.ps!=null?perPr()+': '+rub(o.ps):'',sbad(o.s,o.z))
     +tl(o.ql||'Заказы, шт',f0(o.q)+(o.qa!=null?v2(f0(o.qa)):'')+' шт',o.qd||'')+'</div>'}
 function chgDays(nm,cid){const s=new Set(),ix={};D.days.forEach((d,i)=>{ix[d]=i});for(const z of istOf(nm,cid,0).filter(chgReal)){const i=ix[z.t.slice(0,10)];if(i!=null)s.add(i)}return s}
