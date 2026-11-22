@@ -1513,6 +1513,11 @@ table.zon tr:last-child td{font-weight:700}
 .gfa{font-style:normal;font-size:18px;line-height:1;color:var(--acc);transition:transform .2s ease}
 .gfd[open] .gfa{transform:rotate(90deg)}
 
+/* 22.11 «наша цена крупно» — под фото в шапке листа кампании (d_novoe.js rkphw) */
+.shh .rkphw{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;align-self:flex-start}
+.shh .rkphw .shph.rkph{margin-top:2px}
+.rkpr{font:700 17px/1.1 var(--fd);white-space:nowrap;letter-spacing:-.2px}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -1869,6 +1874,9 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
 .zch .zhd [data-seg="zmp"]>button{flex:1 1 0;min-width:0;justify-content:center;padding-left:4px;padding-right:4px;white-space:nowrap}
 .zch.zmpn [data-seg="zcm"] button[data-v="v"]{opacity:.35;pointer-events:none}
 
+/* 22.11 нажатый столбик — остальные гаснут (как в ВБ Партнёрах) */
+.zch .zrow.pick .zc:not(.pk) .zb i{opacity:.32}.zch .zrow.pick .zc:not(.pk) .zb i.g{opacity:.25}.zch .zb i{transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .2s}
+
 </style>
 </head>
 <body>
@@ -2196,7 +2204,8 @@ const PZK={'сервис':'с сайта','кабинет':'в кабинете 
 function pzWhy(r){if(!r||r.st!==11||rkSt(r).w)return '';
   if(r.bud!=null&&r.bud<=0)return 'кончился бюджет';
   const z=(D.ist||[]).find(x=>x.cid===r.id&&/пауз|запуск|стоп|останов/i.test(x.chto||''));
-  if(z&&!/запуск/i.test(z.chto)){const t=String(z.t||'');return 'поставили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
+  if(z&&(/пауз|стоп|останов/i.test(z.chto)||!/запуск/i.test(z.chto))){   // 22.11 «остановлена до ручного запуска» — это пауза, не запуск
+  const t=String(z.t||'');return 'поставили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
   return 'кто поставил — в журнале нет'}
 /* 15.11 Андрей «тут перебор, всё было нормально… верни блок»: ручная пауза снова в блоке «На паузе», причина паузы видна там же */
 function rkLive(r){return r&&rkSt(r).w?1:0}
@@ -3377,7 +3386,7 @@ function rkVnim(){const z={bud:new Set(),zas:new Set(),zsq:new Set()};const ZD=z
   for(let i=T-ZD;i<T;i++)d5.push(i);for(let i=Math.max(0,T-7);i<=T;i++)d7.push(i);
   const ruki=new Set((D.ist||[]).filter(x=>x.kab===S.kab&&x.cid&&!x.avto&&x.kto!=='заметка'&&x.kto!=='марпла'&&x.t.slice(0,10)>=D.days[T-1]).map(x=>x.cid));
   for(const r of K.rk){if(r.st!==9&&r.st!==11)continue;let s7=0,s5=0,on=0,q5=0;
-    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){const x=(d.s&&d.s[i])||0;v+=x;s5+=x;q5+=(d.q&&d.q[i])||0}}if(v>0)on++}   // 17.11 Андрей «поставил на паузу, а она в холостых»: после паузы ВБ ещё дни шлёт 1–5 показов без трат — живой день только с тратами
+    for(const i of d5){let v=0;for(const nm in r.nm){const d=r.nm[nm].d;if(d){const x=(d.s&&d.s[i])||0;v+=x;s5+=x;q5+=(d.q&&d.q[i])||0}}if(v>=10)on++}   // 22.11 Андрей «там живая, тут стоячая»: на паузе ВБ дописывает копейки (0,4–10 ₽) — живой день только от 10 ₽. 17.11 Андрей «поставил на паузу, а она в холостых»: после паузы ВБ ещё дни шлёт 1–5 показов без трат — живой день только с тратами
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
@@ -3828,7 +3837,8 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   h+=chgNtBlock(nm,id);   // 15.11 Андрей «вместе просто по датам разделить»: правки и заметки кампании — одним списком по дням
   /* блоков «Настройки сейчас», «Ставка» (минимум и советы ВБ — в листе «Ставка»), биддера и графика внизу больше нет — всё в блоке управления сверху.
      Фразы — последним блоком листа: при «Активные / Исключённые / Все» высота меняется только в самом низу (FR.mh держит её, см. frSwitch) */
-  const ph=t?`<button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>`
+  /* 22.11 Андрей (кадр листа кампании, обвёл место под фото): «наша цена крупно» — под фото товара наша цена (t.pr.f, как «наша цена» в листе товара) */
+  const ph=t?`<span class="rkphw"><button class="shph rkph press" type="button" data-nm2="${nm}" title="Открыть товар ${esc(t.art)}" aria-label="Открыть товар ${esc(t.art)}"><span class="ph"${foto(t)}></span></button>${t.pr&&t.pr.f?`<b class="rkpr num" title="Наша цена">${f0(Math.round(t.pr.f))}&nbsp;₽</b>`:''}</span>`
     :`<span class="shph"><span class="ph"${foto({nm})}></span></span>`;
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
@@ -4064,7 +4074,19 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch,T='Когда раб�
    Данные — лента заказов и продаж ВБ (sbor.zak_chas, обновляется с каждым сбором, раз в 30 минут). Только показывает. ── */
 const ZMS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],ZWD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 function zchScroll(){document.querySelectorAll('.zch .zsc[data-h]').forEach(el=>{if(el.dataset.done)return;el.dataset.done=1;const c=el.querySelector('.zc[data-i="'+el.dataset.h+'"]');if(c)el.scrollLeft=Math.max(0,c.offsetLeft+c.offsetWidth-el.clientWidth+8)})}
-document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('.zch .zc');if(!b)return;const w=b.closest('.zch');w.querySelectorAll('.zc.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');const r=w.querySelector('.zrd');if(r)r.innerHTML=b.dataset.r});
+/* 22.11 Андрей (скрин ВБ Партнёров, «при нажатии так показывает»): нажал столбик — вверху дата, сумма, штуки и сравнение этого дня (часа),
+   остальные столбики гаснут; нажал тот же ещё раз или текущий — снова итог. */
+function zPill(a,b,u){const d=a-b;if(!b&&!d)return '';const up=d>=0;return `<span class="zpl ${up?'up':'dn'} num">${up?'▲':'▼'} ${f0(Math.abs(d))}${u}${b?' · '+Math.round(Math.abs(100*d/b))+'%':''}</span>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('.zch .zc');if(!b)return;const w=b.closest('.zch'),row=b.closest('.zrow');
+  const again=b.classList.contains('pk');w.querySelectorAll('.zc.sel,.zc.pk').forEach(x=>x.classList.remove('sel','pk'));b.classList.add('sel');
+  const r=w.querySelector('.zrd');if(r)r.innerHTML=b.dataset.r;
+  const dt=w.querySelector('.zdt'),bg=w.querySelector('.zbig'),cm=w.querySelector('.zcm');if(!dt||!bg)return;
+  if(!w.dataset.d0){w.dataset.d0=dt.innerHTML;w.dataset.b0=bg.innerHTML;w.dataset.c0=cm?cm.innerHTML:''}
+  const now=b.dataset.i===row.dataset.now;
+  if(again||now||b.dataset.fut){row.classList.remove('pick');dt.innerHTML=w.dataset.d0;bg.innerHTML=w.dataset.b0;if(cm)cm.innerHTML=w.dataset.c0;return}
+  b.classList.add('pk');row.classList.add('pick');const a=+b.dataset.a,aq=+b.dataset.aq,c=+b.dataset.b,cq=+b.dataset.bq;
+  dt.innerHTML=esc(b.dataset.dl);bg.innerHTML=`<div><b class="num">${f0(a)} ₽</b>${zPill(a,c,' ₽')}</div><div><b class="num">${f0(aq)} шт</b>${zPill(aq,cq,' шт')}</div>`;
+  if(cm)cm.innerHTML=c||cq?'Разница '+(row.classList.contains('wk')?'с тем же днём неделей раньше':'со вчера в этот час'):''});
 /* 22.11 Андрей (скрин блока, «тут переключение между МП и ниже их соотв лента и тп»): «ВБ | Озон | Маркет» справа от «Заказы | Выкупы».
    ВБ — выбранный вверху кабинет (K.zch), Озон и Маркет — D.mp.oz_z / ym_z из mp_vse.py (раз в час; итоги дней те же, что в «Все площадки»,
    часы — по времени заказа). У Озона и Маркета пока только заказы и отказы: выкупов по часам их кабинеты не отдают. */
@@ -4094,16 +4116,17 @@ function zchBlock(){if(S.zmp===undefined)S.zmp=RS.get('zmp','wb');const mp=zMp()
   const n=dd?24:7,A=dd?z.t:z.w,AQ=dd?z.tq:z.wq,B=dd?z.y:z.pw,BQ=dd?z.yq:z.pwq,nowI=dd?+Z.hm.slice(0,2):Z.wd,bl=dd?'вчера':'неделей раньше',wl=i=>ZWD[((Z.w0==null?0:Z.w0)+i)%7];
   const mx=Math.max(1,...A,...B),st=mx>=3e5?1e5:mx>=12e4?5e4:mx>=6e4?2e4:mx>=24e3?1e4:mx>=12e3?5e3:mx>=6e3?2e3:1e3,top=Math.ceil(mx/st/2)*st*2;
   const ht=v=>v>0?Math.max(2,100*v/top).toFixed(1):0,per=i=>dd?i+':00–'+(i+1)+':00':wl(i);
-  const rdT=i=>`<b>${per(i)}</b> · ${i>nowI?'ещё не наступил':`сегодня <b>${rub(A[i])}</b>, ${f0(AQ[i])} шт`} · ${bl} ${rub(B[i])}, ${f0(BQ[i])} шт`;
+  const rdT=i=>`<b>${per(i)}</b> · ${i>nowI?'ещё не наступил':`${dd||i===nowI?'сегодня ':''}<b>${rub(A[i])}</b>, ${f0(AQ[i])} шт`} · ${bl} ${rub(B[i])}, ${f0(BQ[i])} шт`;
+  const dlT=i=>{if(dd)return `${td.getDate()} ${ZMS[td.getMonth()]}, ${i}:00–${i+1}:00`;const x=new Date(d0);x.setDate(d0.getDate()+i);return `${ZWD[((Z.w0==null?0:Z.w0)+i)%7]}, ${x.getDate()} ${ZMS[x.getMonth()]}`};
   let cols='';for(let i=0;i<n;i++){const fut=i>nowI,a=A[i],b=B[i],col=a>=b?'var(--good)':'var(--bad)';
-    cols+=`<button type="button" class="zc${i===nowI?' sel':''}" data-i="${i}" data-r="${esc(rdT(i))}"><div class="zb">${fut||!a?'':`<i style="height:${ht(a)}%;background:${col}"></i>`}${b?`<i class="g" style="height:${ht(b)}%"></i>`:''}</div><span>${dd?i+':00':wl(i)}</span></button>`}
+    cols+=`<button type="button" class="zc${i===nowI?' sel':''}" data-i="${i}" data-r="${esc(rdT(i))}" data-a="${a||0}" data-aq="${AQ[i]||0}" data-b="${b||0}" data-bq="${BQ[i]||0}" data-dl="${esc(dlT(i))}"${fut?' data-fut="1"':''}><div class="zb">${fut||!a?'':`<i style="height:${ht(a)}%;background:${col}"></i>`}${b?`<i class="g" style="height:${ht(b)}%"></i>`:''}</div><span>${dd?i+':00':wl(i)}</span></button>`}
   const ax=[top,top/2,0].map(v=>`<div class="zy" style="bottom:${(100*v/top).toFixed(1)}%"><span class="num">${v?f0(v):'0'}</span></div>`).join('');
   setTimeout(zchScroll,0);
   return `<div class="card zch${Z.v?'':' zmpn'}"><div class="hrw zhd" style="margin:0 0 8px">${seg('zcm',[['o','Заказы'],['v','Выкупы']],m,'sm')}${mps}</div>
     <div class="muted zdt">${hd}</div>
     <div class="zbig"><div><b class="num">${f0(sum)} ₽</b>${pill(sum,ps,' ₽')}</div><div><b class="num">${f0(qn)} шт</b>${pill(qn,pn,' шт')}</div></div>
     <div class="muted zcm">${ps||pn?'Разница '+cmpT:''}</div>
-    <div class="zwr"><div class="zsc"${dd?` data-h="${nowI}"`:''}><div class="zrow${dd?'':' wk'}">${cols}</div></div><div class="zax">${ax}</div></div>
+    <div class="zwr"><div class="zsc"${dd?` data-h="${nowI}"`:''}><div class="zrow${dd?'':' wk'}" data-now="${nowI}">${cols}</div></div><div class="zax">${ax}</div></div>
     <div class="zrd num">${rdT(nowI)}</div>
     <div class="hrw zft">${seg('zcp',[['d','День'],['w','Неделя']],p,'sm')}<span class="muted">${z.dn?'Выкупы Озона — только по дням · ':''}Данные на сегодня, ${zAt()}</span></div></div>`+(mp==='wb'?zsvBlock():'')+zltBlock()}
 /* 18.11 Андрей (скрин приложения ВБ «Лента заказов», «там 3 ряда ленты»): последние заказы / выкупы / отказы / возвраты —
@@ -4139,7 +4162,7 @@ function zchSwap(id){const sel=id==='zlt'?'.zlt':'.zch',old=document.querySelect
   old.querySelectorAll('[data-seg]').forEach(sg=>{const v=sg.dataset.seg==='zmp'?zMp():sg.dataset.seg==='zcp'?zPe():sg.dataset.seg==='zcm'&&old.classList.contains('zmpn')?'o':String(S[sg.dataset.seg]);sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));zThumb(sg,true)});
   const parts=id==='zlt'?['.zlbody']:['.zdt','.zbig','.zcm','.zwr','.zrd'];
   const h0=old.offsetHeight;
-  const go=()=>{parts.forEach(q=>{const a=old.querySelector(q),b=nw.querySelector(q);if(a&&b)a.replaceWith(b);else if(a&&!b)a.remove()});
+  const go=()=>{delete old.dataset.d0;delete old.dataset.b0;delete old.dataset.c0;parts.forEach(q=>{const a=old.querySelector(q),b=nw.querySelector(q);if(a&&b)a.replaceWith(b);else if(a&&!b)a.remove()});
     if(id!=='zlt'){const s=old.querySelector('.zft .muted'),s2=nw.querySelector('.zft .muted');if(s&&s2)s.textContent=s2.textContent;zchScroll()}
     if(id==='zlt'){const e=old.querySelector('.zle'),e2=nw.querySelector('.zle');old.classList.remove('all');if(e&&!e2)e.style.visibility='hidden';else if(e){e.style.visibility='';e.textContent='Ещё'}}
     if(ZRM)return;const h1=old.offsetHeight;
