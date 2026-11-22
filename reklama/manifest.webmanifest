@@ -1,0 +1,37 @@
+{
+ "id": "/shov/reklama/",
+ "name": "Реклама — ВБ, Озон, Маркет",
+ "short_name": "Реклама",
+ "start_url": "/shov/reklama/",
+ "scope": "/shov/reklama/",
+ "display": "standalone",
+ "background_color": "#1c0f16",
+ "theme_color": "#3e1c2b",
+ "lang": "ru",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-m-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "maskable"
+  },
+  {
+   "src": "icon-m-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
