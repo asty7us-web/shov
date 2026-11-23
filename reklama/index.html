@@ -2182,7 +2182,16 @@ function prep(){
   K=D.kab[S.kab];N=D.days.length;T=N-1;TOV={};RK={};
   for(const r of K.rk)RK[r.id]=r;
   for(const t of K.tov)TOV[t.nm]=t;
+  akPoCene();
 }
+/* 23.11 Андрей «опустил цену, а более высокие цены акций не позеленели… реши окончательно»: в автоакцию ВБ берёт товар сам, если цена
+   не выше плановой (проверено 23.11: цена 564 → при следующем чтении кабинета «Участвует» в акциях с плановой 564, 570 и 575). Поэтому после
+   смены цены с сайта и до перечитки кабинета все автоакции товара считаем по новой цене: вошли — «вход ЧЧ:ММ · ждём ВБ», вышли — «выход …».
+   Обычные (не авто) акции ценой не входят — по ним только та, ради которой меняли цену (aku сторожа). Перечитали кабинет — снова как у ВБ. */
+function akPoCene(){if(!K||!K.lk_at||!D.ist)return;const ch={};
+  for(const i of D.ist)if(i.kab===S.kab&&i.nm&&i.t>K.lk_at&&/^цена(?! — шаг)/.test(String(i.chto||''))&&!(ch[i.nm]>i.t))ch[i.nm]=i.t;
+  for(const nm in ch){const t=TOV[nm],P=t&&t.pr&&t.pr.f;if(!(P>0))continue;
+    for(const a of t.ak||[])if(a.avto&&a.plan){const u=P<=a.plan+0.5?1:0;if(a.uch!==u||a.nw){if(a.uch!==u)a.nw=1;a.uch=u;a.zt=ch[nm].slice(11,16)}}}}
 /* кампания */
 const PLN={search:'поиск',recommendations:'рекомендации',combined:'поиск и рекомендации'};
 const rkType=r=>r.pay==='cpc'?'за клик':r.bt==='unified'?'единая ставка':'за показы';
@@ -2243,7 +2252,7 @@ const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
 /* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
    поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
 const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
-const akSt=(nm,x)=>{const z=akZhd(nm,x);return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
+const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
 const ostNet=t=>!!t&&(t.fbo===0||t.fbo==null)&&(t.fbs===0||t.fbs==null)&&(t.fbo===0||t.fbs===0);   // нигде нет — и это известно точно
 const ostCell=v=>v==null?'<span class="muted">—</span>':v>0?f0(v):'<b class="bad">0</b>';
 const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
