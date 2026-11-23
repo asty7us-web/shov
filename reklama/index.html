@@ -1533,6 +1533,13 @@ table.zon tr:last-child td{font-weight:700}
 .bzb .bzr div:first-child b{color:var(--good)}
 .bzb .btn{align-self:flex-start}
 
+/* 24.11 Андрей: безопасная ставка в акциях — список под кнопкой «Поставить безопасную» */
+.bzak{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.bzak>small{color:var(--muted)}
+.bzar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bzar span{min-width:0;font-size:13px}.bzar i{display:block;font-style:normal;font-size:12px}
+.bzar i.good{color:var(--good)}.bzar i.bad{color:var(--bad)}.bzar em{font-style:normal;color:var(--muted);font-size:12px;white-space:nowrap}
+
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
   color:#fff;background:var(--good);box-shadow:0 6px 18px -8px rgba(22,144,74,.55);display:flex;align-items:center;justify-content:center;padding:0 16px;isolation:isolate}
@@ -2206,7 +2213,14 @@ function prep(){
 function akPoCene(){if(!K||!K.lk_at||!D.ist)return;const ch={};
   for(const i of D.ist)if(i.kab===S.kab&&i.nm&&i.t>K.lk_at&&/^цена(?! — шаг)/.test(String(i.chto||''))&&!(ch[i.nm]>i.t))ch[i.nm]=i.t;
   for(const nm in ch){const t=TOV[nm],P=t&&t.pr&&t.pr.f;if(!(P>0))continue;
-    for(const a of t.ak||[])if(a.avto&&a.plan){const u=P<=a.plan+0.5?1:0;if(a.uch!==u||a.nw){if(a.uch!==u)a.nw=1;a.uch=u;a.zt=ch[nm].slice(11,16)}}}}
+    for(const a of t.ak||[])if(a.avto&&a.plan){const u=P<=a.plan+0.5?1:0;if(a.uch!==u||a.nw){if(a.uch!==u)a.nw=1;a.uch=u;a.zt=ch[nm].slice(11,16)}}}
+  /* 24.11 Андрей «всё-таки не работает» (СПС Средство Септик: цена 2 426 с сайта в 01:57, перечитка 02:05 и 02:15 — ВБ ещё по старой цене
+     «не участвует»): ВБ пересчитывает участие не сразу. Сутки после смены цены автоакция, куда цена проходит, а ВБ ещё не взял, —
+     «цена подходит · ждём ВБ с ЧЧ:ММ», а не «не участвуем». Прошли сутки, а ВБ так и не взял — снова как у ВБ. */
+  const at=Date.parse(String(D.at||'').replace(' ','T')),zh={};
+  for(const i of D.ist)if(i.kab===S.kab&&i.nm&&!ch[i.nm]&&/^цена(?! — шаг)/.test(String(i.chto||''))&&at-Date.parse(String(i.t).replace(' ','T'))<864e5&&!(zh[i.nm]>i.t))zh[i.nm]=i.t;
+  for(const nm in zh){const t=TOV[nm],P=t&&t.pr&&t.pr.f;if(!(P>0))continue;
+    for(const a of t.ak||[])if(a.avto&&a.plan&&!a.uch&&!a.nw&&P<=a.plan+0.5)a.zh=zh[nm].slice(11,16)}}
 /* кампания */
 const PLN={search:'поиск',recommendations:'рекомендации',combined:'поиск и рекомендации'};
 const rkType=r=>r.pay==='cpc'?'за клик':r.bt==='unified'?'единая ставка':'за показы';
@@ -2267,7 +2281,12 @@ const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
 /* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
    поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
 const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
-const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
+const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">цена подходит · ждём ВБ с '+x.zh+'</span>';if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
+/* 24.11 Андрей (кадр акций в листе кампании): «показывать, куда спокойно можем войти, в зависимости от цены, и ставку, которую предлагаешь
+   как безопасную, тоже учитывай». Под статусом акции — чистая и ДРР по панели ВБ при цене акции и рекламе как сейчас (predel.py, x.bz):
+   «спокойно» — чистая ≥ 10% и ДРР ≤ 10%; в листе кампании — ещё безопасная ставка этой кампании при цене акции (e.bz.ak) */
+const akBz=(x,e)=>{const z=x&&x.bz;if(!z)return '';const sa=e&&e.bz&&e.bz.ak?e.bz.ak[x.id]:null;
+  return `<i class="${z.ok?'good':'bad'}">${z.ok?'спокойно':z.n<10?'чистая ниже 10%':'ДРР выше 10%'} · чистая ${f1(z.n)}%, ДРР ${f1(z.d)}%${sa==null?'':sa<0?' · безоп. ставка ниже мин.':' · безоп. ставка '+kop(sa)}</i>`};
 const ostNet=t=>!!t&&(t.fbo===0||t.fbo==null)&&(t.fbs===0||t.fbs==null)&&(t.fbo===0||t.fbs===0);   // нигде нет — и это известно точно
 const ostCell=v=>v==null?'<span class="muted">—</span>':v>0?f0(v):'<b class="bad">0</b>';
 const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
@@ -3589,7 +3608,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
       +prcBlock(t,nm,cx)
       +`<div class="akl">`
       +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
-        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`}).join('')+'</div>'
+        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x)}</small></div></button>`}).join('')+'</div>'
 }
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
@@ -3610,9 +3629,9 @@ function akStat(aks){const inA=aks.filter(x=>x.uch&&x.s<=D.today),fu=aks.filter(
   if(fu.length)return `<div class="akst g">ВХОДИТ В АКЦИЮ — ${fu.map(x=>esc(x.name)+' с '+dm(x.s)).join(', ')}</div>`;
   return `<div class="akst b">БЕЗ АКЦИИ</div>`}
 function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
-function rkCenaAk(t,nm,cx){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
+function rkCenaAk(t,nm,cx,e){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
   let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?'':akNet())+pb;
-  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}</small></div></button>`).join('')+'</div>';
+  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x,e)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
@@ -3858,7 +3877,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spz);
   /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
-  if(t)h+=rkCenaAk(t,nm,cx);
+  if(t)h+=rkCenaAk(t,nm,cx,e);
   if(t)h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
@@ -4710,13 +4729,19 @@ function noLim(r){const ol=ourLim(r);return !(ol&&ol.on)&&!(r.lw&&r.lw.on)&&!(r.
 /* 24.11 Андрей: «ту, которую безопасно. И при открытии внутри тоже показывал и давал выбрать такую сразу». Безопасная ставка по панели ВБ за последнюю
    полную неделю (predel.py): чистая останется не ниже 10% и ДРР не выше 10% (Андрей 24.11 «также учитывать, что ДРР не более 10%»), даже если клик обойдётся в полную ставку и кликов станет больше; «предел» — чистая ровно
    10%, если кликов столько же. Цена товара — сейчас. Кнопка «Поставить безопасную» вписывает её в поле, дальше как обычно — «было → стало» */
-function bzBox(e,cur,cpm,mn){const z=e&&e.bz;if(!z)return '';const ed=cpm?'за 1000 показов':'за клик';
+function bzBox(e,cur,cpm,mn,nm){const z=e&&e.bz;if(!z)return '';const ed=cpm?'за 1000 показов':'за клик';
   if(z.no)return `<div class="bzb"><b>Безопасную ставку не считаю</b><span>За ${z.w} продаж по панели нет.</span></div>`;
   if(z.s==null)return `<div class="bzb"><b>Безопасную ставку не считаю</b><span>За ${z.w} у кампании ${z.u?'мало '+(cpm?'показов':'кликов')+' ('+f0(z.u)+')':'нет трат'} — цену ${cpm?'показа':'клика'} не вывести. Чистая товара по панели ${f1(z.n)}%.</span></div>`;
   const c=bzCls(e,cur),st=c==='g'?'Ставка сейчас безопасна':c==='w'?'Ставка сейчас выше безопасной':(z.lim?'Ставка сейчас выше предела — ДРР выйдет больше 10%':'Ставка сейчас выше предела — чистая уйдёт ниже 10%');
   return `<div class="bzb ${c}"><div class="bzr"><div><small>Безопасная</small><b class="num">${z.lo?'ниже мин.':kop(z.s)+(z.cap?'+':'')}</b></div><div><small>Предел</small><b class="num">${kop(z.m)}</b></div><div><small>Чистая сейчас</small><b class="num">${f1(z.n)}%</b></div>${z.d==null?'':`<div><small>ДРР сейчас</small><b class="num">${f1(z.d)}%</b></div>`}</div>
     <span>${st}. По панели ВБ за ${z.w}, с ценой товара сейчас: чистая останется не ниже 10%, а ДРР не выше 10%, даже если ${cpm?'показы обойдутся':'клик обойдётся'} в полную ставку и ${cpm?'показов':'кликов'} станет больше. На пределе — ${z.lim?'ДРР':'чистая'} ровно 10%, если ${cpm?'показов':'кликов'} столько же.${z.lim?' Сейчас ставку держит ДРР, а не чистая.':''} Все кампании товара вместе.${z.cap?' Можно и выше, но больше чем втрое к цене '+(cpm?'показов':'клика')+' не считаю.':''}${z.lo?' Даже минимальная ставка ВБ ('+kop(mn)+')'+(z.lim?' даст ДРР выше 10%.':' съест 10% чистой.'):''}</span>
-    ${z.lo?'':`<button class="btn sm press" type="button" data-bv="${z.s}">Поставить безопасную ${kop(z.s)}</button>`}</div>`}
+    ${z.lo?'':`<button class="btn sm press" type="button" data-bv="${z.s}">Поставить безопасную ${kop(z.s)}</button>`}${bzAk(z,nm)}</div>`}
+/* 24.11 Андрей: «ставку, которую предлагаешь как безопасную, тоже учитывай [цену акции]» — безопасная этой кампании при цене каждой акции
+   товара (predel.py, e.bz.ak): спокойно ли входить и какую ставку держать в акции; нажатие вписывает ставку в поле */
+function bzAk(z,nm){const t=typeof TOV!=='undefined'?TOV[nm]:null,A=z.ak;if(!t||!A)return '';
+  const L=(t.ak||[]).filter(x=>x.bz&&A[x.id]!=null&&x.e>=D.today).sort((x,y)=>x.bz.p-y.bz.p);if(!L.length)return '';
+  return `<div class="bzak"><small>В акциях — при цене акции, реклама как сейчас:</small>${L.map(x=>{const sa=A[x.id];
+    return `<div class="bzar"><span><b>${esc(x.name)}</b> · ${rub(x.bz.p)}${x.uch?' · участвуем':''}<i class="${x.bz.ok?'good':'bad'}">${x.bz.ok?'спокойно':x.bz.n<10?'чистая ниже 10%':'ДРР выше 10%'} · чистая ${f1(x.bz.n)}%, ДРР ${f1(x.bz.d)}%</i></span>${sa<0?'<em>ниже мин.</em>':`<button class="chip press" type="button" data-bv="${sa}">${kop(sa)}</button>`}</div>`}).join('')}</div>`}
 function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Object.keys(e.b||{});let pl=pls[0];
   sheet(()=>{const cur=e.b[pl],mk=pl==='recommendations'?'recommendation':pl,mn=(e.min||{})[mk],rc=e.rec||{},cpm=r.pay==='cpm',mb=r.mar&&(r.mar.bid||[]).length;
     const RL={range1To2:'места 1–2',range3To10:'места 3–10',range11To34:'места 11–34',competitiveBid:'конкурентная',leadersBid:'лидеры'};
@@ -4725,7 +4750,7 @@ function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Objec
      <label class="fld"><span>Новая ставка, ₽ ${cpm?'за 1000 показов':'за клик'} · сейчас ${kop(cur)}</span><input class="inp num" id="bv" inputmode="decimal" value="${f2(cur/100).replace(/\s/g,'')}"></label>
      ${cur!=null&&!cpm?`<div class="chips">${[30,40,50,60,100].map(k=>`<button class="chip press" type="button" data-bp="${k}">+ ${k<100?'0,'+k:'1 ₽'}</button>`).join('')}</div>`:''}<!-- 15.11 Андрей «Добавь варианты 30 40 50 60 1р + к ставке»: прибавка к ставке сейчас -->
      <div class="chips">${mn!=null?`<button class="chip press mnc" type="button" data-bv="${mn}">мин. ставка ${kop(mn)}</button><button class="chip press mnc" type="button" data-bv="${mn+(cpm?100:100)}">мин. + 1 ₽</button>`:''}${Object.entries(rc).filter(([k,v])=>v&&RL[k]).map(([k,v])=>`<button class="chip press" type="button" data-bv="${v}" title="Подсказка ВБ"><span class="wbc" aria-hidden="true"></span>${RL[k]} ${kop(v)}</button>`).join('')}</div><!-- 16.11 Андрей «помечай значком такое»: подсказки ставки самого ВБ — со значком ВБ -->
-     ${bzBox(e,cur,cpm,mn)}
+     ${bzBox(e,cur,cpm,mn,nm)}
      <div class="cmp"><div><small>Было</small><b class="num">${kop(cur)}</b></div><div class="ar">→</div><div><small>Станет</small><b class="num" id="bnew">${kop(cur)}</b></div></div>
      ${mb?'<div class="note w">Ставку ведёт биддер Марплы — он вернёт свою через несколько минут. Чтобы держалась ваша, выключите его в Марпле.</div>':bdOn(e.bd)&&e.bd.src==='svoi'&&e.bd.mode==='sam'?'<div class="note w">Ставку ведёт наш биддер в режиме «Сам» — при следующем расчёте он может поставить свою.</div>':''}
      ${mn==null?'<div class="note">Минимальная ставка ВБ ещё не собрана — ниже минимума сервис поставить не даст.</div>':''}
