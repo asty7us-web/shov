@@ -2636,9 +2636,16 @@ function evShort(z){let ch=String(z.chto||''),by=evCut(z.bylo),st=evCut(z.stalo)
   else if(/^пауза$/i.test(ch)){ch='Пауза';tl=tl||(z.kto==='сервис'&&!z.avto?'остановили командой: с сайта или из чата':'в кабинете ВБ, причина не записана');by=st=''}
   else if(/^запуск$/i.test(ch)){ch='Запуск';by=st=''}
   return {ch:ch.charAt(0).toUpperCase()+ch.slice(1),by,st,tl}}
+/* 23.11 Андрей (кадр «История изменений» лимита: десять «Пауза до завтра» подряд): «не нужно столько сообщений, одного достаточно».
+   Одинаковая автоматика (пауза по лимиту, новый день — запуск и т.п.) одной кампании — одна строка: последняя запись и «N раз с ДД.ММ».
+   Записи с раскрываемым списком (det) и ручные правки не сворачиваем */
+function evSvern(L){const M=new Map(),out=[];for(const z of L){if(!z.avto||(z.det&&z.det.length)){out.push(z);continue}
+    const k=(z.cid||'')+'|'+(z.cid?'':z.nm||'')+'|'+evShort(z).ch.replace(/\d+/g,'#'),g=M.get(k);
+    if(g){g._n++;g._d0=z.t.slice(0,10)}else{const y=Object.assign({},z,{_n:1,_d0:z.t.slice(0,10)});M.set(k,y);out.push(y)}}
+  return out}
 function evHtml(z,full,bez){const w=WHO[z.kto]||['',z.kto||''],t=z.nm&&TOV[z.nm],r=z.cid&&RK[z.cid],e=evShort(z),sv=z.kto==='сервис';
   const ch=e.by&&e.st?` <span class="muted">${esc(e.by)}</span> → <b>${esc(e.st)}</b>`:e.st?` <b>${esc(e.st)}</b>`:e.by?` <span class="muted">${esc(e.by)}</span>`:'';
-  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez||sv?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(e.ch)}${ch}${e.tl?` <small class="muted">${esc(e.tl)}</small>`:''}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small class="rkn">${esc(r.name)}</small>`:''}</div></div>`}
+  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez||sv?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(e.ch)}${ch}${e.tl?` <small class="muted">${esc(e.tl)}</small>`:''}${z._n>1?` <small class="muted">· ${z._n} раз с ${dm(z._d0)}</small>`:''}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small class="rkn">${esc(r.name)}</small>`:''}</div></div>`}
 /* ───────── Ещё ───────── */
 const NST_DEF={on:false,bud:{on:true,v:150},   // как в strazh.py: пока человек не включил — бот молчит
 lim:{on:true},stop:{on:true},pos:{on:true,v:10},drr:{on:true,v:30,min:500},klik:{on:true,v:60},lk:{on:false},ak:{on:true},tok:{on:true}};
@@ -4028,8 +4035,8 @@ function otzBlock(t){const o=t&&t.ot;if(!o)return '';
 
 /* 16.11 Андрей (кадр истории товара): «снизу оставляй примерно столько (6), а остальное по кнопке развернуть, и не надо пополнения показывать».
    Пополнения бюджета убраны; паузы по графику видны (причина остановки), ежечасные «час показа» — нет */
-function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(String(z.nm)===String(nm)||(z.cid&&rk.includes(+z.cid)))
-    &&!/^свой график: час показа/.test(z.chto||'')&&!/пополн/i.test(z.chto||''));
+function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=evSvern((D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(String(z.nm)===String(nm)||(z.cid&&rk.includes(+z.cid)))
+    &&!/^свой график: час показа/.test(z.chto||'')&&!/пополн/i.test(z.chto||'')));
   const key='th|'+nm,open=S.chgOpen===key,n=open?30:6;
   return `<div class="hrw" style="margin-top:22px"><h3>История изменений</h3></div>`+(L.length?'<div>'+L.slice(0,n).map(z=>evX(z,1)).join('')+'</div>'
     +(L.length>6?`<button class="btn press" type="button" data-act="chgmore" data-key="${key}" style="width:100%;margin-top:10px">${open?'Свернуть':'Развернуть, ещё '+Math.min(L.length-6,24)}</button>`:'')
@@ -4750,8 +4757,8 @@ function actDep(id,nm){if(!need())return;const r=RK[id],b=K.bal||{},mt=(K.cfg.mi
 const SECRX={limit:[/лимит/i,1],deposit:[/пополн|бюджет/i,0],bid:[/ставк/i,0],bidder:[/биддер/i,0],grafik:[/график/i,0],price:[/цен|скидк/i,0],status:[/пауз|запус|останов|заверш|включ/i,0],zony:[/места показа/i,0],rename:[/название/i,0]};
 /* 16.11 Андрей «историю можно в Марпле всю взять и по всем»: записи журнала Марплы (kto «Марпла», mar_log.py) — в каждом разделе, и её автоматика:
    биддер Марплы — одна запись за день («ставка — биддер Марплы, смен N»), лимит дня Марплы — пауза/запуск */
-function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind],L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto||z.kto==='Марпла')&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
-    &&(cid?z.cid===+cid:String(z.nm)===String(nm)&&!z.cid)&&(kind!=='status'||!/лимит|график/i.test(z.chto||'')));
+function secHist(kind,cid,nm){const [rx,avto]=SECRX[kind];let L=(D.ist||[]).filter(z=>z.kab===S.kab&&z.kto!=='заметка'&&(avto||!z.avto||z.kto==='Марпла')&&rx.test((z.chto||'')+(/^перенос/.test(z.chto||'')?' '+(z.bylo||'')+' '+(z.stalo||''):''))
+    &&(cid?z.cid===+cid:String(z.nm)===String(nm)&&!z.cid)&&(kind!=='status'||!/лимит|график/i.test(z.chto||'')));L=evSvern(L);
   return `<div class="hrw" style="margin-top:18px"><h3>История изменений</h3></div>`+(L.length?`<div${cid?' class="evrk"':''}>`+L.slice(0,15).map(z=>evX(z,1)).join('')+'</div>'
     +(L.length>15?`<div class="muted tnote">Последние 15 из ${L.length}. Весь журнал — в разделе «Ещё».</div>`:''):'<div class="note" style="margin-top:0">Изменений пока не было.</div>')}
 function actLim(id,nm){if(!need())return;const r=RK[id],ol=ourLim(r),cpc=r.pay==='cpc',mdl=(K.cfg.minDailyLimit||100000)/100,ml=r.mar&&r.mar.lim&&r.mar.lim.max>0?Math.round(r.mar.lim.max):0;
@@ -5225,7 +5232,7 @@ function ptrNote(pm){const nm=[...new Set((pm||[]).map(x=>x.n).filter(Boolean))]
   runRes({k:'_ptr'},'g',atTx()+(pm&&pm.length?' · ваши изменения применены ('+pm.length+(nm.length?': '+nm.slice(0,3).join(', ').toLowerCase():'')+'), в данных закрепятся со сбором':' · все ваши изменения уже в данных'))}
 $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').value.trim();if(!p)return;$('#pwgo').disabled=true;$('#pwerr').textContent='';boot(p)});
 if(window.svcBack)svcBack({pop:[()=>navBack()],main:()=>{if(S.tab!=='tov'){go('tov');return true}return false},home:()=>{}});
-window.REK={get shNav(){const x=SHS[SHS.length-1];return x&&x.nav?{i:x.nav.i,n:x.nav.n}:null},actStatus,noLim,get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
+window.REK={secHist,evSvern,get shNav(){const x=SHS[SHS.length-1];return x&&x.nav?{i:x.nav.i,n:x.nav.n}:null},actStatus,noLim,get D(){return D},get KL(){return KL},S,go,pAgg,kabAgg,rkAgg,PI,PP,calcPrice,openProd,openRk,openKw,kwData,tovRows,render,loadKl,get TOV(){return TOV},get RK(){return RK},get K(){return K},rkSt,get upr(){return UPR},applyPatch,shMark,bdAll,openNotes,rkRows,marPer,grHex,actPerenos,navBack,applyTheme,minTxt,
   FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
   get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC},
   prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,ptrVer:v=>{PVER=v},get pver(){return PVER},reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
