@@ -2220,7 +2220,9 @@ function akPoCene(){if(!K||!K.lk_at||!D.ist)return;const ch={};
   const at=Date.parse(String(D.at||'').replace(' ','T')),zh={};
   for(const i of D.ist)if(i.kab===S.kab&&i.nm&&!ch[i.nm]&&/^цена(?! — шаг)/.test(String(i.chto||''))&&at-Date.parse(String(i.t).replace(' ','T'))<864e5&&!(zh[i.nm]>i.t))zh[i.nm]=i.t;
   for(const nm in zh){const t=TOV[nm],P=t&&t.pr&&t.pr.f;if(!(P>0))continue;
-    for(const a of t.ak||[])if(a.avto&&a.plan&&!a.uch&&!a.nw&&P<=a.plan+0.5)a.zh=zh[nm].slice(11,16)}}
+    for(const a of t.ak||[])if(a.avto&&a.plan&&!a.uch&&!a.nw&&P<=a.plan+0.5&&!/блокировк/i.test(a.st||''))a.zh=zh[nm].slice(11,16)}}
+/* 24.11 Андрей «что значит ждём»: у СПС Средство Септик ВБ писал «Не участвует: стоит блокировка на снижение цены» — по такой акции ждать нечего,
+   пишем причину ВБ, а не «ждём ВБ» */
 /* кампания */
 const PLN={search:'поиск',recommendations:'рекомендации',combined:'поиск и рекомендации'};
 const rkType=r=>r.pay==='cpc'?'за клик':r.bt==='unified'?'единая ставка':'за показы';
@@ -2281,7 +2283,7 @@ const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
 /* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
    поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
 const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
-const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">цена подходит · ждём ВБ с '+x.zh+'</span>';if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
+const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">цена подходит · ждём ВБ с '+x.zh+'</span>';if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';if(!x.uch&&/блокировк/i.test(x.st||''))return '<i class="bad">блокировка снижения цены</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
 /* 24.11 Андрей (кадр акций в листе кампании): «показывать, куда спокойно можем войти, в зависимости от цены, и ставку, которую предлагаешь
    как безопасную, тоже учитывай». Под статусом акции — чистая и ДРР по панели ВБ при цене акции и рекламе как сейчас (predel.py, x.bz):
    «спокойно» — чистая ≥ 10% и ДРР ≤ 10%; в листе кампании — ещё безопасная ставка этой кампании при цене акции (e.bz.ak) */
