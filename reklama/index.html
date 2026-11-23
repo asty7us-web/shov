@@ -1206,7 +1206,7 @@ html,body{overscroll-behavior-y:contain}
 .ntf .seg button{flex:1 1 0;min-width:0;justify-content:center;padding:8px 4px;font-size:13px}
 .ntw{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:1px;background:var(--acc-soft);color:var(--acc)}
 .sheet .ntrow{margin-top:4px}
-.evrk .ev .w small{display:none}   /* лист кампании: её название под каждой правкой не повторяем */
+.evrk .ev .w small.rkn{display:none}   /* лист кампании: её название под каждой правкой не повторяем */
 
 /* ── таблица фраз: спокойная смена «Активные / Исключённые / Все» ── */
 #rkkw>.chips{flex-wrap:nowrap;gap:6px}
@@ -2617,6 +2617,11 @@ function evShort(z){let ch=String(z.chto||''),by=evCut(z.bylo),st=evCut(z.stalo)
   else if(/^биддер: ставка/i.test(ch)){const m2=tl.match(/[Мм]есто (\d+)\D+цели (\d+)/);ch='Биддер: ставка';
     tl=m2?'место '+m2[1]+', цель '+m2[2]+(/потолок/.test(tl)?', дальше потолок':''):/нет места|не видно/i.test(tl)?'места нет':tl.replace(/\.$/,'')}
   else if(/^свой лимит дня выбран/i.test(ch)){ch='Пауза до завтра';tl='лимит дня: потрачено '+String(z.bylo||'')+' ₽';by=st=''}
+  /* 23.11 Андрей (кадр листа «Лимит расхода в день»): «нужно видеть когда сработал лимит и остановил, по всем» — пауза и запуск по лимиту
+     (наш и Марплы) словами, причина рядом; раньше в листе кампании причина пряталась вместе с названием кампании */
+  else if(/^свой лимит дня: новый день/i.test(ch)){ch='Запуск';tl='новый день, после лимита дня';by=st=''}
+  else if(/^лимит дня Марплы$/i.test(ch)&&/лимит выбран/i.test(tl)){ch='Пауза до завтра';tl='лимит дня Марплы выбран';by=st=''}
+  else if(/^лимит дня Марплы$/i.test(ch)&&/новый день/i.test(tl)){ch='Запуск';tl='новый день, после лимита Марплы';by=st=''}
   else if(/^свой график: вне часов/i.test(ch)){ch='Пауза';tl='по графику, вне часов показа';by=st=''}
   else if(/^свой график: час показа/i.test(ch)){ch='Запуск';tl='по графику';by=st=''}
   else if(/^пауза$/i.test(ch)){ch='Пауза';tl=tl||(z.kto==='сервис'&&!z.avto?'остановили командой: с сайта или из чата':'в кабинете ВБ, причина не записана');by=st=''}
@@ -2624,7 +2629,7 @@ function evShort(z){let ch=String(z.chto||''),by=evCut(z.bylo),st=evCut(z.stalo)
   return {ch:ch.charAt(0).toUpperCase()+ch.slice(1),by,st,tl}}
 function evHtml(z,full,bez){const w=WHO[z.kto]||['',z.kto||''],t=z.nm&&TOV[z.nm],r=z.cid&&RK[z.cid],e=evShort(z),sv=z.kto==='сервис';
   const ch=e.by&&e.st?` <span class="muted">${esc(e.by)}</span> → <b>${esc(e.st)}</b>`:e.st?` <b>${esc(e.st)}</b>`:e.by?` <span class="muted">${esc(e.by)}</span>`:'';
-  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez||sv?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(e.ch)}${ch}${e.tl?` <small class="muted">${esc(e.tl)}</small>`:''}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small>${esc(r.name)}</small>`:''}</div></div>`}
+  return `<div class="ev"><time>${full?dm(z.t.slice(0,10))+'<br>':''}${z.t.slice(11,16)}</time><div class="w">${bez||sv?'':`<span class="who ${w[0]}">${w[1]}</span>`}${full||!t?'':`<b>${esc(t.art)}</b> — `}${esc(e.ch)}${ch}${e.tl?` <small class="muted">${esc(e.tl)}</small>`:''}${z.tag?` <span class="pill">${esc(z.tag)}</span>`:''}${r&&!bez?`<small class="rkn">${esc(r.name)}</small>`:''}</div></div>`}
 /* ───────── Ещё ───────── */
 const NST_DEF={on:false,bud:{on:true,v:150},   // как в strazh.py: пока человек не включил — бот молчит
 lim:{on:true},stop:{on:true},pos:{on:true,v:10},drr:{on:true,v:30,min:500},klik:{on:true,v:60},lk:{on:false},ak:{on:true},tok:{on:true}};
@@ -4210,7 +4215,7 @@ function mpvBlock(){const ix=PI(),pp=PP(),mp=D.mp||{};
   const xt={a:tot,b:tbOk?tb:null};
   h+=`<div class="mpg mprow mpt"><span class="mpl">Итого</span>${cell(xt,false)}</div>`;
   const oz=mp.oz_at?mp.oz_at.slice(11,16):'',ym=mp.ym_at?mp.ym_at.slice(11,16):'';
-  h+=`<div class="muted mpn">ДРР — реклама к заказам ₽. ≈ Маркет: реклама по ставке буста, оценка.${oz||ym?` Озон и Маркет обновлены в ${oz||ym}${oz&&ym&&oz!==ym?' и '+ym:''}.`:''}</div></div>`;
+  h+=`<div class="muted mpn">ДРР — реклама к заказам ₽. ≈ Маркет: реклама по ставке буста, минус бонусы как в панели и +1% запаса, без отмен — как в отчёте.${oz||ym?` Озон и Маркет обновлены в ${oz||ym}${oz&&ym&&oz!==ym?' и '+ym:''}.`:''}</div></div>`;
   return h}
 
 /* «Космос» как в Склейках и Юнитке (14.11 Андрей в «К»: «ниче не движется, аффирмаций нет, надо как везде»).
