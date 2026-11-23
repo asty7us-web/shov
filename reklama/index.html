@@ -2201,7 +2201,7 @@ const ourGr=r=>(D.gr||{})[S.kab+'|'+r.id]||null;   // свой график по
 function rkSt(r){
   const ol=ourLim(r);
   if(r.st===9)return {c:'on',t:'идёт',w:1};
-  if(r.st===11&&ol&&ol.on&&ol.p===D.today)return {c:'gr',t:'лимит дня выбран',w:1};
+  if(r.st===11&&ol&&ol.on&&!ol.hold&&ol.p===D.today)return {c:'gr',t:'лимит дня выбран',w:1};   // 23.11: остановили вручную (hold) — лимит её не включит, это пауза
   if(r.st===11&&r.w===2)return {c:'gr',t:(ourGr(r)&&ourGr(r).on&&ourGr(r).p)||(r.mar&&r.mar.gr&&!r.mar.gr.now)?'пауза по графику':'лимит дня выбран',w:1};
   if(r.st===11)return {c:'off',t:'пауза',w:0};
   if(r.st===4)return {c:'off',t:'готова к запуску',w:0};
@@ -4047,22 +4047,25 @@ const CHCAST=[[0,4,'Ночь'],[4,8,'Раннее утро'],[8,12,'Утро'],[
 function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch,T='Когда работает реклама';
   const hd=x=>`<div class="hrw"><h3>${T}</h3>${x||''}</div>`;
   if(!z)return hd('')+`<div class="muted tnote">Копим данные по часам: сервис каждые 30 минут запоминает, сколько кампания потратила с начала дня. Первая картинка — через сутки, судить — через 5–7 дней.</div>`;
-  const n=z.n||0,hasT=!!(z.t&&z.t.some(v=>v>0)),m=S.chm==='t'&&hasT?'t':n?'a':hasT?'t':'a',isT=m==='t';
-  const dn=n===1?'день':n<5?'дня':'дней',bt=(v,l,on)=>on?`<button type="button" class="press" data-chm="${v}" aria-pressed="${m===v}">${l}</button>`:'';
-  const head=hd(`<span class="pnqs">${bt('a',`За ${n} ${dn}`,n>0)}${bt('t','Сегодня',hasT)}</span>`);
-  const P=isT?{s:z.t,c:z.tc,a:z.ta,o:z.to}:{s:z.s,c:z.c,a:z.a,o:z.o},hasK=!!(P.a&&P.o),H=[...Array(24).keys()],at=(k,h)=>(P[k]&&P[k][h])||0;
+  /* 23.11 Андрей («история накопилась, сделать периоды к общим»): свой переключатель «За 7 дней | Сегодня» убран — блок берёт период из общих кнопок
+     (сегодня, вчера, позавчера, 3/7/14/30 дн) и складывает часы по дням из «dd». Дней с замерами меньше, чем в периоде, — так и пишем. */
+  const dd=z.dd||{},ix=PI(),isT=ix.length===1&&ix[0]===T,ds=ix.map(i=>D.days[i]),hv=ds.filter(d=>dd[d]),n=hv.length;
+  const dn=k=>k%10===1&&k%100!==11?'день':k%10>=2&&k%10<=4&&(k%100<10||k%100>=20)?'дня':'дней',head=hd('');
+  const P={s:Array(24).fill(0),c:Array(24).fill(0),a:Array(24).fill(0),o:Array(24).fill(0)},hasK=true,H=[...Array(24).keys()],at=(k,h)=>P[k][h]||0;
+  hv.forEach(d=>['s','c','a','o'].forEach((k,j)=>{const v=dd[d][j];if(v)for(let h=0;h<24;h++)P[k][h]+=v[h]||0}));
   const sum=(k,a,b)=>{let v=0;for(let h=a;h<b;h++)v+=at(k,h);return v},all={s:sum('s',0,24),a:sum('a',0,24),o:sum('o',0,24)};
-  const per=isT?`Сегодня${z.tp?', копим не с полуночи':''}, день ещё идёт.`:`За ${n} ${dn} с ${z.d0?dm(z.d0):'—'}.`;
-  if(all.s<1)return head+`<div class="muted tnote">${per} Трат за это время нет.</div>`;
+  const dp=z.dp?dm(z.dp):'—',miss=!isT&&ds.length>1&&n<ds.length&&ds[0]<(z.dp||'');
+  const per=isT?`Сегодня${z.tp?', копим не с полуночи':''}, день ещё идёт.`:ds.length===1?`${perD1()[0].toUpperCase()+perD1().slice(1)}, ${dm(ds[0])}.`
+    :`${perZa()[0].toUpperCase()+perZa().slice(1)}${miss?` По часам копим с ${dp}: есть ${n} ${dn(n)} из ${ds.length}.`:''}`;
+  if(all.s<1)return head+`<div class="muted tnote">${per} ${!isT&&!n&&ds[ds.length-1]<(z.dp||'')?`По часам копим с ${dp}, за этот период замеров нет.`:'Трат за это время нет.'}</div>`;
   const R=CHCAST.map(([a,b,l])=>{const s=sum('s',a,b),k=sum('a',a,b),o=sum('o',a,b);return {a,b,l,s,k,o,p:k>=.5?s/k:null,ok:k>=3}});
   /* вывод — только по частям дня, где набралось хотя бы 3 корзины: на меньшем числе цена корзины случайна */
   const E=R.filter(x=>x.ok).sort((x,y)=>x.p-y.p),lo=E[0],hi=E[E.length-1],cmp=E.length>1&&hi.p/lo.p>=1.3,nm2=x=>`${x.l.toLowerCase()} ${x.a}–${x.b}`;
   let vy;
-  if(!hasK)vy='Корзины за сегодня начнём считать со следующего сбора, через полчаса.';
-  else if(E.length<2)vy=`Корзин пока мало (${f0(all.a)}), сравнивать время суток рано.`;
+  if(E.length<2)vy=`Корзин пока мало (${f0(all.a)}), сравнивать время суток рано.`;
   else if(!cmp)vy=`Корзина стоит примерно одинаково весь день: около <b>${rub(all.s/all.a)}</b>.`;
   else vy=`Дешевле всего корзина: <b class="good">${nm2(lo)}, ${rub(lo.p)}</b>. Дороже всего: <b class="bad">${nm2(hi)}, ${rub(hi.p)}</b>.`;
-  if(hasK&&E.length>1&&!isT&&n<5)vy+=' Дней пока мало, вывод может поменяться.';
+  if(E.length>1&&!isT&&n<5)vy+=n===1?' Это один день, вывод может поменяться.':' Дней пока мало, вывод может поменяться.';
   const cell=(v,f)=>v>=.5?f(v):'—',row=x=>{const c=cmp&&x===lo?' good':cmp&&x===hi?' bad':'';
     return `<div class="t"><b>${x.l}</b><span>${x.a}–${x.b} ч</span></div><div class="num">${cell(x.s,rub)}</div><div class="num">${hasK?cell(x.k,f0):'—'}</div><div class="num">${hasK?cell(x.o,f0):'—'}</div><div class="num pr${c}">${x.p!=null?rub(x.p):'—'}</div>`};
   const tb=`<div class="chq"><div class="h">Время</div><div class="h">Траты</div><div class="h">Корзины</div><div class="h">Заказы</div><div class="h">1 корзина</div>${R.map(row).join('')}`
@@ -4079,7 +4082,7 @@ function chasBlock(r,nm){const e=(r.nm||{})[nm]||{},z=e.ch,T='Когда раб�
   return head+`<div class="chv">${vy}</div>`+tb
     +`<div class="hrw"><h3>По часам</h3><span class="pnqs">${zb('s','Траты')}${hasK?zb('a','Корзины')+zb('o','Заказы'):''}</span></div>`
     +`<div class="ch ax chh" id="${id}"><div class="rd num">${CHR[id](sel)}</div><div class="bars" style="height:150px">${ax}${b}</div><div class="xl">${x}</div></div>`
-    +`<div class="muted tnote">${per} Кнопки периода вверху на этот блок не влияют. ВБ присылает статистику с задержкой, поэтому час примерный: надёжнее смотреть таблицу.${isT?'':' Что ВБ донёс после полуночи, разложено по часам дня по числу кликов.'} Нажмите на столбик — цифры за час.</div>`}
+    +`<div class="muted tnote">${per} ВБ присылает статистику с задержкой, поэтому час примерный: надёжнее смотреть таблицу.${isT?'':' Что ВБ донёс после полуночи, разложено по часам дня по числу кликов.'} Нажмите на столбик — цифры за час.</div>`}
 
 /* ── 17.11 Андрей («К», скрин главной приложения ВБ): «добавить пока что такое же точно и чтобы обновлялось также».
    Блок «Заказы | Выкупы» вверху «Товаров»: сегодня — сумма и штуки, ниже — на сколько меньше / больше, чем вчера к этому же
