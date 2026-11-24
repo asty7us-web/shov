@@ -1345,6 +1345,8 @@ body.mjob #runp{display:none}
 /* ── 14.11: новая кампания, созданная с сайта (r.nov) — пометка в «Кампаниях» карточкой и в подзаголовке листа кампании ── */
 .rk.pg .m .pill.nov{height:auto;min-height:20px;white-space:normal;line-height:1.25;padding:2px 8px}
 .rknov{color:var(--acc);font-weight:650}
+/* 24.11 Андрей «что за жесть» (крупная синяя строка в шапке новой кампании): теперь маленькая плашка под плашками шапки */
+.rknovp{display:inline-flex;align-items:center;height:22px;font-size:12px;font-weight:650;margin-top:6px;white-space:nowrap}
 
 /* ── 14.11 Андрей 08:10 «логика кластеры и фразы… не понял»: свёрнутое «Что такое кластер ›» над таблицей фраз ── */
 .klhow{margin:0 0 10px;border-radius:14px;background:var(--card2)}
@@ -1557,6 +1559,10 @@ button.rkpr i,.prbtn i{font-style:normal;font-size:.7em;opacity:.55}
 .prak{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:2px 0 12px}.prak .pl1{color:var(--ink2);font-size:13px}.prak .prbtn{font:700 20px var(--fd);letter-spacing:-.02em;color:var(--ink)}.prak small{color:var(--ink3);font-size:12px}   /* 24.11 строка цены в «Акциях ВБ» */
 .prpd>div{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}
 .prpd span{color:var(--ink2)}.prpd b{text-align:right}.prpd small{grid-column:1/-1;color:var(--ink3)}
+
+/* 24.11 «у покупателя цена тут» — под нашей ценой в шапке листа кампании */
+.shh .rkphw .rkby{font-size:12px;line-height:1.1;color:var(--ink2);white-space:nowrap;margin-top:-3px}
+.shh .rkphw .rkby b{font-weight:750;color:var(--ink)}
 
 /* 14.11 Андрей: «прожатие — кнопка заметная, как у Марплы, зелёным наливается по мере поступления данных, как в Эпл» — d_novoe.js mBtn */
 .mbtn{position:relative;overflow:hidden;width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:16px;letter-spacing:-.01em;
@@ -2999,16 +3005,12 @@ const DCOLS=[
   {k:'cpm',l:'CPM, ₽',sub:'за 1000 показов',t:'CPM — сколько стоили 1000 показов: затраты ÷ показы × 1000',v:x=>x.cpm,h:x=>x.cpm==null?'—':f0(x.cpm)},
   dNum('a','Корзины'),
   dNum('q','Заказы РК, шт',{t:'заказы, которые ВБ отнёс к рекламе'}),
-  /* 24.11 Андрей «почему не показывает откуда заказы пришли, в марпла показывал»: в строке зоны (поиск/каталог/рекомендации) всех заказов товара нет —
-     показываем заказы этой зоны с рекламы (как Марпла), с пометкой; в итоге и в дне — по-прежнему все заказы товара */
-  dNum('oq','Заказы товара, шт',{t:'все заказы, как гистограмма товара в кабинете ВБ; в строке зоны — заказы с рекламы из этой зоны',v:x=>x.sub&&x.oq==null?x.q:x.oq,
-    h:x=>x.sub&&x.oq==null?(x.q==null?'—':f0(x.q)+'<small>с рекламы</small>'):x.oq==null?'—':f0(x.oq)}),
+  dNum('oq','Заказы товара, шт',{t:'все заказы, как гистограмма товара в кабинете ВБ'}),
   dNum('s','Затраты, ₽',{cls:x=>sbad(x.s,x.oq!=null?x.oq:x.q)}),
   dDrr('drrk','ДРР РК','затраты ÷ сумма заказов с рекламы, ₽'),
   dDrr('drr','ДРР','затраты ÷ все заказы товара, ₽'),
   dNum('sp','Заказы РК, ₽',{t:'сумма заказов, которые ВБ отнёс к рекламе',def:0}),
-  dNum('or','Заказы товара, ₽',{t:'сумма всех заказов товара; в строке зоны — заказы с рекламы из этой зоны',def:0,v:x=>x.sub&&x.or==null?x.sp:x.or,
-    h:x=>x.sub&&x.or==null?(x.sp==null?'—':f0(x.sp)+'<small>с рекламы</small>'):x.or==null?'—':f0(x.or)})];
+  dNum('or','Заказы товара, ₽',{t:'сумма всех заказов товара',def:0})];
 /* 15.11 Андрей «в марпла можно было раскрыть … по смешанным кампаниям откуда поиск, рек»: spl(i) → {p: поиск, r: рекомендации} — строка дня раскрывается
    двумя строками под ней (нажатие по строке); поиск — статистика кластеров, рекомендации — остальное, по расчёту */
 function dayTbl(kind,ix,get,spl){const id='d_'+kind;if(!TBL[id])TBL[id]={sort:['d',-1],cols:DCOLS};
@@ -3536,7 +3538,7 @@ function rkCard(x){const r=x.r,e=r.nm[x.nm]||{},a=x.a,g=ourGr(r);
   /* 14.11 Андрей: «когда товары в списках картинки тоже надо везде» — фото товара у кампании.
      14.11 Андрей 08:10 «сделал спс страницу вышел вошёл но не видно спс»: у только что созданной с сайта кампании (r.nov — ставит applyPatch из ответа сервиса) пометка «новая» */
   return `<button class="rk pg press" type="button" data-rk="${r.id}|${x.nm}" data-ctx="rk"><div class="t"><span class="ph"${foto(x.t||{nm:x.nm})}></span><b>${esc(r.name)}</b>${stHtml(r)}<span class="rkgw">${rkGoB(r,x.nm)}</span></div>
-   <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
+   <div class="m">${x.t?`<span class="pill">${esc(x.t.art)}</span>`:''}${r.nov?'<span class="pill a nov">новая · цифры через ~30 мин</span>':''}<span class="pill wb">${rkType(r)}</span>${e.b?`<span class="pill num">${bidTxt(r,e)}</span>`:''}${minPill(e)}${r.bud!=null?`<span class="pill num ${r.bud<300&&x.w?'w':''}">бюджет ${f0(r.bud)} ₽</span>`:''}${limPill(r)}${g&&g.on?'<span class="pill a">свой график</span>':r.mar&&r.mar.gr?'<span class="pill">график Марплы</span>':''}${r.mar&&r.mar.bid&&r.mar.bid.length?'<span class="pill">биддер Марплы</span>':''}${bdPill(e)}${ostPills(x.t)}</div>
    <div class="k kpi"><div><b class="num ${dcls(x.drr)}">${drrT(x.drr)}</b><span>ДРР</span></div><div><b class="num ${sbad(a.s,a.q)}">${rub(a.s)}</b><span>траты</span></div><div><b class="num">${f0(a.q)}</b><span>заказы РК</span></div><div><b class="num">${a.cpo==null?'—':isFinite(a.cpo)?rub(a.cpo):'нет'}</b><span>цена заказа</span></div></div></button>`}
 function vRk(){if(typeof SEGCB==='object'){SEGCB.zasd=v=>{S.rkf.zd=+v;RS.set('zasd',+v);unfz();render(true)};SEGCB.zasl=v=>{S.rkf.zl=+v;RS.set('zasl',+v);unfz();render(true)}}
   const VN=rkVnim();if(S.rkf.vn&&!ZSK(S.rkf.vn)&&!(VN[S.rkf.vn]&&VN[S.rkf.vn].size))S.rkf.vn='';
@@ -3849,8 +3851,7 @@ function prcSwap(v){S.prd=v;const b=$('#sbody .prc[data-prc]'),t=b&&TOV[b.datase
    «Марпла»; остаток бюджета красный, когда пусто или мало */
 /* 17.11 Андрей: «если РК на паузе мной или тобой и не встанет сама — зелёное оставить, но чуть приглушить; если по графику — так же горит»: .ctg.dim, когда кампания стоит и сама не запустится (rkSt.w=0) */
 const bzCls=(e,v)=>{const z=e&&e.bz;return !z||z.s==null?'':v<=z.s?'g':v<=z.m?'w':'r'};
-const bzBadge=e=>{const z=e&&e.bz;if(z&&z.no)return '<span class="ctbz">нет продаж</span>';if(!z||z.s==null)return '';   /* 23.11 Андрей «не такое длинное»: продаж за неделю нет — коротко «нет продаж» */
-  const cur=Math.max(...Object.values(e.b||{0:0}));
+const bzBadge=e=>{const z=e&&e.bz;if(!z||z.s==null)return '';const cur=Math.max(...Object.values(e.b||{0:0}));
   return `<span class="ctbz ${bzCls(e,cur)}">${z.lo?'безоп. нет':'безоп. '+f2(z.s/100)+(z.cap?'+':'')+' ₽'}</span>`};
 /* 24.11 Андрей «почему тут пауза, а нету остановить… почему не на все распространил»: ручная пауза с сайта и так держала до ручного запуска (hold) —
    то же, что «Остановить». У идущей кампании теперь одна кнопка «Остановить» (to=stop) — в листе кампании, строках товара и карточках «Кампаний» */
@@ -3999,7 +4000,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* 15.11 Андрей «несуразно получилось, картинка уменьшилась, писанины больше, сделай читабельно чётко»: одна короткая серая строка + плашки одной строкой (мелкие), фото крупнее */
   /* 15.11 Андрей «писанина лишняя» (обвёл «2 из 2 · листайте вбок · № … · с … · запуск …»): в шапке кампании только плашки */
   const rkHead=`<span class="rkchips">${t?(t.oh?`<button type="button" class="osbt rkos press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}" aria-label="Остатки по дням">${ostPills(t)}<span class="pill osar">${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)):''}${t?`<button type="button" class="pill rkcp press" data-act="cpy" data-v="${esc(t.art)}" title="Скопировать артикул">⧉ ${esc(t.art)}</button>`:''}<button type="button" class="pill rkcp press" data-act="rkcopy" data-rk="${id}|${nm}" title="Скопировать название кампании">⧉ Название</button><button type="button" class="pill rkcp press${UPR?'':' nolk'}" data-act="rename" data-rk="${id}|${nm}">✎</button><button type="button" class="pill rkcp press${UPR?'':' nolk'}" id="rkrefb" data-act="rkref" data-rk="${id}|${nm}"${RKREF===r.id?' disabled':''} title="Перечитать кампанию из ВБ">${RKREF===r.id?'<span class="sp"></span>Перечитываю…':'⟳ '+(r.ref?esc(r.ref):'Обновить')}</button><button type="button" class="pill rkcp press" data-act="cpy" data-v="${nm}" title="Скопировать артикул ВБ">⧉ ${nm}</button><a class="pill rklk press" href="https://cmp.wildberries.ru/campaigns/edit/${id}" target="_blank" rel="noopener"><b class="rkw" aria-hidden="true"></b>РК ↗</a>${t?`<a class="pill rklk press" href="https://www.wildberries.ru/catalog/${nm}/detail.aspx" target="_blank" rel="noopener"><b class="rkw rkw0" aria-hidden="true"></b>Товар ↗</a>`:''}</span>`;
-  return {ph,t:esc(r.name),s:(rkHead+(r.nov?' · ':'')+(r.nov?'<b class="rknov nov">новая · данные появятся после сбора (до 30 мин)</b>':'')).replace(/ · $/,''),h,
+  return {ph,t:esc(r.name),s:rkHead+(r.nov?'<span class="pill a nov rknovp">новая · цифры через ~30 мин</span>':''),h,
     after:()=>{if(!KL&&(srch||zon))loadKl().then(()=>{const x=$('#rkkw');if(x)x.innerHTML=frBlock(id,nm);const z=$('#rkzon');if(z)z.innerHTML=zonBlock(id,nm)}).catch(()=>{})}}}
 
 /* ── фраза: места по дням и все замеры, ставка фразы, минус ── */
@@ -4672,7 +4673,7 @@ function rkGoB(r,nm){const go=r.st===11||r.st===4?'go':'';   // 24.11: идущ�
 }
 function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm],tt=TOV[nm],or=tt?sum(tt.o&&tt.o.r,ix):0,d=or?100*a.s/or:(a.s?Infinity:null),lv=rkSt(r).w;
   const b=e.bd,mb=lv&&r.mar&&r.mar.bid&&r.mar.bid.length,own=lv&&bdOn(b)&&b.src==='svoi',low=r.bud!=null&&(r.bud<=0||(r.bud<300&&lv)),go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
-  const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · данные появятся после сбора (до 30 мин)</span>':'')
+  const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · цифры через ~30 мин</span>':'')
     +(r.st===11&&!lv?`<span class="pill b pzw">пауза: ${pzWhy(r)}</span>`:'')   // 15.11: причина паузы — видно сразу в строке
     +limNetPill(r)   /* лимит в строке не показываем (14.11); у идущей без лимита — метка */
     /* 15.11 Андрей (кадр листа товара «Уплотнитель 20х20 6м белый»): «чтобы видно было зелёным график активен и остаток» — график показа и остаток бюджета
