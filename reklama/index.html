@@ -2778,6 +2778,7 @@ function colDrag(id,ap){$$('#sbody .colr[data-ck]').forEach(r=>{if(!r.querySelec
     DOC.addEventListener('touchmove',tb,{passive:false});
     if(onH){e.preventDefault();start()}else if(!ms)hold=setTimeout(start,200)}})}
 function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
+  /* 24.11 Андрей «после нажатия готово выбрасывает в общий раздел всех рк»: «Готово» — шаг назад к листу, откуда открыли (было closeAll) */
   /* 15.11 Андрей «неудобно с этими стрелками, размашисто всё»: стрелки ↑↓ убраны — столбец перетаскивается за ручку ⠿ слева, строки ниже, пояснение в одну строку */
   const row=(k,i)=>{const c=T0.cols.find(x=>x.k===k),on=!st.hid.has(k);
     return `<div class="opt colr" data-ck="${k}">${i===0?'<i class="dh dh0"></i>':'<i class="dh" data-drag aria-label="Перетащить">⠿</i>'}<div><b>${c.l}${c.sub?' · '+c.sub:''}</b>${c.t?`<span>${esc(c.t)}</span>`:''}</div>${i===0?'<span class="muted" style="font-size:12px;flex:none">всегда первый</span>'
@@ -2790,13 +2791,13 @@ function openCols(id){sheet(()=>{const st=tblSt(id),T0=TBL[id];
     <div class="hrw"><h3>Столбцы</h3></div>`;
   /* 15.11 Андрей «показы и клики и выбор самому что ставить»: у таблицы фраз своя сортировка (нажатием на столбец) — здесь только столбцы (T0.nosort) */
   if(T0.nosort)return {t:'Столбцы',s:'что показывать и в каком порядке · запоминается на этом устройстве',h:st.ord.map(row).join('')
-    +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>',
+    +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="back">Готово</button></div>',
     after:()=>{const ap=()=>{redraw();render(true)};
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
       colDrag(id,ap);
       const rs=$('#colrs');if(rs)rs.onclick=()=>{RS.del('tb.'+id);ap()}}};
   return {t:'Столбцы и сортировка',s:'что показывать, в каком порядке и как сортировать · запоминается на этом устройстве',h:srt+st.ord.map(row).join('')
-    +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="close">Готово</button></div>'
+    +'<div class="acts"><button class="btn gray press" type="button" id="colrs">Как было сначала</button><button class="btn press" type="button" data-act="back">Готово</button></div>'
     +'<div class="muted tnote">В самой таблице: нажмите на название столбца — сортировка по нему; прежний столбец остаётся вторым (цифры 1 и 2 в шапке).</div>',   // 14.11: пояснение из-под таблиц — только здесь
     after:()=>{const ap=()=>{redraw();render(true)};
       $$('[data-colsw]').forEach(b=>b.onclick=()=>{const s2=tblSt(id),k=b.dataset.colsw;if(s2.hid.has(k))s2.hid.delete(k);else s2.hid.add(k);tblSave(id,s2);ap()});
