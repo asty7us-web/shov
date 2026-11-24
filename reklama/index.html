@@ -2291,7 +2291,7 @@ function rkSt(r){
   if(r.st===9)return {c:'on',t:'идёт',w:1};
   if(r.st===11&&ol&&ol.on&&!ol.hold&&ol.p===D.today)return {c:'gr',t:'лимит дня выбран'+(limHm(r)?' в '+limHm(r):''),w:1};   // 24.11: + час срабатывания; 23.11: остановили вручную (hold) — лимит её не включит, это пауза
   if(r.st===11&&r.w===2)return {c:'gr',t:(ourGr(r)&&ourGr(r).on&&ourGr(r).p)||(r.mar&&r.mar.gr&&!r.mar.gr.now)?'пауза по графику':'лимит дня выбран',w:1};
-  if(r.st===11)return {c:'off',t:'пауза',w:0};
+  if(r.st===11)return {c:'off',t:'остановлена',w:0};   // 24.11 Андрей: свёрнутые — остановленные, «пауза» — только график/лимит
   if(r.st===4)return {c:'off',t:'готова к запуску',w:0};
   return {c:'off',t:'завершена',w:0}}
 /* «идёт» — только статус кабинета 9 (rkSt пишет «идёт»). Лимита дня нет: ни свой ol.on, ни лимит ВБ lw.on, ни лимит Марплы mar.lim
@@ -2305,8 +2305,8 @@ function pzWhy(r){if(!r||r.st!==11||rkSt(r).w)return '';
   if(r.bud!=null&&r.bud<=0)return 'кончился бюджет';
   const z=(D.ist||[]).find(x=>x.cid===r.id&&/пауз|запуск|стоп|останов/i.test(x.chto||''));
   if(z&&(/пауз|стоп|останов/i.test(z.chto)||!/запуск/i.test(z.chto))){   // 22.11 «остановлена до ручного запуска» — это пауза, не запуск
-  const t=String(z.t||'');return 'поставили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
-  return 'кто поставил — в журнале нет'}
+  const t=String(z.t||'');return 'остановили '+(PZK[z.kto]||esc(z.kto||''))+' '+t.slice(8,10)+'.'+t.slice(5,7)+' в '+t.slice(11,16)}
+  return 'кто остановил — в журнале нет'}
 /* 15.11 Андрей «тут перебор, всё было нормально… верни блок»: ручная пауза снова в блоке «На паузе», причина паузы видна там же */
 function rkLive(r){return r&&rkSt(r).w?1:0}
 function rkLive3(r){if(!r)return 0;if(rkSt(r).w)return 1;if(r.st!==11)return 0;
@@ -2513,7 +2513,7 @@ function sync(){
   const per=seg('per',PERS(),perKey(),'sm');let h='',wp=1;   // wp — в строке есть периоды: лупа справа от них, без подписи
   if(S.tab==='tov')h=per+srch('Товар');   // вид «таблица / карточки» — в шапке самого списка (vTov), как в «Кампаниях»: 14.11 Андрей «когда меняешь вид сверху, не видишь, что меняешь ниже»
   else if(S.tab==='rk'){const nw=K.rk.filter(r=>rkLive(r)).length;   // числа на кнопках — видно, что это отбор списка (14.11 Андрей: «кнопка „Работают“ — не понял смысл»)
-    h=per+seg('rkf',[['w','Работают · '+nw],['p','На паузе · '+(K.rk.length-nw)],['all','Все · '+K.rk.length]],S.rkf.f,'sm')+srch('Кампания или товар')}
+    h=per+seg('rkf',[['w','Работают · '+nw],['p','Остановлены · '+(K.rk.length-nw)],['all','Все · '+K.rk.length]],S.rkf.f,'sm')+srch('Кампания или товар')}
   else if(S.tab==='skl')h=per+srch('Товар склейки');
   else if(S.tab==='ceny')h=per+srch('Товар');   // период — для «заказы за период» в карточках «Цен»
   else if(S.tab==='bl'){wp=0;h=K.bally?seg('blf',[['on','Идут'],['no','Товары без акции']],S.blf,'sm')+srch('Товар или акция'):''}
@@ -3742,9 +3742,9 @@ function prodRk(t,nm,ix,pp,a,W,P,rctx){
   if(Pn.length)h+=`<div class="rows" data-rctx="${rctx}" style="margin-top:8px">`+Pn.map(r=>rkRow(r,nm,ix)).join('')+'</div>';
   /* 17.11 Андрей «завершена… на паузе только есть»: завершённые (ВБ, статус 7 — запустить нельзя) — своим разделом «Завершены», не в «На паузе» */
   if(Po.length){const op=+S.openP===+nm,n30=Po.filter(r=>rkAgg(r,nm,PI(30)).s>0).length,isD=r=>rkSt(r).t==='завершена',Pz=Po.filter(r=>!isD(r)),Pd=Po.filter(isD);
-    const lbl=(Pz.length?'На паузе · '+Pz.length:'')+(Pd.length?(Pz.length?' · завершены ':'Завершены · ')+Pd.length:'');
+    const lbl=(Pz.length?'Остановлены · '+Pz.length:'')+(Pd.length?(Pz.length?' · завершены ':'Завершены · ')+Pd.length:'');
     const sec=(L,t,b)=>`<div class="hrw pzh"><h3>${t} · ${L.length}</h3>${b?`<button class="lnk" type="button" data-act="allp" data-nm="${nm}">свернуть</button>`:''}</div><div class="rows" data-rctx="${rctx}">`+L.map(r=>rkRow(r,nm,ix)).join('')+'</div>';
-    h+=op?(Pz.length?sec(Pz,'На паузе',1):'')+(Pd.length?sec(Pd,'Завершены',!Pz.length):'')
+    h+=op?(Pz.length?sec(Pz,'Остановлены',1):'')+(Pd.length?sec(Pd,'Завершены',!Pz.length):'')
       :`<button class="pzr press" type="button" data-act="allp" data-nm="${nm}" aria-expanded="false"><span><b>${lbl}</b><small>${n30?'тратили за 30 дней: '+n30:'за 30 дней расхода не было'}</small></span><i aria-hidden="true">›</i></button>`}
   /* 14.11 Андрей: «места по фразам только внутри рк соотв» — в листе товара мест по фразам нет, только в таблице фраз своей кампании */
   if(t.rk.some(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined')))h+='<div class="muted tnote pmxh">Места по фразам — в листе кампании: нажмите на кампанию выше.</div>';
@@ -4694,7 +4694,7 @@ function rkGoB(r,nm){const go=r.st===11||r.st===4?'go':'';   // 24.11: идущ�
 function rkRow(r,nm,ix,art){const a=rkAgg(r,nm,ix),e=r.nm[nm]||{},ta=art&&TOV[nm],tt=TOV[nm],or=tt?sum(tt.o&&tt.o.r,ix):0,d=or?100*a.s/or:(a.s?Infinity:null),lv=rkSt(r).w;
   const b=e.bd,mb=lv&&r.mar&&r.mar.bid&&r.mar.bid.length,own=lv&&bdOn(b)&&b.src==='svoi',low=r.bud!=null&&(r.bud<=0||(r.bud<300&&lv)),go=r.st===9?'pz':r.st===11||r.st===4?'go':'';
   const m=(ta?`<span class="pill">${esc(ta.art)}</span>`:'')+(r.nov?'<span class="pill a nov">новая · цифры через ~30 мин</span>':'')
-    +(r.st===11&&!lv?`<span class="pill b pzw">пауза: ${pzWhy(r)}</span>`:'')   // 15.11: причина паузы — видно сразу в строке
+    +(r.st===11&&!lv?`<span class="pill b pzw">${pzWhy(r)}</span>`:'')   // 15.11: причина паузы — видно сразу в строке
     +limNetPill(r)   /* лимит в строке не показываем (14.11); у идущей без лимита — метка */
     /* 15.11 Андрей (кадр листа товара «Уплотнитель 20х20 6м белый»): «чтобы видно было зелёным график активен и остаток» — график показа и остаток бюджета
        плашками в строке кампании: зелёным, когда график включён и бюджета хватает; мало бюджета — красным, как раньше */
