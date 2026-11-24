@@ -1590,6 +1590,18 @@ table.zon tr:last-child td{font-weight:700}
 .prc .bars .col i em{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;padding:5px 0 0;line-height:1;white-space:nowrap}
 .prc .bars .col .tp .in0{writing-mode:vertical-rl;transform:rotate(180deg);margin:0 auto 2px}
 
+/* 24.11 ключи в названии и описании карточки (d_txk.js) */
+.txk{font-weight:600}
+small.txk{display:block;font-size:11px;margin-top:2px;opacity:.9}
+.txk.ok{color:var(--good)}
+.txk.sl{color:var(--warn)}
+.txk.no{color:var(--bad)}
+.txkt{width:100%;border-collapse:collapse;font-size:14px}
+.txkt th{text-align:left;font-size:12px;font-weight:600;color:var(--ink3);padding:4px 6px}
+.txkt td{padding:7px 6px;border-top:.5px solid var(--line);vertical-align:top}
+.txkt td:first-child{width:52%}
+.txkt td:not(:first-child){white-space:nowrap}
+
 /* «Реклама» — правки 14.11 по словам Андрея (главная, шапка, нижняя полоса, таблицы, «Баллы», «Акции», «Ещё»). Встаёт после стилей a_head.html и перекрывает их.
    Цвета — только переменными темы. */
 
@@ -2289,7 +2301,17 @@ const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
 /* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
    поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
 const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
-const akSt=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">цена подходит · ждём ВБ с '+x.zh+'</span>';if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';if(!x.uch&&/блокировк/i.test(x.st||''))return '<i class="bad">блокировка снижения цены</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
+/* 24.11 Андрей «у нас стояло больше, чем на ВБ, акций в списке»: ВБ в акциях товара показывает только начавшиеся; будущие
+   (начало позже сегодня) у нас идут в конце списка, под строкой «Ещё не начались», со статусом «с ДД.ММ · …» */
+const akFut=x=>!!(x&&x.s&&x.s>D.today);
+/* 24.11 Андрей (кадр «Войти в акцию ценой», «Отмечательная распродажа» 01.12–10.01 обведена): «должны показываться только актуальные на данный момент и + на завтра,
+   если какие-то новые будут, но их чтобы было видно отдельно» — в списках акций только идущие сейчас и начинающиеся завтра; завтрашние — отдельной шапкой «С завтра» */
+const dPlus=(s,n)=>{const d=new Date(s+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const akVis=x=>!!x&&x.e>=D.today&&(!x.s||x.s<=dPlus(D.today,1));
+const akSort=(x,y)=>akFut(x)-akFut(y)||y.uch-x.uch||(y.plan||0)-(x.plan||0);
+const akFutHd=(a,i,x)=>akFut(x)&&(i===0||!akFut(a[i-1]))?'<div class="muted" style="padding:10px 2px 4px;font-size:12px"><b>С завтра — новые акции</b> · у ВБ в списке товара их пока нет</div>':'';
+const akSt=(nm,x)=>akFut(x)?'<i>с завтра · </i>'+akSt0(nm,x):akSt0(nm,x);
+const akSt0=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">цена подходит · ждём ВБ с '+x.zh+'</span>';if(x.nw)return x.uch?'<span class="akok">вход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</span>':'<i>выход '+(x.zt?x.zt+' ':'')+'· ждём ВБ</i>';if(!x.uch&&/блокировк/i.test(x.st||''))return '<i class="bad">блокировка снижения цены</i>';return x.uch?'<span class="akok">участвуем</span>':z?'<span class="akok">вход '+z+' · ждём ВБ</span>':'<i>не участвуем</i>'};
 /* 24.11 Андрей (кадр акций в листе кампании): «показывать, куда спокойно можем войти, в зависимости от цены, и ставку, которую предлагаешь
    как безопасную, тоже учитывай». Под статусом акции — чистая и ДРР по панели ВБ при цене акции и рекламе как сейчас (predel.py, x.bz):
    «спокойно» — чистая ≥ 10% и ДРР ≤ 10%; в листе кампании — ещё безопасная ставка этой кампании при цене акции (e.bz.ak) */
@@ -2306,7 +2328,7 @@ const istOf=(nm,cid,note)=>{const t=nm&&TOV[nm];return (D.ist||[]).filter(z=>z.k
   &&((!nm&&!cid)||(cid?z.cid===+cid:(String(z.nm)===String(nm)||!!(z.cid&&t&&t.rk.includes(z.cid))))))};
 
 /* ───────── графики ───────── */
-let CHN=0;const CHR={};
+let CHN=0;const CHR={},CHR0={};   /* CHR0 — строка «за весь период» над графиком, пока день не выбран (24.11 Андрей «Где за весь период») */
 /* 14.11 Андрей: «если есть гистограммы, то надо показывать значения и по вертикали» — шкала слева: 2–4 деления круглыми числами и тонкие линии.
    axTicks(mx, цел) — деления до mx; целые величины (штуки) дробных делений не получают */
 function axTicks(mx,int){if(!(mx>0)||!isFinite(mx))return [];const p=Math.pow(10,Math.floor(Math.log10(mx))-1);let st=p;
@@ -2326,17 +2348,17 @@ function chart(o){   // o: {ix, val:i=>число|null, col:i=>цвет, top:i=>
   const lab=n<=16,step=Math.ceil(n/8),MH=o.mh||(o.inn||o.dot?64:86);let b='',x='';
   o.ix.forEach((i,k)=>{const v=o.val(i),inf=v!=null&&!isFinite(v),f=o.hf?o.hf(i):null,h=f!=null?(f>0?Math.max(2.5,MH*Math.min(1,f)):0):v==null||v===0?0:Math.max(2.5,MH*Math.min(inf?mx:v,mx)/mx),inn=lab&&o.inn?o.inn(i):'',has=inn!==''&&inn!=null,big=h>=20;let tp=lab&&o.top?o.top(i):'';
     if(has&&!big)tp=(tp==null?'':tp)+`<span class="in0">${inn}</span>`;
-    b+=`<div class="col${k===n-1?' sel':''}" data-ch="${id}" data-i="${i}">${tp!==''&&tp!=null?`<span class="tp num">${tp}</span>`:''}<i style="height:${h}%;background:${h?(o.col?o.col(i):'var(--acc)'):'var(--bar)'}${inf&&f==null?';opacity:.55':''}">${has&&big?`<em class="num">${inn}</em>`:''}</i></div>`;
+    b+=`<div class="col${k===n-1&&!o.read0?' sel':''}" data-ch="${id}" data-i="${i}">${tp!==''&&tp!=null?`<span class="tp num">${tp}</span>`:''}<i style="height:${h}%;background:${h?(o.col?o.col(i):'var(--acc)'):'var(--bar)'}${inf&&f==null?';opacity:.55':''}">${has&&big?`<em class="num">${inn}</em>`:''}</i></div>`;
     x+=`<span class="${i===T?'td':''}">${lab||k%step===0||k===n-1?D.days[i].slice(8,10):''}${o.dot&&o.dot(i)?'<i class="chd"></i>':''}</span>`});
-  CHR[id]=o.read;
+  CHR[id]=o.read;if(o.read0)CHR0[id]=o.read0;
   const AX=o.ax===false||!any?null:Object.assign({mx,f:axNum},o.ax||{});let ax='';
   if(AX&&AX.mx>0)ax=axTicks(AX.mx,o.ax&&o.ax.int!=null?o.ax.int:(!o.ax&&int)).map(v=>`<div class="yt" style="bottom:${(MH*v/AX.mx).toFixed(2)}%"><span class="num">${AX.f(v)}</span></div>`).join('');
-  return `<div class="ch${ax?' ax':''}" id="${id}"><div class="rd num">${o.read(o.ix[n-1])}</div><div class="bars" style="height:${H}px">${ax}${o.line?`<div class="nl" style="bottom:${MH*o.line/mx}%"></div>`:''}${b}${(o.hl||[]).map(l=>`<div class="hl ${l.c||''}" style="bottom:${(MH*Math.max(0,l.v)/mx).toFixed(2)}%">${l.t?`<span class="num">${l.t}</span>`:''}</div>`).join('')}</div><div class="xl">${x}</div></div>`}
+  return `<div class="ch${ax?' ax':''}" id="${id}"><div class="rd num">${o.read0||o.read(o.ix[n-1])}</div><div class="bars" style="height:${H}px">${ax}${o.line?`<div class="nl" style="bottom:${MH*o.line/mx}%"></div>`:''}${b}${(o.hl||[]).map(l=>`<div class="hl ${l.c||''}" style="bottom:${(MH*Math.max(0,l.v)/mx).toFixed(2)}%">${l.t?`<span class="num">${l.t}</span>`:''}</div>`).join('')}</div><div class="xl">${x}</div></div>`}
 /* 14.11 Андрей: «если в гистограмме нажимаешь, после второго раза должно отмереть» — второе нажатие на уже выбранный столбик снимает выбор:
    остальные столбики больше не затемнены, строка над графиком снова про последний день */
 document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('.bars .col');if(!c||!CHR[c.dataset.ch])return;const w=$('#'+c.dataset.ch);if(!w)return;
   const bars=w.querySelector('.bars'),rd=w.querySelector('.rd'),cols=[...w.querySelectorAll('.bars .col')],off=c.classList.contains('sel')&&bars.classList.contains('dim'),pick=off?cols[cols.length-1]:c;
-  rd.innerHTML=CHR[c.dataset.ch](+pick.dataset.i);cols.forEach(z=>z.classList.toggle('sel',z===pick));bars.classList.toggle('dim',!off)});
+  const r0=off&&CHR0[c.dataset.ch];rd.innerHTML=r0||CHR[c.dataset.ch](+pick.dataset.i);cols.forEach(z=>z.classList.toggle('sel',!r0&&z===pick));bars.classList.toggle('dim',!off)});
 /* 14.11 Андрей: «плоский график показал такой бесполезный», «ты гистограммы поменял на полоски зачем» — в карточке товара снова маленькая гистограмма по дням.
    Высота столбика — от наибольшего дня самого товара (раньше шкала шла от нормы ДРР, и все дни выходили одной высоты). Высотой показано то, что выбрано
    над списком: ДРР | Реклама | Заказы; цвет — по ДРР дня, день с тратами без заказов — красный. Над самым высоким днём — его число, под столбиками — числа месяца.
@@ -2592,12 +2614,12 @@ function jamHtml(nm,skip){const L=jamRows(nm).filter(q=>!skip.has(q.t.trim().toL
 /* ───────── Акции ───────── */
 function akRows(){const q=S.q.toLowerCase(),out=[];
   for(const t of K.tov){if(!t.ak||!t.pr||(q&&!(t.art+' '+t.nm).toLowerCase().includes(q)))continue;
-    const cur=t.pr.f,L=t.ak.filter(a=>a.e>=D.today).map(a=>Object.assign({},a,{can:!a.uch&&a.plan&&cur>a.plan,dif:a.plan&&cur?100*(a.plan-cur)/cur:null}));
+    const cur=t.pr.f,L=t.ak.filter(akVis).map(a=>Object.assign({},a,{can:!a.uch&&a.plan&&cur>a.plan,dif:a.plan&&cur?100*(a.plan-cur)/cur:null}));
     const f=S.ak.f==='can'?L.filter(a=>a.can):S.ak.f==='in'?L.filter(a=>a.uch):L;
-    if(f.length)out.push({t,L:f.sort((x,y)=>(y.uch-x.uch)||(y.plan||0)-(x.plan||0)),o:sum(t.o&&t.o.r,PI(30))})}
+    if(f.length)out.push({t,L:f.sort(akSort),o:sum(t.o&&t.o.r,PI(30))})}
   return out.sort((x,y)=>y.o-x.o)}
 const akWhy=a=>{const s=String(a.st||'').replace(/^\s*(не\s+)?участвует\s*:?\s*/i,'');return s?s.charAt(0).toLowerCase()+s.slice(1):''};   // «Не участвует: стоит блокировка…» → причина
-const akSub=a=>jn(a.s<=D.today?'идёт до '+dm(a.e):dm(a.s)+'–'+dm(a.e),a.avto?'автоакция':'',a.uch?'':esc(akWhy(a)));
+const akSub=a=>jn(a.s<=D.today?'идёт до '+dm(a.e):'с завтра, до '+dm(a.e),a.avto?'автоакция':'',a.uch?'':esc(akWhy(a)));
 function vAk(){const rows=akRows();let h=fresh(1);
   /* 14.11 Андрей: «снизу куча текста непонятного» — было шесть предложений про вход и выход; правило цены и так показано в расчёте «было → стало» по нажатию */
   h+=`<div class="muted tnote" style="margin:0 3px 2px">Вход и выход — ценой. Нажмите на акцию — покажу расчёт «было → стало».${K.lk?'':' Автоакции ('+(K.avto_n||0)+') видны только в кабинете ВБ.'}</div>`;
@@ -2609,7 +2631,7 @@ function vAk(){const rows=akRows();let h=fresh(1);
   for(const {t,L} of rows){const q30=sum(t.o&&t.o.q,i30);
     h+=`<div class="card" style="padding:13px 14px"><button class="pc press" type="button" data-nm="${t.nm}" style="box-shadow:none;padding:0;grid-template-columns:42px 1fr;background:none"><div class="ph" style="width:42px;height:56px;${t.foto?`background-image:url('${esc(t.foto)}')`:''}"></div><div style="min-width:0"><div class="nm">${esc(t.art)}</div><div class="akp"><b class="num">${rub2(t.pr.f)}</b><span class="num">наша цена · скидка ${t.pr.d}%</span></div></div></button>
       ${(pb=>pb?`<div class="akpn">${pb}</div>`:`<div class="akg"><div class="akgl"><span>Заказы за 30 дней</span><b class="num">${f0(q30)} шт</b></div>${sparkQ(i30,i=>t.o&&t.o.q?t.o.q[i]:0)}</div>`)(panBlock(t,null,1))}<div style="margin-top:4px">`;   /* 17.11 Андрей (кадр «Акции»): «вместо этого блока панель блок такой же короткий и сроки менять» — строка «По панели» как в листе товара (неделя | 2 недели | месяц); нет панели — прежний график заказов */
-    for(const a of L)h+=`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
+    for(const [i,a] of L.entries())h+=akFutHd(L,i,a)+`<button class="akr press${a.uch?' akin':''}" type="button" data-ak="${t.nm}|${a.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${a.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(a.name)}</b><span>${akSub(a)}</span></div>
       <div class="pr num${a.uch?' good':''}">${a.plan?rub(a.plan):'—'}<small>${a.uch?'<span class="akok">'+(a.nw?'вошли, ВБ отметит':'участвуем')+'</span>':a.dif!=null&&a.dif<0?'цена '+f0(a.dif)+'%':'цена подходит'}</small></div></button>`;
     h+='</div></div>'}
   return h+'</div>'}
@@ -2629,7 +2651,7 @@ function cnPan(v,l){if(!v)return '';
   if(!(v[0]>0))return `<div class="cnpr"><span class="l">${l}</span><span class="muted">продаж нет</span></div>`;
   const m=v[2]==null?null:100*v[2];
   return `<div class="cnpr"><span class="l">${l}</span><b class="num ${mcls(m)}">маржа ${pc(m)}</b><span class="num">ДРР ${pc(100*(v[1]||0))}</span><span class="num">продажи ${kr(v[0])} ₽</span></div>`}   // столбец панели: период, маржа и ДРР, продажи (неделя и месяц стоят рядом)
-function cnCard(x){const t=x.t,p=t.pr,by=buyer(t),pn=t.pan,A=(t.ak||[]).filter(a=>a.e>=D.today),U=A.filter(a=>a.uch).sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:0),
+function cnCard(x){const t=x.t,p=t.pr,by=buyer(t),pn=t.pan,A=(t.ak||[]).filter(akVis),U=A.filter(a=>a.uch).sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:0),
     can=A.filter(a=>!a.uch&&a.plan&&p.f>a.plan).length,nr=U[0];
   let pl='';
   if(by)pl+=`<span class="pill num">у покупателя ${by.calc?'≈ ':''}${rub(by.v)} · скидка ВБ ${f0(by.spp)}%${by.vit?' · по витрине':''}</span>`;
@@ -3305,7 +3327,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   const ncol=1+fc.filter(k=>k!=='dn').length+(dn?days.length-1:0);
   for(const e of show){const cs=days.map(i=>cellOf(e,i)),c0=cs[0],busy=FR.busy.has(nm+'|'+e.t),on=FR.sel.has(e.t),op=FR.op.has(e.t);let p0=null;for(let j=1;j<cs.length;j++)if(cs[j]){p0=cs[j];break}
     const dC=!dn?'':cs.slice(1).map((c,k)=>{let p=null;for(let j=k+2;j<cs.length;j++)if(cs[j]){p=cs[j];break}return FR.tm===days[k+1]?mxCell(c,p,true):'<td>'+cellIn(c,p)+(c?`<small class="num mhm">${c.src==='w'?'среднее':c.nt?(c.nf?esc(c.hm)+'<br>':'')+c.nf+' из '+c.nt:esc(c.hm||'')}</small>`:'')+'</td>'}).join('');   /* 17.11 Андрей (кадр, обвёл даты): «тут время погрузки надо» — у прошлого дня под местом и время, когда нашли (16:28–19:24), и «N из M» */ /* 17.11 Андрей «под датой писать во сколько было» — время замера под каждым прошлым днём, как у сегодняшнего */
-    h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${e.xall?'<small class="bad">исключена</small>':e.b&&!fc.includes('b')?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button></div></td>`
+    h+=`<tr class="${e.xall?'x':''}${on?' sel':''}${op?' klop':''}"><td class="q"><div class="qw"><label class="ck"><input type="checkbox" data-frc="${esc(e.t)}"${on?' checked':''} aria-label="Выбрать"></label><button class="qn klo${op?' on':''}" type="button" data-klo="${esc(e.t)}" aria-expanded="${op}" title="Из каких запросов состоит кластер"><span class="qt"><b>${esc(e.t)}</b>${txkTag(nm,e.t)}${e.xall?'<small class="bad">исключена</small>':e.b&&!fc.includes('b')?`<small class="num">своя ставка ${kop(e.b)}</small>`:''}</span><i class="kla" aria-hidden="true">›</i></button></div></td>`
       +fc.map(k=>k==='p'?`<td><button class="plb press" type="button" data-frm="${esc(e.t)}" title="Снять место сейчас">${busy?'<span class="c n mwait"><i></i></span><small class="mwt">снимаю…</small>':c0?`<span class="${FR.fresh&&FR.fresh.has(nm+'|'+e.t)?'mfresh':''}">`+cellIn(c0,p0)+`</span><small class="num">${c0.src==='w'?'среднее':esc(c0.hm||'')}</small>`:'<span class="c n">–</span><small>снять</small>'}</button></td>\u0001`:k==='dn'?'\u0002':k==='b'?`<td class="kbt"><button class="kb num press${e.b?' own':''}${lkb}" type="button" data-kbe="${id}|${nm}|${esc(e.t)}" title="Нажмите — впишите ставку прямо здесь">${f0((e.b||bs||0)/100)}<small>${e.b?'своя':'общая'}</small></button></td>`:k==='f'?`<td class="num">${e.f?kr(e.f):'—'}</td>`:k==='v'?`<td class="num">${e.a.v?f0(e.a.v):'—'}</td>`:k==='c'?`<td class="num">${e.a.c?f0(e.a.c):'—'}</td>`:k==='ctr'?`<td class="num">${e.a.v?pc(100*e.a.c/e.a.v):'—'}</td>`:k==='cpc'?`<td class="num">${e.a.c?rub2(e.a.s/e.a.c):'—'}</td>`:k==='s'?`<td class="num ${sbad(e.a.s,e.a.o)}">${e.a.s?f0(e.a.s):'—'}</td>`:k==='a'?`<td class="num">${e.a.a?f0(e.a.a):'—'}</td>`:k==='o'?`<td class="num">${e.a.o?f0(e.a.o):e.a.s?'<b class="bad">0</b>':'—'}</td>`:k==='cpo'?`<td class="num">${e.cpo==null?'—':isFinite(e.cpo)?f0(e.cpo):'<span class="bad">нет</span>'}</td>`:'').join('').replace('\u0001',dC).replace('\u0002',fc.includes('p')?'':dC)+'</tr>'
       +(op?klRow(e.t,id,nm,ncol):'')}
   h+='</tbody></table></div>';
@@ -3313,7 +3335,7 @@ function frBlock(id,nm){const key=id+'|'+nm;if(FR.key!==key){FR.key=key;FR.sel=n
   /* 14.11 Андрей: «снизу куча текста не понятного» — под таблицей одна строка: что нажимается (было семь предложений) */
   h+=`<div class="muted tnote">Нажмите: на кластер — из каких запросов он состоит, на место — снимется заново, на дату — время замеров, на столбец — сортировка. Частота — запросов за месяц.${rr&&rr.pay==='cpc'?' Кампания за клик: исключать фразы ВБ здесь не даёт.':''}${FR.note?' <b>'+esc(FR.note)+'</b>':''}</div>`+MXLG;
   const lk=UPR?'':' nolk',n=FR.sel.size,xs=[...FR.sel].filter(q=>(all.find(e=>e.t===q)||{}).xall).length;
-  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button><button class="btn sm gray press" type="button" data-act="frcopy" style="flex:none" title="Скопировать выбранные фразы">Скопировать</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}${man?`<button class="btn sm press${lk}" type="button" data-act="frbid" style="flex:none">Ставка · ${n}</button>`:''}${mBtn('Прожать выбранные · '+n,lk,1)}</div>`
+  h+=n?`<div class="selbar"><button class="btn sm gray press num" type="button" data-act="frclr" aria-label="Снять выбор" title="Снять выбор">✕ ${n}</button><button class="btn sm gray press" type="button" data-act="frcopy" style="flex:none" title="Скопировать выбранные фразы">Скопировать</button>${n-xs&&canMin?`<button class="btn sm red press${lk}" type="button" data-act="frminus" data-add="1">Исключить${xs?' '+(n-xs):''}</button>`:''}${xs?`<button class="btn sm press${lk}" type="button" data-act="frminus" data-add="0">Вернуть${n-xs?' '+xs:''}</button>`:''}${man?`<button class="btn sm press${lk}" type="button" data-act="frbid" style="flex:none">Ставка · ${n}</button>`:''}${mBtn('Прожать выбранные · '+n,lk,1)}<button class="btn sm gray press" type="button" data-act="frtxt" data-rk="${id}|${nm}" title="Есть ли выбранные фразы в названии и описании карточки">Текст · ${n}</button></div>`
     :`<div class="acts" style="grid-template-columns:1fr">${mBtn('Прожать места · '+show.length+' '+(show.length%10===1&&show.length%100!==11?'фраза':show.length%10>=2&&show.length%10<=4&&(show.length%100<12||show.length%100>14)?'фразы':'фраз'),lk)}</div>`;
   if(K.jam){const sk=new Set(all.map(e=>e.t.trim().toLowerCase())),nj=jamRows(nm).filter(q=>!sk.has(q.t.trim().toLowerCase())).length;
     if(nj)h+=`<div class="hrw"><h3>Остальные запросы товара · ${nj}</h3><button class="lnk" type="button" data-act="frjam">${FR.jam?'свернуть':'показать'}</button></div>`
@@ -3601,7 +3623,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 Андрей 08:05: «над акции динамику цен» — «Цена по дням» прямо над «Акции ВБ» (прежние два блока ниже — «Скидка ВБ (СПП)» и строка цен — сведены в него) */
   /* 14.11 (четвёртый заход) Андрей 09:18: «И выше динамика цен гистограмма чтобы я понимал реально войти в акцию» — у товара с акциями «Цена по дням»
      стоит внутри блока «Акции ВБ»: под строкой «В акции / Без акции», прямо над списком акций, с линиями плановых цен; акций нет — отдельным блоком здесь же */
-  const aks=(t.ak||[]).filter(x=>x.e>=D.today);
+  const aks=(t.ak||[]).filter(akVis);
   /* 17.11 Андрей «почему не во всех есть раздел акции» → «да»: блок «Акции ВБ» у каждого товара; акций нет — «АКЦИЙ НЕТ» (у Каб 2 автоакций не видно: его кабинета в Opera нет) */
   if(!(aks.length&&t.pr))h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`+akNet()+prcBlock(t,nm,cx);
   /* 14.11 Андрей (кадр блока «Акции ВБ», «Без акции» обведено): «Здесь показатели по панели добавь дрр цену маржу сюда» — под строкой «Без акции / В акции»
@@ -3616,8 +3638,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
     h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`
       +prcBlock(t,nm,cx)
       +`<div class="akl">`
-      +aks.sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
-        return `<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x)}</small></div></button>`}).join('')+'</div>'
+      +aks.sort(akSort).map((x,i,a)=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
+        return akFutHd(a,i,x)+`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x)}</small></div></button>`}).join('')+'</div>'
 }
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
@@ -3638,9 +3660,9 @@ function akStat(aks){const inA=aks.filter(x=>x.uch&&x.s<=D.today),fu=aks.filter(
   if(fu.length)return `<div class="akst g">ВХОДИТ В АКЦИЮ — ${fu.map(x=>esc(x.name)+' с '+dm(x.s)).join(', ')}</div>`;
   return `<div class="akst b">БЕЗ АКЦИИ</div>`}
 function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
-function rkCenaAk(t,nm,cx,e){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(x=>x.e>=D.today),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
+function rkCenaAk(t,nm,cx,e){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(akVis),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
   let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?'':akNet())+pb;
-  if(aks.length)h+='<div class="akl">'+aks.slice().sort((x,y)=>y.uch-x.uch||(y.plan||0)-(x.plan||0)).map(x=>`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x,e)}</small></div></button>`).join('')+'</div>';
+  if(aks.length)h+='<div class="akl">'+aks.slice().sort(akSort).map((x,i,a)=>akFutHd(a,i,x)+`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x,e)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
   /* 14.11 Андрей (кадр листа товара, обвёл блок кампаний): «обведи красиво эффект перелива света… очень аккуратно мягко и подпиши Рекламные кампании» — рамка .rkbox (a_css_k.css) */
@@ -3869,14 +3891,17 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
      красный во всю высоту, «0 зак»; линия — норма ДРР (NORMA, 9%); шкала слева. ДРР выше 60% упирается в верх (цифра над ним настоящая) */
   const dmo=S.rkdm||'o',zk=x=>x.s>=1&&!(dmo==='k'?x.sp:x.or),dv=x=>dmo==='k'?(x.sp?100*x.s/x.sp:null):x.drr,
     dbt=(v,l)=>`<button type="button" class="press" data-act="rkdm" data-k="${v}" aria-pressed="${dmo===v}">${l}</button>`;
-  h+=`<div class="hrw"><h3>По дням</h3><span class="pnqs">${dbt('o','ДРР общий')}${dbt('k','ДРР РК')}${dbt('s','Расход')}</span></div>`+chart({ix:cx,h:176,mh:72,
+  /* 24.11 Андрей (кадр «3 дн», обвёл «По дням»): «Где за весь период» — пока день не выбран, строка над графиком — итог выбранного периода; нажатие на день — этот день, повторное — снова период */
+  const nz0=v=>v!=null&&!isFinite(v),zpD=zp.x.sp?100*zp.x.s/zp.x.sp:(zp.x.s>=1?Infinity:null),
+    rd0=`<b>Итог ${perZa()}${ix.length>1?' ('+dm(D.days[ix[0]])+'–'+dm(D.days[ix[ix.length-1]])+')':''}</b> · расход ${rub(zp.x.s)} · ДРР общий <b class="${nz0(zp.v)?'bad':dcls(zp.v)}">${nz0(zp.v)?'заказов нет':pc(zp.v)}</b> · ДРР РК <b class="${nz0(zpD)?'bad':dcls(zpD)}">${nz0(zpD)?'заказов нет':pc(zpD)}</b> · заказы товара <b>${f0(zp.oq)} шт</b>, с этой рекламы <b>${f0(zp.x.q)}</b> · клики ${f0(zp.x.c)}${zp.x.v?' из '+f0(zp.x.v)+' показов':''}`;
+  h+=`<div class="hrw"><h3>По дням</h3><span class="pnqs">${dbt('o','ДРР общий')}${dbt('k','ДРР РК')}${dbt('s','Расход')}</span></div>`+chart({ix:cx,h:176,mh:72,read0:rd0,
     val:i=>{const x=g(i);if(dmo==='s')return x.s>=1?x.s:null;return zk(x)?Infinity:x.s>=1?dv(x):null},cap:dmo==='s'?0:60,line:dmo==='s'?0:NORMA,
     ax:dmo==='s'?{f:axNum}:{f:v=>f0(v)+'%'},
     col:i=>{const x=g(i);return zk(x)?'var(--bad)':dcol(dmo==='s'?x.drr:dv(x))},dot:i=>cd.has(i),inn:i=>{const x=g(i),q=dmo==='k'?x.q:x.oq;return x.s>=1&&q?f0(q):''},   // 15.11 Андрей «заказы внутри как в маркетологе»: внутри столбика заказы, шт (в «ДРР РК» — с этой рекламы, иначе — товара)
     
     top:i=>{const x=g(i);if(x.s<1)return '';if(dmo==='s')return zk(x)?`<span class="t0 bd">${ksh(x.s)}</span><span class="z0">0 зак</span>`:ksh(x.s);if(zk(x))return '<span class="z0">0 зак</span>';return f0(dv(x))+'%'},   // 15.11 Андрей «расход не виден цифры»: в «Расход» сумма над каждым столбиком
     read:i=>{const x=g(i),dk=x.sp?100*x.s/x.sp:(x.s>=1?Infinity:null),nz=v=>v!=null&&!isFinite(v);return `<b>${dlab(i)}${i===T?' (сегодня)':''}</b> · расход ${rub(x.s)} · ДРР общий <b class="${!x.or&&x.s>=1?'bad':dcls(x.drr)}">${!x.or&&x.s>=1?'заказов нет':pc(x.drr)}</b> · ДРР РК <b class="${nz(dk)?'bad':dcls(dk)}">${nz(dk)?'заказов нет':pc(dk)}</b> · заказы товара <b>${f0(x.oq)} шт</b>, с этой рекламы <b>${f0(x.q)}</b> · клики ${f0(x.c)}${x.v?' из '+f0(x.v)+' показов':''}${cd.has(i)?' · <span style="color:var(--acc)">в этот день меняли</span>':''}`}})
-    +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий, внутри — заказы товара, шт.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе; внутри — эти заказы, шт.':'ДРР общий — расход к заказам всего товара; внутри — заказы товара, шт.'} Линия — норма ${NORMA}%. Нажмите на день — все цифры.</div>`;
+    +`<div class="muted tnote">${dmo==='s'?'Высота — расход за день, цвет — ДРР общий, внутри — заказы товара, шт.':dmo==='k'?'ДРР РК — расход к заказам, которые ВБ отнёс к этой рекламе; внутри — эти заказы, шт.':'ДРР общий — расход к заказам всего товара; внутри — заказы товара, шт.'} Линия — норма ${NORMA}%. Над графиком — итог периода; нажмите на день — его цифры, ещё раз — снова период.</div>`;
   /* 14.11 Андрей: «…надо еще показать табличного типа как в марпле… показы клики спм спс, дрр рк, дрр, затраты, заказы кол-во, корзины» — таблица по дням
      (dayTbl — d_tabl.js); g(i) уже отдаёт v, c, a, q, s, sp, or, oq */
   const pz=e.ps,spl=pz&&(r.pl||[]).includes('combined')?i=>{const x=g(i),p={v:pz.v?pz.v[i]||0:0,c:pz.c?pz.c[i]||0:0,a:pz.a?pz.a[i]||0:0,q:pz.q?pz.q[i]||0:0,s:pz.s?pz.s[i]||0:0},m=k=>Math.max(0,(x[k]||0)-p[k]);
@@ -4003,6 +4028,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='adinfo')openAdInfo(rk);   // 15.11 Андрей «Автопополнение не реагирует кнопка»: было всплывающее сообщение внизу — теперь лист, как у других плиток
   else if(a==='frmore'){FR.all=true;redraw()}
   else if(a==='frjam'){FR.jam=!FR.jam;redraw()}
+  else if(a==='frtxt')openTxk(+rk[0],rk[1]);else if(a==='frtxtgo')actTxk(+rk[0],rk[1]);   // 24.11 ключи в названии и описании
   else if(a==='frclr'){FR.sel=new Set();redraw()}
   /* 16.11 Андрей «чтобы мог выбрать и скопировать запрос» — выбранные галочками фразы копируются, каждая с новой строки */
   else if(a==='frcopy'){const t=[...FR.sel].join(String.fromCharCode(10)),ok=()=>toast(FR.sel.size>1?'Скопировал фраз: '+FR.sel.size:'Скопировал: «'+t.slice(0,60)+'»'),
@@ -4095,6 +4121,42 @@ function tovHist(t,nm){const rk=(t.rk||[]).map(Number),L=evSvern((D.ist||[]).fil
 /* 17.11 фильтр «Вхолостую»: дни и потолок трат выбираются списком */
 document.addEventListener('change',e=>{const x=e.target;if(!x||!x.classList||!x.classList.contains('zsel'))return;const v=+x.value;
   if(x.dataset.k==='zasd'){S.rkf.zd=v;RS.set('zasd',v)}else{S.rkf.zl=v;RS.set('zasl',v)}unfz();render(true)});
+
+/* ───────── 24.11 Андрей: «проверка по выбранным ключам … раз в день … есть она в тексте или описании или нет, как-то аккуратно,
+   и кнопка, чтобы проверить сразу. И быстро. Без трат».
+   Название и описание карточки приходят со сбором (tt, ds, tat — тексты перечитываются раз в сутки, в полном сборе), у каждой фразы
+   в таблице — пометка. «Текст · N» в полосе выбора — лист по выбранным фразам; «Проверить сейчас» — сторож (txt) за секунды
+   перечитывает карточку из ВБ (только чтение, бесплатно) и возвращает итог по фразам (txr). Правило сверки — как tx_in() в wbapi.py. */
+function txNorm(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/x/g,'х').replace(/[^0-9a-zа-я]+/g,' ').trim()}
+function txIn(q,text){q=txNorm(q);const t=txNorm(text);if(!q||!t)return 0;if((' '+t+' ').includes(' '+q+' '))return 2;
+  const tw=t.split(' '),ts=new Set(tw);
+  for(const w of q.split(' ')){if(w.length<=3){if(!ts.has(w))return 0}else{const st=w.slice(0,Math.max(4,w.length-2));if(!tw.some(x=>x.startsWith(st)))return 0}}
+  return 1}
+/* [в названии, в описании]: 2 — дословно, 1 — все слова есть, 0 — нет; null — текста карточки нет в данных */
+function txRes(nm,q){const t=TOV[nm];if(!t)return null;if(t.txr&&t.txr[q])return t.txr[q];if(t.ds==null)return null;return [txIn(q,t.tt),txIn(q,t.ds)]}
+function txkTag(nm,q){const r=txRes(nm,q);if(!r)return '';
+  const [a,b]=r,m=Math.max(a,b);
+  const tx=a===2&&b===2?'✓ в названии и описании':a===2?'✓ в названии':b===2?'✓ в описании':m===1?'≈ слова есть, но не подряд':'✗ нет в тексте';
+  return `<small class="txk ${m===2?'ok':m===1?'sl':'no'}">${tx}</small>`}
+const txCell=v=>v===2?'<span class="txk ok">✓ есть</span>':v===1?'<span class="txk sl">≈ по словам</span>':'<span class="txk no">✗ нет</span>';
+const txWhen=s=>{if(!s)return '';const d=String(s),day=d.slice(0,10);return (day===D.today?'сегодня':day.slice(8,10)+'.'+day.slice(5,7))+' в '+d.slice(11,16)};
+let TXK=0;
+function openTxk(id,nm){const qs=[...FR.sel];if(!qs.length){toast('Отметьте фразы галочками');return}
+  sheet(()=>{const t=TOV[nm]||{},L=[...FR.sel].length?[...FR.sel]:qs,res=L.map(q=>[q,txRes(nm,q)]),have=res.some(x=>x[1]);
+    const n2=res.filter(x=>x[1]&&Math.max(...x[1])===2).length,n0=res.filter(x=>x[1]&&Math.max(...x[1])===0).length;
+    const dl=t.dl!=null?t.dl:t.ds!=null?String(t.ds).length:null,tl=t.tl!=null?t.tl:t.tt!=null?String(t.tt).length:null;
+    let h=have?`<div class="note" style="margin-top:0"><b>Дословно: ${n2} из ${L.length}</b>${n0?` · нет совсем: <b class="bad">${n0}</b>`:''}<br>`
+        +`<span class="muted">Текст карточки — ${esc(txWhen(t.tat)||'нет даты')}${tl!=null?` · название ${tl} знаков из 60`:''}${dl!=null?` · описание ${f0(dl)} знаков, предел обычно 2 000`:''}</span></div>`
+      :`<div class="note" style="margin-top:0">Текста этой карточки в данных ещё нет — нажмите «Проверить сейчас».</div>`;
+    h+=`<table class="txkt"><thead><tr><th>Фраза</th><th>Название</th><th>Описание</th></tr></thead><tbody>`
+      +res.map(([q,r])=>`<tr><td>${esc(q)}</td>${r?`<td>${txCell(r[0])}</td><td>${txCell(r[1])}</td>`:'<td class="muted">—</td><td class="muted">—</td>'}</tr>`).join('')+`</tbody></table>`;
+    h+=`<div class="muted" style="font-size:12px;margin:8px 2px 0">✓ — фраза стоит дословно, ≈ — все слова есть, но не подряд или в другой форме. Тексты карточек перечитываются раз в сутки, ночью.</div>`;
+    h+=`<div class="acts" style="grid-template-columns:1fr;margin-top:12px"><button class="btn press${UPR?'':' nolk'}" type="button" id="txkb" data-act="frtxtgo" data-rk="${id}|${nm}"${TXK?' disabled':''}>${TXK?'<span class="sp"></span>Читаю ВБ…':'⟳ Проверить сейчас'}</button></div>`;
+    return {t:'Ключи в тексте',s:esc((t.art||nm)+'')+' · выбрано '+L.length,h}},true)}
+async function actTxk(id,nm){if(TXK||!need())return;const qs=[...FR.sel];if(!qs.length){toast('Отметьте фразы галочками');return}
+  TXK=1;redraw();
+  try{const r=await quick({k:'txt',nm:+nm,q:qs.slice(0,30)},()=>{const b=$('#txkb');if(b)b.innerHTML='<span class="sp"></span>Читаю ВБ…'},60000);TXK=0;redraw();toast(r.msg||'Текст перечитан')}
+  catch(e){TXK=0;redraw()}}
 
 /* ── 15.11 Андрей («ВБ Маркетолог К»): траты кампании по часам. ВБ по часам не отдаёт — сервис каждые 30 минут запоминает «сколько с начала дня» (chasy.py), за час = разница замеров.
    18.11 Андрей (скрин, «совершенно непонятно, читай не читай, надо по-другому»): вместо двух графиков с точками и абзаца — вывод одной фразой, таблица по частям дня
@@ -4588,7 +4650,7 @@ async function pollRes(){await Promise.all(NH.map(async h=>{try{const r=await fe
 const RUNW={status:['Меняю статус кампании в кабинете ВБ','обычно до полминуты',45],bid:['Ставлю ставку в кабинете ВБ','обычно до полминуты',45],deposit:['Пополняю бюджет кампании','обычно до полминуты',45],
   limit:['Сохраняю лимит дня','обычно до полминуты',45],price:['Меняю цену в кабинете ВБ','обычно до полминуты',45],create:['Создаю кампанию в кабинете ВБ','обычно около минуты',90],note:['Сохраняю заметку','несколько секунд',30],
   minus:['Меняю минус-фразы кампании','обычно до полминуты',45],klbid:['Ставлю ставку запроса','обычно до полминуты',45],grafik:['Сохраняю график показа','обычно до полминуты',45],bidder:['Сохраняю настройки биддера','обычно до полминуты',45],
-  grtpl:['Сохраняю шаблон часов','несколько секунд',30],nst:['Сохраняю настройки уведомлений','несколько секунд',30],rkref:['Перечитываю кампанию из ВБ','обычно 5–20 секунд',40],mesto:['Снимаю место в выдаче ВБ','обычно до минуты',90],
+  grtpl:['Сохраняю шаблон часов','несколько секунд',30],nst:['Сохраняю настройки уведомлений','несколько секунд',30],rkref:['Перечитываю кампанию из ВБ','обычно 5–20 секунд',40],txt:['Читаю текст карточки из ВБ','несколько секунд',40],mesto:['Снимаю место в выдаче ВБ','обычно до минуты',90],
   mesta:['Запускаю замер мест','ответ за несколько секунд, сам замер — около 20 минут в фоне',45],refresh_fast:['Собираю свежие данные из ВБ','около двух минут',200],refresh_full:['Собираю все данные заново','15–30 минут, страницу можно закрыть',2100],
   bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240],zony:['Меняю места показа в ВБ','обычно до 20 секунд',60],rename:['Меняю название в ВБ','обычно до 10 секунд',45]};
 /* 14.11 Андрей (08:10): «сторож там не пиши» — на странице слова «сторож» нет: «Выполняется», «сервис», «ответ сервиса» */
@@ -4603,7 +4665,7 @@ const runSteps=(st,bad)=>'<div class="rsteps">'+['Отправлено','Вып�
 const runProg=st=>runSteps(st)+'<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">'+(st?'Выполняется…':'Отправляю команду…')+'</b><small id="runsub"></small></div></div>';
 const RUNPROG=runProg(0);
 const RUNNM={_ptr:'Страница обновлена',status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
-  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы',zony:'Места показа',rename:'Название кампании'};
+  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',txt:'Ключи в тексте',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы',zony:'Места показа',rename:'Название кампании'};
 /* итог команды вверху экрана: k — g (готово) / b (отказ) / w (сторож молчит); нажатие убирает */
 function runRes(cmd,k,msg){let w=$('#runres');if(!w){w=document.createElement('div');w.id='runres';w.className='runres';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w)}
   const r=RK[cmd.cid],t=cmd.nm&&TOV[cmd.nm],sub=r?r.name:t?t.art:'',el=document.createElement('button');el.type='button';el.className='rres '+k;
@@ -4750,7 +4812,7 @@ function bzBox(e,cur,cpm,mn,nm){const z=e&&e.bz;if(!z)return '';const ed=cpm?'з
 /* 24.11 Андрей: «ставку, которую предлагаешь как безопасную, тоже учитывай [цену акции]» — безопасная этой кампании при цене каждой акции
    товара (predel.py, e.bz.ak): спокойно ли входить и какую ставку держать в акции; нажатие вписывает ставку в поле */
 function bzAk(z,nm){const t=typeof TOV!=='undefined'?TOV[nm]:null,A=z.ak;if(!t||!A)return '';
-  const L=(t.ak||[]).filter(x=>x.bz&&A[x.id]!=null&&x.e>=D.today).sort((x,y)=>x.bz.p-y.bz.p);if(!L.length)return '';
+  const L=(t.ak||[]).filter(x=>x.bz&&A[x.id]!=null&&akVis(x)).sort((x,y)=>x.bz.p-y.bz.p);if(!L.length)return '';
   return `<div class="bzak"><small>В акциях — при цене акции, реклама как сейчас:</small>${L.map(x=>{const sa=A[x.id];
     return `<div class="bzar"><span><b>${esc(x.name)}</b> · ${rub(x.bz.p)}${x.uch?' · участвуем':''}<i class="${x.bz.ok?'good':'bad'}">${x.bz.ok?'спокойно':x.bz.n<10?'чистая ниже 10%':'ДРР выше 10%'} · чистая ${f1(x.bz.n)}%, ДРР ${f1(x.bz.d)}%</i></span>${sa<0?'<em>ниже мин.</em>':`<button class="chip press" type="button" data-bv="${sa}">${kop(sa)}</button>`}</div>`}).join('')}</div>`}
 function actBid(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},pls=Object.keys(e.b||{});let pl=pls[0];
