@@ -3587,6 +3587,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
      <div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${t.oh?`<button type="button" class="osbt press${S.ostOpen?' on':''}" data-act="osth" aria-expanded="${S.ostOpen?'true':'false'}">${ostPills(t)}<span class="pill osar">остатки по дням ${S.ostOpen?'▴':'▾'}</span></button>`:ostPills(t)}${t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:''}${a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:''}</div>`;
   if(t.oh&&S.ostOpen)h+=ostHist(t);
   if(ostNet(t)&&W.length)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.</div>';
+  h+='AKROW';   /* 24.11 Андрей (кадр листа товара Сетка20х20_10м): «в таких разделах тоже надо работу с акциями блок» — как в листе кампании, свёрнутой строкой «Акции» наверху; блок «Акции ВБ» снизу переехал сюда */
   h+=panBlock(t,a);   // 14.11 23:08 Андрей: «по панели надо видеть сверху ситуацию, необязательно сразу 3 периода» — сразу под ценой и остатками, один период
   /* 14.11 (четвёртый заход): строки «панель неделя / месяц: ДРР · маржа» над главными цифрами больше нет — те же числа в блоке «Показатели» под кампаниями (panBlock) */
   /* 14.11 Андрей: «в товаре плашка „ДРР вчера“ завис, зачем, если период выше — выбор»: плашки «вчера» нет, «Вчера» — кнопкой периода */
@@ -3625,6 +3626,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   /* 14.11 (четвёртый заход) Андрей 09:18: «И выше динамика цен гистограмма чтобы я понимал реально войти в акцию» — у товара с акциями «Цена по дням»
      стоит внутри блока «Акции ВБ»: под строкой «В акции / Без акции», прямо над списком акций, с линиями плановых цен; акций нет — отдельным блоком здесь же */
   const aks=(t.ak||[]).filter(akVis);
+  const h0=h;h='';
   /* 17.11 Андрей «почему не во всех есть раздел акции» → «да»: блок «Акции ВБ» у каждого товара; акций нет — «АКЦИЙ НЕТ» (у Каб 2 автоакций не видно: его кабинета в Opera нет) */
   if(!(aks.length&&t.pr))h+=`<div class="hrw akh"><h3>Акции ВБ</h3></div>`+akNet()+prcBlock(t,nm,cx);
   /* 14.11 Андрей (кадр блока «Акции ВБ», «Без акции» обведено): «Здесь показатели по панели добавь дрр цену маржу сюда» — под строкой «Без акции / В акции»
@@ -3642,6 +3644,8 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
       +aks.sort(akSort).map((x,i,a)=>{const lo=x.plan&&Math.round(P-x.plan)>=1,mm=   /* разница меньше рубля — не «ниже на 0 ₽ (−0%)» (кадр 14.11) */lo?m2(x.plan):null;if(mm!=null)anyM=true;
         return akFutHd(a,i,x)+`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x)}</small></div></button>`}).join('')+'</div>'
 }
+  {const akH=h;h=h0;const nI=aks.filter(x=>x.uch&&x.s<=D.today).length,nF=aks.filter(akFut).length,tx=(nI?'участвуем: '+nI:aks.length?'не участвуем':'акций нет')+(nF?' · с завтра: '+nF:'');
+   h=h.replace('AKROW',()=>`<button type="button" class="ctlt press${nI?' on':''}" data-act="akt" aria-expanded="${S.akOpen?'true':'false'}"><i></i><span>Акции</span><b>${tx}</b><span class="ar">${S.akOpen?'▴':'▾'}</span></button>`+(S.akOpen?akH:''))}
   h+=`<div class="acts ${K.bally?'x4':'x3'}"><button class="ab press${UPR?'':' nolk'}" type="button" data-act="price" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><b>Изменить цену</b><span>вниз — скидкой, вверх — ценой до скидки</span></button>
      <button class="ab press" type="button" data-act="notes" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h3"/></svg><b>Заметки</b><span>мои и из истории</span></button>
      <button class="ab press${UPR?'':' nolk'}" type="button" data-act="create" data-nm="${nm}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg><b>Новая кампания</b><span>за клик в поиске, за показы или единая</span></button>
@@ -3661,8 +3665,8 @@ function akStat(aks){const inA=aks.filter(x=>x.uch&&x.s<=D.today),fu=aks.filter(
   if(fu.length)return `<div class="akst g">ВХОДИТ В АКЦИЮ — ${fu.map(x=>esc(x.name)+' с '+dm(x.s)).join(', ')}</div>`;
   return `<div class="akst b">БЕЗ АКЦИИ</div>`}
 function akNet(){return `<div class="akst b">АКЦИЙ НЕТ</div>`+(K.lk?'':'<div class="muted tnote">Автоакции Каб 2 здесь не видны: его кабинета в браузере нет.</div>')}
-function rkCenaAk(t,nm,cx,e){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(akVis),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
-  let h=`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`+(aks.length?'':akNet())+pb;
+function rkCenaAk(t,nm,cx,e,nohd){if(!t||!t.pr)return '';const aks=(t.ak||[]).filter(akVis),inA=aks.filter(x=>x.uch&&x.s<=D.today),pb=prcBlock(t,nm,cx);
+  let h=(nohd?'<div style="margin-top:8px"></div>':`<div class="hrw akh"><h3>Цены и акции ВБ</h3></div>`)+(aks.length?'':akNet())+pb;
   if(aks.length)h+='<div class="akl">'+aks.slice().sort(akSort).map((x,i,a)=>akFutHd(a,i,x)+`<button class="akr press${x.uch?' akin':''}" type="button" data-ak="${nm}|${x.id}" style="width:100%;border-left:0;border-right:0;border-top:0;${x.uch?'':'background:none;'}text-align:left;cursor:pointer"><div><b>${esc(x.name)}</b></div><div class="pr num">${x.plan?rub(x.plan):'—'}<small>${akSt(nm,x)}${akBz(x,e)}</small></div></button>`).join('')+'</div>';
   return h}
 function prodRk(t,nm,ix,pp,a,W,P,rctx){
@@ -3876,6 +3880,11 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* 17.11 Андрей «этот блок добавь наверх», «Обновить / Название / Копировать — уже есть сверху, не нужно тут»: блок управления первым под периодом, ⟳ — плашкой в шапке */
   /* 17.11 Андрей «его надо добавить скрытно, свёрнуто»: блок управления наверху свёрнут, в строке — состояние кампании; нажатие раскрывает/сворачивает */
   h+=`<button type="button" class="ctlt press ${st.c}" data-act="ctlt" aria-expanded="${S.ctlOpen?'true':'false'}"><i></i><span>Управление</span><b>${st.t}</b><span class="ar">${S.ctlOpen?'▴':'▾'}</span></button>`+(S.ctlOpen?rkCtl(r,nm):'');
+  /* 24.11 Андрей (кадр листа кампании, обвёл место между «Управление» и «Показатели кампании»): «тут раскрывающийся блок с акциями сюда перенеси» —
+     «Цены и акции ВБ» товара (был под таблицей по дням) стоит здесь свёрнутой строкой, как «Управление»: в строке — участвуем ли сейчас и сколько с завтра */
+  if(t&&t.pr){const A=(t.ak||[]).filter(akVis),nI=A.filter(x=>x.uch&&x.s<=D.today).length,nF=A.filter(akFut).length,
+      tx=(nI?'участвуем: '+nI:A.length?'не участвуем':'акций нет')+(nF?' · с завтра: '+nF:''),cxa=[];for(let i=Math.max(0,T-Math.max(13,S.per-1));i<=T;i++)cxa.push(i);
+    h+=`<button type="button" class="ctlt press${nI?' on':''}" data-act="akt" aria-expanded="${S.akOpen?'true':'false'}"><i></i><span>Акции</span><b>${tx}</b><span class="ar">${S.akOpen?'▴':'▾'}</span></button>`+(S.akOpen?rkCenaAk(t,nm,cxa,e,1):'')}
   const zy=T>0?dr([T-1]):null,zy2=T>1?dr([T-2]):null,zp=dr(ix),zpp=dr(pp);
   h+=`<div class="hrw"><h3>Показатели кампании</h3><span class="muted" style="font-size:12.5px">${perZa()}</span></div>`;
   h+=kpi4({drr:zp.v,pdrr:zpp&&zpp.v,drrk:a.drrk,s:a.s,ps:zpp&&zpp.x.s,q:a.q,z:a.q,ql:'Заказы с рекламы / всего',qa:zp.oq,qd:'всего у товара <b>'+f0(zp.oq)+' шт</b>'});
@@ -3914,7 +3923,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   if(typeof chasBlock==='function')h+=chasBlock(r,nm);
   if(typeof dayTbl==='function')h+=dayTbl('rk',cx,g,spz);
   /* 15.11 Андрей «добавь ниже по ценам акциям в рк тоже»: под статистикой по дням — цена по дням и акции ВБ товара, как в листе товара */
-  if(t)h+=rkCenaAk(t,nm,cx,e);
+  /* 24.11: «Цены и акции ВБ» перенесены наверх, под «Управление» (свёрнутая строка «Акции») */
   if(t)h+=otzBlock(t);   // 15.11 Андрей «ни в рк ни в товаре не наблюдаю ситуацию с отзывами»
   /* 15.11 Андрей «после статистики места если поиски ещё»: фразы и места — сразу за таблицей по дням (если у кампании есть поиск), настройки — после них */
   const srch=(r.pl||[]).some(p=>p==='search'||p==='combined');
@@ -4021,6 +4030,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='dtx'){const X=S.dtx||(S.dtx=new Set());if(X.has(ds.k))X.delete(ds.k);else X.add(ds.k);redraw()}
   else if(a==='osth'){S.ostOpen=!S.ostOpen;redraw()}
   else if(a==='ctlt'){S.ctlOpen=!S.ctlOpen;redraw()}
+  else if(a==='akt'){S.akOpen=!S.akOpen;redraw()}
   else if(a==='chgmore'){S.chgOpen=S.chgOpen===ds.key?'':ds.key;redraw()}
   else if(a==='istavto'){S.ist.avto=!S.ist.avto;redraw()}
   else if(a==='istall'){S.ist.k='all';S.ist.q='';openIst()}
