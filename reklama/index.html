@@ -1657,6 +1657,10 @@ small.txk{display:block;font-size:11px;margin-top:2px;opacity:.9}
 .pc .kpi{grid-template-columns:minmax(0,.86fr) minmax(0,1.12fr) minmax(0,1.02fr) minmax(0,1fr);align-items:start}
 .pc .kpi span{line-height:1.25}
 @media (max-width:385px){.pc .kpi{gap:4px}.pc .kpi b{font-size:14.5px}.pc .kpi span{font-size:10.5px}}
+/* 25.11 Андрей «при смене срока картинка уходит резко»: мягкое появление только цифр при смене Сегодня/Вчера/… — фото (.ph) без анимации */
+#view.perfade .kpi b,#view.perfade .kpi span,#view.perfade .tile .v,#view.perfade .tile small,#view.perfade .skc>.muted,#view.perfade .skpl{animation:perIn .28s ease-out both}
+@keyframes perIn{from{opacity:.35}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#view.perfade .kpi b,#view.perfade .kpi span,#view.perfade .tile .v,#view.perfade .tile small,#view.perfade .skc>.muted,#view.perfade .skpl{animation:none}}
 
 /* ── 14.11 Андрей: «время обновл стоит а если 3 дня назад как» — кнопка обновления: давние данные — жёлтая, не сегодняшние — красная с датой ── */
 .rfb.old{color:var(--warn);background:var(--warn-soft)}
@@ -2548,13 +2552,13 @@ function vcStep(tok,chk){if(tok!==VCT||!D)return;
   const t0=S.tab;let b;S.tab=t;try{b=VBODY()}catch(e){return}finally{S.tab=t0}
   const T=document.createElement('template');T.innerHTML='<div class="view" data-v="'+t+'" style="animation:none">'+b+'</div>';   // в шаблоне картинки не грузятся, пока раздел не показан
   VC.set(t,{el:T.content.firstElementChild,body:b,sig});vcIdle(()=>vcStep(tok,false),2000)}
-function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card'),cy=innerHeight*.45;for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.top<=cy&&r.bottom>cy){let b=[k,r.top,null],bd=Math.abs(r.top-cy);for(const tr of C[k].querySelectorAll('tr[data-nm]')){const q=tr.getBoundingClientRect(),dd=Math.abs(q.top-cy);if(dd<bd){bd=dd;b=[k,q.top,tr.dataset.nm]}}return b}}for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top,null]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
+function render(keep){const an=keep&&scrollY>0?(()=>{const C=document.querySelectorAll('#view .card, #view .pc, #view .rk'),cy=innerHeight*.45;for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.top<=cy&&r.bottom>cy){let b=[k,r.top,null],bd=Math.abs(r.top-cy);for(const tr of C[k].querySelectorAll('tr[data-nm]')){const q=tr.getBoundingClientRect(),dd=Math.abs(q.top-cy);if(dd<bd){bd=dd;b=[k,q.top,tr.dataset.nm]}}return b}}for(let k=0;k<C.length;k++){const r=C[k].getBoundingClientRect();if(r.bottom>90)return [k,r.top,null]}return null})():null,y=scrollY,q=document.activeElement&&document.activeElement.id==='q',tw=$('#view .tws'),ty=tw?[tw.scrollTop,tw.scrollLeft]:null;
   const body=VBODY();$('#view').innerHTML=`<div class="view" data-v="${S.tab}"${keep||document.documentElement.dataset.vt?' style="animation:none"':''}>`+body+'</div>';twFit();
   VCUR={tab:S.tab,sig:vcSig(),body};if(!VGO)VC.clear();vcLater();
   if(keep){scrollTo(0,y);const t2=$('#view .tws');if(t2&&ty){t2.scrollTop=ty[0];t2.scrollLeft=ty[1]}
     /* 15.11 Андрей «если сроки менять дёргается»: первая видимая карточка остаётся на том же месте экрана (порядок при смене срока держит FRZ) */
     /* 17.11 Андрей «при смене срока … как-то дёргано»: держим на месте то, что в середине экрана — строку товара открытой склейки или карточку, а не первую карточку сверху (у неё менялась высота, и всё ниже прыгало) */
-    if(an){const c=document.querySelectorAll('#view .card')[an[0]],e=c&&(an[2]?c.querySelector('tr[data-nm="'+an[2]+'"]'):c);if(e){const d=e.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}
+    if(an){const c=document.querySelectorAll('#view .card, #view .pc, #view .rk')[an[0]],e=c&&(an[2]?c.querySelector('tr[data-nm="'+an[2]+'"]'):c);if(e){const d=e.getBoundingClientRect().top-an[1];if(Math.abs(d)>1)scrollTo(0,scrollY+d)}}}else scrollTo(0,0);if(q){const e=$('#q');if(e)e.focus()}}   // 25.11 Андрей «картинка уходит»: якорь прокрутки — и карточки .card (склейки), и .pc / .rk (товары, кампании)
 /* смена раздела: вперёд — страница уезжает влево, назад — вправо */
 function go(tab){if(!TABS.includes(tab))tab='tov';if(tab===S.tab){sync();render();return}const d=TABS.indexOf(tab)-TABS.indexOf(S.tab);
   smooth(d>0?'fwd':'back',()=>{vcPut();S.tab=tab;RS.set('tab',tab);S.q='';unfz();sync();if(!vcTake()){VGO=true;try{render()}finally{VGO=false}}});K3.call('go',K3MAP[tab])}
@@ -2799,7 +2803,7 @@ function vEsh(){const n=nst(),w=(D.warn||[]).concat(K.mar_warn||[]),b=K.bal||{};
 const TBL={},FRZ={};
 const unfz=()=>{for(const k in FRZ)delete FRZ[k]};
 /* период сменили — строки остаются там же, где были: запоминаем порядок показанного списка; сбрасывается сортировкой, отбором, поиском */
-function freeze(){if(S.tab==='tov')FRZ.tov=tovRows().map(x=>x.t.nm);else if(S.tab==='rk')FRZ.rk=rkRows().map(x=>x.r.id+'|'+x.nm);else if(S.tab==='skl'){const R=sklRows();FRZ.skl=R.map(g=>g.imt);FRZ.sklIn=new Map(R.map(g=>[g.imt,g.L.map(x=>x.t.nm)]))}}   // 15.11 Андрей «порядок все равно меняется»: товары внутри склейки тоже на своих местах
+function freeze(){if(S.tab==='tov')FRZ.tov=tovRows().map(x=>x.t.nm);else if(S.tab==='rk')FRZ.rk=rkRows().map(x=>x.r.id+'|'+x.nm);else if(S.tab==='skl'){const R=sklRows();FRZ.skl=R.map(g=>g.imt);FRZ.sklIn=new Map(R.map(g=>[g.imt,g.L.map(x=>x.t.nm)]));FRZ.sklTop=new Map(R.map(g=>[g.imt,g.top.nm]))}}   // 15.11 Андрей «порядок все равно меняется»: товары внутри склейки тоже на своих местах; 25.11 Андрей «при смене срока картинка уходит резко»: фото склейки — тот же товар-лидер, что был на экране
 function tblSt(id){const T0=TBL[id],s=RS.get('tb.'+id,null)||{},all=T0.cols.map(c=>c.k),kn=new Set(s.kn||[]),fx=all[0];
   const ord=(s.ord||[]).filter(k=>all.includes(k));for(const k of all)if(!ord.includes(k))ord.push(k);
   const hid=new Set((s.hid||[]).filter(k=>all.includes(k)));
@@ -3053,7 +3057,7 @@ function sklGroups(){const ix=PI(),G=new Map();
   const out=[];
   for(const g of G.values()){if(g.L.length<2)continue;g.a=sklAgg(g.L.map(x=>x.t),ix);
     const fz=FRZ.skl&&FRZ.sklIn&&FRZ.sklIn.get(g.imt);if(fz){const o=new Map(fz.map((n,k)=>[n,k]));g.L.sort((x,y)=>(o.has(x.t.nm)?o.get(x.t.nm):1e9)-(o.has(y.t.nm)?o.get(y.t.nm):1e9))}else g.L.sort((x,y)=>y.a.or-x.a.or||y.a.s-x.a.s);for(const x of g.L)x.sh=g.a.oq?100*x.a.oq/g.a.oq:null;
-    g.top=g.L.reduce((m,x)=>x.a.or>m.a.or?x:m,g.L[0]).t;if(!fz)g.L=tblSort('skc',g.L);   // 17.11: внутри склейки — своя сортировка (шапка таблицы), фото склейки — товар с наибольшими заказами
+    {const tn=FRZ.sklTop&&FRZ.sklTop.get(g.imt),tr=tn&&g.L.find(x=>x.t.nm===tn);g.top=tr?tr.t:g.L.reduce((m,x)=>x.a.or>m.a.or?x:m,g.L[0]).t}if(!fz)g.L=tblSort('skc',g.L);   // 17.11: внутри склейки — своя сортировка (шапка таблицы), фото склейки — товар с наибольшими заказами; 25.11 Андрей «картинка уходит»: при заморозке — прежний лидер на фото, иначе по заказам срока
     g.nw=g.L.filter(x=>x.w>0).length;g.bez=g.L.filter(x=>!x.a.s).reduce((z,x)=>z+x.a.oq,0);out.push(g)}   // bez — заказы товаров склейки, на которые реклама не тратилась
   return out}
 function sklRows(){let L=sklGroups();if(FRZ.skl){const m=new Map(L.map(g=>[g.imt,g]));return FRZ.skl.map(i=>m.get(i)).filter(Boolean)}
@@ -5321,9 +5325,10 @@ function actBidder(id,nm){if(!need())return;const r=RK[id],e=r.nm[nm]||{},b=e.bd
 
 /* ───────── события ───────── */
 const SEGCB={};
-function onSeg(id,v){if(id==='zcm'||id==='zcp'||id==='zlt'||id==='zmp'){onSeg0(id,v);return}smooth('fade',()=>onSeg0(id,v))}
+const perFade=()=>{const v=$('#view');if(!v||matchMedia('(prefers-reduced-motion: reduce)').matches)return;v.classList.add('perfade');setTimeout(()=>v.classList.remove('perfade'),300)};   // 25.11 Андрей «при смене срока картинка уходит резко»: мягко только цифры, не весь экран
+function onSeg(id,v){if(id==='zcm'||id==='zcp'||id==='zlt'||id==='zmp'||id==='per'){onSeg0(id,v);return}smooth('fade',()=>onSeg0(id,v))}   // 25.11 Андрей «мигает»: срок — без view-transition всего экрана (как переключатели заказов/день)
 function onSeg0(id,v){
-  if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
+  if(id==='per'){const n=/^v[012]$/.test(v)?1:+v,o=v==='v2'?1:v==='v0'?-1:0;if(n===S.per&&o===(S.off||0))return;freeze();S.per=n;S.off=o;S.pnp=null;RS.set('per',n);RS.set('off',o);sync();render(true);perFade();redraw()}   // строки остаются на своих местах (freeze); 17.11 Андрей «при смене срока не все меняется»: выбор «неделя / 2 недели / месяц» панели из листа товара (S.pnp) сбрасывается — цифры панели снова идут за сроком
   else if(id==='view'){S.view=v;RS.set('view',v);unfz();sync();render(true)}
   else if(id==='rkv'){S.rkv=v;RS.set('rkv',v);unfz();render(true)}
   else if(id==='skls'){S.sklInv=(v===S.skls)?!S.sklInv:false;S.skls=v;RS.set('skls',v);unfz();render(true)}   // 17.11 Андрей: повторное нажатие — обратный порядок
