@@ -713,6 +713,153 @@ td.t1 small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes vtOR{to{opacity:0;transform:translateX(26%)}}@keyframes vtIL{from{opacity:0;transform:translateX(-26%)}}
 </style>
 <style>
+/* 27.11 «А/Б» — свой А/Б-тест главного фото (d_ab.js). Телефон прежде всего: карточки, плитки 3:4, крупные кнопки, без таблиц */
+.abnew{height:56px;font-size:17px;border-radius:16px;margin:2px 0 6px;gap:8px}
+.abempty{padding-top:34px}
+.abgh{font:700 14px var(--fd);color:var(--ink2);margin:16px 4px 8px;letter-spacing:-.01em}
+.abgr{display:grid;gap:10px}
+.abgr .abc{margin-bottom:0}
+@media (min-width:900px){.abgr{grid-template-columns:repeat(2,minmax(0,1fr))}.abnew{max-width:420px}}
+.abkab{font-size:12.5px;text-align:center;margin:14px 0 4px}
+.abc{display:flex;gap:12px;width:100%;text-align:left;border:0;cursor:pointer;color:inherit;font:inherit;margin-bottom:10px;padding:12px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh1);min-width:0}
+.abph{flex:none;width:72px;height:96px;border-radius:12px;background:var(--fill) center/cover no-repeat;box-shadow:0 0 0 .5px var(--line)}
+.abm{flex:1;min-width:0;display:grid;gap:5px;align-content:start}
+.abt{display:flex;align-items:center;gap:8px;justify-content:space-between;min-width:0}
+.abt b{font-size:16px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abm small{display:block;font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.abm small.abpl{white-space:normal;color:var(--ink2)}
+.pill.abs{flex:none}
+.pill.abs.g{background:var(--good-soft);color:var(--good)}
+.pill.abs.w{background:var(--warn-soft);color:var(--warn)}
+.pill.abs.r{background:var(--bad-soft);color:var(--bad)}
+.pill.abs.a{background:var(--acc-soft);color:var(--acc)}
+.abbar{height:8px;border-radius:99px;background:var(--fill);overflow:hidden}
+.abbar.sm{height:5px}
+.abbar i{display:block;height:100%;border-radius:inherit;background:var(--acc);transition:width .4s var(--ease)}
+.abbar.g i{background:var(--good)}
+.abbar.w i{background:var(--warn)}
+.ablead{font-size:13px;color:var(--ink2);line-height:1.35}
+.ablead b{color:var(--ink)}
+.aberr{font-size:13px;font-weight:600;line-height:1.35;color:var(--bad);background:var(--bad-soft);border-radius:11px;padding:8px 10px;white-space:normal;overflow-wrap:anywhere;margin-top:2px}
+.aberr.big{font-size:14.5px;padding:11px 12px;margin:4px 0 8px}
+/* лист теста */
+.abhd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px}
+.abrkn{font-size:13px;color:var(--ink3);min-width:0;overflow-wrap:anywhere}
+.abnow b{color:var(--ink)}
+.abpr2,.abcf{background:var(--card2);border-radius:14px;padding:10px 12px;margin-top:10px;display:grid;gap:7px}
+.abcf small,.abpr2 small{font-size:12px;color:var(--ink3)}
+.abcft{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;color:var(--ink2)}
+.abcft b{font-weight:700;color:var(--ink);white-space:nowrap}
+.abcft span b{color:var(--ink)}
+.absg{display:grid;gap:4px;border-radius:14px;padding:10px 12px;margin-top:10px;font-size:13px;line-height:1.35}
+.absg.g{background:var(--good-soft)}
+.absg.g b{color:var(--good)}
+.absg.w{background:var(--warn-soft)}
+.absg.w b{color:var(--warn)}
+.absg span{color:var(--ink2)}
+.absg .btn{margin-top:4px;justify-self:start}
+.abvg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (min-width:560px){.abvg{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.abv{background:var(--card2);border-radius:16px;padding:8px;display:grid;gap:6px;align-content:start;min-width:0}
+.abv.lead{box-shadow:0 0 0 2px var(--good)}
+.abv.ex{opacity:.5}
+.abv .abim{display:block;aspect-ratio:3/4;border-radius:11px;background:var(--fill) center/cover no-repeat}
+.abvh{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-width:0}
+.abvh b{font:700 17px var(--fd);margin-right:2px}
+.abtag{font-size:10.5px;font-weight:700;border-radius:7px;padding:2px 6px;background:var(--fill);color:var(--ink2);white-space:nowrap}
+.abtag.g{background:var(--good-soft);color:var(--good)}
+.abtag.a{background:var(--acc-soft);color:var(--acc)}
+.abkv{display:grid;grid-template-columns:1fr auto;gap:2px 6px;font-size:13px}
+.abkv span{color:var(--ink3)}
+.abkv b{font-weight:650;text-align:right;font-variant-numeric:tabular-nums}
+.abvs{font-size:11px;color:var(--ink3);margin-top:-3px}
+.abv .btn.sm{width:100%;height:36px;font-size:13.5px}
+.abfun{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;background:var(--card2);border-radius:14px;padding:10px 12px;margin-top:10px}
+.abfun small{display:block;font-size:11.5px;color:var(--ink3);font-weight:600}
+.abfun b{font:700 18px var(--fd)}
+.abfun span{flex-basis:100%;font-size:12px;color:var(--ink3)}
+.abacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.abacts .btn{height:50px}
+.abacts .full,.abacts .btn:only-child{grid-column:1/-1}
+.btn.hl{background:var(--good);color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 30%,transparent)}
+.abrf svg{transition:transform .3s}
+.abspin svg{animation:abrot .9s linear infinite}
+@keyframes abrot{to{transform:rotate(360deg)}}
+.abinf{font-size:12px;color:var(--ink3);line-height:1.4;margin:12px 2px 0}
+details.abdt{margin-top:12px;background:var(--card2);border-radius:14px;padding:0 12px}
+details.abdt>summary{min-height:48px;display:flex;align-items:center;font-weight:650;font-size:14.5px;cursor:pointer;list-style:none}
+details.abdt>summary::-webkit-details-marker{display:none}
+details.abdt>summary::after{content:'';margin-left:auto;width:8px;height:8px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(45deg) translate(-2px,-2px);transition:transform .25s}
+details.abdt[open]>summary::after{transform:rotate(-135deg)}
+.ablog ul{list-style:none;margin:0;padding:0 0 8px}
+.ablog li{display:grid;grid-template-columns:auto auto 1fr;gap:4px 8px;align-items:baseline;padding:7px 0;border-top:.5px solid var(--line);font-size:13px}
+.ablog li span{color:var(--ink3)}
+.ablog li small{color:var(--ink2);min-width:0;overflow-wrap:anywhere}
+.abcmp b{white-space:normal;font-size:15.5px;line-height:1.25}
+.abone{display:flex;gap:10px;align-items:center;background:var(--card2);border-radius:14px;padding:8px;margin-top:10px}
+.abone i{flex:none;width:48px;height:64px;border-radius:9px;background:var(--fill) center/cover no-repeat}
+.abone small{display:block;font-size:12.5px;color:var(--ink3)}
+.abtwo{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px}
+.abtwo i{width:96px;height:128px;border-radius:12px;background:var(--fill) center/cover no-repeat;box-shadow:0 0 0 .5px var(--line)}
+.abtwo span{font-size:22px;color:var(--ink3)}
+/* мастер */
+.absteps{display:flex;gap:6px;margin:4px 0 6px}
+.absteps span{flex:1;min-width:0;text-align:center;font-size:12.5px;font-weight:650;color:var(--ink3);padding:8px 2px;border-radius:10px;background:var(--fill2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.absteps span.on{background:var(--acc);color:var(--on-acc)}
+.absteps span.ok{color:var(--good)}
+.absq{font-size:17px;font-weight:600}
+.abpl{display:grid;gap:8px;margin-top:12px}
+.abpi{display:flex;gap:11px;align-items:center;width:100%;min-height:68px;padding:8px 10px;border:0;border-radius:14px;background:var(--card2);text-align:left;color:inherit;font:inherit;cursor:pointer;min-width:0}
+.abpi .tph{width:42px;height:56px}
+.abpi div{min-width:0;flex:1}
+.abpi b{display:block;font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abpi small{display:block;font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abpi.dis{opacity:.6}
+.abpi.sgw{box-shadow:0 0 0 2px var(--good)}
+.abcnt{font-size:13px;color:var(--ink2);margin-top:12px;text-align:center}
+.abtv{display:flex;gap:10px;align-items:center;background:var(--card2);border-radius:14px;padding:8px 10px;margin-top:8px}
+.abtv .tph{width:36px;height:48px}
+.abtv div{min-width:0;flex:1}
+.abtv b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abtv small{display:block;font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abh{font:700 16px var(--fd);margin:18px 2px 8px}
+.abh.sm{font-size:14px}
+.abh .muted{font:500 12.5px var(--ff,inherit)}
+.abrk{display:grid;gap:8px}
+.abrkb{display:flex;gap:11px;align-items:center;width:100%;min-height:58px;padding:9px 12px;border:0;border-radius:14px;background:var(--card2);text-align:left;color:inherit;font:inherit;cursor:pointer;min-width:0}
+.abrkb i{flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--ink3)}
+.abrkb[aria-pressed="true"]{box-shadow:0 0 0 2px var(--acc)}
+.abrkb[aria-pressed="true"] i{box-shadow:inset 0 0 0 7px var(--acc)}
+.abrkb div{min-width:0;flex:1}
+.abrkb b{display:block;font-size:14.5px;overflow-wrap:anywhere}
+.abrkb small{display:block;font-size:12.5px;color:var(--ink3)}
+.abg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:560px){.abg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.abti{position:relative;display:block;aspect-ratio:3/4;border-radius:12px;border:0;padding:0;background:var(--fill) center/cover no-repeat;cursor:pointer;box-shadow:0 0 0 .5px var(--line);overflow:hidden;min-width:0;color:inherit}
+.abti[aria-pressed="true"]{box-shadow:0 0 0 3px var(--acc)}
+.abti.fix{cursor:default;box-shadow:0 0 0 3px var(--good)}
+.abti .abk{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.3);border:2px solid #fff;color:#fff;font-size:13px;font-weight:800;line-height:20px;text-align:center}
+.abti[aria-pressed="true"] .abk{background:var(--acc)}
+.abti.fix .abk{background:var(--good)}
+.abti .abl{position:absolute;left:4px;right:4px;bottom:4px;font-size:10.5px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;border-radius:7px;padding:2px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.abti .abfn{position:absolute;inset:0;display:grid;place-items:center;padding:8px 6px 26px;font-size:11px;color:var(--ink3);overflow-wrap:anywhere;text-align:center}
+.abupb{margin-top:12px;position:relative;overflow:hidden;height:52px}
+.abupb input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.abupb.busy{opacity:.7;pointer-events:none}
+.abbig{height:54px!important;font-size:17px!important}
+.abload{margin-top:16px}
+.abstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;margin-top:10px;scrollbar-width:none}
+.abstrip>div{flex:none;width:64px;text-align:center;min-width:0}
+.abstrip i{display:block;width:64px;height:85px;border-radius:10px;background:var(--fill) center/cover no-repeat;box-shadow:0 0 0 .5px var(--line)}
+.abstrip b{display:block;font:700 14px var(--fd);margin-top:3px}
+.abstrip small{display:block;font-size:10.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abset .fld{margin:0 0 12px}
+.abdef{font-size:12px;margin:-4px 2px 12px}
+.abwait{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--acc);background:var(--acc-soft);border-radius:10px;padding:6px 9px;line-height:1.3}
+.abwait .sp{flex:none;width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:abrot .8s linear infinite}
+.abwait.big{margin-top:8px;padding:10px 12px;font-size:14px}
+.abwait.big small{display:block;font-size:12px;font-weight:500;color:var(--ink2)}
+
 /* 18.11 «Когда работает реклама» (d_chasy.js): вывод фразой и таблица по частям дня */
 .chv{font-size:15px;line-height:1.4;margin:2px 4px 10px;color:var(--ink)}
 .chv b.good,.chq .pr.good{color:var(--good)}.chv b.bad,.chq .pr.bad{color:var(--bad)}
@@ -1971,6 +2118,8 @@ body.ptrout #view{opacity:.35;transition:opacity .16s ease}
   <button type="button" data-tab="ceny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M10 7.5v9M10 7.5h3a2.6 2.6 0 0 1 0 5.2h-4.5M8.5 14.8h5"/></svg><span>Цены</span></button>
   <button type="button" data-tab="ak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5z"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/></svg><span>Акции</span></button>
   <button type="button" data-tab="bl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1L4.5 10l5.2-.8z"/></svg><span>Баллы</span></button>
+  <!-- 27.11 «А/Б» — свой А/Б-тест главного фото карточки ВБ вместо Марплы (d_ab.js, договор со сторожем — AB_KONTRAKT.md) -->
+  <button type="button" data-tab="ab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="8.5" height="14" rx="2.2"/><rect x="13" y="5" width="8.5" height="14" rx="2.2"/><path d="m4.5 16 2.2-3 2.3 3M15 16l2-2.6 2.5 2.6"/></svg><span>А/Б</span></button>
   <button type="button" data-tab="esh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="8" cy="17" r="2" fill="var(--bg)"/></svg><span>Ещё</span></button>
   <!-- 14.11 Андрей: «поиск… не надо раздел целый — вот можно кнопкой справа в шапке от периодов»: седьмой кнопки «Поиск» здесь больше нет (с 06:40 седьмой раздел — «Цены»);
        лупа #fsb стоит в строке #sub под шапкой (её ставит sync() в d_views.js), по нажатию — тот же лист с полем и списком с картинками (openFind) -->
@@ -2536,7 +2685,7 @@ function sync(){
 /* 18.11 Андрей «сами принципы другие может» (сравнил с приложением ВБ): разделы лежат готовыми, как экраны в приложении. Переход только подставляет готовый раздел.
    Ушли из раздела — он остаётся целиком; остальные собираются заранее, когда телефон свободен. Любая обычная перерисовка (новые данные, срок, кабинет, сортировка) сбрасывает запас,
    а после подстановки раздел в свободную минуту сверяется со свежим расчётом: разошёлся — перерисовывается. Устаревшие цифры так не задержатся. */
-const VBODY=()=>({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,esh:vEsh}[S.tab]||vTov)();
+const VBODY=()=>({tov:vTov,rk:vRk,skl:vSkl,ceny:vCeny,bl:vBl,ak:vAk,ab:vAb,esh:vEsh}[S.tab]||vTov)();
 const VC=new Map();let VCUR=null,VGO=false,VWT=0,VCT=0;
 const vcSig=()=>{const{tab,q,...r}=S;return JSON.stringify(r,(k,v)=>v instanceof Set||v instanceof Map?[...v]:v)};
 const vcOk=()=>!!D&&!S.q&&!Object.keys(FRZ).length;
@@ -3167,7 +3316,7 @@ function vBl(){const b=K.bally;
    внутри заказы товара, шт); фразы — одна таблица прямо в кампании (частота, траты, заказы, место, выбор нескольких, исключить / вернуть,
    снять место по нажатию); последние правки сразу в листе; заметки одним списком, готовая заметка сохраняется нажатием ───────── */
 /* 14.11 Андрей 06:40: «раздел цены показать по каждому по панели данные» — седьмой раздел «Цены» (vCeny, d_views.js); порядок внизу: Товары, Кампании, Склейки, Цены, Акции, Баллы, Ещё */
-const TABS=['tov','rk','skl','ceny','ak','bl','esh'];
+const TABS=['tov','rk','skl','ceny','ak','bl','ab','esh'];   // 27.11: «А/Б» — свой А/Б-тест главного фото (d_ab.js)
 const LITE=document.documentElement.dataset.lite==='1';   // компьютер без видеокарты (ставит скрипт в шапке) — без переходов и без движения сцены
 if(!TABS.includes(S.tab))S.tab='tov';
 S.rkf={f:RS.get('rkf','w'),sort:RS.get('rks','s'),zd:+RS.get('zasd',5)||5,zl:+RS.get('zasl',100)||100};S.rkv=RS.get('rkv','table');S.skls=RS.get('skls','s');S.sklb=RS.get('sklb','');S.blf='on';S.chgOpen='';S.kw.sort='f';S.ist.k='all';S.ist.cid=0;
@@ -3185,7 +3334,7 @@ function navBack(){if(SHS.length){back();return true}return false}
 /* темы. «Космос 3D» — та же сцена, что в «Панели» (panel/kosmos/scene.js — Земля, Луна и небо по картам NASA), грузится только при этой теме.
    «Космос» — прежний, обычный: звёздное небо картинкой и градиент, как в Юнитке и Склейках, без 3D (13.11 Андрей: «добавь ещё обычный наш космос») */
 const THL=[['auto','Как в системе','Обычные'],['light','Светлая','Обычные'],['dark','Тёмная','Обычные'],['kosmos','Космос','Космос','space'],['space','Космос 3D','Космос']];
-const K3MAP={tov:'sum',rk:'cat',skl:'skl',ceny:'spp',bl:'prod',ak:'spp',esh:'year'};
+const K3MAP={tov:'sum',rk:'cat',skl:'skl',ceny:'spp',bl:'prod',ak:'spp',ab:'cat',esh:'year'};
 const K3=(()=>{let st=0,want=false;const R=document.documentElement;   // st: 0 не грузили, 1 грузится, 2 есть, 3 не вышло
   const live=()=>st===2&&want&&!!window.KOSMOS&&KOSMOS.state().on;
   const run=()=>{if(!want||!window.KOSMOS)return;
@@ -4144,6 +4293,7 @@ function doAct(a,ds){const rk=(ds.rk||'').split('|'),kk=(ds.k||'').split('|'),fk
   else if(a==='unlock')unlock();else if(a==='lockupr'){UPR=null;RS.del('upr');if(ES){ES.close();ES=null}render(true);toast('Управление на этом устройстве выключено')}
   else if(a==='ref-read'){closeAll();$('#refBtn').classList.add('spin');reload().then(()=>toast('Показаны данные на '+D.at.slice(11,16)+' МСК')).catch(e=>toast(e.message)).then(()=>$('#refBtn').classList.remove('spin'))}
   else if(a==='rkref')actRkRef(+rk[0],rk[1]);else if(a==='ref-fast')actRefresh('fast');else if(a==='ref-full')actRefresh('full');else if(a==='ref-mesta')actRefresh('mesta');
+  else if(/^ab/.test(a))abAct(a,ds);   // 27.11 раздел «А/Б» (d_ab.js)
   else if(a==='nstsave'){if(!need())return;const n=nst();$$('[data-nst]').forEach(b=>{const k=b.dataset.nst,v=b.getAttribute('aria-checked')==='true';if(k==='on')n.on=v;else n[k].on=v});
     $$('[data-nstv]').forEach(i=>{const [k,f]=i.dataset.nstv.split('.'),v=parseFloat(i.value);if(isFinite(v))n[k][f]=v});
     sheet(()=>({t:'Сохранить настройки уведомлений?',s:'',h:`<div class="note">Сервис начнёт присылать по новым правилам со следующей проверки.</div>${RUNBOX('Сохранить')}`,after:()=>{$('#okBtn').onclick=()=>run({k:'nst',nst:n})}}),true)}}
@@ -4598,6 +4748,273 @@ function spaceDeco(on,deco){
 }
 function kosmosOn(t){const on=t==='kosmos'||t==='space';spaceDeco(on,t==='kosmos');if(on){syncSound();if(!soundOff()&&spAud&&spAud.paused)spMusic(true)}}
 
+/* ───────── «А/Б» — свой А/Б-тест главного фото карточки ВБ вместо Марплы (27.11.2026, PROMT_AB_TEST.md разделы 3–4) ─────────
+   Договор со сторожем — reklama_wb\AB_KONTRAKT.md: данные data.json → "ab" {"tests":[TEST]}, команды abfoto / abup / abstart / abpause / abgo /
+   abstop / abwin / abexcl / abref, ответ сторожа patch {"ab_test": TEST} — страница подменяет тест сразу (abPut из applyPatch).
+   Раздел: список тестов карточками, крупная «Новый тест». Мастер — три листа подряд (товар → кампания и фото → настройки и запуск), «назад» —
+   на прошлый шаг. Лист теста — плитки вариантов, уверенность, подсказки, кнопки; всё, что меняет карточку, — через лист «было → стало» (run),
+   «⟳ Обновить» — только чтение (quick). Фото с телефона: сжать до 1500 px, вложением в ntfy (тема команд + «-f»), sha256 → abup */
+const AB_ST={running:['идёт','g'],paused:['пауза','w'],done:['готово','a'],stopped:['остановлен',''],error:['сбой','r'],win:['победитель поставлен','g']};
+const AB_DEF={pokazy:10000,krug:1000,minut:50};
+const abAll=()=>D&&D.ab&&Array.isArray(D.ab.tests)?D.ab.tests:[];
+const abList=()=>abAll().filter(x=>x&&(!x.kab||x.kab===S.kab));
+const abGet=id=>abAll().find(x=>x&&String(x.id)===String(id))||null;
+const abLive=x=>!!x&&(x.status==='running'||x.status==='paused');
+const abVis=x=>((x&&x.variants)||[]).filter(v=>!v.excl);
+const abVar=(x,id)=>((x&&x.variants)||[]).find(v=>v.id===id)||null;
+const abBaseV=x=>((x&&x.variants)||[]).find(v=>v.base)||((x&&x.variants)||[])[0]||null;
+const abSet=x=>Object.assign({},AB_DEF,(x&&x.set)||{});
+/* превью: большие фото витрины ВБ — мелким размером (плитки 3:4, телефону хватает) */
+const abThumb=u=>String(u||'').replace(/\/images\/(big|hq|c516x688)\//,'/images/c246x328/');
+const abBg=u=>u?` style="background-image:url('${esc(abThumb(u))}')"`:'';
+const abCtr=v=>!v||!v.v?null:100*(v.ctr!=null?v.ctr:(v.c||0)/v.v);
+const abLbl=v=>v?esc(v.label||v.id)+(v.base?' · исходное':''):'—';
+const abTm=ts=>{if(!ts)return '';const s=new Date((+ts+3*3600)*1000).toISOString();return s.slice(8,10)+'.'+s.slice(5,7)+' '+s.slice(11,16)};
+const abNow=()=>Math.floor(Date.now()/1000);
+const abDur=s=>{const h=Math.round(s/3600);return h<1?'меньше часа':h<24?'≈ '+h+' ч':'≈ '+Math.floor(h/24)+' дн'+(h%24?' '+h%24+' ч':'')};
+const abWord=(n,a,b,c)=>{n=Math.abs(n)%100;const k=n%10;return n>10&&n<20?c:k===1?a:k>=2&&k<=4?b:c};
+/* фото, которое сейчас главное (во время теста — текущий вариант, иначе исходное или победитель) */
+const abImg=x=>{const v=abVar(x,x.cur)||abVar(x,x.winner)||abBaseV(x);return v?v.img:''};
+const abTov=x=>TOV[x.nm]||null;
+const abArt=x=>esc(x.art||(abTov(x)||{}).art||x.nm);
+const abName=x=>esc(x.name||(abTov(x)||{}).tt||'');
+
+/* сколько показов набрано из нужного и сколько примерно осталось (по скорости с начала теста) */
+function abProg(x){const P=abSet(x).pokazy,L=abVis(x);let got=0;for(const v of L)got+=Math.min(P,v.v||0);const need=P*L.length;
+  let left='';const el=(x.upd||abNow())-(x.started||0);if(x.status==='running'&&got>0&&got<need&&el>600)left=abDur((need-got)*el/got);
+  return {got,need,p:need?Math.min(1,got/need):0,left}}
+function abConfH(x,big){const c=x.conf,L=abVar(x,x.leader);
+  if(c==null||!L)return `<div class="abcf"><div class="abcft"><span>Насколько уверены</span><b class="muted">пока рано</b></div><div class="abbar"><i style="width:0"></i></div>${big?'<small>Нужно больше показов — тогда станет видно, какое фото открывают чаще.</small>':''}</div>`;
+  const p=Math.round(100*c),k=c>=.95?'g':c>=.8?'w':'';
+  const tx=c>=.95?'лидер лучше уверенно':c>=.8?'скорее лучше, ждём ещё показов':'разница пока может быть случайной';
+  return `<div class="abcf"><div class="abcft"><span>Насколько уверены, что <b>${esc(L.label||L.id)}</b> лучше</span><b class="${k==='g'?'good':''}">${p}%</b></div><div class="abbar ${k}"><i style="width:${p}%"></i></div>${big?`<small>${tx}</small>`:''}</div>`}
+
+/* ── раздел ── */
+function vAb(){const L=abList(),oth=abAll().length-L.length;
+  let h=`<button class="btn abnew press" type="button" data-act="abnew"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Новый тест</button>`;
+  if(!L.length)return h+`<div class="empty abempty"><b>Тестов пока нет</b>Нажмите «Новый тест»: выберите товар, его поисковую кампанию и 2–10 фото. Сервис сам будет по очереди ставить фото главным и считать, какое чаще открывают.${oth?`<br><br>В другом кабинете тестов: ${oth}.`:''}</div>`;
+  const G=[['Нужно решение',L.filter(x=>x.status==='done'||x.status==='error')],['Идут',L.filter(abLive)],['Завершённые за 30 дней',L.filter(x=>x.status==='stopped'||x.status==='win')]];
+  for(const [t,a] of G)if(a.length)h+=`<div class="abgh">${t} · ${a.length}</div><div class="abgr">`+a.map(abCard).join('')+'</div>';
+  if(oth)h+=`<div class="muted abkab">В другом кабинете тестов: ${oth}</div>`;
+  return h}
+function abCard(x){const st=AB_ST[x.status]||[x.status||'—',''],pr=abProg(x),L=abVar(x,x.leader),W=abVar(x,x.winner),c=x.conf;
+  const rk=x.rk||(RK[x.cid]||{}).name||'';
+  let line='';
+  if(x.status==='win'&&W)line=`<div class="ablead">Победитель <b>${esc(W.label||W.id)}</b>${abCtr(W)!=null?' · CTR '+pc(abCtr(W)):''}</div>`;
+  else if(L)line=`<div class="ablead">Лидер <b>${esc(L.label||L.id)}</b>${abCtr(L)!=null?' · CTR '+pc(abCtr(L)):''}${c!=null?' · уверенность '+Math.round(100*c)+'%':''}</div>`+(c!=null?`<div class="abbar sm ${c>=.95?'g':c>=.8?'w':''}"><i style="width:${Math.round(100*c)}%"></i></div>`:'');
+  else line='<div class="ablead muted">Лидера пока нет — мало показов</div>';
+  const pl=x.status==='done'?'все фото набрали показы — выберите победителя':f0(pr.got)+' из '+f0(pr.need)+' показов'+(pr.left?' · осталось '+pr.left:'');
+  return `<button class="abc press" type="button" data-act="abopen" data-t="${esc(x.id)}"><i class="abph"${abBg(abImg(x))}></i><div class="abm">
+    <div class="abt"><b>${abArt(x)}</b><span class="pill abs ${st[1]}">${st[0]}</span></div>
+    ${abName(x)?`<small>${abName(x)}</small>`:''}${rk?`<small>РК: ${esc(rk)}</small>`:''}
+    ${abLive(x)||x.status==='done'?`<div class="abbar"><i style="width:${Math.round(100*pr.p)}%"></i></div><small class="abpl">${pl}</small>`:''}
+    ${x.wait?'<div class="abwait"><span class="sp"></span>ставлю фото в карточку… до нескольких минут</div>':''}${line}${x.status==='error'?`<div class="aberr">${esc(x.err||'Сбой — тест остановлен, исходное фото возвращено')}</div>`:''}</div></button>`}
+
+/* ── лист теста ── */
+function abOpen(id,ctx){const t=abGet(id);if(!t)return;if(typeof shMark==='function')shMark('ab',id);
+  const L=ctx||abList().map(x=>String(x.id)),i=L.indexOf(String(id));
+  const fn=()=>abBody(id);fn.abT=String(id);
+  sheet(fn,false,i>=0&&L.length>1?{i,n:L.length,to:j=>abOpen(L[j],L)}:null)}
+function abBody(id){const x=abGet(id);if(!x)return {t:'А/Б-тест',s:'',h:'<div class="empty"><b>Тест не найден</b>Его уже нет в данных — закройте лист.</div>'};
+  const st=AB_ST[x.status]||[x.status||'—',''],set=abSet(x),pr=abProg(x),V=x.variants||[],live=abLive(x),tot=V.reduce((s,v)=>s+(v.v||0),0)||1;
+  const rk=x.rk||(RK[x.cid]||{}).name||'',canX=live&&abVis(x).length>2,sg=x.suggest||{};
+  let h='';
+  if(x.status==='error')h+=`<div class="aberr big">${esc(x.err||'Сбой — тест остановлен, исходное фото возвращено')}</div>`;
+  h+=`<div class="abhd"><span class="pill abs ${st[1]}">${st[0]}</span>${rk?`<span class="abrkn">РК: ${esc(rk)}</span>`:''}</div>`;
+  if(x.wait)h+='<div class="abwait big"><span class="sp"></span><div><b>Ставлю фото в карточку…</b><small>ВБ принимает его до нескольких минут — цифры пойдут, когда встанет</small></div></div>';
+  if(x.status==='running'&&x.cur){const v=abVar(x,x.cur),mn=x.krug_t?Math.max(0,Math.round((abNow()-x.krug_t)/60)):null;
+    h+=`<div class="note abnow">Сейчас главное — <b>${abLbl(v)}</b>. Круг: ${f0(x.krug_v||0)} из ${f0(set.krug)} показов${mn!=null?', идёт '+mn+' мин из '+set.minut:''}.</div>`}
+  else if(x.status==='paused')h+='<div class="note abnow">На паузе главным стоит исходное фото, показы не считаются.</div>';
+  else if(x.status==='done')h+='<div class="note abnow">Все фото набрали показы. Главным сейчас стоит исходное — выберите победителя или оставьте как есть.</div>';
+  if(live||x.status==='done')h+=`<div class="abpr2"><div class="abcft"><span>Показы</span><b>${f0(pr.got)} из ${f0(pr.need)}</b></div><div class="abbar"><i style="width:${Math.round(100*pr.p)}%"></i></div>${pr.left?`<small>осталось ${pr.left} (примерно, по скорости с начала)</small>`:''}</div>`;
+  h+=abConfH(x,true);
+  if(live||x.status==='done'){
+    if(sg.win){const v=abVar(x,sg.win);if(v)h+=`<div class="absg g"><b>${esc(v.label||v.id)} уверенно лучше</b><span>Можно ставить победителем — главное фото станет этим.</span><button class="btn sm press" type="button" data-act="abwin" data-t="${esc(x.id)}" data-v="${esc(v.id)}">Поставить ${esc(v.label||v.id)}</button></div>`}
+    if(sg.excl&&live){const v=abVar(x,sg.excl);if(v&&!v.excl)h+=`<div class="absg w"><b>${esc(v.label||v.id)} явно хуже</b><span>Исключите, чтобы не тратить на него показы.</span><button class="btn sm gray press" type="button" data-act="abexcl" data-t="${esc(x.id)}" data-v="${esc(v.id)}">Исключить ${esc(v.label||v.id)}</button></div>`}}
+  h+='<div class="abvg">'+V.map(v=>{const lead=v.id===x.leader&&!v.excl,ctr=abCtr(v),sh=(v.v||0)/tot,tags=[];
+      if(v.id===x.winner)tags.push('<span class="abtag g">победитель</span>');else if(lead)tags.push('<span class="abtag g">лидер</span>');
+      if(v.id===x.cur&&x.status!=='error'&&v.id!==x.winner)tags.push('<span class="abtag a">сейчас главное</span>');
+      if(v.excl)tags.push('<span class="abtag">исключён</span>');else if(v.done)tags.push('<span class="abtag">набрал</span>');
+      return `<div class="abv${lead?' lead':''}${v.excl?' ex':''}"><i class="abim"${abBg(v.img)}></i><div class="abvh"><b>${esc(v.label||v.id)}</b>${v.base?'<span class="abtag">исходное</span>':''}${tags.join('')}</div>
+        <div class="abkv"><span>Показы</span><b>${f0(v.v||0)}</b><span>Клики</span><b>${f0(v.c||0)}</b><span>CTR</span><b class="${lead?'good':''}">${ctr==null?'—':pc(ctr)}</b><span>Кругов</span><b>${f0(v.krugi||0)}</b></div>
+        <div class="abbar sm" title="Доля показов"><i style="width:${Math.round(100*sh)}%"></i></div><small class="abvs">доля показов ${Math.round(100*sh)}%</small>
+        ${canX&&!v.base&&!v.excl?`<button class="btn sm gray press" type="button" data-act="abexcl" data-t="${esc(x.id)}" data-v="${esc(v.id)}">Исключить</button>`:''}</div>`}).join('')+'</div>';
+  const fu=x.fun||{};
+  if(fu.kor!=null||fu.zak!=null)h+=`<div class="abfun"><div><small>Корзины</small><b>${f0(fu.kor||0)}</b></div><div><small>Заказы</small><b>${f0(fu.zak||0)}</b></div><span>по карточке, общие${fu.s?', с '+(typeof fu.s==='number'?abTm(fu.s).slice(0,5):dm(String(fu.s).slice(0,10))):''} — на варианты не делятся</span></div>`;
+  const B=[],tid=esc(x.id);
+  if(x.status==='running')B.push(`<button class="btn gray press" type="button" data-act="abpause" data-t="${tid}">Пауза</button>`);
+  if(x.status==='paused')B.push(`<button class="btn press" type="button" data-act="abgo" data-t="${tid}">Продолжить</button>`);
+  if(live)B.push(`<button class="btn red press" type="button" data-act="abstop" data-t="${tid}">Стоп</button>`);
+  if(x.status==='error')B.push(`<button class="btn red press full" type="button" data-act="abstop" data-t="${tid}">Вернуть исходные фото</button>`);
+  if(live||x.status==='done')B.push(`<button class="btn press full${sg.win||x.status==='done'?' hl':''}" type="button" data-act="abwin" data-t="${tid}">Поставить победителя</button>`);
+  if(live||x.status==='done'||x.status==='error')B.push(`<button class="btn gray press full abrf" type="button" data-act="abref" data-t="${tid}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Обновить</button>`);
+  if(B.length)h+='<div class="abacts">'+B.join('')+'</div>';
+  h+=`<div class="abinf">По ${f0(set.pokazy)} показов на фото, смена каждые ${f0(set.krug)} показов или ${set.minut} мин.${x.started?' Запущен '+abTm(x.started)+'.':''}${x.ended?' Закончен '+abTm(x.ended)+'.':''}${x.upd?' Пересчитан '+abTm(x.upd)+'.':''}</div>`;
+  const lg=(x.log||[]).slice().sort((a,b)=>(b.t||0)-(a.t||0));
+  if(lg.length)h+=`<details class="abdt ablog"><summary>Журнал смен · ${lg.length}</summary><ul>${lg.map(e=>{const v=abVar(x,e.v);return `<li><span class="num">${abTm(e.t)}</span><b>${v?esc(v.label||v.id):esc(e.v||'—')}</b><small>${e.pok!=null?f0(e.pok)+' пок.':''}${e.kl!=null?' · '+f0(e.kl)+' кл.':''}${e.note?' · '+esc(e.note):''}</small></li>`}).join('')}</ul></details>`;
+  return {t:abArt(x),s:abName(x),ph:`<span class="shph"><span class="ph"${abBg(abImg(x))}></span></span>`,h}}
+
+/* ответ сторожа {"ab_test": TEST} — подменить тест в данных страницы (новый — первым) */
+/* 27.11 сторож (AB_KONTRAKT «Изменения сторожа»): в patch img варианта может быть null, а log — последние 5 записей (ntfy режет длинный ответ):
+   img берём из прежних данных теста, журнал — прежний плюс новые записи (без повторов, новые сверху, не больше 30) */
+function abPut(t){if(!t||t.id==null||!D)return;D.ab=D.ab&&Array.isArray(D.ab.tests)?D.ab:{tests:[]};const L=D.ab.tests,i=L.findIndex(x=>x&&String(x.id)===String(t.id)),o=i>=0?L[i]:null;
+  if(o){for(const v of t.variants||[])if(!v.img){const p=abVar(o,v.id);if(p&&p.img)v.img=p.img}
+    const ky=e=>[e.t,e.v,e.note].join('|'),seen=new Set(),lg=[];for(const e of (t.log||[]).concat(o.log||[]))if(e&&!seen.has(ky(e))){seen.add(ky(e));lg.push(e)}
+    t.log=lg.sort((a,b)=>(b.t||0)-(a.t||0)).slice(0,30)}
+  if(i>=0)L[i]=t;else L.unshift(t)}
+
+/* ── мастер «Новый тест» ── */
+let ABW=null;
+const abSteps=n=>'<div class="absteps">'+['Товар','Фото','Запуск'].map((t,i)=>`<span class="${i+1===n?'on':i+1<n?'ok':''}">${i+1<n?'✓ ':i+1+' · '}${t}</span>`).join('')+'</div>';
+const abSearch=t=>t.rk.filter(id=>RK[id]&&(RK[id].pl||[]).some(p=>p==='search'||p==='combined'));
+function abNew(){if(!need())return;ABW={q:'',nm:0,f:null,ferr:'',cid:0,sel:[],up:[],set:Object.assign({},AB_DEF),upBusy:'',upErr:''};sheet(abW1)}
+function abProds(){const q=(ABW.q||'').trim().toLowerCase(),busy=new Set(abAll().filter(x=>abLive(x)&&(!x.kab||x.kab===S.kab)).map(x=>String(x.nm)));
+  let L=K.tov.map(t=>({t,s:abSearch(t),w:abSearch(t).filter(id=>rkSt(RK[id]).w).length}));
+  if(q)L=L.filter(o=>String(o.t.art).toLowerCase().includes(q)||String(o.t.tt||'').toLowerCase().includes(q)||String(o.t.nm).includes(q));
+  L.sort((a,b)=>(b.w>0)-(a.w>0)||(b.s.length>0)-(a.s.length>0)||String(a.t.art).localeCompare(String(b.t.art),'ru'));
+  const n=L.length;L=L.slice(0,40);
+  return (L.length?L.map(({t,s,w})=>{const b=busy.has(String(t.nm));return `<button class="abpi press${b||!s.length?' dis':''}" type="button" data-act="abpick" data-n="${t.nm}"><i class="tph"${foto(t)}></i><div><b>${esc(t.art)}</b><small>${esc(t.tt||'')}</small><small>${b?'<span class="bad">уже на тесте</span>':s.length?(w?'поисковая РК работает':'поисковая РК на паузе'):'нет поисковой РК'}</small></div></button>`}).join(''):'<div class="empty">Ничего не нашлось. Попробуйте часть артикула или названия.</div>')
+    +(n>40?`<div class="muted abcnt">Показаны первые 40 из ${n} — уточните поиск</div>`:'')}
+function abW1(){return {t:'Новый тест',s:'шаг 1 из 3 · товар',h:abSteps(1)+`<label class="fld"><span>Артикул или название</span><input class="inp absq" id="abq" type="search" autocomplete="off" enterkeyhint="search" placeholder="Например, Сетка" value="${esc(ABW.q)}"></label><div class="abpl" id="abpl">${abProds()}</div>`}}
+function abPick(nm){const t=TOV[nm];if(!t)return;const on=abAll().find(x=>abLive(x)&&String(x.nm)===String(nm)&&(!x.kab||x.kab===S.kab));
+  if(on){toast('У этого товара тест уже идёт — открываю его');abOpen(on.id);return}
+  if(!abSearch(t).length){toast('У товара нет поисковой кампании — тест не на чем крутить');return}
+  Object.assign(ABW,{nm:+nm,f:null,ferr:'',cid:0,sel:[],up:[],upErr:'',upBusy:''});sheet(abW2);abFoto()}
+async function abFoto(){const nm=ABW.nm;ABW.f=null;ABW.ferr='';
+  try{const r=await quick({k:'abfoto',kab:S.kab,nm},null,90000);if(!ABW||ABW.nm!==nm)return;const f=r.patch&&r.patch.abfoto;
+    if(!f)throw new Error('Сервис не прислал фото товара');ABW.f=f;const R=f.rk||[];if(R.length===1)ABW.cid=+R[0].cid}
+  catch(e){if(!ABW||ABW.nm!==nm)return;ABW.ferr=e.message||'Не получилось прочитать фото'}
+  abRedraw(abW2)}
+const abRedraw=fn=>{const u=SHS[SHS.length-1];if(u&&u.fn===fn)redraw()};
+const abRkSt=s=>+s===9?'идёт':+s===11?'на паузе':+s===4?'готова к запуску':'статус '+esc(s);
+const abNSel=()=>ABW.sel.length;
+function abW2(){const t=TOV[ABW.nm]||{},f=ABW.f;let h=abSteps(2)+`<div class="abtv"><i class="tph"${foto(t)}></i><div><b>${esc(t.art||'')}</b><small>${esc(t.tt||'')}</small></div></div>`;
+  if(ABW.ferr)return {t:'Новый тест',s:'шаг 2 из 3 · кампания и фото',h:h+`<div class="aberr big">${esc(ABW.ferr)}</div><div class="abacts"><button class="btn press full" type="button" data-act="abfr">Попробовать ещё раз</button></div>`};
+  if(!f)return {t:'Новый тест',s:'шаг 2 из 3 · кампания и фото',h:h+'<div class="prog abload"><span class="sp"></span><div class="pgt"><b>Читаю фото и кампании товара…</b><small>обычно несколько секунд</small></div></div>'};
+  const R=f.rk||[],G=f.gal||[],sets=(f.sets||[]).filter(s=>s&&(s.files||[]).length);
+  h+='<div class="abh">Кампания</div>';
+  if(!R.length)h+='<div class="note w">У товара нет поисковой кампании — тест не на чем крутить. Создайте или запустите поисковую кампанию и вернитесь.</div>';
+  else h+='<div class="abrk">'+R.map(r=>`<button class="abrkb press" type="button" data-act="abrk" data-c="${+r.cid}" aria-pressed="${+r.cid===+ABW.cid}"><i></i><div><b>${esc(r.name||'Кампания '+r.cid)}</b><small>${abRkSt(r.st)}</small></div></button>`).join('')+'</div>';
+  h+=`<div class="abh">Фото <span class="muted">· выбрано ${abNSel()} к исходному, можно до 9</span></div>`;
+  h+='<div class="abg">'+(G.length?`<div class="abti fix" aria-pressed="true"${abBg(G[0])}><span class="abk">✓</span><span class="abl">A · сейчас главное</span></div>`:'')
+    +G.slice(1).map((u,i)=>{const k='g:'+(i+2),on=ABW.sel.includes(k);return `<button class="abti press" type="button" data-act="absel" data-k="${k}" aria-pressed="${on}"${abBg(u)}><span class="abk">${on?'✓':''}</span><span class="abl">фото ${i+2}</span></button>`}).join('')
+    +ABW.up.map(u=>{const k='u:'+u.f,on=ABW.sel.includes(k);return `<button class="abti press" type="button" data-act="absel" data-k="${esc(k)}" aria-pressed="${on}"${u.prev?` style="background-image:url('${esc(u.prev)}')"`:''}><span class="abk">${on?'✓':''}</span><span class="abl">с телефона</span></button>`}).join('')+'</div>';
+  if(f.gn>G.length)h+=`<div class="muted abcnt abgn">Ещё ${f.gn-G.length} ${abWord(f.gn-G.length,'фото','фото','фото')} в карточке не показаны</div>`;
+  if(!G.length)h+='<div class="note w">Сервис не прислал фото карточки — исходное фото станет вариантом A само.</div>';
+  h+=`<label class="btn gray abupb press${ABW.upBusy?' busy':''}"><input type="file" id="abfile" accept="image/*" multiple${ABW.upBusy?' disabled':''}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${ABW.upBusy?esc(ABW.upBusy):'Загрузить с телефона'}</label>`;
+  if(ABW.upErr)h+=`<div class="aberr">${esc(ABW.upErr)}</div>`;
+  for(const s of sets)h+=`<div class="abh sm">Папка 7-ab: ${esc(s.name)}</div><div class="abg">`+s.files.map(fl=>{const k='s:'+s.name+'|'+fl.f,on=ABW.sel.includes(k);
+      return `<button class="abti press" type="button" data-act="absel" data-k="${esc(k)}" aria-pressed="${on}"${abBg(fl.prev)}>${fl.prev?'':`<span class="abfn">${esc(fl.f)}</span>`}<span class="abk">${on?'✓':''}</span><span class="abl">${esc(fl.f)}</span></button>`}).join('')+'</div>';
+  const ok=R.length&&ABW.cid&&abNSel()>=1&&!ABW.upBusy;
+  h+=`<div class="abcnt">${!R.length?'':!ABW.cid?'Выберите кампанию.':abNSel()?'Вариантов в тесте: '+(abNSel()+1)+' (A и ещё '+abNSel()+').':'Выберите хотя бы одно фото к исходному.'}</div>`;
+  h+=`<div class="abacts"><button class="btn press full abbig" type="button" data-act="abw3"${ok?'':' disabled'}>Дальше</button></div>`;
+  return {t:'Новый тест',s:'шаг 2 из 3 · кампания и фото',h}}
+/* выбранные фото по порядку: B, C, … (A — исходное) */
+function abChosen(){const f=ABW.f||{},G=f.gal||[],L=[];
+  for(const k of ABW.sel){if(k.startsWith('g:')){const n=+k.slice(2);L.push({src:{src:'gal',n},img:G[n-1]||'',t:'фото '+n})}
+    else if(k.startsWith('u:')){const u=ABW.up.find(z=>'u:'+z.f===k);if(u)L.push({src:{src:'up',f:u.f},img:u.prev||'',t:'с телефона',loc:1})}
+    else if(k.startsWith('s:')){const [sn,...fn]=k.slice(2).split('|'),fl=fn.join('|'),s=(f.sets||[]).find(z=>z.name===sn),x=s&&(s.files||[]).find(z=>z.f===fl);L.push({src:{src:'set',set:sn,f:fl},img:(x&&x.prev)||'',t:fl})}}
+  return L}
+const abLet=i=>'ABCDEFGHIJ'[i]||String(i+1);
+function abStrip(){const f=ABW.f||{},G=f.gal||[];return '<div class="abstrip">'+[{img:G[0]||'',t:'исходное'}].concat(abChosen()).map((v,i)=>`<div><i${v.loc?` style="background-image:url('${esc(v.img)}')"`:abBg(v.img)}></i><b>${abLet(i)}</b><small>${esc(v.t)}</small></div>`).join('')+'</div>'}
+function abW3(){const t=TOV[ABW.nm]||{},r=((ABW.f||{}).rk||[]).find(z=>+z.cid===+ABW.cid)||{},s=ABW.set,n=abNSel()+1;
+  return {t:'Новый тест',s:'шаг 3 из 3 · запуск',h:abSteps(3)+`<div class="abtv"><i class="tph"${foto(t)}></i><div><b>${esc(t.art||'')}</b><small>РК: ${esc(r.name||ABW.cid)}</small></div></div>`+abStrip()
+    +`<div class="note">${n} ${abWord(n,'фото','фото','фото')} по кругу: каждые <b id="abs1">${f0(s.krug)}</b> показов или <b id="abs2">${s.minut}</b> мин главным встаёт следующее. Фото выбывает, когда наберёт <b id="abs3">${f0(s.pokazy)}</b> показов. Всего нужно около <b id="abs4">${f0(n*s.pokazy)}</b> показов.</div>`
+    +`<details class="abdt abset"><summary>Настройки</summary><label class="fld"><span>Показов на каждое фото</span><input class="inp" id="abp" type="number" inputmode="numeric" min="1000" max="100000" step="500" value="${s.pokazy}"></label>
+      <label class="fld"><span>Круг: смена фото после стольких показов</span><input class="inp" id="abk" type="number" inputmode="numeric" min="100" step="100" value="${s.krug}"></label>
+      <label class="fld"><span>…или после стольких минут</span><input class="inp" id="abm" type="number" inputmode="numeric" min="10" max="240" step="5" value="${s.minut}"></label><div class="muted abdef">По умолчанию 10 000 / 1 000 / 50 мин — как в Марпле.</div></details>`
+    +'<div class="aberr" id="abserr" hidden></div><div class="abacts"><button class="btn press full abbig" type="button" data-act="abstart1">Запустить</button></div>'}}
+function abReadSet(){const g=id=>{const e=$('#'+id);return e?Math.round(parseFloat(String(e.value).replace(/\s/g,'').replace(',','.'))):NaN},p=g('abp'),k=g('abk'),m=g('abm');
+  if(!(p>=1000&&p<=100000))return 'Показов на фото — от 1 000 до 100 000';
+  if(!(k>=100&&k<=p))return 'Круг — от 100 показов и не больше показов на фото';
+  if(!(m>=10&&m<=240))return 'Минут на круг — от 10 до 240';
+  ABW.set={pokazy:p,krug:k,minut:m};return ''}
+function abStart1(){if(!need())return;if(!ABW||!ABW.nm||!ABW.cid||!abNSel()){toast('Сначала выберите товар, кампанию и фото');return}
+  const e=abReadSet(),eb=$('#abserr');if(e){if(eb){eb.textContent=e;eb.hidden=false}const d=$('#sbody details.abset');if(d)d.open=true;return}
+  const t=TOV[ABW.nm]||{},r=((ABW.f||{}).rk||[]).find(z=>+z.cid===+ABW.cid)||{},s=ABW.set,n=abNSel()+1,vars=abChosen().map(v=>v.src);
+  const cmd={k:'abstart',kab:S.kab,nm:+ABW.nm,cid:+ABW.cid,name:String(t.tt||t.art||'').slice(0,80),set:Object.assign({},s),vars};
+  sheet(()=>({t:'Запустить А/Б-тест?',s:esc(t.art||''),h:`<div class="cmp abcmp"><div><small>Сейчас</small><b>главное — исходное фото, теста нет</b></div><div class="ar">→</div><div><small>Станет</small><b>${n} фото по кругу</b></div></div>`+abStrip()
+    +`<div class="note">РК «${esc(r.name||ABW.cid)}». Смена каждые ${f0(s.krug)} показов или ${s.minut} мин, по ${f0(s.pokazy)} показов на фото. Пока тест идёт, свой лимит дня и график не остановят кампанию; цену, ставки и акции тест не трогает. После теста — всё как было.</div>`
+    +RUNBOX('Запустить тест'),after:()=>{$('#okBtn').onclick=()=>run(cmd,r2=>{const x=r2&&r2.patch&&r2.patch.ab_test;ABW=null;closeAll();if(S.tab!=='ab')go('ab');else render(true);if(x)setTimeout(()=>abOpen(x.id),S.tab==='ab'?0:450)})}}),true)}
+/* фото с телефона: сжать, вложением в ntfy, sha256, команда abup */
+async function abShrink(file){if(file.type&&!/^image\//.test(file.type))throw new Error('Это не картинка — выберите фото');
+  let src,w,h;
+  try{src=await createImageBitmap(file,{imageOrientation:'from-image'});w=src.width;h=src.height}
+  catch(e){src=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Фото не открылось — попробуйте другое (JPG или PNG)'));i.src=URL.createObjectURL(file)});w=src.naturalWidth;h=src.naturalHeight}
+  if(!(w>0&&h>0))throw new Error('Фото пустое — выберите другое');
+  /* 27.11 сторож: меньше 700×900 ВБ не принимает — такое не грузим; сжатие тоже не опускает ниже 700×900 */
+  if(w<700||h<900){try{if(src.close)src.close()}catch(e){}throw new Error('Фото меньше 700×900 ('+w+'×'+h+') — ВБ такое не примет. Выберите фото крупнее.')}
+  let k=Math.min(1,1500/Math.max(w,h));if(w*k<700||h*k<900)k=Math.min(1,Math.max(700/w,900/h));
+  const cw=Math.max(1,Math.round(w*k)),ch=Math.max(1,Math.round(h*k)),c=document.createElement('canvas');c.width=cw;c.height=ch;
+  const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cw,ch);g.drawImage(src,0,0,cw,ch);try{if(src.close)src.close()}catch(e){}
+  const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));if(!b)throw new Error('Не получилось сжать фото — попробуйте другое');return b}
+const abSig=ms=>{try{return AbortSignal.timeout(ms)}catch(e){return undefined}};
+async function abUp1(file){const blob=await abShrink(file),buf=await blob.arrayBuffer();
+  const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',buf))].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const topic=UPR.cmd+'-f',name='ab_'+Date.now().toString(36)+'.jpg';let url='',why='нет связи';
+  for(const h of NH){try{const r=await fetch(h+'/'+topic+'?filename='+name,{method:'PUT',body:blob,signal:abSig(60000)});
+      if(!r.ok){why=r.status===413?'файл велик для сервера':r.status===429?'сервер просит подождать минуту':'сервер ответил '+r.status;continue}
+      const j=await r.json().catch(()=>null);if(j&&j.attachment&&j.attachment.url){url=j.attachment.url;break}why='сервер не принял вложение'}catch(e){why='нет связи'}}
+  if(!url)throw new Error('Фото не загрузилось ('+why+'). Проверьте интернет и попробуйте ещё раз.');
+  let r;try{r=await quick({k:'abup',kab:S.kab,nm:ABW.nm,url,sha},null,90000)}catch(e){throw new Error('Фото не сохранилось: '+e.message)}
+  const f=r&&r.patch&&r.patch.abup&&r.patch.abup.f;if(!f)throw new Error('Сервис не подтвердил фото — попробуйте ещё раз');
+  return {f:String(f),prev:URL.createObjectURL(blob)}}
+async function abUpload(files){if(!ABW||!files.length)return;if(!need())return;const nm=ABW.nm;ABW.upErr='';const n=files.length;let i=0,ok=0;
+  for(const fl of files){i++;if(!ABW||ABW.nm!==nm)return;if(abNSel()>=9){ABW.upErr='Больше 9 фото к исходному не поставить — лишние не загружены.';break}
+    ABW.upBusy='Загружаю фото'+(n>1?' '+i+' из '+n:'')+'…';abRedraw(abW2);
+    try{const u=await abUp1(fl);if(!ABW||ABW.nm!==nm)return;ABW.up.push(u);ABW.sel.push('u:'+u.f);ok++}catch(e){if(ABW)ABW.upErr=e.message||'Фото не загрузилось';break}}
+  if(ABW){ABW.upBusy='';abRedraw(abW2);if(ok)toast(ok>1?'Загружено фото: '+ok:'Фото загружено')}}
+
+/* ── действия листа теста ── */
+const abCmd=(k,x,o)=>Object.assign({k,kab:x.kab||S.kab,tid:x.id,nm:+x.nm||undefined},o||{});
+function abPause(x){sheet(()=>({t:'Поставить тест на паузу?',s:abArt(x),h:`<div class="cmp abcmp"><div><small>Сейчас</small><b>идёт, главное — ${abLbl(abVar(x,x.cur))}</b></div><div class="ar">→</div><div><small>Станет</small><b>пауза, главное — исходное</b></div></div><div class="note">Показы на паузе не считаются. Продолжить можно в любой момент.</div>${RUNBOX('Поставить на паузу')}`,after:()=>{$('#okBtn').onclick=()=>run(abCmd('abpause',x))}}),true)}
+function abGo(x){sheet(()=>({t:'Продолжить тест?',s:abArt(x),h:`<div class="cmp abcmp"><div><small>Сейчас</small><b>пауза</b></div><div class="ar">→</div><div><small>Станет</small><b>идёт, следующий круг</b></div></div><div class="note">Главным встанет следующее фото по очереди, счёт показов продолжится.</div>${RUNBOX('Продолжить')}`,after:()=>{$('#okBtn').onclick=()=>run(abCmd('abgo',x))}}),true)}
+function abStop(x){const er=x.status==='error';   // 27.11: у «сбоя» — ещё раз вернуть исходные фото
+  sheet(()=>({t:er?'Вернуть исходные фото?':'Остановить тест?',s:abArt(x),h:`<div class="cmp abcmp"><div><small>Сейчас</small><b>${er?'сбой':(AB_ST[x.status]||[''])[0]}</b></div><div class="ar">→</div><div><small>Станет</small><b>${er?'галерея как до теста, тест закрыт':'остановлен, главное — исходное'}</b></div></div><div class="note">${er?'Сервис ещё раз поставит фото карточки как до теста и уберёт копию исходного. ':''}Лимит дня и график кампании вернутся как до теста. Набранные цифры останутся в листе.</div>${RUNBOX(er?'Вернуть исходные':'Остановить','red')}`,after:()=>{$('#okBtn').onclick=()=>run(abCmd('abstop',x))}}),true)}
+function abExcl(x,vid){const v=abVar(x,vid);if(!v)return;const n=abVis(x).length;
+  sheet(()=>({t:'Исключить '+esc(v.label||v.id)+'?',s:abArt(x),h:`<div class="cmp abcmp"><div><small>Сейчас</small><b>в ротации ${n} фото</b></div><div class="ar">→</div><div><small>Станет</small><b>${n-1} фото, без ${esc(v.label||v.id)}</b></div></div><div class="abone"><i${abBg(v.img)}></i><div><b>${abLbl(v)}</b><small>${f0(v.v||0)} показов · CTR ${abCtr(v)==null?'—':pc(abCtr(v))}</small></div></div><div class="note">Это фото больше не встанет главным. Его цифры останутся в листе.</div>${RUNBOX('Исключить')}`,after:()=>{$('#okBtn').onclick=()=>run(abCmd('abexcl',x,{v:v.id}))}}),true)}
+function abWinPick(x){const sg=(x.suggest||{}).win||x.leader;
+  sheet(()=>({t:'Какое фото поставить?',s:abArt(x),h:'<div class="abpl">'+(x.variants||[]).map(v=>`<button class="abpi press${v.id===sg?' sgw':''}" type="button" data-act="abwin" data-t="${esc(x.id)}" data-v="${esc(v.id)}"><i class="tph"${abBg(v.img)}></i><div><b>${abLbl(v)}${v.id===sg?' · <span class="good">лучший</span>':''}</b><small>${f0(v.v||0)} показов · ${f0(v.c||0)} кликов · CTR ${abCtr(v)==null?'—':pc(abCtr(v))}</small></div></button>`).join('')+'</div>'}),true)}
+function abWin(x,vid){const v=abVar(x,vid);if(!v)return;const A=abVar(x,x.cur)||abBaseV(x),c=x.conf;
+  sheet(()=>({t:'Поставить '+esc(v.label||v.id)+' главным?',s:abArt(x),h:`<div class="cmp abcmp"><div><small>Сейчас главное</small><b>${abLbl(A)}</b></div><div class="ar">→</div><div><small>Станет</small><b>${abLbl(v)}</b></div></div><div class="abtwo"><i${abBg(A&&A.img)}></i><span>→</span><i${abBg(v.img)}></i></div>`
+    +(v.id!==x.leader||c==null||c<.95?`<div class="note w">${v.id!==x.leader&&x.leader?'Это не лидер теста. ':''}${c!=null?'Уверенность сейчас '+Math.round(100*c)+'% — ':''}победитель может оказаться случайным.</div>`:'')
+    +`<div class="note">Фото станет главным навсегда, тест закроется. Лимит дня и график кампании вернутся как до теста.</div>${RUNBOX('Поставить '+esc(v.label||v.id))}`,after:()=>{$('#okBtn').onclick=()=>run(abCmd('abwin',x,{v:v.id}),abToTest(x.id))}}),true)}
+/* после ответа «готово» — вернуться к листу теста (лист выбора варианта и подтверждение убрать) */
+const abToTest=id=>()=>{const i=SHS.findIndex(u=>u.fn&&u.fn.abT===String(id));if(i<0){back();return}SHS.length=i+1;shNav('b',()=>drawSheet())};
+async function abRef(x,btn){if(!need())return;if(btn){btn.classList.add('abspin');btn.disabled=true}
+  try{const r=await quick(abCmd('abref',x),null,90000);toast(r.msg||'Цифры теста обновлены');redraw()}catch(e){}
+  finally{const b=$('#sbody [data-act=abref]');if(b){b.classList.remove('abspin');b.disabled=false}}}
+/* все нажатия раздела — через doAct (после ввода пароля действие продолжается само) */
+function abAct(a,ds){const x=ds.t!=null?abGet(ds.t):null;
+  if(a==='abnew')abNew();
+  else if(a==='abopen'){if(x)abOpen(x.id,SHS.length?null:abList().map(z=>String(z.id)))}
+  else if(a==='abpick')abPick(+ds.n);
+  else if(a==='abfr'){if(ABW){abFoto();redraw()}}
+  else if(a==='abrk'){if(ABW){ABW.cid=+ds.c;redraw()}}
+  else if(a==='absel'){if(!ABW)return;const k=ds.k,i=ABW.sel.indexOf(k);if(i>=0)ABW.sel.splice(i,1);else if(abNSel()>=9){toast('Не больше 9 фото к исходному');return}else ABW.sel.push(k);redraw()}
+  else if(a==='abw3'){if(ABW&&ABW.cid&&abNSel())sheet(abW3)}
+  else if(a==='abstart1')abStart1();
+  else if(!x)toast('Тест не найден — обновите данные');
+  else if(a==='abref')abRef(x,document.querySelector('#sbody [data-act=abref]'));
+  else if(!need())return;
+  else if(a==='abpause')abPause(x);else if(a==='abgo')abGo(x);else if(a==='abstop')abStop(x);
+  else if(a==='abexcl')abExcl(x,ds.v);
+  else if(a==='abwin'){if(ds.v)abWin(x,ds.v);else abWinPick(x)}}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='abq'&&ABW){ABW.q=e.target.value;const p=$('#abpl');if(p)p.innerHTML=abProds()}
+  else if(e.target&&/^ab[pkm]$/.test(e.target.id)&&ABW){const g=id=>Math.round(parseFloat(($('#'+id)||{}).value)),p=g('abp'),k=g('abk'),m=g('abm'),n=abNSel()+1,put=(id,v)=>{const el=$('#'+id);if(el&&isFinite(v))el.textContent=v};
+    put('abs1',f0(k));put('abs2',m);put('abs3',f0(p));put('abs4',f0(n*p));const eb=$('#abserr');if(eb)eb.hidden=true}});
+/* 27.11 ссылки из «К»: #ab=<id теста> — лист теста, #ab — список. При загрузке (boot в e_sheets.js) и при смене адреса */
+function abHash(){const m=/^#ab(?:=([\w-]+))?$/.exec(location.hash);if(!m||!D)return false;
+  try{history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}
+  const t=m[1]?abGet(m[1]):null;
+  if(t&&t.kab&&D.kab[t.kab]&&t.kab!==S.kab){S.kab=t.kab;RS.set('kab',S.kab);prep();sync()}
+  if(SHS.length){SHS.length=0;drawSheet()}
+  if(S.tab!=='ab')go('ab');else render();
+  if(m[1]){if(t)abOpen(t.id);else toast('Тест не найден — возможно, он старше 30 дней')}
+  return true}
+addEventListener('hashchange',()=>{if(D)abHash()});
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='abfile'){const L=[...(e.target.files||[])];e.target.value='';if(L.length)abUpload(L)}});
+
 /* ───────── листы: стопка, «назад» возвращает на предыдущий ─────────
    14.11 Андрей: «и крестик справа не надо, хватает назад и шторки» — стрелка «назад» слева есть всегда (на первом листе она закрывает лист),
    крестик остался в разметке скрытым (его нажимают проверки). «назад плохо работает», «резко срабатывает, надо придать большей плавности» —
@@ -4666,6 +5083,7 @@ function shOpen(o){if(!o)return;const R=document.documentElement;R.dataset.shnoa
       if(k==='tov'&&TOV[x])openProd(+x);
       else if(k==='rk'&&RK[x])openRk(+x,y&&RK[x].nm[y]?y:undefined);
       else if(k==='skl'&&typeof sklGroups==='function'&&sklGroups().some(g=>String(g.imt)===x))openSkl(x);
+      else if(k==='ab'&&abGet(x))abOpen(x);   // 27.11 лист А/Б-теста
       else break}}catch(e){}
   shSave();requestAnimationFrame(()=>requestAnimationFrame(()=>{delete R.dataset.shnoa}))}
 const bidTxt=(r,e)=>Object.entries(e.b||{}).map(([p,v])=>(r.pl.length>1||p!=='search'?(PLN[p]||p)+' ':'')+kop(v)+(r.pay==='cpm'?' за 1000 показов':' за клик')).join(' · ');   // 14.11: «за 1000» — полностью
@@ -4746,7 +5164,10 @@ const RUNW={status:['Меняю статус кампании в кабинет�
   minus:['Меняю минус-фразы кампании','обычно до полминуты',45],klbid:['Ставлю ставку запроса','обычно до полминуты',45],grafik:['Сохраняю график показа','обычно до полминуты',45],bidder:['Сохраняю настройки биддера','обычно до полминуты',45],
   grtpl:['Сохраняю шаблон часов','несколько секунд',30],nst:['Сохраняю настройки уведомлений','несколько секунд',30],rkref:['Перечитываю кампанию из ВБ','обычно 5–20 секунд',40],txt:['Читаю текст карточки из ВБ','несколько секунд',40],mesto:['Снимаю место в выдаче ВБ','обычно до минуты',90],
   mesta:['Запускаю замер мест','ответ за несколько секунд, сам замер — около 20 минут в фоне',45],refresh_fast:['Собираю свежие данные из ВБ','около двух минут',200],refresh_full:['Собираю все данные заново','15–30 минут, страницу можно закрыть',2100],
-  bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240],zony:['Меняю места показа в ВБ','обычно до 20 секунд',60],rename:['Меняю название в ВБ','обычно до 10 секунд',45]};
+  bally:['Оформляю акцию в кабинете ВБ','до 5 минут',240],ballystop:['Останавливаю акцию в кабинете ВБ','до 5 минут',240],zony:['Меняю места показа в ВБ','обычно до 20 секунд',60],rename:['Меняю название в ВБ','обычно до 10 секунд',45],
+  /* 27.11 «А/Б» (d_ab.js) */abfoto:['Читаю фото и кампании товара','обычно несколько секунд',40],abup:['Сохраняю фото с телефона','обычно до 20 секунд',60],abstart:['Запускаю тест: ставлю первое фото','обычно до минуты',90],
+  abpause:['Ставлю тест на паузу, возвращаю исходное фото','обычно до полминуты',60],abgo:['Продолжаю тест: ставлю следующее фото','обычно до полминуты',60],abstop:['Останавливаю тест, возвращаю как было','обычно до полминуты',60],
+  abwin:['Ставлю победителя главным фото','обычно до полминуты',60],abexcl:['Исключаю фото из теста','несколько секунд',40],abref:['Перечитываю статистику теста из ВБ','обычно 5–20 секунд',40]};
 /* 14.11 Андрей (08:10): «сторож там не пиши» — на странице слова «сторож» нет: «Выполняется», «сервис», «ответ сервиса» */
 const runW=c=>RUNW[c.k==='refresh'?'refresh_'+(c.mode==='full'?'full':'fast'):c.k]||['Выполняю команду','обычно до полминуты',45];
 const mmss=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -4759,7 +5180,8 @@ const runSteps=(st,bad)=>'<div class="rsteps">'+['Отправлено','Вып�
 const runProg=st=>runSteps(st)+'<div class="prog"><span class="sp"></span><div class="pgt"><b id="runtx">'+(st?'Выполняется…':'Отправляю команду…')+'</b><small id="runsub"></small></div></div>';
 const RUNPROG=runProg(0);
 const RUNNM={_ptr:'Страница обновлена',status:'Статус кампании',bid:'Ставка',deposit:'Пополнение бюджета',limit:'Лимит дня',price:'Цена',create:'Новая кампания',note:'Заметка',minus:'Минус-фразы',klbid:'Ставка запроса',
-  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',txt:'Ключи в тексте',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы',zony:'Места показа',rename:'Название кампании'};
+  grafik:'График показа',bidder:'Биддер',grtpl:'Шаблон часов',nst:'Уведомления',rkref:'Обновить РК',txt:'Ключи в тексте',mesto:'Место в поиске',mesta:'Замер мест',refresh:'Сбор данных',bally:'Баллы за отзывы',ballystop:'Остановка акции',perenos:'Перенос из Марплы',zony:'Места показа',rename:'Название кампании',
+  abfoto:'А/Б: фото товара',abup:'А/Б: фото с телефона',abstart:'А/Б-тест: запуск',abpause:'А/Б-тест: пауза',abgo:'А/Б-тест: продолжить',abstop:'А/Б-тест: стоп',abwin:'А/Б-тест: победитель',abexcl:'А/Б-тест: исключить фото',abref:'А/Б-тест: обновить'};
 /* итог команды вверху экрана: k — g (готово) / b (отказ) / w (сторож молчит); нажатие убирает */
 function runRes(cmd,k,msg){let w=$('#runres');if(!w){w=document.createElement('div');w.id='runres';w.className='runres';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w)}
   const r=RK[cmd.cid],t=cmd.nm&&TOV[cmd.nm],sub=r?r.name:t?t.art:'',el=document.createElement('button');el.type='button';el.className='rres '+k;
@@ -4843,7 +5265,7 @@ function rknMerge(){if(!D||!D.kab)return;const now=Date.now();
 const PMEM_TTL=3*3600e3,PMEMK='pmem';
 const atMs=()=>{try{return new Date(D.at+':00+03:00').getTime()}catch(e){return 0}};
 function pmemSave(p,nmT){if(!p)return;let c;try{c=JSON.parse(JSON.stringify(p))}catch(e){return}delete c.ms;   /* 15.11 Андрей «почему в заметках не отражается сразу»: запись в «Что меняли» и отметку акции тоже держим до сбора */
-  if(!c.ist&&!c.aku&&!c.rk&&!c.tov&&!c.lim&&!c.gr&&!c.grt&&!c.kl&&!c.bally&&!c.nst)return;
+  if(!c.ist&&!c.aku&&!c.rk&&!c.tov&&!c.lim&&!c.gr&&!c.grt&&!c.kl&&!c.bally&&!c.nst&&!c.ab_test)return;   // 27.11: и тест «А/Б» — до сбора
   const now=Date.now(),L=RS.get(PMEMK,[]);RS.set(PMEMK,(Array.isArray(L)?L:[]).filter(x=>x&&now-x.t<PMEM_TTL).concat([{t:now,p:c,n:nmT||''}]).slice(-40))}
 /* после загрузки данных: наложить то, чего в данных ещё нет; вернуть названия наложенного — для плашки после перезагрузки */
 function pmemMerge(){const L=RS.get(PMEMK,null);if(!Array.isArray(L)||!D)return [];const now=Date.now(),at=atMs();
@@ -4867,6 +5289,7 @@ function applyPatch(p,quiet){if(!p)return;const Kk=D.kab[p.kab||S.kab];
   if(p.grt)D.grt=p.grt;
   if(Kk&&p.bally){const b=Kk.bally||(Kk.bally={promos:[],val:[]});b.promos=(b.promos||[]).filter(x=>x.id!==p.bally.id);if(!p.bally.del)b.promos.unshift(p.bally)}
   if(p.nst)D.nst=p.nst;
+  if(p.ab_test)abPut(p.ab_test);   // 27.11 «А/Б»: ответ сторожа {ab_test: TEST} — тест подменяется сразу (d_ab.js)
   if(p.kl&&KL&&KL.kab[p.kab||S.kab]){const z=KL.kab[p.kab||S.kab].k[p.kl.key];if(z)for(const q of z.q){if(p.kl.x&&p.kl.x[q.t]!=null){if(p.kl.x[q.t])q.x=1;else delete q.x}if(p.kl.b&&q.t in p.kl.b){if(p.kl.b[q.t])q.b=p.kl.b[q.t];else delete q.b}}}
   if(!quiet){prep();render(true)}}
 async function reload(){D=await load(null,true);rknMerge();pmemMerge();KL=null;KLP=null;prep();sync();render(true);redraw()}
@@ -5473,7 +5896,7 @@ async function boot(pass){
   if(fr){const v=$('#view');v.classList.add('ptrin');setTimeout(()=>v.classList.remove('ptrin'),600)}
   $('#lock').hidden=true;$('#lock').innerHTML='';pverGet().then(v=>{if(v)PVER=v});prep();sync();render();applyTheme(RS.get('theme','auto'));checkUpr();
   if(UPASS){const p=UPASS;UPASS=null;if(!UPR)unlockDo(p).then(()=>{render(true);toast('Управление включено')}).catch(()=>{})}   // вошли паролем управления — второй раз его не спрашиваем
-  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(sha&&!SHS.length)shOpen(sha);
+  const h=location.hash.match(/nm=(\d+)/);if(h&&TOV[h[1]])openProd(+h[1]);else if(abHash()){}else if(sha&&!SHS.length)shOpen(sha);   // 27.11 #ab=<id> / #ab — А/Б-тест (d_ab.js)
   if(ptr0&&Date.now()-ptr0<60000)setTimeout(()=>ptrNote(pm),350)}   // …и те же листы
 /* плашка после «потянуть — обновить»: свежесть данных и что из ваших правок применено и закреплено */
 function ptrNote(pm){const nm=[...new Set((pm||[]).map(x=>x.n).filter(Boolean))];
@@ -5484,6 +5907,7 @@ window.REK={secHist,evSvern,get shNav(){const x=SHS[SHS.length-1];return x&&x.na
   FR,FRZ,TBL,tblSt,tblCols,sklRows,sklAgg,openSkl,openCols,openRef,openIst,frShown,cellOf,blLive,buyer,onSeg0,get T(){return T},
   get SHS(){return SHS},get WQ(){return WQ},get WAIT(){return WAIT},get LC(){return LC},
   prOur,prNum,rknMerge,pmemMerge,pmemSave,ptrDo,ptrVer:v=>{PVER=v},get pver(){return PVER},reload,run,runRes,toast,navType,fotoNm};   // 14.11 (четвёртый заход): наша цена по дням из журнала, память новых кампаний, «потянуть — обновить» — для проверок   // 14.11: стопка листов и очередь команд — для проверок test_page.py (подставные ответы)
+Object.assign(window.REK,{vAb,abOpen,abNew,abPut,abGet,abList,abProg,get ABW(){return ABW}});   // 27.11 «А/Б» — для проверок test_page.py
 hashKey();boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
 
