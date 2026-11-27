@@ -2492,7 +2492,8 @@ const foto=t=>{const u=t?(t.foto||fotoNm(t.nm)):'';return u?` style="background-
 /* остатки — везде одним видом (13.11 Андрей: «где-то показаны остатки, где-то не указано, и если 0, то указывай»): ноль пишем явно и красным,
    «нет данных» — только если отчёт ВБ не прочитался */
 const ost1=(l,v)=>`<span class="pill num${v==null?'':v>0?'':' b'}">${l}: ${v==null?'нет данных':f0(v)+' шт'}</span>`;
-const ostPills=t=>t?ost1('FBO',t.fbo)+ost1('FBS',t.fbs):'';
+const fboR=t=>t?(t.ff??t.fbo):null;   // 27.11 Андрей: ФБО факт — можно заказать на витрине
+const ostPills=t=>{if(!t)return '';let h=ost1('FBO',t.fbo);if(t.ff!=null&&t.ff<(t.fbo||0))h+=`<span class="pill num${t.ff>0?'':' b'}">можно заказать: ${f0(t.ff)} шт</span>`;   /* только когда заказать можно меньше, чем в отчёте (отчёт на час-другой отстаёт — «больше» не показываем) */return h+ost1('FBS',t.fbs);};
 /* 15.11 Андрей «цену поменял, пуш говорит прошло, а тут не участвуем»: участие в акциях кабинет перечитывается со сбором (раз в 30 мин),
    поэтому после входа ценой с сайта до перечитки строка акции пишет «вход HH:MM · ждём ВБ», а не «не участвуем» */
 const akZhd=(nm,x)=>{if(x.uch||!K||!K.lk_at)return null;const z=(D.ist||[]).find(i=>i.kab===S.kab&&i.nm==nm&&i.t>K.lk_at&&String(i.chto||'').indexOf('вход в акцию «'+String(x.name||'').slice(0,50)+'»')>=0);return z?z.t.slice(11,16):null};
@@ -2512,9 +2513,9 @@ const akSt0=(nm,x)=>{const z=akZhd(nm,x);if(x.zh)return '<span class="akok">це
    «спокойно» — чистая ≥ 10% и ДРР ≤ 10%; в листе кампании — ещё безопасная ставка этой кампании при цене акции (e.bz.ak) */
 const akBz=(x,e)=>{const z=x&&x.bz;if(!z)return '';const sa=e&&e.bz&&e.bz.ak?e.bz.ak[x.id]:null;
   return `<i class="${z.ok?'good':'bad'}">${z.ok?'спокойно':z.n<10?'чистая ниже 10%':'ДРР выше 10%'} · чистая ${f1(z.n)}%, ДРР ${f1(z.d)}%${sa==null?'':sa<0?' · безоп. ставка ниже мин.':' · безоп. ставка '+kop(sa)}</i>`};
-const ostNet=t=>!!t&&(t.fbo===0||t.fbo==null)&&(t.fbs===0||t.fbs==null)&&(t.fbo===0||t.fbs===0);   // нигде нет — и это известно точно
+const ostNet=t=>{if(!t)return false;const f=fboR(t);return(f===0||f==null)&&(t.fbs===0||t.fbs==null)&&(f===0||t.fbs===0);};   // нигде нет — и это известно точно
 const ostCell=v=>v==null?'<span class="muted">—</span>':v>0?f0(v):'<b class="bad">0</b>';
-const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
+const ostAt=()=>jn(K.ost_at?'склады ВБ на '+dm(K.ost_at.slice(0,10))+(K.ost_at.length>10?' '+K.ost_at.slice(11,16):''):'',K.ff_at?'можно заказать на '+dm(K.ff_at.slice(0,10))+(K.ff_at.length>10?' '+K.ff_at.slice(11,16):''):'',K.fbs_at?'свой склад на '+dm(K.fbs_at.slice(0,10))+' '+K.fbs_at.slice(11,16):'');
 /* цена у покупателя: по последним заказам (цена и скидка ВБ дня); нашу цену с тех пор меняли — пересчитываем той же скидкой ВБ */
 function buyer(t){if(!t||!t.pr||!t.pd||!t.pd.length)return null;const x=t.pd[t.pd.length-1],same=Math.abs(x[1]-t.pr.f)<1.5;
   return {v:same?x[2]:t.pr.f*(1-x[3]/100),spp:x[3],calc:!same,i:x[0],vit:x[4]===1}}   /* 19.11: x[4]=1 — день без заказов, снимок витрины из панели */
@@ -2720,7 +2721,7 @@ const fresh=bez=>{const a=D.at.replace('T',' '),ago=atAgo();   // bez — без
 function tovRows(){const ix=PI();let a=K.tov.map(t=>({t,a:pAgg(t,ix),w:wrk(t).length}));
   if(FRZ.tov){const m=new Map(a.map(x=>[x.t.nm,x]));return FRZ.tov.map(n=>m.get(n)).filter(Boolean)}   // период сменили — товары остаются на своих местах
   if(S.only)a=a.filter(x=>x.w>0||x.a.s>0);
-  if(S.ost)a=a.filter(x=>(x.t.fbo||0)+(x.t.fbs||0)>0);   // 15.11 Андрей «тут ещё выбор с остатками товары дать»: есть на складах ВБ или на своём
+  if(S.ost)a=a.filter(x=>(fboR(x.t)||0)+(x.t.fbs||0)>0);   // 15.11 Андрей «тут ещё выбор с остатками товары дать»: есть на складах ВБ или на своём
   if(S.q){const q=S.q.toLowerCase();a=a.filter(x=>(x.t.art+' '+x.t.nm).toLowerCase().includes(q))}
   if(S.view==='table')return tblSort('tov',a);
   const inf=v=>v==null?-1:v,key=({drr:x=>inf(x.a.drr),s:x=>x.a.s,or:x=>x.a.or})[S.sort]||(x=>x.a.s);
@@ -2921,7 +2922,7 @@ function dataKv(){const m=D.mst,ms=m&&m.at?dm(m.at.slice(0,10))+' '+m.at.slice(1
   /* 14.11: подписи короче — на 360 левый столбец ломался в четыре строки («Статистика, / ставки, / бюджеты, / цены») */
   return `<div class="kv"><span>Статистика и ставки</span><b>${dm(D.at.slice(0,10))} ${D.at.slice(11,16)} МСК</b><span>Сбор сам</span><b>каждые 30 минут</b>
     <span>Места в поиске</span><b>${ms}</b><span>Замер сам</span><b>главные фразы — раз в час</b>
-    ${K.ost_at?`<span>Склады ВБ</span><b>${dm(K.ost_at.slice(0,10))} ${K.ost_at.slice(11,16)}</b>`:''}${K.fbs_at?`<span>Свой склад</span><b>${dm(K.fbs_at.slice(0,10))} ${K.fbs_at.slice(11,16)}</b>`:''}
+    ${K.ost_at?`<span>Склады ВБ</span><b>${dm(K.ost_at.slice(0,10))} ${K.ost_at.slice(11,16)}</b>`:''}${K.ff_at?`<span>Можно заказать</span><b>${dm(K.ff_at.slice(0,10))} ${K.ff_at.slice(11,16)}</b>`:''}${K.fbs_at?`<span>Свой склад</span><b>${dm(K.fbs_at.slice(0,10))} ${K.fbs_at.slice(11,16)}</b>`:''}
     ${K.lk_at?`<span>Акции ВБ</span><b>${dm(K.lk_at.slice(0,10))} ${K.lk_at.slice(11,16)}</b>`:''}${K.mar_at?`<span>Марпла</span><b>${dm(K.mar_at.slice(0,10))} ${K.mar_at.slice(11,16)}</b>`:''}
     <span>Последний сбор</span><b>${D.mode==='full'?'полный, 31 день':'быстрый'}</b></div>`}
 /* 14.11 Андрей: «кнопка запретить зачем мне» — кнопки «Запретить на этом устройстве» больше нет (обработчик lockupr остался в e_sheets.js, его никто не зовёт);
@@ -3061,6 +3062,7 @@ TBL.tov={sort:['drr',-1],cols:[
   {k:'cpc',l:'CPC, ₽',t:'цена клика: затраты ÷ клики',def:0,v:x=>x.a.cpc,h:x=>x.a.cpc==null?'—':f2(x.a.cpc)},
   {k:'mar',l:'Маржа, панель',v:x=>pmar(x.t),h:x=>{const m=pmar(x.t);return m==null?'—':pc(m)},cls:x=>mcls(pmar(x.t))},
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
+  {k:'ff',l:'Можно заказать, шт',v:x=>typeof x.t.ff==='undefined'?null:x.t.ff,h:x=>ostCell(typeof x.t.ff==='undefined'?null:x.t.ff)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
   {k:'pr',l:'Цена наша, ₽',def:0,v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'},
   {k:'prb',l:'У покупателя, ₽',def:0,v:x=>{const b=buyer(x.t);return b?b.v:null},h:x=>{const b=buyer(x.t);return b?(b.calc?'≈ ':'')+f0(b.v):'—'}},
@@ -3090,6 +3092,7 @@ TBL.rk={sort:['s',-1],cols:[
   {k:'bud',l:'Бюджет, ₽',t:'остаток бюджета кампании',v:x=>x.r.bud,h:x=>x.r.bud==null?'—':f0(x.r.bud),cls:x=>x.r.bud!=null&&x.r.bud<300&&x.w?'warnc':''},
   {k:'lim',l:'Лимит дня, ₽',def:0,v:x=>limR(x.r),h:x=>{const v=limR(x.r);if(v!=null)return f0(v);return limGoNet(x.r)?`<b>⚠ нет</b><small>не задан — может уйти весь бюджет · сегодня ${rub(tdR(x).s)}</small>`:'нет'},cls:x=>limGoNet(x.r)?'warnc':''},
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t?x.t.fbo:null,h:x=>ostCell(x.t?x.t.fbo:null)},
+  {k:'ff',l:'Можно заказать, шт',v:x=>!x.t||typeof x.t.ff==='undefined'?null:x.t.ff,h:x=>ostCell(!x.t||typeof x.t.ff==='undefined'?null:x.t.ff)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t?x.t.fbs:null,h:x=>ostCell(x.t?x.t.fbs:null)},
   {k:'td',l:'Расход сегодня, ₽',def:0,v:x=>tdR(x).s,h:x=>f0(tdR(x).s),cls:x=>sbad(tdR(x).s,tdR(x).q)},
   {k:'bd',l:'Биддер',def:0,v:x=>{const e=x.r.nm[x.nm]||{};return bdOn(e.bd)&&e.bd.src==='svoi'?2:x.r.mar&&x.r.mar.bid&&x.r.mar.bid.length?1:0},
@@ -3107,6 +3110,7 @@ TBL.skl={sort:['or',-1],cols:[
   {k:'q',l:'Заказы с рекламы, шт',def:0,v:x=>x.a.q,h:x=>f0(x.a.q)},
   {k:'c',l:'Клики',def:0,v:x=>x.a.c,h:x=>f0(x.a.c)},
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
+  {k:'ff',l:'Можно заказать, шт',v:x=>typeof x.t.ff==='undefined'?null:x.t.ff,h:x=>ostCell(typeof x.t.ff==='undefined'?null:x.t.ff)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
   {k:'pr',l:'Цена наша, ₽',def:0,v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'}]};
 /* 17.11 Андрей (кадр раскрытой склейки): «тут надо больше наших параметров и кастомизация + сортировка внутри склейки удобно плавно» —
@@ -3127,6 +3131,7 @@ TBL.skc={sort:['or',-1],cols:[
   {k:'ps',l:'Продажи панели, ₽',v:x=>pnv(x,0),h:x=>{const v=pnv(x,0);return v==null?'—':f0(v)}},
   {k:'vk',l:'Выкуп',t:'«% выкупа» листа «SKU» панели за месяц',v:x=>pnv(x,4,'m'),h:x=>{const v=pnv(x,4,'m');return v==null?'—':pc(100*v)}},
   {k:'fbo',l:'Склады ВБ, шт',v:x=>x.t.fbo,h:x=>ostCell(x.t.fbo)},
+  {k:'ff',l:'Можно заказать, шт',v:x=>typeof x.t.ff==='undefined'?null:x.t.ff,h:x=>ostCell(typeof x.t.ff==='undefined'?null:x.t.ff)},
   {k:'fbs',l:'Свой склад, шт',v:x=>x.t.fbs,h:x=>ostCell(x.t.fbs)},
   {k:'pr',l:'Цена, ₽',t:'наша цена на витрине',v:x=>x.t.pr?x.t.pr.f:null,h:x=>x.t.pr?f0(x.t.pr.f):'—'},
   {k:'q',l:'Заказы РК, шт',t:'заказы, которые ВБ отнёс к рекламе',def:0,v:x=>x.a.q,h:x=>f0(x.a.q)},
@@ -3689,7 +3694,7 @@ function rkVnim(){const z={bud:new Set(),zas:new Set(),zsq:new Set()};const ZD=z
     for(const nm in r.nm){const d=r.nm[nm].d;s7+=sum(d&&d.s,d7)}
     if(r.bud===0&&s7>=1)z.bud.add(r.id);
     const st=String(r.start||r.cr||'').slice(0,10);
-    const ost=Object.keys(r.nm).some(nm=>{const t=TOV[nm];return !t||((t.fbo||0)+(t.fbs||0))>0});   // 19.11 Андрей «тут не все такие»: бюджет 0 (своя кнопка «Бюджет 0») и товара нет ни на одном складе — не вхолостую
+    const ost=Object.keys(r.nm).some(nm=>{const t=TOV[nm];return !t||((fboR(t)||0)+(t.fbs||0))>0});   // 19.11 Андрей «тут не все такие»: бюджет 0 (своя кнопка «Бюджет 0») и товара нет ни на одном складе — не вхолостую
     if(st&&st<edge&&(r.st===9||on>=Math.ceil(ZD*0.6))&&s5/ZD<=ZL&&!ruki.has(r.id)&&r.bud!==0&&ost)(q5>0?z.zsq:z.zas).add(r.id)}   // 19.11 Андрей «ок»: фильтр на две кнопки — без заказов / с заказами, но мало трат
   return z}
 const VNL={bud:'Бюджет 0',zas:'Вхолостую: без заказов',zsq:'Мало трат, но есть заказы'};const ZSK=k=>k==='zas'||k==='zsq';
@@ -3797,7 +3802,7 @@ function prodBody(nm,ctx,ci){const t=TOV[nm],ix=PI(),pp=PP(),a=pAgg(t,ix),b=pp?p
   const metaRest=(t.am&&(t.am[0]||t.am[1])?`<span class="pill num">${t.am[0]?'нижняя цена автоакций '+f0(t.am[0])+' ₽'+(t.am[2]?' до '+dm(t.am[2]):''):''}${t.am[1]?(t.am[0]?' · ':'')+'снижение цены в автоакциях заблокировано':''}</span>`:'')+(a.oq&&a.wb?`<span class="pill num">со складов ВБ ${pc(100*a.wb/a.oq)} заказов</span>`:'');
   let h=perSeg()+(metaRest?`<div class="meta" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${metaRest}</div>`:'');
   if(t.oh&&S.ostOpen)h+=ostHist(t);
-  if(ostNet(t)&&W.length)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.</div>';
+  if(ostNet(t)&&W.length)h+='<div class="note b">'+(fboR(t)===0&&t.fbo>0?`На складах ВБ по отчёту ${f0(t.fbo)} шт, но заказать нельзя ни одной, а реклама идёт.`:'Товара нет ни на складах ВБ, ни на своём складе, а реклама идёт.')+'</div>';
   h+=panBlock(t,a);   // 14.11 23:08 Андрей: «по панели надо видеть сверху ситуацию, необязательно сразу 3 периода» — сразу под ценой и остатками, один период
   h+='AKROW';   /* 24.11 Андрей (кадр листа товара Сетка20х20_10м): «в таких разделах тоже надо работу с акциями блок» — как в листе кампании, свёрнутой строкой «Акции» под «Показателями» (они по-прежнему выше акций); блок «Акции ВБ» снизу переехал сюда */
   /* 14.11 (четвёртый заход): строки «панель неделя / месяц: ДРР · маржа» над главными цифрами больше нет — те же числа в блоке «Показатели» под кампаниями (panBlock) */
@@ -4095,7 +4100,7 @@ function rkBody(id,nm,ctx,ci){const r=RK[id],e=r.nm[nm]||{},ix=PI(),pp=PP(),a=rk
   /* 15.11 Андрей (кадр «Стик СПС», «Товар здесь» зачёркнут, стрелка от ссылок вверх): «слева это дубль убери и ссылки перенеси выше … аккуратно» — кнопки «Товар здесь» нет
      (в товар ведёт фото в шапке), ссылки «Кампания ↗» и «Товар ↗» — маленькими плашками в шапке за плашками кампании (rkHead ниже) */
   /* отдельной жёлтой строки «бюджета осталось … — кампания скоро встанет» больше нет: то же говорит красная плитка «Остаток бюджета» (не дублируем) */
-  if(ostNet(t)&&st.w)h+='<div class="note b">Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.</div>';
+  if(ostNet(t)&&st.w)h+='<div class="note b">'+(fboR(t)===0&&t.fbo>0?`На складах ВБ по отчёту ${f0(t.fbo)} шт, но заказать нельзя ни одной, а кампания работает.`:'Товара нет ни на складах ВБ, ни на своём складе, а кампания работает.')+'</div>';
   /* 15.11 Андрей: «по блокам внутри рк не правильная логика надо сначала показатели по рк + панель показатели тоже надо. Статистика гистограмма по дрр …
      ничего не понятно на нее смотря … и дрр по рк и общий. Статистика рк по дням. Потом уже настройки и прочее» — порядок листа: показатели РК → панель товара →
      гистограмма ДРР (переключатель «ДРР общий | ДРР РК | Расход», одна цифра над столбиком, шкала и линия нормы) → таблица по дням → другие РК товара →
