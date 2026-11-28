@@ -438,7 +438,7 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .yt tr.p td:first-child{font-weight:400;padding-left:22px}
 .yt tr.s td{border-bottom-color:transparent}
 .yt tr.oth td{color:var(--ink2);font-size:12.5px;padding-top:4px;padding-bottom:4px}.yt tr.oth td:first-child{font-weight:400;padding-left:22px;white-space:normal;line-height:1.25}
-.yt td.ytg{cursor:pointer}.yt td.ytg i{font-style:normal;color:var(--ink3);margin-left:4px}
+.yt td.ytg{cursor:pointer}.yt i.ysv{font-style:normal;font-size:10px;color:var(--good);margin-left:3px;vertical-align:top}.yt td.b1 i.ysv{color:var(--bad)}.yt td.ytg i{font-style:normal;color:var(--ink3);margin-left:4px}
 .yt th{cursor:default;min-width:84px}
 .yt td.cur,.yt th.cur{background:var(--acc-soft)}
 .yt td:last-child,.yt th:last-child{font-weight:700;border-left:.5px solid var(--line)}
@@ -1617,13 +1617,16 @@ function vSpp(){
 const YR=[['qty','Продажи, шт','n','b'],['sales','Продажи, ₽','r','b'],['avg','Средний чек','r','p'],['cost','Себестоимость','r',''],['pcost','% себестоимости','p','p'],
   ['logi','Логистика','r',''],['plogi','% логистики','p','p'],['comm','Комиссия','r',''],['pcomm','% комиссии','p','p'],['acq','Эквайринг','r',''],
   ['marg','Маржинальный доход','r','b'],['pmarg','% рентабельности','p','p'],['ads','Реклама','r',''],['drr','ДРР','p','p'],['other','Прочие расходы площадки','r',''],
-  ['gross','Валовая прибыль','r','b'],['pgross','% рентабельности','p','p'],['tax','Налог','r',''],['net','Чистая прибыль','r','b'],['pnet','% рентабельности','p','p']];
+  ['gross','Валовая прибыль','r','b'],['pgross','% рентабельности','p','p'],['tax','Налог','r',''],['net','Чистая прибыль','r','b'],['pnet','% рентабельности','p','p'],['ozh','Ожидаем к оплате','r','b']];
 const YD={avg:['sales','qty'],pcost:['cost','sales'],plogi:['logi','sales'],pcomm:['comm','sales'],pmarg:['marg','sales'],drr:['ads','sales'],pgross:['gross','sales'],pnet:['net','sales']};
 function god(){
   const G=D.god||{},ms=mps().filter(mp=>G[mp]),o={};
-  for(const key of ['qty','sales','cost','logi','comm','acq','marg','ads','other','gross','tax','net'])o[key]=Array.from({length:12},(_,i)=>ms.reduce((a,mp)=>a+((G[mp][key]||[])[i]||0),0));
+  for(const key of ['qty','sales','cost','logi','comm','acq','marg','ads','other','gross','tax','net','ozh'])o[key]=Array.from({length:12},(_,i)=>ms.reduce((a,mp)=>a+((G[mp][key]||[])[i]||0),0));
   /* 28.11 «прочие расходы площадки» по статьям листа «Год» (sbor.god_prochie); одинаковые названия площадок — одной строкой */
   const oth=new Map();for(const mp of ms)for(const [n,v] of (G[mp].oth||[])){const k=n.toLowerCase().replace(/ё/g,'е');let x=oth.get(k);if(!x){x={n,v:Array(12).fill(0),mp:[]};oth.set(k,x)}v.forEach((y,i)=>x.v[i]+=y||0);if(!x.mp.includes(mp))x.mp.push(mp)}
+  /* 28.11 «ожидаем к оплате» («ДЗ для Баланса»): сверенные с отчётами площадок месяцы — общие у выбранных площадок */
+  const sv=ms.filter(mp=>G[mp].ozh).map(mp=>new Map((G[mp].ozh_sv||[]).map(([m,ok])=>[m,ok])));
+  o.ozhSv=Array.from({length:12},(_,i)=>sv.length&&sv.every(x=>x.get(i+1)===true)?1:sv.some(x=>x.get(i+1)===false)?-1:0);o.ozhEst=sv.length>0;
   o.oth=[...oth.values()].sort((a,b)=>b.v.reduce((z,y)=>z+y,0)-a.v.reduce((z,y)=>z+y,0));
   return {o,ms};
 }
@@ -1638,11 +1641,11 @@ function vYear(){
 <div class="sub"><span>валовая <b class="num">${fm(tot('gross'))}</b> · ${fp(tot('pgross'))}</span><span>чистая <b class="num ${tot('net')<0?'dn':''}">${fm(tot('net'))}</b> · ${fp(tot('pnet'))}</span><span>ДРР <b class="num">${fp(tot('drr'))}</b></span></div>
 ${bars('yc','m',ser,FMT[yf[2]]===fr?fm:FMT[yf[2]],mcur,false)}
 <div class="pills" style="margin-top:10px">${[['sales','Продажи'],['gross','Валовая'],['net','Чистая'],['ads','Реклама'],['drr','ДРР'],['pgross','% валовой'],['pnet','% чистой'],['qty','Штуки']].map(x=>`<button class="pill${x[0]===ym?' on':''}" data-ym="${x[0]}">${x[1]}</button>`).join('')}</div></div>
-<div class="card"><h3 class="ct">Что здесь</h3><div class="lbl" style="line-height:1.5">Счёт года с листа «Год» панели. Валовая прибыль здесь — до налога и без услуг ФФ и доукомплектовки, зато с расходами магазина: подписки, хранение, штрафы, приёмка. В «Сводке» прибыль считается по товарам, как на листе «SKU»: уже за вычетом налога, ФФ и доукомплектовки. Поэтому цифры прибыли там и тут разные; продажи здесь — без самовыкупов.${S.kab?' Кабинет здесь не делится — лист «Год» общий на ВБ.':''}</div></div></div>
+<div class="card"><h3 class="ct">Что здесь</h3><div class="lbl" style="line-height:1.5">Счёт года с листа «Год» панели. Валовая прибыль здесь — до налога и без услуг ФФ и доукомплектовки, зато с расходами магазина: подписки, хранение, штрафы, приёмка. В «Сводке» прибыль считается по товарам, как на листе «SKU»: уже за вычетом налога, ФФ и доукомплектовки. Поэтому цифры прибыли там и тут разные; продажи здесь — без самовыкупов.${o.ozhEst?' «Ожидаем к оплате» — из «Учёта сделок» (лист «ДЗ для Баланса»): сколько площадка должна перечислить за месяц по своим отчётам. ✓ — месяц сверен с отчётами из кабинетов до рубля.':''}${S.kab?' Кабинет здесь не делится — лист «Год» общий на ВБ.':''}</div></div></div>
 ${small?'<div class="cnt" style="margin-top:14px">Таблица — в тысячах рублей, средний чек — в рублях. Листается вбок, свежий месяц справа.</div>':''}
 <div class="tw" id="ytw" style="margin-top:${small?0:12}px"><table class="tb yt"><thead><tr><th>Показатель</th>${Array.from({length:upto},(_,i)=>`<th class="${i+1===mcur?'cur':''}">${MON3[i]}</th>`).join('')}<th>Год</th></tr></thead>
 <tbody>${YR.map(r=>{const isO=r[0]==='other'&&o.oth.length,open=isO&&S.yoth!==0;
-  return `<tr class="${r[3]}${r[3]!=='p'&&YR[YR.indexOf(r)+1]&&YR[YR.indexOf(r)+1][3]==='p'?' s':''}"${isO?' id="yOth"':''}><td${isO?` class="ytg" data-yoth="1" title="${open?'Свернуть':'Показать по статьям'}"`:''}>${r[1]}${isO?`<i>${open?'▾':'▸'}</i>`:''}</td>${Array.from({length:upto},(_,i)=>{const v=val(r[0],i);return `<td class="${i+1===mcur?'cur ':''}${(r[0]==='gross'||r[0]==='net'||r[0]==='marg')&&v<0?'b1':''}">${yfmt(r)(v)}</td>`}).join('')}<td class="${(r[0]==='gross'||r[0]==='net')&&tot(r[0])<0?'b1':''}">${yfmt(r)(tot(r[0]))}</td></tr>`
+  return `<tr class="${r[3]}${r[3]!=='p'&&YR[YR.indexOf(r)+1]&&YR[YR.indexOf(r)+1][3]==='p'?' s':''}"${isO?' id="yOth"':''}><td${isO?` class="ytg" data-yoth="1" title="${open?'Свернуть':'Показать по статьям'}"`:''}>${r[1]}${isO?`<i>${open?'▾':'▸'}</i>`:''}</td>${Array.from({length:upto},(_,i)=>{const v=val(r[0],i);const sv=r[0]==='ozh'?o.ozhSv[i]:0;return `<td class="${i+1===mcur?'cur ':''}${(r[0]==='gross'||r[0]==='net'||r[0]==='marg')&&v<0||sv<0?'b1':''}"${sv?` title="${sv>0?'сверено с отчётами площадок до рубля':'не сходится с отчётами площадок'}"`:''}>${yfmt(r)(v)}${sv>0?'<i class="ysv">✓</i>':sv<0?'<i class="ysv">!</i>':''}</td>`}).join('')}<td class="${(r[0]==='gross'||r[0]==='net')&&tot(r[0])<0?'b1':''}">${yfmt(r)(tot(r[0]))}</td></tr>`
    +(open?o.oth.map(x=>`<tr class="oth" data-oth="${esc(x.n)}"><td>${esc(x.n)}${S.mp==='all'&&ms.length>1?' · '+x.mp.map(m=>MPN[m]).join(', '):''}</td>${Array.from({length:upto},(_,i)=>`<td class="${i+1===mcur?'cur':''}">${yfmt(r)(x.v[i])}</td>`).join('')}<td>${yfmt(r)(x.v.slice(0,upto).reduce((a,b)=>a+b,0))}</td></tr>`).join(''):'')}).join('')}</tbody></table></div>${foot()}`;
 }
 
