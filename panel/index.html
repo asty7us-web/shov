@@ -437,6 +437,8 @@ mark{background:var(--warn-soft);color:inherit;border-radius:3px;padding:0 1px}
 .yt tr.p td{color:var(--ink2);font-size:12.5px;padding-top:4px;padding-bottom:8px}
 .yt tr.p td:first-child{font-weight:400;padding-left:22px}
 .yt tr.s td{border-bottom-color:transparent}
+.yt tr.oth td{color:var(--ink2);font-size:12.5px;padding-top:4px;padding-bottom:4px}.yt tr.oth td:first-child{font-weight:400;padding-left:22px;white-space:normal;line-height:1.25}
+.yt td.ytg{cursor:pointer}.yt td.ytg i{font-style:normal;color:var(--ink3);margin-left:4px}
 .yt th{cursor:default;min-width:84px}
 .yt td.cur,.yt th.cur{background:var(--acc-soft)}
 .yt td:last-child,.yt th:last-child{font-weight:700;border-left:.5px solid var(--line)}
@@ -1620,6 +1622,9 @@ const YD={avg:['sales','qty'],pcost:['cost','sales'],plogi:['logi','sales'],pcom
 function god(){
   const G=D.god||{},ms=mps().filter(mp=>G[mp]),o={};
   for(const key of ['qty','sales','cost','logi','comm','acq','marg','ads','other','gross','tax','net'])o[key]=Array.from({length:12},(_,i)=>ms.reduce((a,mp)=>a+((G[mp][key]||[])[i]||0),0));
+  /* 28.11 «прочие расходы площадки» по статьям листа «Год» (sbor.god_prochie); одинаковые названия площадок — одной строкой */
+  const oth=new Map();for(const mp of ms)for(const [n,v] of (G[mp].oth||[])){const k=n.toLowerCase().replace(/ё/g,'е');let x=oth.get(k);if(!x){x={n,v:Array(12).fill(0),mp:[]};oth.set(k,x)}v.forEach((y,i)=>x.v[i]+=y||0);if(!x.mp.includes(mp))x.mp.push(mp)}
+  o.oth=[...oth.values()].sort((a,b)=>b.v.reduce((z,y)=>z+y,0)-a.v.reduce((z,y)=>z+y,0));
   return {o,ms};
 }
 function vYear(){
@@ -1636,7 +1641,9 @@ ${bars('yc','m',ser,FMT[yf[2]]===fr?fm:FMT[yf[2]],mcur,false)}
 <div class="card"><h3 class="ct">Что здесь</h3><div class="lbl" style="line-height:1.5">Счёт года с листа «Год» панели. Валовая прибыль здесь — до налога и без услуг ФФ и доукомплектовки, зато с расходами магазина: подписки, хранение, штрафы, приёмка. В «Сводке» прибыль считается по товарам, как на листе «SKU»: уже за вычетом налога, ФФ и доукомплектовки. Поэтому цифры прибыли там и тут разные; продажи здесь — без самовыкупов.${S.kab?' Кабинет здесь не делится — лист «Год» общий на ВБ.':''}</div></div></div>
 ${small?'<div class="cnt" style="margin-top:14px">Таблица — в тысячах рублей, средний чек — в рублях. Листается вбок, свежий месяц справа.</div>':''}
 <div class="tw" id="ytw" style="margin-top:${small?0:12}px"><table class="tb yt"><thead><tr><th>Показатель</th>${Array.from({length:upto},(_,i)=>`<th class="${i+1===mcur?'cur':''}">${MON3[i]}</th>`).join('')}<th>Год</th></tr></thead>
-<tbody>${YR.map(r=>`<tr class="${r[3]}${r[3]!=='p'&&YR[YR.indexOf(r)+1]&&YR[YR.indexOf(r)+1][3]==='p'?' s':''}"><td>${r[1]}</td>${Array.from({length:upto},(_,i)=>{const v=val(r[0],i);return `<td class="${i+1===mcur?'cur ':''}${(r[0]==='gross'||r[0]==='net'||r[0]==='marg')&&v<0?'b1':''}">${yfmt(r)(v)}</td>`}).join('')}<td class="${(r[0]==='gross'||r[0]==='net')&&tot(r[0])<0?'b1':''}">${yfmt(r)(tot(r[0]))}</td></tr>`).join('')}</tbody></table></div>${foot()}`;
+<tbody>${YR.map(r=>{const isO=r[0]==='other'&&o.oth.length,open=isO&&S.yoth!==0;
+  return `<tr class="${r[3]}${r[3]!=='p'&&YR[YR.indexOf(r)+1]&&YR[YR.indexOf(r)+1][3]==='p'?' s':''}"${isO?' id="yOth"':''}><td${isO?` class="ytg" data-yoth="1" title="${open?'Свернуть':'Показать по статьям'}"`:''}>${r[1]}${isO?`<i>${open?'▾':'▸'}</i>`:''}</td>${Array.from({length:upto},(_,i)=>{const v=val(r[0],i);return `<td class="${i+1===mcur?'cur ':''}${(r[0]==='gross'||r[0]==='net'||r[0]==='marg')&&v<0?'b1':''}">${yfmt(r)(v)}</td>`}).join('')}<td class="${(r[0]==='gross'||r[0]==='net')&&tot(r[0])<0?'b1':''}">${yfmt(r)(tot(r[0]))}</td></tr>`
+   +(open?o.oth.map(x=>`<tr class="oth" data-oth="${esc(x.n)}"><td>${esc(x.n)}${S.mp==='all'&&ms.length>1?' · '+x.mp.map(m=>MPN[m]).join(', '):''}</td>${Array.from({length:upto},(_,i)=>`<td class="${i+1===mcur?'cur':''}">${yfmt(r)(x.v[i])}</td>`).join('')}<td>${yfmt(r)(x.v.slice(0,upto).reduce((a,b)=>a+b,0))}</td></tr>`).join(''):'')}).join('')}</tbody></table></div>${foot()}`;
 }
 
 /* ───────── листы товара и склейки: карточка площадки, товар на всех площадках, склейка ───────── */
@@ -1859,6 +1866,7 @@ document.addEventListener('click',e=>{
   if((b=t.closest('[data-cm]'))){S.cm=b.dataset.cm;PS.set('cm',S.cm);render(true);return}
   if((b=t.closest('[data-pm]'))){S.pm=b.dataset.pm;reopen();return}
   if((b=t.closest('[data-ym]'))){S.ym=b.dataset.ym;render(true);return}
+  if((b=t.closest('[data-yoth]'))){S.yoth=S.yoth===0?1:0;render(true);return}   // 28.11 прочие расходы по статьям — свернуть / развернуть
   if((b=t.closest('[data-sortgo]'))){const key=b.dataset.sortgo;S.sort=key;S.dir=(key==='drr'||key==='pComm'||key==='pLogi')?-1:-1;S.cat='';S.skl='';PS.set('sort',key);PS.set('dir',S.dir);list.n=60;go('prod');return}
   if((b=t.closest('[data-sort]'))){const key=b.dataset.sort;if(key==='name')return;if(S.sort===key)S.dir=-S.dir;else{S.sort=key;S.dir=-1}PS.set('sort',key);PS.set('dir',S.dir);list.n=60;render(true);return}
   if(t.closest('#catBtn')){catSheet();return}
@@ -2017,7 +2025,7 @@ $('#lock').addEventListener('submit',e=>{e.preventDefault();const p=$('#pw').val
 themeInit();
 /* «назад» на телефоне не выбрасывает с сайта — общий svcBack из servisy\svc.py; из листа товара сначала возвращает в лист склейки */
 if(window.svcBack)svcBack({pop:[()=>K3.see(false),()=>ORI.close(),()=>{if(shw.classList.contains('on')&&SHB.length&&openSh(SHB.pop()))return true;return closeSheet()}],main:()=>{if(S.tab!=='sum'){go('sum');return true}return false},home:()=>{}});
-window.PANEL={get D(){return D},K3,fresh,S,go,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},lite:LITE,zone,NORM,colSel,
+window.PANEL={get D(){return D},K3,fresh,S,go,god,met,totals,items,curK,plist,aggr,cover,AMB,ORI,get role(){return ROLE},lite:LITE,zone,NORM,colSel,
   prods,skls:sklsC,joined,filt,render,get TOV(){return TOV},clear(){C={}},same:(g,k)=>paces(items(g,k),g,k,fS)};
 boot();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/shov/sw.js').catch(()=>{});
